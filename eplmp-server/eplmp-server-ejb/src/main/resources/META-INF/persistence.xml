@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence xmlns="http://xmlns.jcp.org/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence http://xmlns.jcp.org/xml/ns/persistence/persistence_2_1.xsd" version="2.1">
+  <persistence-unit name="DocDoku-PU" transaction-type="JTA">
+    <jta-data-source>jdbc/docdokuPU</jta-data-source>
+    <class>org.polarsys.eplmp.core.admin.PlatformOptions</class>
+    <class>org.polarsys.eplmp.core.admin.WorkspaceFrontOptions</class>
+    <class>org.polarsys.eplmp.core.admin.WorkspaceBackOptions</class>
+    <class>org.polarsys.eplmp.core.common.Account</class>
+    <class>org.polarsys.eplmp.core.common.BinaryResource</class>
+    <class>org.polarsys.eplmp.core.common.Organization</class>
+    <class>org.polarsys.eplmp.core.common.User</class>
+    <class>org.polarsys.eplmp.core.common.UserGroup</class>
+    <class>org.polarsys.eplmp.core.common.Workspace</class>
+    <class>org.polarsys.eplmp.core.change.ChangeItem</class>
+    <class>org.polarsys.eplmp.core.change.ChangeIssue</class>
+    <class>org.polarsys.eplmp.core.change.ChangeOrder</class>
+    <class>org.polarsys.eplmp.core.change.ChangeRequest</class>
+    <class>org.polarsys.eplmp.core.change.Milestone</class>
+    <class>org.polarsys.eplmp.core.notification.TagUserSubscription</class>
+    <class>org.polarsys.eplmp.core.notification.TagUserGroupSubscription</class>
+    <class>org.polarsys.eplmp.core.change.ModificationNotification</class>
+    <class>org.polarsys.eplmp.core.configuration.ProductConfiguration</class>
+    <class>org.polarsys.eplmp.core.configuration.ProductBaseline</class>
+    <class>org.polarsys.eplmp.core.configuration.BaselinedPart</class>
+    <class>org.polarsys.eplmp.core.configuration.PartCollection</class>
+    <class>org.polarsys.eplmp.core.configuration.ProductInstanceIteration</class>
+    <class>org.polarsys.eplmp.core.configuration.ProductInstanceMaster</class>
+    <class>org.polarsys.eplmp.core.configuration.PathDataIteration</class>
+    <class>org.polarsys.eplmp.core.configuration.PathDataMaster</class>
+    <class>org.polarsys.eplmp.core.document.DocumentIteration</class>
+    <class>org.polarsys.eplmp.core.document.DocumentLink</class>
+    <class>org.polarsys.eplmp.core.document.DocumentMaster</class>
+    <class>org.polarsys.eplmp.core.document.DocumentMasterTemplate</class>
+    <class>org.polarsys.eplmp.core.document.DocumentRevision</class>
+    <class>org.polarsys.eplmp.core.meta.Folder</class>
+    <class>org.polarsys.eplmp.core.document.IterationChangeSubscription</class>
+    <class>org.polarsys.eplmp.core.document.StateChangeSubscription</class>
+    <class>org.polarsys.eplmp.core.configuration.DocumentBaseline</class>
+    <class>org.polarsys.eplmp.core.configuration.DocumentCollection</class>
+    <class>org.polarsys.eplmp.core.configuration.BaselinedDocument</class>
+    <class>org.polarsys.eplmp.core.gcm.GCMAccount</class>
+    <class>org.polarsys.eplmp.core.log.DocumentLog</class>
+    <class>org.polarsys.eplmp.core.log.PartLog</class>
+    <class>org.polarsys.eplmp.core.log.WorkspaceLog</class>
+    <class>org.polarsys.eplmp.core.meta.DefaultAttributeTemplate</class>
+    <class>org.polarsys.eplmp.core.meta.InstanceAttribute</class>
+    <class>org.polarsys.eplmp.core.meta.InstanceAttributeTemplate</class>
+    <class>org.polarsys.eplmp.core.meta.InstanceBooleanAttribute</class>
+    <class>org.polarsys.eplmp.core.meta.InstanceDateAttribute</class>
+    <class>org.polarsys.eplmp.core.meta.InstanceListOfValuesAttribute</class>
+    <class>org.polarsys.eplmp.core.meta.ListOfValuesAttributeTemplate</class>
+    <class>org.polarsys.eplmp.core.meta.InstanceNumberAttribute</class>
+    <class>org.polarsys.eplmp.core.meta.InstanceTextAttribute</class>
+    <class>org.polarsys.eplmp.core.meta.InstanceLongTextAttribute</class>
+    <class>org.polarsys.eplmp.core.meta.InstanceURLAttribute</class>
+    <class>org.polarsys.eplmp.core.meta.ListOfValues</class>
+    <class>org.polarsys.eplmp.core.meta.Tag</class>
+    <class>org.polarsys.eplmp.core.product.ConfigurationItem</class>
+    <class>org.polarsys.eplmp.core.product.DateBasedEffectivity</class>
+    <class>org.polarsys.eplmp.core.product.Effectivity</class>
+    <class>org.polarsys.eplmp.core.product.Geometry</class>
+    <class>org.polarsys.eplmp.core.product.LotBasedEffectivity</class>
+    <class>org.polarsys.eplmp.core.product.PartIteration</class>
+    <class>org.polarsys.eplmp.core.product.PartMaster</class>
+    <class>org.polarsys.eplmp.core.product.PartMasterTemplate</class>
+    <class>org.polarsys.eplmp.core.product.PartRevision</class>
+    <class>org.polarsys.eplmp.core.product.PartSubstituteLink</class>
+    <class>org.polarsys.eplmp.core.product.PartUsageLink</class>
+    <class>org.polarsys.eplmp.core.product.SerialNumberBasedEffectivity</class>
+    <class>org.polarsys.eplmp.core.product.Marker</class>
+    <class>org.polarsys.eplmp.core.product.Layer</class>
+    <class>org.polarsys.eplmp.core.product.CADInstance</class>
+    <class>org.polarsys.eplmp.core.product.Conversion</class>
+    <class>org.polarsys.eplmp.core.product.Import</class>
+    <class>org.polarsys.eplmp.core.product.PartNumberAttributeTemplate</class>
+    <class>org.polarsys.eplmp.core.product.InstancePartNumberAttribute</class>
+    <class>org.polarsys.eplmp.core.security.ACL</class>
+    <class>org.polarsys.eplmp.core.security.ACLUserEntry</class>
+    <class>org.polarsys.eplmp.core.security.ACLUserGroupEntry</class>
+    <class>org.polarsys.eplmp.core.security.Credential</class>
+    <class>org.polarsys.eplmp.core.security.PasswordRecoveryRequest</class>
+    <class>org.polarsys.eplmp.core.security.UserGroupMapping</class>
+    <class>org.polarsys.eplmp.core.security.WorkspaceUserGroupMembership</class>
+    <class>org.polarsys.eplmp.core.security.WorkspaceUserMembership</class>
+    <class>org.polarsys.eplmp.core.sharing.SharedEntity</class>
+    <class>org.polarsys.eplmp.core.sharing.SharedPart</class>
+    <class>org.polarsys.eplmp.core.sharing.SharedDocument</class>
+    <class>org.polarsys.eplmp.core.workflow.WorkspaceWorkflow</class>
+    <class>org.polarsys.eplmp.core.workflow.Activity</class>
+    <class>org.polarsys.eplmp.core.workflow.ActivityModel</class>
+    <class>org.polarsys.eplmp.core.workflow.ParallelActivity</class>
+    <class>org.polarsys.eplmp.core.workflow.ParallelActivityModel</class>
+    <class>org.polarsys.eplmp.core.workflow.SequentialActivity</class>
+    <class>org.polarsys.eplmp.core.workflow.SequentialActivityModel</class>
+    <class>org.polarsys.eplmp.core.workflow.Task</class>
+    <class>org.polarsys.eplmp.core.workflow.TaskModel</class>
+    <class>org.polarsys.eplmp.core.workflow.Workflow</class>
+    <class>org.polarsys.eplmp.core.workflow.WorkflowModel</class>
+    <class>org.polarsys.eplmp.core.workflow.Role</class>
+    <class>org.polarsys.eplmp.core.query.Query</class>
+    <class>org.polarsys.eplmp.core.query.QueryRule</class>
+    <class>org.polarsys.eplmp.core.query.QueryContext</class>
+    <class>org.polarsys.eplmp.core.product.PathToPathLink</class>
+    <class>org.polarsys.eplmp.core.meta.StatusChange</class>
+    <class>org.polarsys.eplmp.core.hooks.Webhook</class>
+    <class>org.polarsys.eplmp.core.hooks.SimpleWebhookApp</class>
+    <class>org.polarsys.eplmp.core.hooks.SNSWebhookApp</class>
+    <class>org.polarsys.eplmp.core.hooks.Webhook</class>
+    <class>org.polarsys.eplmp.core.hooks.WebhookApp</class>
+
+    <class>org.polarsys.eplmp.server.storage.CryptoConverter</class>
+    <exclude-unlisted-classes>true</exclude-unlisted-classes>
+    <properties>
+        <property name="javax.persistence.schema-generation.database.action" value="create"/>
+        <property name="javax.persistence.schema-generation.scripts.action" value="drop-and-create"/>
+        <property name="javax.persistence.schema-generation.scripts.create-target" value="create.sql"/>
+        <property name="javax.persistence.schema-generation.scripts.drop-target" value="drop.sql"/>
+        <property name="javax.persistence.sharedCache.mode" value="ALL"/>
+    </properties>
+    </persistence-unit>
+</persistence>

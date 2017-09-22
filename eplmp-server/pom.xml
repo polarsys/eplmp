@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.polarsys.eplmp</groupId>
+        <artifactId>eclipse-eplmp</artifactId>
+        <version>2.5-SNAPSHOT</version>
+    </parent>
+    <artifactId>eplmp-server</artifactId>
+    <packaging>pom</packaging>
+    <name>eplmp-server Java EE 7</name>
+    <modules>
+        <module>eplmp-server-ext</module>
+        <module>eplmp-server-office-doc</module>
+        <module>eplmp-server-ejb</module>
+        <module>eplmp-server-rest</module>
+        <module>eplmp-server-ear</module>
+    </modules>
+</project>
