@@ -11,8 +11,8 @@
 
 package org.polarsys.eplmp.server.rest.file.util;
 
+import org.apache.poi.util.IOUtils;
 import org.polarsys.eplmp.server.rest.exceptions.InterruptedStreamException;
-import com.google.common.io.ByteStreams;
 
 import javax.ws.rs.core.StreamingOutput;
 import java.io.IOException;
@@ -65,7 +65,7 @@ public class BinaryResourceBinaryStreamingOutput implements StreamingOutput {
                     output.write(data, 0, nr);
                 }
             } else {
-                ByteStreams.copy(in, output);
+                IOUtils.copy(in, output);
             }
         } catch (IOException e) {
             // may be caused by a client side cancel

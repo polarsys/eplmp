@@ -1,13 +1,13 @@
 /*******************************************************************************
-  * Copyright (c) 2017 DocDoku.
-  * All rights reserved. This program and the accompanying materials
-  * are made available under the terms of the Eclipse Public License v1.0
-  * which accompanies this distribution, and is available at
-  * http://www.eclipse.org/legal/epl-v10.html
-  *
-  * Contributors:
-  *    DocDoku - initial API and implementation
-  *******************************************************************************/
+ * Copyright (c) 2017 DocDoku.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ * <p>
+ * Contributors:
+ * DocDoku - initial API and implementation
+ *******************************************************************************/
 package org.polarsys.eplmp.server.resourcegetters;
 
 import org.polarsys.eplmp.core.common.BinaryResource;
@@ -21,7 +21,6 @@ import org.polarsys.eplmp.core.util.Tools;
 import org.polarsys.eplmp.server.InternalService;
 import org.polarsys.eplmp.server.converters.OnDemandConverter;
 import org.polarsys.eplmp.server.extras.TitleBlockGenerator;
-import com.google.common.io.ByteStreams;
 
 import javax.inject.Inject;
 import java.io.IOException;
@@ -121,7 +120,7 @@ public class OfficeOnDemandConverter implements OnDemandConverter {
             try (OutputStream outputStream = storageManager.getGeneratedFileOutputStream(binaryResource, pdfFileName);
                  InputStream binaryResourceInputStream = storageManager.getBinaryResourceInputStream(binaryResource);
                  InputStream inputStreamConverted = fileConverter.convertToPDF(normalizedName, binaryResourceInputStream)) {
-                ByteStreams.copy(inputStreamConverted, outputStream);
+                FileIO.copy(inputStreamConverted, outputStream);
             }
             inputStream = storageManager.getGeneratedFileInputStream(binaryResource, pdfFileName);
         }

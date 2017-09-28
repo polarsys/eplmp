@@ -1,13 +1,13 @@
 /*******************************************************************************
-  * Copyright (c) 2017 DocDoku.
-  * All rights reserved. This program and the accompanying materials
-  * are made available under the terms of the Eclipse Public License v1.0
-  * which accompanies this distribution, and is available at
-  * http://www.eclipse.org/legal/epl-v10.html
-  *
-  * Contributors:
-  *    DocDoku - initial API and implementation
-  *******************************************************************************/
+ * Copyright (c) 2017 DocDoku.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ * <p>
+ * Contributors:
+ * DocDoku - initial API and implementation
+ *******************************************************************************/
 package org.polarsys.eplmp.core.util;
 
 import java.io.*;
@@ -99,6 +99,20 @@ public class FileIO {
             LOGGER.log(Level.SEVERE, "Cannot encode string " + toEncode, e);
             return toEncode;
         }
+    }
+
+
+    public static long copy(InputStream in, OutputStream out) throws IOException {
+        byte[] buffer = new byte[CHUNK_SIZE];
+        long totalRead = 0L;
+        int len;
+
+        while ((len = in.read(buffer)) > 0) {
+            out.write(buffer, 0, len);
+            totalRead += len;
+        }
+
+        return totalRead;
     }
 
 }
