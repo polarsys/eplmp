@@ -23,7 +23,7 @@ import java.util.Properties;
  */
 public abstract class ApplicationException extends Exception {
 
-    private static final String BUNDLE_BASE_NAME = "/com/docdoku/core/i18n/LocalStrings";
+    private static final String BUNDLE_BASE_NAME = "/org/polarsys/eplmp/core/i18n/LocalStrings";
     private Properties properties;
 
     public ApplicationException(String pMessage) {

@@ -65,7 +65,7 @@ public class ConverterBean implements IConverterManagerLocal {
     @Inject
     private BeanLocator beanLocator;
 
-    private static final String CONF_PROPERTIES = "/com/docdoku/server/converters/utils/conf.properties";
+    private static final String CONF_PROPERTIES = "/org/polarsys/eplmp/server/converters/utils/conf.properties";
     private static final Properties CONF = new Properties();
     private static final float[] RATIO = new float[]{1f, 0.6f, 0.2f};
 
