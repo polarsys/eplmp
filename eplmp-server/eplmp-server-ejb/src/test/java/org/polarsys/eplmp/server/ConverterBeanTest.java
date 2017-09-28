@@ -10,6 +10,13 @@
   *******************************************************************************/
 package org.polarsys.eplmp.server;
 
+import org.junit.Before;
+import org.junit.Ignore;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
 import org.polarsys.eplmp.core.common.BinaryResource;
 import org.polarsys.eplmp.core.product.Geometry;
 import org.polarsys.eplmp.core.product.PartIteration;
@@ -18,12 +25,6 @@ import org.polarsys.eplmp.core.services.IBinaryStorageManagerLocal;
 import org.polarsys.eplmp.core.services.IProductManagerLocal;
 import org.polarsys.eplmp.server.converters.CADConverter;
 import org.polarsys.eplmp.server.converters.ConversionResult;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
 
 import javax.persistence.EntityManager;
 import java.io.ByteArrayInputStream;
@@ -107,6 +108,7 @@ public class ConverterBeanTest {
     }
 
     @Test
+    @Ignore
     public void testNominalConvert() throws Exception {
         // * test *
         bean.convertCADFileToOBJ(ipk, cadBinRes);
