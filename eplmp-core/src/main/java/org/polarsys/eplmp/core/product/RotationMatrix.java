@@ -20,10 +20,12 @@ import java.io.Serializable;
  *
  * @author Charles Fallourd
  * @version 2.5, 01/03/16
- * @since   V2.5
+ * @since V2.5
  */
 @Embeddable
 public class RotationMatrix implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     private double m00, m01, m02, m10, m11, m12, m20, m21, m22;
 
@@ -32,15 +34,15 @@ public class RotationMatrix implements Serializable {
     }
 
     public RotationMatrix(double[] values) {
-        if(values!=null) {
+        if (values != null) {
             m00 = values[0];
-            m01 = values[1];
-            m02 = values[2];
-            m10 = values[3];
+            m01 = values[3];
+            m02 = values[6];
+            m10 = values[1];
             m11 = values[4];
-            m12 = values[5];
-            m20 = values[6];
-            m21 = values[7];
+            m12 = values[7];
+            m20 = values[2];
+            m21 = values[5];
             m22 = values[8];
         }
     }
@@ -119,6 +121,6 @@ public class RotationMatrix implements Serializable {
 
     @Transient
     public double[] getValues() {
-        return new double[]{ m00, m01, m02, m10, m11, m12, m20, m21, m22 };
+        return new double[]{m00, m01, m02, m10, m11, m12, m20, m21, m22};
     }
 }

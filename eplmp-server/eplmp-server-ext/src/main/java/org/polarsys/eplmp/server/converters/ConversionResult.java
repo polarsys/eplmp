@@ -20,6 +20,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -31,6 +32,38 @@ import java.util.stream.Collectors;
  * It holds the converted file and its materials.
  */
 public class ConversionResult implements Closeable, Serializable {
+
+    public static class Position implements Serializable {
+
+        /**
+         * Position of a component instance
+         */
+        private static final long serialVersionUID = 1L;
+
+        private double[] translation;
+        private double[][] rotationmatrix;
+
+        /**
+         * Constructor for a component position.
+         *
+         * @param rm
+         *            the rotation matrix
+         * @param o
+         *            Translation vector
+         */
+        public Position(double[][] rm, double[] o) {
+            this.translation = o;
+            this.rotationmatrix = rm;
+        }
+
+        public double[] getTranslation() {
+            return translation;
+        }
+
+        public double[][] getRotationMatrix() {
+            return this.rotationmatrix;
+        }
+    }
 
     private static final Logger LOGGER = Logger.getLogger(ConversionResult.class.getName());
 
@@ -53,6 +86,8 @@ public class ConversionResult implements Closeable, Serializable {
      */
     private String errorOutput;
 
+    private Map<String, List<Position>> componentPositionMap;
+
     /**
      * Default constructor
      */
@@ -62,7 +97,8 @@ public class ConversionResult implements Closeable, Serializable {
     /**
      * Constructor with converted file
      *
-     * @param convertedFile the converted file
+     * @param convertedFile
+     *            the converted file
      */
     public ConversionResult(Path convertedFile) {
         this.convertedFile = convertedFile.toUri();
@@ -71,7 +107,8 @@ public class ConversionResult implements Closeable, Serializable {
     /**
      * Constructor with converted file and materials
      *
-     * @param convertedFile the converted file
+     * @param convertedFile
+     *            the converted file
      */
     public ConversionResult(Path convertedFile, List<Path> materials) {
         this.convertedFile = convertedFile.toUri();
@@ -79,23 +116,33 @@ public class ConversionResult implements Closeable, Serializable {
         materials.forEach((path) -> this.materials.add(path.toUri()));
     }
 
-    public Path getConvertedFile() {
-        return Paths.get(convertedFile);
+    /**
+     * Constructor with assembly component-position map.
+     *
+     * @param componentPositionMap
+     *            Assembly components and positions
+     */
+    public ConversionResult(Map<String, List<Position>> componentPositionMap) {
+        this.componentPositionMap = componentPositionMap;
     }
 
-    public void setConvertedFile(Path convertedFile) {
+    public Path getConvertedFile() {
+        return convertedFile != null ? Paths.get(convertedFile) : null;
+    }
+
+    void setConvertedFile(Path convertedFile) {
         this.convertedFile = convertedFile.toUri();
     }
 
     public List<Path> getMaterials() {
-        return materials.stream().map((uri) -> {
-            return Paths.get(uri);
-        }).collect(Collectors.toList());
+        return materials.stream()
+                .map(Paths::get)
+                .collect(Collectors.toList());
     }
 
-    public void setMaterials(List<Path> materials) {
+    void setMaterials(List<Path> materials) {
         this.materials = new ArrayList<>();
-        materials.forEach((path) -> this.materials.add(path.toUri()));
+        materials.forEach(path -> this.materials.add(path.toUri()));
     }
 
     public String getStdOutput() {
@@ -112,6 +159,14 @@ public class ConversionResult implements Closeable, Serializable {
 
     public void setErrorOutput(String errorOutput) {
         this.errorOutput = errorOutput;
+    }
+
+    public Map<String, List<Position>> getComponentPositionMap() {
+        return this.componentPositionMap;
+    }
+
+    void setComponentPositionMap(Map<String, List<Position>> componentPositionMap) {
+        this.componentPositionMap = componentPositionMap;
     }
 
     public void close() {

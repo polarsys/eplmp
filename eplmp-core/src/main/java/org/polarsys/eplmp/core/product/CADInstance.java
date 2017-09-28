@@ -22,7 +22,7 @@ import java.io.Serializable;
  *
  * By using its attributes: translation and orientation on the three axis
  * it will be possible to position the mesh to render it.
- * 
+ *
  * @author Florent Garin
  * @version 1.1, 20/07/12
  * @since   V1.1
@@ -31,31 +31,33 @@ import java.io.Serializable;
 @Entity
 public class CADInstance implements Serializable, Cloneable {
 
-    @GeneratedValue(strategy=GenerationType.IDENTITY)
+    private static final long serialVersionUID = 1L;
+
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
     private int id;
-    
-    
+
+
     /**
      * Translation on x axis.
      */
     private double tx;
-    
+
     /**
      * Translation on y axis.
      */
     private double ty;
-    
+
     /**
      * Translation on z axis.
      */
     private double tz;
-    
+
     /**
      * Radian orientation on x axis.
      */
     private double rx;
-    
+
     /**
      * Radian orientation on y axis.
      */
@@ -76,7 +78,7 @@ public class CADInstance implements Serializable, Cloneable {
     @NotNull
     private RotationType rotationType;
 
-    
+
     public CADInstance() {
     }
 
@@ -98,7 +100,7 @@ public class CADInstance implements Serializable, Cloneable {
         this.tz = tz;
         this.rotationMatrix = rotationMatrix;
     }
-    
+
 
     public double getRx() {
         return rx;

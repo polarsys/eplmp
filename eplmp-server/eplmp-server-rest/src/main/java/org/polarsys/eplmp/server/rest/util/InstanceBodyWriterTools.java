@@ -119,10 +119,26 @@ public class InstanceBodyWriterTools {
 
                     List<Integer> copyInstanceIds = new ArrayList<>(instanceIds);
                     copyInstanceIds.add(instance.getId());
-
                     Vector3d instanceTranslation = new Vector3d(instance.getTx(), instance.getTy(), instance.getTz());
-                    Vector3d instanceRotation = new Vector3d(instance.getRx(), instance.getRy(), instance.getRz());
-                    Matrix4d combinedMatrix = combineTransformation(matrix, instanceTranslation, instanceRotation);
+
+                    Matrix4d combinedMatrix;
+
+                    switch (instance.getRotationType()) {
+                        case ANGLE: {
+                            Vector3d instanceRotation = new Vector3d(instance.getRx(), instance.getRy(), instance.getRz());
+                            combinedMatrix = combineTransformation(matrix, instanceTranslation, instanceRotation);
+                            break;
+                        }
+                        case MATRIX: {
+                            Matrix4d rotationMatrix = new Matrix4d(new Matrix3d(instance.getRotationMatrix().getValues()), instanceTranslation, 1);
+                            combinedMatrix = combineTransformation(matrix, rotationMatrix);
+                            break;
+                        }
+                        default: {
+                            LOGGER.log(Level.SEVERE, "Unknown rotation Type, matrix not calculated");
+                            combinedMatrix = matrix;
+                        }
+                    }
 
                     if (!partI.isAssembly() && !partI.getGeometries().isEmpty()) {
                         writeLeaf(currentPath, copyInstanceIds, partI, combinedMatrix, jg);
@@ -142,7 +158,7 @@ public class InstanceBodyWriterTools {
 
     }
 
-    private static Matrix4d combineTransformation(Matrix4d matrix, Vector3d translation, Vector3d rotation) {
+    static Matrix4d combineTransformation(Matrix4d matrix, Vector3d translation, Vector3d rotation) {
         Matrix4d gM = new Matrix4d(matrix);
         Matrix4d m = new Matrix4d();
 
@@ -165,7 +181,7 @@ public class InstanceBodyWriterTools {
         return gM;
     }
 
-    private static Matrix4d combineTransformation(Matrix4d matrix, Matrix4d transformation) {
+    static Matrix4d combineTransformation(Matrix4d matrix, Matrix4d transformation) {
         Matrix4d gM = new Matrix4d(matrix);
         gM.mul(transformation);
 
@@ -236,5 +252,4 @@ public class InstanceBodyWriterTools {
         }
         jg.writeEnd();
     }
-
 }

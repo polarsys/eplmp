@@ -12,9 +12,7 @@ package org.polarsys.eplmp.server;
 
 import org.polarsys.eplmp.core.common.BinaryResource;
 import org.polarsys.eplmp.core.exceptions.*;
-import org.polarsys.eplmp.core.product.Conversion;
-import org.polarsys.eplmp.core.product.Geometry;
-import org.polarsys.eplmp.core.product.PartIterationKey;
+import org.polarsys.eplmp.core.product.*;
 import org.polarsys.eplmp.core.security.UserGroupMapping;
 import org.polarsys.eplmp.core.services.IBinaryStorageManagerLocal;
 import org.polarsys.eplmp.core.services.IConverterManagerLocal;
@@ -34,16 +32,16 @@ import javax.ejb.Local;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.script.ScriptException;
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Properties;
-import java.util.UUID;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.DoubleStream;
 
 /**
  * CAD File converter
@@ -67,7 +65,7 @@ public class ConverterBean implements IConverterManagerLocal {
     @Inject
     private BeanLocator beanLocator;
 
-    private static final String CONF_PROPERTIES = "/org/polarsys/eplmp/server/converters/utils/conf.properties";
+    private static final String CONF_PROPERTIES = "/com/docdoku/server/converters/utils/conf.properties";
     private static final Properties CONF = new Properties();
     private static final float[] RATIO = new float[]{1f, 0.6f, 0.2f};
 
@@ -150,7 +148,10 @@ public class ConverterBean implements IConverterManagerLocal {
 
     }
 
-    private boolean doConversion(BinaryResource cadBinaryResource, CADConverter selectedConverter, PartIterationKey pPartIPK) throws IOException, StorageException, ConversionException {
+    private boolean doConversion(BinaryResource cadBinaryResource, CADConverter selectedConverter,
+                                 PartIterationKey pPartIPK) throws IOException, StorageException, ConversionException {
+
+        boolean result = false;
 
         UUID uuid = UUID.randomUUID();
         Path tempDir = Files.createDirectory(Paths.get("docdoku-" + uuid));
@@ -161,10 +162,15 @@ public class ConverterBean implements IConverterManagerLocal {
             Files.copy(in, tmpCadFile);
             // convert file
             try (ConversionResult conversionResult = selectedConverter.convert(tmpCadFile.toUri(), tempDir.toUri())) {
-                return handleConvertedFile(conversionResult, pPartIPK, tempDir);
+                Map<String, List<ConversionResult.Position>> componentPositionMap = conversionResult.getComponentPositionMap();
+                if (componentPositionMap != null) {
+                    result = syncAssembly(componentPositionMap, productService.getPartIteration(pPartIPK));
+                }
+                if (conversionResult.getConvertedFile() != null) {
+                    result = handleConvertedFile(conversionResult, pPartIPK, tempDir);
+                }
             } catch (Exception e) {
                 LOGGER.log(Level.WARNING, e.getMessage(), e);
-                return false;
             } finally {
                 Files.list(tempDir).forEach((p) -> {
                     try {
@@ -177,6 +183,7 @@ public class ConverterBean implements IConverterManagerLocal {
         } finally {
             Files.deleteIfExists(tempDir);
         }
+        return result;
     }
 
     private boolean handleConvertedFile(ConversionResult conversionResult, PartIterationKey pPartIPK, Path tempDir) {
@@ -195,7 +202,8 @@ public class ConverterBean implements IConverterManagerLocal {
         if (decimate(convertedFile, tempDir, RATIO)) {
             String fileName = convertedFile.getFileName().toString();
             for (int i = 0; i < RATIO.length; i++) {
-                Path geometryFile = tempDir.resolve(fileName.replaceAll("\\.obj$", Math.round((RATIO[i] * 100)) + ".obj"));
+                Path geometryFile = tempDir
+                        .resolve(fileName.replaceAll("\\.obj$", Math.round((RATIO[i] * 100)) + ".obj"));
                 saveGeometryFile(pPartIPK, i, geometryFile, box);
             }
         } else {
@@ -210,6 +218,79 @@ public class ConverterBean implements IConverterManagerLocal {
 
         return true;
 
+    }
+
+    /**
+     * Update the current Part from the imported assembly description
+     *
+     * @param componentPositionMap
+     *            Assembly description root component.
+     * @param partToConvert
+     *            Current Part ID
+     * @throws UserNotFoundException
+     * @throws UserNotActiveException
+     * @throws WorkspaceNotEnabledException
+     * @throws WorkspaceNotFoundException
+     * @throws EntityConstraintException
+     * @throws NotAllowedException
+     * @throws AccessRightException
+     * @throws DocumentRevisionNotFoundException
+     * @throws PartUsageLinkNotFoundException
+     * @throws ListOfValuesNotFoundException
+     * @throws PartMasterNotFoundException
+     * @throws PartRevisionNotFoundException
+     */
+    private boolean syncAssembly(Map<String, List<ConversionResult.Position>> componentPositionMap, PartIteration partToConvert)
+            throws UserNotFoundException, UserNotActiveException, WorkspaceNotEnabledException,
+            WorkspaceNotFoundException, PartRevisionNotFoundException, PartMasterNotFoundException,
+            ListOfValuesNotFoundException, PartUsageLinkNotFoundException, DocumentRevisionNotFoundException,
+            AccessRightException, NotAllowedException, EntityConstraintException {
+
+        boolean succeed = true;
+
+        List<PartUsageLink> partUsageLinks = new ArrayList<>();
+        for (Map.Entry<String, List<ConversionResult.Position>> entry : componentPositionMap.entrySet()) {
+            // Component name
+            String cadFileName = entry.getKey();
+            // Linked component positioning
+            List<ConversionResult.Position> positions = entry.getValue();
+            // Retrieve this part master ID
+            PartMaster partMaster = productService.findPartMasterByCADFileName(partToConvert.getWorkspaceId(),
+                    cadFileName);
+
+            if (partMaster != null) {
+                PartUsageLink partUsageLink = new PartUsageLink();
+                partUsageLink.setAmount(positions.size());
+                partUsageLink.setComponent(partMaster);
+                partUsageLink.setCadInstances(toCADInstances(positions));
+                partUsageLinks.add(partUsageLink);
+            } else {
+                LOGGER.log(Level.WARNING, "No Part found for " + cadFileName);
+                succeed = false;
+            }
+        }
+        // Replace usage links (erase old structure)
+        partToConvert.setComponents(partUsageLinks);
+        productService.updatePartIteration(partToConvert.getKey(), partToConvert.getIterationNote(),
+                partToConvert.getSource(), partToConvert.getComponents(), partToConvert.getInstanceAttributes(),
+                partToConvert.getInstanceAttributeTemplates(), null, null, null);
+        if (succeed) {
+            LOGGER.log(Level.INFO, "Assembly synchronized");
+        }
+        return succeed;
+    }
+
+    List<CADInstance> toCADInstances(List<ConversionResult.Position> positions) {
+        List<CADInstance> instances = new ArrayList<>();
+        for (ConversionResult.Position p : positions) {
+            double[] rm = DoubleStream
+                    .concat(Arrays.stream(p.getRotationMatrix()[0]), DoubleStream
+                            .concat(Arrays.stream(p.getRotationMatrix()[1]), Arrays.stream(p.getRotationMatrix()[2])))
+                    .toArray();
+            instances
+                    .add(new CADInstance(new RotationMatrix(rm), p.getTranslation()[0], p.getTranslation()[1], p.getTranslation()[2]));
+        }
+        return instances;
     }
 
     private CADConverter selectConverter(BinaryResource cadBinaryResource) {
@@ -250,8 +331,7 @@ public class ConverterBean implements IConverterManagerLocal {
             LOGGER.log(Level.INFO, "Decimate command" + "\n" + args);
 
             // Add redirectErrorStream, fix process hang up
-            ProcessBuilder pb = new ProcessBuilder(args)
-                    .redirectErrorStream(true);
+            ProcessBuilder pb = new ProcessBuilder(args).redirectErrorStream(true);
 
             Process proc = pb.start();
 
