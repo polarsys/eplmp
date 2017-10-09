@@ -31,7 +31,7 @@ import java.util.*;
  * @version 1.1, 18/05/11
  * @since   V1.1
  */
-@Table(name="PARTITERATION", indexes = {@Index(name = "INDEX_WKS_PARTNUMBER_VERSION", columnList = "WORKSPACE_ID, PARTMASTER_PARTNUMBER, PARTREVISION_VERSION")})
+@Table(name="PARTITERATION", indexes = {@Index(name = "INDEX_PART_WKS_PARTNUMBER_VERSION", columnList = "WORKSPACE_ID, PARTMASTER_PARTNUMBER, PARTREVISION_VERSION")})
 @IdClass(org.polarsys.eplmp.core.product.PartIterationKey.class)
 @NamedQueries({
         @NamedQuery(name="PartIteration.findUsedByAsSubstitute", query="SELECT p FROM PartIteration p JOIN p.components l JOIN l.substitutes s WHERE s.substitute = :partMaster"),
@@ -85,7 +85,7 @@ public class PartIteration implements Serializable, FileHolder, Comparable<PartI
 
     @OneToMany(orphanRemoval=true, cascade = {CascadeType.REMOVE, CascadeType.REFRESH}, fetch = FetchType.EAGER)
     @JoinTable(name="PARTITERATION_BINRES",
-        indexes = {@Index(name = "INDEX_FULLNAME", columnList = "ATTACHEDFILE_FULLNAME")},
+        indexes = {@Index(name = "INDEX_PART_FULLNAME", columnList = "ATTACHEDFILE_FULLNAME")},
         inverseJoinColumns = {
             @JoinColumn(name = "ATTACHEDFILE_FULLNAME", referencedColumnName = "FULLNAME")
         },

@@ -33,7 +33,7 @@ import java.util.*;
  * @version 2.0, 11/01/14
  * @since V2.0
  */
-@Table(name = "DOCUMENTREVISION", indexes = {@Index(name = "INDEX_WKS_ID", columnList = "WORKSPACE_ID, DOCUMENTMASTER_ID")})
+@Table(name = "DOCUMENTREVISION", indexes = {@Index(name = "INDEX_DOC_WKS_ID", columnList = "WORKSPACE_ID, DOCUMENTMASTER_ID")})
 @IdClass(DocumentRevisionKey.class)
 @Entity
 @NamedQueries({

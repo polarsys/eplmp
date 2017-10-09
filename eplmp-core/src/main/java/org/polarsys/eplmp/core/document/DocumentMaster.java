@@ -30,7 +30,7 @@ import java.util.List;
  * @version 1.1, 23/01/12
  * @since   V1.0
  */
-@Table(name="DOCUMENTMASTER", indexes = {@Index(name = "INDEX_WKS", columnList = "WORKSPACE_ID")})
+@Table(name="DOCUMENTMASTER", indexes = {@Index(name = "INDEX_DOC_WKS", columnList = "WORKSPACE_ID")})
 @IdClass(org.polarsys.eplmp.core.document.DocumentMasterKey.class)
 @Entity
 @NamedQueries ({

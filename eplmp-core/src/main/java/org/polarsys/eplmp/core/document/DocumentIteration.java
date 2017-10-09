@@ -29,7 +29,7 @@ import java.util.*;
  * @version 1.0, 02/06/08
  * @since   V1.0
  */
-@Table(name = "DOCUMENTITERATION", indexes = {@Index(name = "INDEX_WKS_ID_VERSION", columnList = "WORKSPACE_ID, DOCUMENTMASTER_ID, DOCUMENTREVISION_VERSION")})
+@Table(name = "DOCUMENTITERATION", indexes = {@Index(name = "INDEX_DOC_WKS_ID_VERSION", columnList = "WORKSPACE_ID, DOCUMENTMASTER_ID, DOCUMENTREVISION_VERSION")})
 @javax.persistence.IdClass(org.polarsys.eplmp.core.document.DocumentIterationKey.class)
 @NamedQueries ({
     @NamedQuery(name="DocumentIteration.findByBinaryResource", query = "SELECT d FROM DocumentIteration d WHERE :binaryResource member of d.attachedFiles")
@@ -51,7 +51,7 @@ public class DocumentIteration implements Serializable, FileHolder, Comparable<D
 
     @OneToMany(cascade = {CascadeType.REMOVE, CascadeType.REFRESH}, fetch = FetchType.EAGER)
     @JoinTable(name = "DOCUMENTITERATION_BINRES",
-        indexes = {@Index(name = "INDEX_FULLNAME", columnList = "ATTACHEDFILE_FULLNAME")},
+        indexes = {@Index(name = "INDEX_DOC_FULLNAME", columnList = "ATTACHEDFILE_FULLNAME")},
         inverseJoinColumns = {
             @JoinColumn(name = "ATTACHEDFILE_FULLNAME", referencedColumnName = "FULLNAME")
         },
