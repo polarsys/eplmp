@@ -13,7 +13,6 @@ package org.polarsys.eplmp.core.hooks;
 import javax.persistence.*;
 import javax.xml.bind.annotation.XmlSeeAlso;
 import java.io.Serializable;
-import java.util.List;
 
 @XmlSeeAlso({SimpleWebhookApp.class, SNSWebhookApp.class})
 @Inheritance

@@ -12,8 +12,6 @@ package org.polarsys.eplmp.core.hooks;
 
 import javax.persistence.Entity;
 import javax.persistence.Table;
-import java.util.ArrayList;
-import java.util.List;
 
 @Table(name = "SNSWEBHOOKAPP")
 @Entity

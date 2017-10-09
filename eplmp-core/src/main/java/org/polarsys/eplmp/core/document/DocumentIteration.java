@@ -51,15 +51,16 @@ public class DocumentIteration implements Serializable, FileHolder, Comparable<D
 
     @OneToMany(cascade = {CascadeType.REMOVE, CascadeType.REFRESH}, fetch = FetchType.EAGER)
     @JoinTable(name = "DOCUMENTITERATION_BINRES",
-    inverseJoinColumns = {
-        @JoinColumn(name = "ATTACHEDFILE_FULLNAME", referencedColumnName = "FULLNAME")
-    },
-    joinColumns = {
-        @JoinColumn(name = "WORKSPACE_ID", referencedColumnName = "WORKSPACE_ID"),
-        @JoinColumn(name = "DOCUMENTMASTER_ID", referencedColumnName = "DOCUMENTMASTER_ID"),
-        @JoinColumn(name = "DOCUMENTREVISION_VERSION", referencedColumnName = "DOCUMENTREVISION_VERSION"),
-        @JoinColumn(name = "ITERATION", referencedColumnName = "ITERATION")
-    })
+        indexes = {@Index(name = "INDEX_FULLNAME", columnList = "ATTACHEDFILE_FULLNAME")},
+        inverseJoinColumns = {
+            @JoinColumn(name = "ATTACHEDFILE_FULLNAME", referencedColumnName = "FULLNAME")
+        },
+        joinColumns = {
+            @JoinColumn(name = "WORKSPACE_ID", referencedColumnName = "WORKSPACE_ID"),
+            @JoinColumn(name = "DOCUMENTMASTER_ID", referencedColumnName = "DOCUMENTMASTER_ID"),
+            @JoinColumn(name = "DOCUMENTREVISION_VERSION", referencedColumnName = "DOCUMENTREVISION_VERSION"),
+            @JoinColumn(name = "ITERATION", referencedColumnName = "ITERATION")
+        })
     private Set<BinaryResource> attachedFiles = new HashSet<>();
     private String revisionNote;
     @ManyToOne(fetch = FetchType.EAGER)

@@ -84,15 +84,17 @@ public class PartIteration implements Serializable, FileHolder, Comparable<PartI
 
 
     @OneToMany(orphanRemoval=true, cascade = {CascadeType.REMOVE, CascadeType.REFRESH}, fetch = FetchType.EAGER)
-    @JoinTable(name="PARTITERATION_BINRES", inverseJoinColumns = {
-        @JoinColumn(name = "ATTACHEDFILE_FULLNAME", referencedColumnName = "FULLNAME")
-    },
-    joinColumns = {
-        @JoinColumn(name = "WORKSPACE_ID", referencedColumnName = "WORKSPACE_ID"),
-        @JoinColumn(name = "PARTMASTER_PARTNUMBER", referencedColumnName = "PARTMASTER_PARTNUMBER"),
-        @JoinColumn(name = "PARTREVISION_VERSION", referencedColumnName = "PARTREVISION_VERSION"),
-        @JoinColumn(name = "ITERATION", referencedColumnName = "ITERATION")
-    })
+    @JoinTable(name="PARTITERATION_BINRES",
+        indexes = {@Index(name = "INDEX_FULLNAME", columnList = "ATTACHEDFILE_FULLNAME")},
+        inverseJoinColumns = {
+            @JoinColumn(name = "ATTACHEDFILE_FULLNAME", referencedColumnName = "FULLNAME")
+        },
+        joinColumns = {
+            @JoinColumn(name = "WORKSPACE_ID", referencedColumnName = "WORKSPACE_ID"),
+            @JoinColumn(name = "PARTMASTER_PARTNUMBER", referencedColumnName = "PARTMASTER_PARTNUMBER"),
+            @JoinColumn(name = "PARTREVISION_VERSION", referencedColumnName = "PARTREVISION_VERSION"),
+            @JoinColumn(name = "ITERATION", referencedColumnName = "ITERATION")
+        })
     private Set<BinaryResource> attachedFiles = new HashSet<>();
 
     private String iterationNote;
