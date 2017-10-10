@@ -1,15 +1,27 @@
 /*******************************************************************************
-  * Copyright (c) 2017 DocDoku.
-  * All rights reserved. This program and the accompanying materials
-  * are made available under the terms of the Eclipse Public License v1.0
-  * which accompanies this distribution, and is available at
-  * http://www.eclipse.org/legal/epl-v10.html
-  *
-  * Contributors:
-  *    DocDoku - initial API and implementation
-  *******************************************************************************/
+ * Copyright (c) 2017 DocDoku.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ * <p>
+ * Contributors:
+ * DocDoku - initial API and implementation
+ *******************************************************************************/
 package org.polarsys.eplmp.server.indexer;
 
+import io.searchbox.client.JestClient;
+import io.searchbox.client.JestResult;
+import io.searchbox.cluster.Health;
+import io.searchbox.core.*;
+import io.searchbox.indices.CreateIndex;
+import io.searchbox.indices.mapping.PutMapping;
+import io.searchbox.params.SearchType;
+import org.elasticsearch.common.settings.Settings;
+import org.elasticsearch.common.xcontent.XContentBuilder;
+import org.elasticsearch.common.xcontent.XContentFactory;
+import org.elasticsearch.index.query.QueryBuilder;
+import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.polarsys.eplmp.core.common.Account;
 import org.polarsys.eplmp.core.common.BinaryResource;
 import org.polarsys.eplmp.core.common.Workspace;
@@ -25,16 +37,6 @@ import org.polarsys.eplmp.core.services.IIndexerManagerLocal;
 import org.polarsys.eplmp.core.services.INotifierLocal;
 import org.polarsys.eplmp.i18n.PropertiesLoader;
 import org.polarsys.eplmp.server.dao.*;
-import io.searchbox.client.JestClient;
-import io.searchbox.client.JestResult;
-import io.searchbox.core.*;
-import io.searchbox.indices.CreateIndex;
-import io.searchbox.indices.mapping.PutMapping;
-import io.searchbox.params.SearchType;
-import org.elasticsearch.common.settings.Settings;
-import org.elasticsearch.common.xcontent.*;
-import org.elasticsearch.index.query.QueryBuilder;
-import org.elasticsearch.search.builder.SearchSourceBuilder;
 
 import javax.annotation.security.DeclareRoles;
 import javax.annotation.security.RolesAllowed;
@@ -280,6 +282,16 @@ public class IndexerManagerBean implements IIndexerManagerLocal {
         } catch (IOException e) {
             LOGGER.log(Level.WARNING, "Cannot index the whole workspace: The Elasticsearch server does not seem to respond");
             mailer.sendBulkIndexationFailure(account, getString("IndexerNotAvailableForRequest", new Locale(account.getLanguage())));
+        }
+    }
+
+    @Override
+    public boolean ping() {
+        try {
+            JestResult result = esClient.execute(new Health.Builder().build());
+            return result.isSucceeded();
+        } catch (IOException e) {
+            return false;
         }
     }
 
