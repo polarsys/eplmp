@@ -1,13 +1,13 @@
 /*******************************************************************************
-  * Copyright (c) 2017 DocDoku.
-  * All rights reserved. This program and the accompanying materials
-  * are made available under the terms of the Eclipse Public License v1.0
-  * which accompanies this distribution, and is available at
-  * http://www.eclipse.org/legal/epl-v10.html
-  *
-  * Contributors:
-  *    DocDoku - initial API and implementation
-  *******************************************************************************/
+ * Copyright (c) 2017 DocDoku.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ * <p>
+ * Contributors:
+ * DocDoku - initial API and implementation
+ *******************************************************************************/
 package org.polarsys.eplmp.server.rest;
 
 import org.polarsys.eplmp.core.change.ModificationNotification;
@@ -576,7 +576,8 @@ public class PartsResource {
             @ApiParam(required = false, value = "Auto check out parts flag") @QueryParam("autoCheckout") boolean autoCheckout,
             @ApiParam(required = false, value = "Auto check in parts flag") @QueryParam("autoCheckin") boolean autoCheckin,
             @ApiParam(required = false, value = "Permissive update flag") @QueryParam("permissiveUpdate") boolean permissiveUpdate,
-            @ApiParam(required = false, value = "Revision note to add") @QueryParam("revisionNote") String revisionNote)
+            @ApiParam(required = false, value = "Revision note to add") @QueryParam("revisionNote") String revisionNote,
+            @ApiParam(required = true, value = "Import type") @QueryParam("importType") String importType)
             throws Exception {
 
         Collection<Part> parts = request.getParts();
@@ -592,7 +593,14 @@ public class PartsResource {
 
         File importFile = Files.createTempFile(tempFolderName, fileName).toFile();
         BinaryResourceUpload.uploadBinary(new BufferedOutputStream(new FileOutputStream(importFile)), part);
-        importerService.importIntoParts(workspaceId, importFile, fileName, revisionNote, autoCheckout, autoCheckin, permissiveUpdate);
+
+        if ("attributes".equals(importType)) {
+            importerService.importIntoParts(workspaceId, importFile, fileName, revisionNote, autoCheckout, autoCheckin, permissiveUpdate);
+        } else if ("bom".equals(importType)) {
+            importerService.importBom(workspaceId, importFile, fileName, revisionNote, autoCheckout, autoCheckin, permissiveUpdate);
+        } else {
+            return Response.status(Response.Status.BAD_REQUEST).build();
+        }
 
         importFile.deleteOnExit();
 
@@ -680,12 +688,14 @@ public class PartsResource {
     })
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Produces(MediaType.APPLICATION_JSON)
-    public ImportPreviewDTO getImportPreview(
+    public Response getImportPreview(
             @Context HttpServletRequest request,
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = false, value = "Auto check out parts flag") @QueryParam("autoCheckout") boolean autoCheckout,
             @ApiParam(required = false, value = "Auto check in parts flag") @QueryParam("autoCheckin") boolean autoCheckin,
-            @ApiParam(required = false, value = "Permissive update flag") @QueryParam("permissiveUpdate") boolean permissiveUpdate)
+            @ApiParam(required = false, value = "Permissive update flag") @QueryParam("permissiveUpdate") boolean permissiveUpdate,
+            @ApiParam(required = true, value = "Import type") @QueryParam("importType") String importType)
+
             throws Exception {
 
         Collection<Part> parts = request.getParts();
@@ -700,11 +710,20 @@ public class PartsResource {
 
         File importFile = Files.createTempFile("part-" + name, "-import.tmp" + (extension == null ? "" : "." + extension)).toFile();
         BinaryResourceUpload.uploadBinary(new BufferedOutputStream(new FileOutputStream(importFile)), part);
-        ImportPreview importPreview = importerService.dryRunImportIntoParts(workspaceId, importFile, name + "." + extension, autoCheckout, autoCheckin, permissiveUpdate);
+
+        ImportPreview importPreview;
+
+        if ("attributes".equals(importType)) {
+            importPreview = importerService.dryRunImportIntoParts(workspaceId, importFile, name + "." + extension, autoCheckout, autoCheckin, permissiveUpdate);
+        } else if ("bom".equals(importType)) {
+            importPreview = importerService.dryRunImportBom(workspaceId, importFile, name + "." + extension, autoCheckout, autoCheckin, permissiveUpdate);
+        } else {
+            return Response.status(Response.Status.BAD_REQUEST).build();
+        }
 
         importFile.deleteOnExit();
 
-        return mapper.map(importPreview, ImportPreviewDTO.class);
+        return Response.ok().entity(mapper.map(importPreview, ImportPreviewDTO.class)).build();
     }
 
 

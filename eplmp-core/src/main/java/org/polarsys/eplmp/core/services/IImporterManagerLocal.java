@@ -1,13 +1,13 @@
 /*******************************************************************************
-  * Copyright (c) 2017 DocDoku.
-  * All rights reserved. This program and the accompanying materials
-  * are made available under the terms of the Eclipse Public License v1.0
-  * which accompanies this distribution, and is available at
-  * http://www.eclipse.org/legal/epl-v10.html
-  *
-  * Contributors:
-  *    DocDoku - initial API and implementation
-  *******************************************************************************/
+ * Copyright (c) 2017 DocDoku.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ * <p>
+ * Contributors:
+ * DocDoku - initial API and implementation
+ *******************************************************************************/
 package org.polarsys.eplmp.core.services;
 
 import org.polarsys.eplmp.core.exceptions.ImportPreviewException;
@@ -29,5 +29,9 @@ public interface IImporterManagerLocal {
     Future<ImportResult> importIntoPathData(String workspaceId, File file, String originalFileName, String revisionNote, boolean autoFreezeAfterUpdate, boolean permissiveUpdate);
 
     ImportPreview dryRunImportIntoParts(String workspaceId, File file, String originalFileName, boolean autoCheckout, boolean autoCheckin, boolean permissiveUpdate) throws ImportPreviewException;
+
+    Future<ImportResult> importBom(String workspaceId, File file, String originalFileName, String revisionNote, boolean autoCheckout, boolean autoCheckin, boolean permissiveUpdate);
+
+    ImportPreview dryRunImportBom(String workspaceId, File file, String originalFileName, boolean autoCheckout, boolean autoCheckin, boolean permissiveUpdate) throws ImportPreviewException;
 
 }

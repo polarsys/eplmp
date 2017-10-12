@@ -1,23 +1,22 @@
 /*******************************************************************************
-  * Copyright (c) 2017 DocDoku.
-  * All rights reserved. This program and the accompanying materials
-  * are made available under the terms of the Eclipse Public License v1.0
-  * which accompanies this distribution, and is available at
-  * http://www.eclipse.org/legal/epl-v10.html
-  *
-  * Contributors:
-  *    DocDoku - initial API and implementation
-  *******************************************************************************/
+ * Copyright (c) 2017 DocDoku.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ * <p>
+ * Contributors:
+ * DocDoku - initial API and implementation
+ *******************************************************************************/
 
 package org.polarsys.eplmp.server.converters;
 
-import java.net.URI;
-
 import javax.ejb.Remote;
+import java.net.URI;
 
 /**
  * CADConverter Extension point interface for 3D files conversion.
- * 
+ *
  * Converters are supposed to be (standalone) remote EJB module that can be
  * deployed independently of DocdokuPLM application.
  */
@@ -29,19 +28,19 @@ public interface CADConverter {
      */
     class ConversionException extends Exception {
 
-	private static final long serialVersionUID = 1L;
+        private static final long serialVersionUID = 1L;
 
-	public ConversionException(String message) {
-	    super(message);
-	}
+        public ConversionException(String message) {
+            super(message);
+        }
 
-	public ConversionException(Throwable cause) {
-	    super(cause);
-	}
+        public ConversionException(Throwable cause) {
+            super(cause);
+        }
 
-	public ConversionException(String message, Throwable cause) {
-	    super(message, cause);
-	}
+        public ConversionException(String message, Throwable cause) {
+            super(message, cause);
+        }
     }
 
     /**
@@ -53,10 +52,10 @@ public interface CADConverter {
      *            a given temporary directory for converter operations
      * @return the conversion result
      * @throws ConversionException
-     * 
+     *
      */
     ConversionResult convert(URI cadFileName, URI tempDir)
-	    throws ConversionException;
+            throws ConversionException;
 
     /**
      * Determine if this converter is able to convert given CAD file format
