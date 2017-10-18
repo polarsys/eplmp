@@ -74,7 +74,13 @@ public class PlatformHealthManagerBean implements IPlatformHealthManagerLocal {
         }
 
         // LibreOffice check
-        String officeHome = officeConfig.getOfficeHome();
+        String officeHome = null;
+        try {
+            officeHome = officeConfig.getOfficeHome();
+        }catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Office properties object not accessible", e);
+            check = false;
+        }
 
         if (officeHome == null || officeHome.isEmpty()) {
             LOGGER.log(Level.SEVERE, "Office is not configured");
@@ -91,6 +97,13 @@ public class PlatformHealthManagerBean implements IPlatformHealthManagerLocal {
                 LOGGER.log(Level.SEVERE, "Office is not executable");
                 check = false;
             }
+        }
+
+        try {
+            Integer officePort = officeConfig.getOfficePort();
+        }catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Office port incorrectly set", e);
+            check = false;
         }
 
         // Check for mandatory config
@@ -124,5 +137,6 @@ public class PlatformHealthManagerBean implements IPlatformHealthManagerLocal {
             LOGGER.log(Level.SEVERE, "Health check didn't pass");
             throw new PlatformHealthException(Locale.getDefault());
         }
+
     }
 }

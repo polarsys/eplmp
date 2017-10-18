@@ -21,6 +21,8 @@ import org.polarsys.eplmp.core.services.IPlatformHealthManagerLocal;
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
+import javax.json.Json;
+import javax.json.JsonObject;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -53,8 +55,14 @@ public class PlatformResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response getPlatformHealthStatus() {
         try {
+            long before=System.currentTimeMillis();
             platformHealthManager.runHealthCheck();
-            return Response.noContent().build();
+            long after=System.currentTimeMillis();
+            JsonObject result= Json.createObjectBuilder()
+                    .add("status", "ok")
+                    .add("executionTime", after-before)
+                    .build();
+            return Response.ok(result).build();
         } catch (PlatformHealthException e) {
             return Response.serverError().build();
         }
