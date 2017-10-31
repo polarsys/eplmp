@@ -1,28 +1,30 @@
 /*******************************************************************************
-  * Copyright (c) 2017 DocDoku.
-  * All rights reserved. This program and the accompanying materials
-  * are made available under the terms of the Eclipse Public License v1.0
-  * which accompanies this distribution, and is available at
-  * http://www.eclipse.org/legal/epl-v10.html
-  *
-  * Contributors:
-  *    DocDoku - initial API and implementation
-  *******************************************************************************/
+ * Copyright (c) 2017 DocDoku.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ * <p>
+ * Contributors:
+ * DocDoku - initial API and implementation
+ *******************************************************************************/
 
 package org.polarsys.eplmp.server.rest;
 
+import io.swagger.annotations.*;
+import org.dozer.DozerBeanMapperSingletonWrapper;
+import org.dozer.Mapper;
 import org.polarsys.eplmp.core.common.Account;
+import org.polarsys.eplmp.core.common.OAuthProvider;
 import org.polarsys.eplmp.core.common.Workspace;
 import org.polarsys.eplmp.core.exceptions.*;
 import org.polarsys.eplmp.core.exceptions.NotAllowedException;
 import org.polarsys.eplmp.core.security.UserGroupMapping;
 import org.polarsys.eplmp.core.services.*;
 import org.polarsys.eplmp.server.rest.dto.AccountDTO;
+import org.polarsys.eplmp.server.rest.dto.OAuthProviderDTO;
 import org.polarsys.eplmp.server.rest.dto.PlatformOptionsDTO;
 import org.polarsys.eplmp.server.rest.dto.WorkspaceDTO;
-import io.swagger.annotations.*;
-import org.dozer.DozerBeanMapperSingletonWrapper;
-import org.dozer.Mapper;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.security.DeclareRoles;
@@ -33,6 +35,7 @@ import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 import javax.ws.rs.*;
+import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.Serializable;
@@ -73,6 +76,9 @@ public class AdminResource implements Serializable {
 
     @Inject
     private IIndexerManagerLocal indexManager;
+
+    @Inject
+    private IOAuthManagerLocal oAuthManager;
 
     private Mapper mapper;
 
@@ -362,4 +368,104 @@ public class AdminResource implements Serializable {
 
         return mapper.map(account, AccountDTO.class);
     }
+
+    @GET
+    @Path("providers")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "Successful retrieval of auth providers"),
+            @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 500, message = "Internal server error")
+    })
+    @ApiOperation(value = "Get detailed providers",
+            response = OAuthProviderDTO.class,
+            responseContainer = "List")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getDetailedProviders() {
+        List<OAuthProvider> providers = oAuthManager.getProviders();
+        List<OAuthProviderDTO> dtos = new ArrayList<>();
+
+        for (OAuthProvider provider : providers) {
+            dtos.add(mapper.map(provider, OAuthProviderDTO.class));
+        }
+
+        return Response.ok(new GenericEntity<List<OAuthProviderDTO>>(dtos) {
+        }).build();
+    }
+
+    @GET
+    @Path("providers/{id}")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "Successful retrieval of auth provider"),
+            @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 500, message = "Internal server error")
+    })
+    @ApiOperation(value = "Get detailed provider",
+            response = OAuthProviderDTO.class)
+    @Produces(MediaType.APPLICATION_JSON)
+    public OAuthProviderDTO getDetailedProvider(@ApiParam(value = "Provider id", required = true) @PathParam("id") int providerId) throws OAuthProviderNotFoundException {
+        OAuthProvider provider = oAuthManager.getProvider(providerId);
+        return mapper.map(provider, OAuthProviderDTO.class);
+    }
+
+    @POST
+    @Path("providers")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "Successful creation of auth provider"),
+            @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 500, message = "Internal server error")
+    })
+    @ApiOperation(value = "Create provider",
+            response = OAuthProviderDTO.class)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response createProvider(@ApiParam(required = true, value = "Updated account") OAuthProviderDTO providerDTO)
+            throws AccountNotFoundException {
+
+        OAuthProvider provider = oAuthManager.createProvider(providerDTO.getName(), providerDTO.isEnabled(), providerDTO.getAuthority(),
+                providerDTO.getIssuer(), providerDTO.getClientID(), providerDTO.getJwsAlgorithm(),
+                providerDTO.getJwkSetURL(), providerDTO.getRedirectUri(), providerDTO.getSecret(), providerDTO.getScope(), providerDTO.getResponseType(),
+                providerDTO.getAuthorizationEndpoint());
+        return Response.ok().entity(mapper.map(provider, OAuthProviderDTO.class)).build();
+    }
+
+    @PUT
+    @Path("providers/{id}")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "Successful update of auth provider"),
+            @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 500, message = "Internal server error")
+    })
+    @ApiOperation(value = "Update provider",
+            response = OAuthProviderDTO.class)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response updateProvider(
+            @ApiParam(value = "OAuthProvider id", required = true) @PathParam("id") int id,
+            @ApiParam(required = true, value = "Updated provider") OAuthProviderDTO providerDTO)
+            throws AccountNotFoundException, OAuthProviderNotFoundException {
+
+        OAuthProvider provider = oAuthManager.updateProvider(id, providerDTO.getName(), providerDTO.isEnabled(), providerDTO.getAuthority(),
+                providerDTO.getIssuer(), providerDTO.getClientID(), providerDTO.getJwsAlgorithm(),
+                providerDTO.getJwkSetURL(), providerDTO.getRedirectUri(), providerDTO.getSecret(), providerDTO.getScope(), providerDTO.getResponseType(),
+                providerDTO.getAuthorizationEndpoint());
+        return Response.ok().entity(mapper.map(provider, OAuthProviderDTO.class)).build();
+    }
+
+    @DELETE
+    @Path("providers/{id}")
+    @ApiResponses(value = {
+            @ApiResponse(code = 204, message = "Successful removal of auth provider"),
+            @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 500, message = "Internal server error")
+    })
+    @ApiOperation(value = "Remove provider",
+            response = Response.class)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response removeProvider(
+            @ApiParam(value = "OAuthProvider id", required = true) @PathParam("id") int id)
+            throws AccountNotFoundException, OAuthProviderNotFoundException {
+        oAuthManager.deleteProvider(id);
+        return Response.noContent().build();
+    }
+
 }
