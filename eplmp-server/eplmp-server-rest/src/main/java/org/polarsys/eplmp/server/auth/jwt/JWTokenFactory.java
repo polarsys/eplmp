@@ -43,7 +43,7 @@ public class JWTokenFactory {
 
     private static final Logger LOGGER = Logger.getLogger(JWTokenFactory.class.getName());
     private static final String ALG = AlgorithmIdentifiers.HMAC_SHA256;
-    private static final Long JWT_TOKEN_EXPIRES_TIME = 10 * 60l; // 10 minutes token lifetime
+    private static final Long JWT_TOKEN_EXPIRES_TIME = 60 * 60l; // 1 hour token lifetime, to prevent timeout when uploading
     private static final Long JWT_TOKEN_REFRESH_BEFORE = 3 * 60l; // Deliver new token 3 minutes before expiration
 
     private static final String SUBJECT_LOGIN = "login";
