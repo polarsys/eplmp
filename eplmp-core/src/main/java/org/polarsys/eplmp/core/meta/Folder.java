@@ -32,7 +32,7 @@ import java.util.Deque;
 @Entity
 public class Folder implements Serializable, Comparable<Folder> {
 
-    @Column(length=255)
+    @Column(length=1024)
     @javax.persistence.Id
     private String completePath="";
             
