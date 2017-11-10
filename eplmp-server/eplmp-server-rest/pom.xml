@@ -38,6 +38,11 @@
             <groupId>net.sf.dozer</groupId>
             <artifactId>dozer</artifactId>
         </dependency>
+        <!-- dozer uses SLF4J and PLM uses JUL: Set correct binding -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-jdk14</artifactId>
+        </dependency>
         <dependency>
             <groupId>java3d</groupId>
             <artifactId>vecmath</artifactId>
