@@ -72,6 +72,11 @@
             <groupId>io.searchbox</groupId>
             <artifactId>jest</artifactId>
         </dependency>
+        <!-- searchbox uses SLF4J and PLM uses JUL: Set correct binding -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-jdk14</artifactId>
+        </dependency>
         <dependency>
             <groupId>vc.inreach.aws</groupId>
             <artifactId>aws-signing-request-interceptor</artifactId>
