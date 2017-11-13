@@ -2,12 +2,15 @@
 <!DOCTYPE glassfish-ejb-jar PUBLIC "-//GlassFish.org//DTD GlassFish Application Server 3.1 EJB 3.1//EN"
         "http://glassfish.org/dtds/glassfish-ejb-jar_3_1-1.dtd">
 <glassfish-ejb-jar>
-    
+
+    <security-role-mapping>
+        <role-name>guest</role-name>
+        <group-name>guest</group-name>
+    </security-role-mapping>
     <security-role-mapping>
         <role-name>users</role-name>
         <group-name>users</group-name>
     </security-role-mapping>
-
     <security-role-mapping>
         <role-name>admin</role-name>
         <group-name>admin</group-name>
