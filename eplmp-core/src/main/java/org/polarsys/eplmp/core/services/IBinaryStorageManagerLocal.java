@@ -32,5 +32,5 @@ public interface IBinaryStorageManagerLocal {
     void renameFile(BinaryResource binaryResource, String pNewName) throws StorageException, FileNotFoundException;
     String getExternalStorageURI(BinaryResource binaryResource);
     String getShortenExternalStorageURI(BinaryResource binaryResource);
-    void deleteWorkspaceFolder(String workspaceId, List<BinaryResource> binaryResourcesInWorkspace) throws StorageException;
+    void deleteWorkspaceFolder(String workspaceId) throws StorageException;
 }
