@@ -10,4 +10,10 @@
     <entity class="org.polarsys.eplmp.core.hooks.SimpleWebhookApp">
         <convert converter="org.polarsys.eplmp.server.storage.CryptoConverter" attribute-name="authorization"/>
     </entity>
+
+    <entity class="org.polarsys.eplmp.core.common.OAuthProvider">
+        <convert converter="org.polarsys.eplmp.server.storage.CryptoConverter" attribute-name="clientID"/>
+        <convert converter="org.polarsys.eplmp.server.storage.CryptoConverter" attribute-name="secret"/>
+    </entity>
+
 </entity-mappings>

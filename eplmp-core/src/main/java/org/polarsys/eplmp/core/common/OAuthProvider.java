@@ -33,9 +33,6 @@ public class OAuthProvider implements Serializable {
 
     private String name;
     private boolean enabled;
-
-    // todo encrypt critical fields
-
     private String authority;
     private String issuer;
     private String clientID;
