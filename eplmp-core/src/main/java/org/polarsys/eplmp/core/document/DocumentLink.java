@@ -1,13 +1,13 @@
 /*******************************************************************************
-  * Copyright (c) 2017 DocDoku.
-  * All rights reserved. This program and the accompanying materials
-  * are made available under the terms of the Eclipse Public License v1.0
-  * which accompanies this distribution, and is available at
-  * http://www.eclipse.org/legal/epl-v10.html
-  *
-  * Contributors:
-  *    DocDoku - initial API and implementation
-  *******************************************************************************/
+ * Copyright (c) 2017 DocDoku.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ * <p>
+ * Contributors:
+ * DocDoku - initial API and implementation
+ *******************************************************************************/
 
 package org.polarsys.eplmp.core.document;
 
@@ -19,57 +19,57 @@ import java.io.Serializable;
  * This is a link class used to connect an object to a {@link DocumentRevision}.
  * Documents are not linked directly but rather through this class to get
  * a loosely coupling and to carry additional information.
- * 
+ *
  * @author Florent Garin
  * @version 1.1, 28/01/13
- * @since   V1.0
+ * @since V1.0
  */
-@Table(name="DOCUMENTLINK")
+@Table(name = "DOCUMENTLINK")
 @javax.persistence.Entity
-@NamedQueries ({
-    @NamedQuery(name="DocumentLink.findDocumentOwner", query = "SELECT d FROM DocumentIteration d WHERE :link MEMBER OF d.linkedDocuments"),
-    @NamedQuery(name="DocumentLink.findPartOwner", query = "SELECT p FROM PartIteration p WHERE :link MEMBER OF p.linkedDocuments"),
-    @NamedQuery(name="DocumentLink.findProductInstanceIteration", query = "SELECT p FROM ProductInstanceIteration p JOIN p.linkedDocuments dl where dl.targetDocument = :documentRevision"),
-    @NamedQuery(name="DocumentLink.findPathData", query = "SELECT p FROM PathDataIteration p JOIN p.linkedDocuments dl where dl.targetDocument = :documentRevision"),
-    @NamedQuery(name="DocumentLink.findInverseDocumentLinks", query = "SELECT d FROM DocumentIteration d JOIN d.linkedDocuments dl where dl.targetDocument = :documentRevision"),
-    @NamedQuery(name="DocumentLink.findInversePartLinks", query = "SELECT p FROM PartIteration p JOIN p.linkedDocuments dl where dl.targetDocument = :documentRevision")
+@NamedQueries({
+        @NamedQuery(name = "DocumentLink.findDocumentOwner", query = "SELECT d FROM DocumentIteration d WHERE :link MEMBER OF d.linkedDocuments"),
+        @NamedQuery(name = "DocumentLink.findPartOwner", query = "SELECT p FROM PartIteration p WHERE :link MEMBER OF p.linkedDocuments"),
+        @NamedQuery(name = "DocumentLink.findProductInstanceIteration", query = "SELECT p FROM ProductInstanceIteration p JOIN p.linkedDocuments dl where dl.targetDocument = :documentRevision"),
+        @NamedQuery(name = "DocumentLink.findPathData", query = "SELECT p FROM PathDataIteration p JOIN p.linkedDocuments dl where dl.targetDocument = :documentRevision"),
+        @NamedQuery(name = "DocumentLink.findInverseDocumentLinks", query = "SELECT d FROM DocumentIteration d JOIN d.linkedDocuments dl where dl.targetDocument = :documentRevision"),
+        @NamedQuery(name = "DocumentLink.findInversePartLinks", query = "SELECT p FROM PartIteration p JOIN p.linkedDocuments dl where dl.targetDocument = :documentRevision")
 })
-public class DocumentLink implements Serializable, Cloneable{
+public class DocumentLink implements Serializable, Cloneable {
 
-    @GeneratedValue(strategy=GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
     private int id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumns({
-        @JoinColumn(name="TARGET_DOCUMENTMASTER_ID", referencedColumnName="DOCUMENTMASTER_ID"),
-        @JoinColumn(name="TARGET_DOCREVISION_VERSION", referencedColumnName="VERSION"),
-        @JoinColumn(name="TARGET_WORKSPACE_ID", referencedColumnName="WORKSPACE_ID")
+            @JoinColumn(name = "TARGET_DOCUMENTMASTER_ID", referencedColumnName = "DOCUMENTMASTER_ID"),
+            @JoinColumn(name = "TARGET_DOCREVISION_VERSION", referencedColumnName = "VERSION"),
+            @JoinColumn(name = "TARGET_WORKSPACE_ID", referencedColumnName = "WORKSPACE_ID")
     })
     private DocumentRevision targetDocument;
 
-    @Column(name = "TARGET_DOCUMENTMASTER_ID", length=100, insertable = false, updatable = false)
-    private String targetDocumentMasterId ="";
+    @Column(name = "TARGET_DOCUMENTMASTER_ID", length = 100, insertable = false, updatable = false)
+    private String targetDocumentMasterId = "";
 
-    @Column(name = "TARGET_DOCREVISION_VERSION", length=10, insertable = false, updatable = false)
-    private String targetDocumentVersion ="";
+    @Column(name = "TARGET_DOCREVISION_VERSION", length = 10, insertable = false, updatable = false)
+    private String targetDocumentVersion = "";
 
-    @Column(name = "TARGET_WORKSPACE_ID", length=100, insertable = false, updatable = false)
-    private String targetDocumentWorkspaceId="";
+    @Column(name = "TARGET_WORKSPACE_ID", length = 100, insertable = false, updatable = false)
+    private String targetDocumentWorkspaceId = "";
 
-    @Column(name="COMMENTDATA")
+    @Column(name = "COMMENTDATA")
     private String comment;
 
-    
+
     public DocumentLink() {
     }
-    
-    public DocumentLink(DocumentRevision pTargetDocument, String pComment){
+
+    public DocumentLink(DocumentRevision pTargetDocument, String pComment) {
         setTargetDocument(pTargetDocument);
-        comment=pComment;
+        comment = pComment;
     }
 
-    public DocumentLink(DocumentRevision pTargetDocument){
+    public DocumentLink(DocumentRevision pTargetDocument) {
         setTargetDocument(pTargetDocument);
     }
 
@@ -94,7 +94,7 @@ public class DocumentLink implements Serializable, Cloneable{
         return targetDocument;
     }
 
-    public DocumentRevisionKey getTargetDocumentKey(){
+    public DocumentRevisionKey getTargetDocumentKey() {
         return new DocumentRevisionKey(targetDocumentWorkspaceId, targetDocumentMasterId, targetDocumentVersion);
     }
 
@@ -122,19 +122,18 @@ public class DocumentLink implements Serializable, Cloneable{
         this.targetDocumentWorkspaceId = targetDocumentWorkspaceId;
     }
 
-    
 
     public void setTargetDocument(DocumentRevision targetDocument) {
         this.targetDocument = targetDocument;
-        targetDocumentMasterId =targetDocument.getId();
-        targetDocumentVersion =targetDocument.getVersion();
-        targetDocumentWorkspaceId=targetDocument.getWorkspaceId();
+        targetDocumentMasterId = targetDocument.getId();
+        targetDocumentVersion = targetDocument.getVersion();
+        targetDocumentWorkspaceId = targetDocument.getWorkspaceId();
     }
 
-    
+
     @Override
     public String toString() {
-        return targetDocumentMasterId +"-"+ targetDocumentVersion;
+        return targetDocumentMasterId + "-" + targetDocumentVersion;
     }
 
     @Override
@@ -153,7 +152,7 @@ public class DocumentLink implements Serializable, Cloneable{
     public int hashCode() {
         return id;
     }
-    
+
 
     @Override
     public DocumentLink clone() {
@@ -163,7 +162,7 @@ public class DocumentLink implements Serializable, Cloneable{
         } catch (CloneNotSupportedException e) {
             throw new InternalError();
         }
-        
+
         return clone;
     }
 
@@ -171,4 +170,7 @@ public class DocumentLink implements Serializable, Cloneable{
         return this.getTargetDocument().getTitle();
     }
 
+    public void removeTargetDocument() {
+        this.targetDocument = null;
+    }
 }
