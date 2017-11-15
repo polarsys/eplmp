@@ -45,5 +45,7 @@ public interface IOAuthManagerLocal {
 
     boolean isProvidedAccount(Account account);
 
+    Integer getProviderId(Account account);
+
     String findAvailableLogin(String sub);
 }

@@ -126,6 +126,16 @@ public class OAuthManagerBean implements IOAuthManagerLocal {
     }
 
     @Override
+    @RolesAllowed({UserGroupMapping.ADMIN_ROLE_ID, UserGroupMapping.REGULAR_USER_ROLE_ID})
+    public Integer getProviderId(Account account) {
+        try {
+            return new OAuthProviderDAO(em).findProvidedAccount(account).getProvider().getId();
+        } catch (ProvidedAccountNotFoundException e) {
+            return null;
+        }
+    }
+
+    @Override
     public String findAvailableLogin(String sub) {
         try {
             accountManager.getAccount(sub);

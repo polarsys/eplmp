@@ -1,13 +1,13 @@
 /*******************************************************************************
-  * Copyright (c) 2017 DocDoku.
-  * All rights reserved. This program and the accompanying materials
-  * are made available under the terms of the Eclipse Public License v1.0
-  * which accompanies this distribution, and is available at
-  * http://www.eclipse.org/legal/epl-v10.html
-  *
-  * Contributors:
-  *    DocDoku - initial API and implementation
-  *******************************************************************************/
+ * Copyright (c) 2017 DocDoku.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ * <p>
+ * Contributors:
+ * DocDoku - initial API and implementation
+ *******************************************************************************/
 package org.polarsys.eplmp.server.rest;
 
 import java.io.IOException;
@@ -26,17 +26,8 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.GenericEntity;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import javax.ws.rs.*;
+import javax.ws.rs.core.*;
 
 import org.dozer.DozerBeanMapperSingletonWrapper;
 import org.dozer.Mapper;
@@ -52,6 +43,7 @@ import org.polarsys.eplmp.core.exceptions.NotAllowedException;
 import org.polarsys.eplmp.core.security.UserGroupMapping;
 import org.polarsys.eplmp.core.services.IAccountManagerLocal;
 import org.polarsys.eplmp.core.services.IContextManagerLocal;
+import org.polarsys.eplmp.core.services.IOAuthManagerLocal;
 import org.polarsys.eplmp.core.services.IUserManagerLocal;
 import org.polarsys.eplmp.server.auth.AuthConfig;
 import org.polarsys.eplmp.server.auth.jwt.JWTokenFactory;
@@ -78,6 +70,8 @@ public class AccountResource {
     private IUserManagerLocal userManager;
     @Inject
     private IContextManagerLocal contextManager;
+    @Inject
+    private IOAuthManagerLocal authManager;
     @Inject
     private AuthConfig authConfig;
 
@@ -107,6 +101,7 @@ public class AccountResource {
         Account account = accountManager.getMyAccount();
         AccountDTO accountDTO = mapper.map(account, AccountDTO.class);
         accountDTO.setAdmin(contextManager.isCallerInRole(UserGroupMapping.ADMIN_ROLE_ID));
+        accountDTO.setProviderId(authManager.getProviderId(account));
         return accountDTO;
     }
 
@@ -121,14 +116,27 @@ public class AccountResource {
     })
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    public AccountDTO updateAccount(
+    public Response updateAccount(
+            @ApiParam(hidden = true) @HeaderParam("Authorization") String authorizationString,
             @ApiParam(required = true, value = "Updated account") AccountDTO accountDTO)
             throws AccountNotFoundException, NotAllowedException {
-	if (accountManager.authenticateAccount(contextManager.getCallerPrincipalLogin(), accountDTO.getPassword()) == null) {
-	    throw new NotAllowedException(new Locale(accountDTO.getLanguage()), "NotAllowedException68");
-	}
+
+        // If current password is specified, authenticate user with it
+        String password = accountDTO.getPassword();
+        if (password != null && !password.isEmpty()) {
+            if (accountManager.authenticateAccount(contextManager.getCallerPrincipalLogin(), accountDTO.getPassword()) == null) {
+                throw new NotAllowedException(new Locale(accountDTO.getLanguage()), "NotAllowedException68");
+            }
+        } else {
+            if (authorizationString == null
+                    || !authorizationString.startsWith("Bearer ")
+                    || !JWTokenFactory.isJWTValidBefore(authConfig.getJWTKey(), 2 * 60, authorizationString.substring("Bearer ".length()))) {
+                return Response.status(Response.Status.FORBIDDEN).build();
+            }
+        }
+
         Account account = accountManager.updateAccount(accountDTO.getName(), accountDTO.getEmail(), accountDTO.getLanguage(), accountDTO.getNewPassword(), accountDTO.getTimeZone());
-        return mapper.map(account, AccountDTO.class);
+        return Response.ok().entity(mapper.map(account, AccountDTO.class)).build();
     }
 
     @POST

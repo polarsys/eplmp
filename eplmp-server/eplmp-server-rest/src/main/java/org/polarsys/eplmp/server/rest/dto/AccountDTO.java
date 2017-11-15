@@ -49,6 +49,9 @@ public class AccountDTO implements Serializable {
     @ApiModelProperty(value = "Password for password change or create action")
     private String newPassword;
 
+    @ApiModelProperty(value = "Provider id if account is provided")
+    private Integer providerId;
+
     public AccountDTO() {
     }
 
@@ -122,5 +125,13 @@ public class AccountDTO implements Serializable {
 
     public void setEnabled(boolean enabled) {
 	this.enabled = enabled;
+    }
+
+    public Integer getProviderId() {
+        return providerId;
+    }
+
+    public void setProviderId(Integer providerId) {
+        this.providerId = providerId;
     }
 }

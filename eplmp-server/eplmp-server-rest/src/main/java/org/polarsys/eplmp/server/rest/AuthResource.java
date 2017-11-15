@@ -249,6 +249,24 @@ public class AuthResource {
         }).build();
     }
 
+    @GET
+    @Path("/providers/{id}")
+    @ApiOperation(value = "Get provider details",
+            response = OAuthProviderPublicDTO.class)
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "Successful retrieval of provider."),
+            @ApiResponse(code = 404, message = "Provider not found"),
+            @ApiResponse(code = 500, message = "Internal server error")
+    })
+    @Produces(MediaType.APPLICATION_JSON)
+    public OAuthProviderPublicDTO getProvider(
+            @ApiParam(required = true, value = "Password recovery process") @PathParam("id") Integer providerId) throws OAuthProviderNotFoundException {
+        OAuthProvider provider = oAuthManager.getProvider(providerId);
+        OAuthProviderPublicDTO oAuthProviderPublicDTO = mapper.map(provider, OAuthProviderPublicDTO.class);
+        oAuthProviderPublicDTO.setSigningKeys(getSigningKeys(provider.getJwkSetURL()));
+        return oAuthProviderPublicDTO;
+    }
+
     private String getSigningKeys(String url) {
         OkHttpClient client = new OkHttpClient();
         Request request = new Request.Builder().url(url).build();

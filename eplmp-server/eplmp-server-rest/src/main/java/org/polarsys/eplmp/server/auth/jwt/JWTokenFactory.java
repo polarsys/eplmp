@@ -1,13 +1,13 @@
 /*******************************************************************************
-  * Copyright (c) 2017 DocDoku.
-  * All rights reserved. This program and the accompanying materials
-  * are made available under the terms of the Eclipse Public License v1.0
-  * which accompanies this distribution, and is available at
-  * http://www.eclipse.org/legal/epl-v10.html
-  *
-  * Contributors:
-  *    DocDoku - initial API and implementation
-  *******************************************************************************/
+ * Copyright (c) 2017 DocDoku.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ * <p>
+ * Contributors:
+ * DocDoku - initial API and implementation
+ *******************************************************************************/
 
 package org.polarsys.eplmp.server.auth.jwt;
 
@@ -73,6 +73,7 @@ public class JWTokenFactory {
 
         JwtClaims claims = new JwtClaims();
         claims.setSubject(jsonClaims.toString());
+        claims.setIssuedAtToNow();
         claims.setExpirationTime(NumericDate.fromSeconds(NumericDate.now().getValue() + JWT_TOKEN_EXPIRES_TIME));
 
         JsonWebSignature jws = new JsonWebSignature();
@@ -140,6 +141,20 @@ public class JWTokenFactory {
 
         return null;
 
+    }
+
+    public static boolean isJWTValidBefore(Key key, int seconds, String authorizationString) {
+        JWTokenUserGroupMapping jwTokenUserGroupMapping = validateAuthToken(key, authorizationString);
+        if (jwTokenUserGroupMapping != null) {
+            try {
+                NumericDate issuedAt = jwTokenUserGroupMapping.getClaims().getIssuedAt();
+                issuedAt.addSeconds(seconds);
+                return NumericDate.now().isBefore(issuedAt);
+            } catch (MalformedClaimException e) {
+                return false;
+            }
+        }
+        return false;
     }
 
     public static void refreshTokenIfNeeded(Key key, HttpServletResponse response, JWTokenUserGroupMapping jwTokenUserGroupMapping) {
