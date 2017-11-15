@@ -16,10 +16,10 @@ import java.io.File;
 import java.util.Locale;
 
 /**
- * PartImporter plugin interface
+ * BomImporter plugin interface
  */
 @Remote
-public interface PartImporter {
+public interface BomImporter {
 
     /**
      * Exception reporting a unrecoverable problem during conversion process.
@@ -60,6 +60,6 @@ public interface PartImporter {
      * @return an ImportResult result object
      */
     // TODO : replace java.io.File with java.io.InputStream
-    PartImporterResult importFile(Locale locale, String workspaceId, File file, boolean autoCheckout, boolean autoCheckIn, boolean permissiveUpdate) throws ImporterException;
+    BomImporterResult importFile(Locale locale, String workspaceId, File file, boolean autoCheckout, boolean autoCheckIn, boolean permissiveUpdate) throws ImporterException;
 
 }
