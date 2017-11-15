@@ -168,8 +168,8 @@ public class BinaryStorageManagerBean implements IBinaryStorageManagerLocal {
     }
 
     @Override
-    public void deleteWorkspaceFolder(String workspaceId, List<BinaryResource> binaryResourcesInWorkspace) throws StorageException {
-        defaultStorageProvider.deleteWorkspaceFolder(workspaceId, binaryResourcesInWorkspace);
+    public void deleteWorkspaceFolder(String workspaceId) throws StorageException {
+        defaultStorageProvider.deleteWorkspaceFolder(workspaceId);
     }
 
 }
