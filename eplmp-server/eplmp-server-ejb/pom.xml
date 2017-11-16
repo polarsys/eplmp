@@ -137,7 +137,34 @@
                     <exclude>**/*.properties</exclude>
                 </excludes>
             </resource>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+                <includes>
+                    <include>META-INF/persistence.xml</include>
+                </includes>
+            </resource>
         </resources>
         <finalName>${project.artifactId}</finalName>
     </build>
+
+    <!-- Default mode-->
+    <properties>
+        <clusterPropertiesInclude><![CDATA[]]></clusterPropertiesInclude>
+    </properties>
+
+    <!-- Cluster mode-->
+    <profiles>
+        <profile>
+            <id>cluster</id>
+            <properties>
+                <clusterPropertiesInclude><![CDATA[
+            <property name="eclipselink.cache.coordination.protocol" value="jms" />
+            <property name="eclipselink.cache.coordination.jms.topic" value="jms/CacheCoordinationTopic" />
+            <property name="eclipselink.cache.coordination.jms.factory" value="jms/CacheCoordinationFactory" />
+            ]]></clusterPropertiesInclude>
+            </properties>
+        </profile>
+    </profiles>
+
 </project>
