@@ -12,8 +12,11 @@
 package org.polarsys.eplmp.core.admin;
 
 /**
+ * Setting which indicates if the super-admin have to valid account and workspace creations.
  *
  * @author Morgan Guimard
+ * @version 2.5, 02/06/16
+ * @since V2.5
  */
 public enum OperationSecurityStrategy {
     NONE, ADMIN_VALIDATION

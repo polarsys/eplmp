@@ -10,7 +10,7 @@
   *******************************************************************************/
 
 /**
- * Provides exceptions returned by the business layer.
+ * Provides classes for implementing webhooks.
  *
  * @since 1.0
  */

@@ -13,6 +13,16 @@ package org.polarsys.eplmp.core.hooks;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 
+/**
+ * A {@link WebhookApp} subclass which performs an HTTP request on a given URI.
+ * The HTTP method and authorization header can also be customized.
+ *
+ * @author Morgan Guimard
+ * @version 2.5, 14/10/17
+ * @see     WebhookApp
+ * @see     SNSWebhookApp
+ * @since V2.5
+ */
 @Table(name = "SIMPLEWEBHOOKAPP")
 @Entity
 public class SimpleWebhookApp extends WebhookApp {

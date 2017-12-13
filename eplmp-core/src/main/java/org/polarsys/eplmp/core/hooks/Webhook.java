@@ -15,6 +15,15 @@ import org.polarsys.eplmp.core.common.Workspace;
 import javax.persistence.*;
 import java.io.Serializable;
 
+/**
+ * This class is a webhook applicable on a specific {@link Workspace}.
+ * A webhook is a notification function that carries event data over
+ * the HTTP protocol.
+ *
+ * @author Morgan Guimard
+ * @version 2.5, 14/10/17
+ * @since V2.5
+ */
 @Table(name = "WEBHOOK")
 @Entity
 @NamedQueries({

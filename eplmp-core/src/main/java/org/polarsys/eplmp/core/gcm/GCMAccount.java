@@ -18,6 +18,13 @@ import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 
+/**
+ * Represents a Firebase Cloud Messaging (formerly GCM) account.
+ *
+ * @author Morgan Guimard
+ * @version 2.0, 06/01/14
+ * @since V2.0
+ */
 @Table(name="GCMACCOUNT")
 @javax.persistence.Entity
 public class GCMAccount implements Serializable {

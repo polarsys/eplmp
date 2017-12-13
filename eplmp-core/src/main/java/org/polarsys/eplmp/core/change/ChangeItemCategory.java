@@ -9,12 +9,14 @@
   *    DocDoku - initial API and implementation
   *******************************************************************************/
 
-
 package org.polarsys.eplmp.core.change;
 
 /**
+ * Classification category for change items.
  *
  * @author Morgan Guimard
+ * @version 2.0, 10/02/14
+ * @since V2.0
  */
 public enum ChangeItemCategory {
     ADAPTIVE, CORRECTIVE, PERFECTIVE, PREVENTIVE, OTHER

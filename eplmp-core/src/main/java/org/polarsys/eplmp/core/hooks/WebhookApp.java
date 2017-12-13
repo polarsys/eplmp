@@ -14,6 +14,16 @@ import javax.persistence.*;
 import javax.xml.bind.annotation.XmlSeeAlso;
 import java.io.Serializable;
 
+/**
+ * <code>WebhookApp</code> class wraps the inner logic necessary for
+ * the implementation of a {@link Webhook}.
+ *
+ * @author Morgan Guimard
+ * @version 2.5, 14/10/17
+ * @see     SimpleWebhookApp
+ * @see     SNSWebhookApp
+ * @since V2.5
+ */
 @XmlSeeAlso({SimpleWebhookApp.class, SNSWebhookApp.class})
 @Inheritance
 @Table(name = "WEBHOOKAPP")

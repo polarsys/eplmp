@@ -9,7 +9,6 @@
   *    DocDoku - initial API and implementation
   *******************************************************************************/
 
-
 package org.polarsys.eplmp.core.change;
 
 import org.polarsys.eplmp.core.common.User;

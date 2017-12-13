@@ -10,7 +10,7 @@
   *******************************************************************************/
 
 /**
- * Provides exceptions returned by the business layer.
+ * Provides classes for Firebase Cloud Messaging (formerly GCM).
  *
  * @since 1.0
  */

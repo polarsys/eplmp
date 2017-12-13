@@ -13,6 +13,16 @@ package org.polarsys.eplmp.core.hooks;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 
+/**
+ * A {@link WebhookApp} subclass which relies on Amazon SNS (Simple Notification Service)
+ * in order to notify either end-users or third-party applications.
+ *
+ * @author Morgan Guimard
+ * @version 2.5, 14/10/17
+ * @see     WebhookApp
+ * @see     SimpleWebhookApp
+ * @since V2.5
+ */
 @Table(name = "SNSWEBHOOKAPP")
 @Entity
 public class SNSWebhookApp extends WebhookApp {

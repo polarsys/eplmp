@@ -15,8 +15,6 @@ import org.polarsys.eplmp.core.common.Workspace;
 
 import javax.persistence.*;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**

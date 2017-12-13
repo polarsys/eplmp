@@ -9,12 +9,14 @@
   *    DocDoku - initial API and implementation
   *******************************************************************************/
 
-
 package org.polarsys.eplmp.core.change;
 
 /**
+ * Priorities of change items.
  *
  * @author Morgan Guimard
+ * @version 2.0, 10/02/14
+ * @since V2.0
  */
 public enum ChangeItemPriority {
     LOW, MEDIUM, HIGH, EMERGENCY
