@@ -1,16 +1,17 @@
 /*******************************************************************************
-  * Copyright (c) 2017 DocDoku.
-  * All rights reserved. This program and the accompanying materials
-  * are made available under the terms of the Eclipse Public License v1.0
-  * which accompanies this distribution, and is available at
-  * http://www.eclipse.org/legal/epl-v10.html
-  *
-  * Contributors:
-  *    DocDoku - initial API and implementation
-  *******************************************************************************/
+ * Copyright (c) 2017 DocDoku.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ * <p>
+ * Contributors:
+ * DocDoku - initial API and implementation
+ *******************************************************************************/
 package org.polarsys.eplmp.server.indexer;
 
-import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.auth.*;
+import com.amazonaws.auth.profile.ProfileCredentialsProvider;
 import com.amazonaws.internal.StaticCredentialsProvider;
 import io.searchbox.client.JestClient;
 import io.searchbox.client.JestClientFactory;
@@ -63,10 +64,22 @@ public class IndexerClientProducer {
             httpConfigBuilder.defaultCredentials(username, password);
 
         JestClientFactory factory;
-        if (awsService != null && awsRegion != null && awsAccessKey != null && awsSecretKey != null) {
 
-            final StaticCredentialsProvider staticCredentialsProvider = new StaticCredentialsProvider(new BasicAWSCredentials(awsAccessKey, awsSecretKey));
-            final AWSSigner awsSigner = new AWSSigner(staticCredentialsProvider, awsRegion, awsService, () -> LocalDateTime.now(ZoneOffset.UTC));
+        if (awsService != null && awsRegion != null) {
+
+            final AWSCredentialsProviderChain providerChain;
+
+            if (awsAccessKey != null && awsSecretKey != null) {
+                providerChain = new AWSCredentialsProviderChain(
+                        new AWSStaticCredentialsProvider(
+                                new BasicAWSCredentials(awsAccessKey, awsSecretKey)
+                        )
+                );
+            } else {
+                providerChain = new DefaultAWSCredentialsProviderChain();
+            }
+
+            final AWSSigner awsSigner = new AWSSigner(providerChain, awsRegion, awsService, () -> LocalDateTime.now(ZoneOffset.UTC));
             final AWSSigningRequestInterceptor requestInterceptor = new AWSSigningRequestInterceptor(awsSigner);
 
             factory = new JestClientFactory() {
@@ -99,7 +112,7 @@ public class IndexerClientProducer {
     @Produces
     @ApplicationScoped
     public JestClient produce() {
-        LOGGER.log(Level.INFO, "Producing Elasticsearch rest client");
+        LOGGER.log(Level.INFO, "Producing ElasticSearch rest client");
         return client;
     }
 
