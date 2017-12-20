@@ -4,9 +4,9 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * <p>
+ *
  * Contributors:
- * DocDoku - initial API and implementation
+ *    DocDoku - initial API and implementation
  *******************************************************************************/
 
 package org.polarsys.eplmp.server;
@@ -22,7 +22,6 @@ import org.polarsys.eplmp.core.services.IAccountManagerLocal;
 import org.polarsys.eplmp.core.services.IOAuthManagerLocal;
 import org.polarsys.eplmp.server.dao.OAuthProviderDAO;
 
-import javax.annotation.Resource;
 import javax.annotation.security.DeclareRoles;
 import javax.annotation.security.RolesAllowed;
 import javax.ejb.Local;
@@ -32,7 +31,6 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import java.util.List;
 import java.util.Locale;
-import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
