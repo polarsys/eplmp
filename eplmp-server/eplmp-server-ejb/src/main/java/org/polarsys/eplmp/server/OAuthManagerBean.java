@@ -22,6 +22,7 @@ import org.polarsys.eplmp.core.services.IAccountManagerLocal;
 import org.polarsys.eplmp.core.services.IOAuthManagerLocal;
 import org.polarsys.eplmp.server.dao.OAuthProviderDAO;
 
+import javax.annotation.Resource;
 import javax.annotation.security.DeclareRoles;
 import javax.annotation.security.RolesAllowed;
 import javax.ejb.Local;
@@ -31,6 +32,8 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import java.util.List;
 import java.util.Locale;
+import java.util.Properties;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -49,6 +52,8 @@ public class OAuthManagerBean implements IOAuthManagerLocal {
     @Inject
     private IAccountManagerLocal accountManager;
 
+    @Inject
+    private OauthConfig oauthConfig;
 
     @Override
     public List<OAuthProvider> getProviders() {
@@ -143,6 +148,39 @@ public class OAuthManagerBean implements IOAuthManagerLocal {
         } catch (AccountNotFoundException e) {
             return sub;
         }
+    }
+
+    @Override
+    public void loadProvidersFromProperties() {
+        LOGGER.log(Level.INFO, "Configuring oauth providers");
+        List<OAuthProvider> providers = oauthConfig.getProviders();
+
+        OAuthProviderDAO oAuthProviderDAO = new OAuthProviderDAO(em);
+
+        for (OAuthProvider provider : providers) {
+            try {
+                OAuthProvider existingProvider = oAuthProviderDAO.findProvider(provider.getId());
+
+                existingProvider.setName(provider.getName());
+                existingProvider.setEnabled(provider.isEnabled());
+                existingProvider.setAuthority(provider.getAuthority());
+                existingProvider.setIssuer(provider.getIssuer());
+                existingProvider.setClientID(provider.getClientID());
+                existingProvider.setJwsAlgorithm(provider.getJwsAlgorithm());
+                existingProvider.setJwkSetURL(provider.getJwkSetURL());
+                existingProvider.setRedirectUri(provider.getRedirectUri());
+                existingProvider.setSecret(provider.getSecret());
+                existingProvider.setScope(provider.getScope());
+                existingProvider.setResponseType(provider.getResponseType());
+                existingProvider.setAuthorizationEndpoint(provider.getAuthorizationEndpoint());
+
+                LOGGER.log(Level.INFO, "Provider updated");
+            } catch (OAuthProviderNotFoundException e) {
+                oAuthProviderDAO.createProvider(provider);
+                LOGGER.log(Level.INFO, "Provider created");
+            }
+        }
+
     }
 
     private String generateLogin(String sub, int start) {

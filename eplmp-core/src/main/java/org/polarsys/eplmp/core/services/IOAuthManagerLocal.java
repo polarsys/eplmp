@@ -48,4 +48,6 @@ public interface IOAuthManagerLocal {
     Integer getProviderId(Account account);
 
     String findAvailableLogin(String sub);
+
+    void loadProvidersFromProperties();
 }
