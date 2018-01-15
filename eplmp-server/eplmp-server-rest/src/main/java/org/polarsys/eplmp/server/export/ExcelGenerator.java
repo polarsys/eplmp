@@ -282,6 +282,7 @@ public class ExcelGenerator {
                     data.add(sb.toString());
                     break;
 
+
                 case QueryField.CTX_P2P_SOURCE:
                     Map<String, List<PartLinkList>> sources = row.getSources();
                     String sourcePartLinksAsString = Tools.getPartLinksAsExcelString(sources);
@@ -292,6 +293,11 @@ public class ExcelGenerator {
                     Map<String, List<PartLinkList>> targets = row.getTargets();
                     String targetPartLinksAsString = Tools.getPartLinksAsExcelString(targets);
                     data.add(targetPartLinksAsString);
+                    break;
+
+                case QueryField.PART_MASTER_IS_STANDARD:
+                    boolean isStandard = row.getPartRevision().getPartMaster().isStandardPart();
+                    data.add(Boolean.toString(isStandard));
                     break;
 
                 default:
