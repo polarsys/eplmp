@@ -4,9 +4,9 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * <p>
+ *
  * Contributors:
- * DocDoku - initial API and implementation
+ *    DocDoku - initial API and implementation
  *******************************************************************************/
 
 package org.polarsys.eplmp.server;
@@ -26,7 +26,6 @@ import java.util.stream.Collectors;
  * Get oauth config from resources
  * <p>
  * Insert oAuth provider config with ./asadmin commands, before the server starts
- * <p>
  *
  * @author Morgan Guimard
  */
