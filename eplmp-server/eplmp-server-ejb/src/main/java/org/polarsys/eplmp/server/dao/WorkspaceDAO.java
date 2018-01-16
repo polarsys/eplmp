@@ -118,12 +118,6 @@ public class WorkspaceDAO {
         String workspaceId = workspace.getId();
         String pathToMatch = workspaceId.replace("_", "\\_").replace("%", "\\%") + "/%";
 
-        // Keep binaries in memory to delete them if google storage is the default storage provider
-        // We also could enhance the way we delete files by using gsutils from google api
-        List<BinaryResource> binaryResourcesInWorkspace =
-                em.createQuery("SELECT b FROM BinaryResource b where b.fullName LIKE :pathToMatch", BinaryResource.class)
-                        .setParameter("pathToMatch", pathToMatch).getResultList();
-
         // SharedEntities
         em.createQuery("DELETE FROM SharedEntity s where s.workspace = :workspace")
                 .setParameter("workspace", workspace).executeUpdate();
@@ -373,7 +367,7 @@ public class WorkspaceDAO {
         em.remove(workspace);
 
         // Delete workspace files
-        storageManager.deleteWorkspaceFolder(workspaceId, binaryResourcesInWorkspace);
+        storageManager.deleteWorkspaceFolder(workspaceId);
 
         em.flush();
 
