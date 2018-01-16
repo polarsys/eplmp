@@ -294,6 +294,11 @@ public class ExcelGenerator {
                     data.add(targetPartLinksAsString);
                     break;
 
+                case QueryField.PART_MASTER_IS_STANDARD:
+                    boolean isStandard = row.getPartRevision().getPartMaster().isStandardPart();
+                    data.add(Boolean.toString(isStandard));
+                    break;
+
                 default:
                     if (select.startsWith(QueryField.PART_REVISION_ATTRIBUTES_PREFIX)) {
                         String attributeSelectType = select.substring(0, select.indexOf(".")).substring(QueryField.PART_REVISION_ATTRIBUTES_PREFIX.length());
