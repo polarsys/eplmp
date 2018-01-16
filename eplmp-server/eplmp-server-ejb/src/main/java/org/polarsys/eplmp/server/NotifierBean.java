@@ -229,8 +229,8 @@ public class NotifierBean implements INotifierLocal {
         };
 
         try {
-            User adminUser = new User(new Workspace(workspaceId), admin);
-            sendMessage(adminUser, "WorkspaceDeletion_title", "WorkspaceDeletion_text", args);
+            //User admin does not exist anymore as the workspace has been deleted
+            sendMessage(admin, "WorkspaceDeletion_title", "WorkspaceDeletion_text", args);
         } catch (MessagingException pMEx) {
             logMessagingException(pMEx);
         }
