@@ -16,10 +16,16 @@ import org.polarsys.eplmp.core.admin.WorkspaceFrontOptions;
 import org.polarsys.eplmp.core.common.BinaryResource;
 import org.polarsys.eplmp.core.common.UserGroup;
 import org.polarsys.eplmp.core.common.Workspace;
+import org.polarsys.eplmp.core.configuration.PathDataIteration;
+import org.polarsys.eplmp.core.configuration.PathDataMaster;
+import org.polarsys.eplmp.core.configuration.ProductInstanceIteration;
 import org.polarsys.eplmp.core.document.DocumentIteration;
+import org.polarsys.eplmp.core.document.DocumentLink;
+import org.polarsys.eplmp.core.document.DocumentMaster;
 import org.polarsys.eplmp.core.meta.Folder;
 import org.polarsys.eplmp.core.exceptions.*;
 import org.polarsys.eplmp.core.product.PartIteration;
+import org.polarsys.eplmp.core.product.PartMaster;
 import org.polarsys.eplmp.core.product.PartUsageLink;
 import org.polarsys.eplmp.core.services.IBinaryStorageManagerLocal;
 import org.polarsys.eplmp.core.workflow.WorkflowModel;
@@ -117,6 +123,8 @@ public class WorkspaceDAO {
 
         String workspaceId = workspace.getId();
         String pathToMatch = workspaceId.replace("_", "\\_").replace("%", "\\%") + "/%";
+        final int batchSize = 1000;
+        int i;
 
         // SharedEntities
         em.createQuery("DELETE FROM SharedEntity s where s.workspace = :workspace")
@@ -136,6 +144,53 @@ public class WorkspaceDAO {
         // BaselinedDocument
         em.createQuery("DELETE FROM BaselinedDocument bd where bd.targetDocument.documentRevision.documentMasterWorkspaceId = :workspaceId")
                 .setParameter("workspaceId", workspaceId).executeUpdate();
+
+        i = 0;
+        while (true) {
+        List<ProductInstanceIteration> productInstanceIterations =
+                em.createQuery("SELECT pii FROM ProductInstanceIteration pii WHERE pii.productInstanceMaster.instanceOf.workspace = :workspace", ProductInstanceIteration.class)
+                    .setParameter("workspace", workspace)
+                    .setFirstResult(i)
+                    .setMaxResults(batchSize)
+                    .getResultList();
+            if (productInstanceIterations == null || productInstanceIterations.isEmpty()) {
+                break;
+            }
+            for (ProductInstanceIteration p : productInstanceIterations) {
+                for (DocumentLink documentLink : p.getLinkedDocuments()) {
+                    documentLink.removeTargetDocument();
+                }
+                p.setLinkedDocuments(new HashSet<>());
+                for (PathDataMaster pathDataMaster : p.getPathDataMasterList()) {
+                    for (PathDataIteration p2 : pathDataMaster.getPathDataIterations()) {
+                        for (DocumentLink documentLink : p2.getLinkedDocuments()) {
+                            documentLink.removeTargetDocument();
+                        }
+                        p2.setLinkedDocuments(new HashSet<>());
+                    }
+                }
+            }
+            em.flush();
+            em.clear();
+            i += batchSize;
+        }
+
+        // PathDatas
+        em.createQuery("DELETE FROM PathDataIteration pdi " +
+            "where pdi.pathDataMaster IN (" +
+            "SELECT pdm FROM ProductInstanceIteration pii, PathDataMaster pdm " +
+            "WHERE pdm = pii.pathDataMasterList " +
+            "AND pii.productInstanceMaster.instanceOf.workspace = :workspace" +
+            ")")
+            .setParameter("workspace", workspace).executeUpdate();
+        em.createQuery("DELETE FROM PathDataMaster pdm " +
+            "where pdm IN (" +
+            "SELECT pdm2 FROM ProductInstanceIteration pii, PathDataMaster pdm2 " +
+            "WHERE pdm2 = pii.pathDataMasterList " +
+            "AND pii.productInstanceMaster.instanceOf.workspace = :workspace" +
+            ")")
+            .setParameter("workspace", workspace).executeUpdate();
+
         // ProductInstances
         em.createQuery("DELETE FROM ProductInstanceIteration pii where pii.productInstanceMaster.instanceOf.workspace = :workspace")
                 .setParameter("workspace", workspace).executeUpdate();
@@ -173,6 +228,7 @@ public class WorkspaceDAO {
         EffectivityDAO effectivityDAO = new EffectivityDAO(em);
         effectivityDAO.removeEffectivityConstraints(workspaceId);
         em.flush();
+        em.clear();
 
         // ConfigurationItem
         em.createQuery("DELETE FROM ConfigurationItem c where c.workspace = :workspace")
@@ -210,26 +266,53 @@ public class WorkspaceDAO {
         em.createQuery("DELETE FROM Milestone m where m.workspace = :workspace")
                 .setParameter("workspace", workspace).executeUpdate();
 
-        // Clear all document links ...
-        List<DocumentIteration> documentsIteration =
-                em.createQuery("SELECT d FROM DocumentIteration d WHERE d.documentRevision.documentMaster.workspace = :workspace", DocumentIteration.class)
-                        .setParameter("workspace", workspace).getResultList();
-
-        List<PartIteration> partsIteration =
-                em.createQuery("SELECT p FROM PartIteration p WHERE p.partRevision.partMaster.workspace = :workspace", PartIteration.class)
-                        .setParameter("workspace", workspace).getResultList();
-
-        for (DocumentIteration d : documentsIteration) {
-            d.setLinkedDocuments(new HashSet<>());
-        }
-        for (PartIteration p : partsIteration) {
-            p.setLinkedDocuments(new HashSet<>());
-            for (PartUsageLink pul : p.getComponents()) {
-                pul.setSubstitutes(new LinkedList<>());
+        i = 0;
+        while (true) {
+            List<DocumentIteration> documentIterations =
+                    em.createQuery("SELECT d FROM DocumentIteration d WHERE d.documentRevision.partMaster.workspace = :workspace", DocumentIteration.class)
+                            .setParameter("workspace", workspace)
+                            .setFirstResult(i)
+                            .setMaxResults(batchSize)
+                            .getResultList();
+            if (documentIterations == null || documentIterations.isEmpty()) {
+                break;
             }
-            p.setComponents(new LinkedList<>());
+            for (DocumentIteration d : documentIterations) {
+                for (DocumentLink documentLink : d.getLinkedDocuments()) {
+                    documentLink.removeTargetDocument();
+                }
+                d.setLinkedDocuments(new HashSet<>());
+            }
+            em.flush();
+            em.clear();
+            i += batchSize;
         }
-        em.flush();
+
+        i = 0;
+        while (true) {
+            List<PartIteration> partIterations =
+                    em.createQuery("SELECT p FROM PartIteration p WHERE p.partRevision.partMaster.workspace = :workspace", PartIteration.class)
+                        .setParameter("workspace", workspace)
+                        .setFirstResult(i)
+                        .setMaxResults(batchSize)
+                        .getResultList();
+            if (partIterations == null || partIterations.isEmpty()) {
+                break;
+            }
+            for (PartIteration p : partIterations) {
+                for (DocumentLink documentLink : p.getLinkedDocuments()) {
+                      documentLink.removeTargetDocument();
+                }
+                p.setLinkedDocuments(new HashSet<>());
+                for (PartUsageLink pul : p.getComponents()) {
+                    pul.setSubstitutes(new LinkedList<>());
+                }
+                p.setComponents(new LinkedList<>());
+            }
+            em.flush();
+            em.clear();
+            i += batchSize;
+        }
 
         // Clear all part substitute links
         em.createQuery("DELETE FROM PartSubstituteLink psl WHERE psl.substitute.workspace = :workspace")
@@ -245,19 +328,41 @@ public class WorkspaceDAO {
         em.flush();
 
         // remove documents
-        documentsIteration.stream()
-                .map(documentIteration -> documentIteration.getDocumentRevision().getDocumentMaster())
-                .distinct()
-                .forEach(em::remove);
-        em.flush();
+        while (true) {
+            List<DocumentMaster> documentMasters =
+                    em.createQuery("SELECT d FROM DocumentMaster d WHERE d.workspace = :workspace", DocumentMaster.class)
+                            .setParameter("workspace", workspace)
+                            .setFirstResult(0)
+                            .setMaxResults(batchSize)
+                            .getResultList();
+            if (documentMasters == null || documentMasters.isEmpty()) {
+                break;
+            }
+            for (DocumentMaster documentMaster : documentMasters) {
+                em.remove(documentMaster);
+            }
+            em.flush();
+            em.clear();
+        }
 
         // remove parts
-        partsIteration.stream()
-                .map(partIteration -> partIteration.getPartRevision().getPartMaster())
-                .distinct()
-                .forEach(em::remove);
+        while (true) {
+            List<PartMaster> partMasters =
+                em.createQuery("SELECT p FROM PartMaster p WHERE p.workspace = :workspace", PartMaster.class)
+                        .setParameter("workspace", workspace)
+                        .setFirstResult(0)
+                        .setMaxResults(batchSize)
+                        .getResultList();
+            if (partMasters == null || partMasters.isEmpty()) {
+                break;
+            }
+            for (PartMaster partMaster : partMasters) {
+                em.remove(partMaster);
+            }
+            em.flush();
+            em.clear();
+        }
 
-        em.flush();
 
         // Delete folders
         em.createQuery("UPDATE Folder f SET f.parentFolder = NULL WHERE f.parentFolder.completePath = :workspaceId OR f.parentFolder.completePath LIKE :pathToMatch")
@@ -290,8 +395,8 @@ public class WorkspaceDAO {
         for (WorkspaceWorkflow ww : workspaceWorkflowList) {
             em.remove(ww);
         }
-
         em.flush();
+        em.clear();
 
         // Tags subscriptions
         em.createQuery("DELETE FROM TagUserSubscription t where t.tag.workspace = :workspace")
@@ -327,6 +432,10 @@ public class WorkspaceDAO {
         em.createQuery("DELETE FROM WorkspaceUserMembership w where w.workspace = :workspace")
                 .setParameter("workspace", workspace).executeUpdate();
 
+        // ACL User groups
+        em.createQuery("DELETE FROM ACLUserGroupEntry acl where acl.principal.workspace = :workspace")
+                .setParameter("workspace", workspace).executeUpdate();
+
         // User groups
         em.createQuery("DELETE FROM UserGroup u where u.workspace = :workspace")
                 .setParameter("workspace", workspace).executeUpdate();
@@ -340,9 +449,15 @@ public class WorkspaceDAO {
             em.flush();
             em.remove(u);
         }
+        em.flush();
+        em.clear();
 
         // Imports
         em.createQuery("DELETE FROM Import i where i.user.workspace = :workspace")
+                .setParameter("workspace", workspace).executeUpdate();
+
+        // ACL Users
+        em.createQuery("DELETE FROM ACLUserEntry acl where acl.principal.workspace = :workspace")
                 .setParameter("workspace", workspace).executeUpdate();
 
         // Users
@@ -362,7 +477,11 @@ public class WorkspaceDAO {
         // WorkspaceFrontOptions
         em.createQuery("DELETE FROM WorkspaceFrontOptions wo where wo.workspace = :workspace")
                 .setParameter("workspace", workspace).executeUpdate();
-       
+
+        //If em has been cleared workspace is not attached anymore and thus remove will fail
+        if (!em.contains(workspace)) {
+            workspace = em.merge(workspace);
+        }
         // Finally delete the workspace
         em.remove(workspace);
 
@@ -370,6 +489,7 @@ public class WorkspaceDAO {
         storageManager.deleteWorkspaceFolder(workspaceId);
 
         em.flush();
+        em.clear();
 
     }
 
