@@ -150,7 +150,7 @@ public class DocumentTemplateBinaryResource {
         InputStream binaryContentInputStream = null;
 
         // Set to false because templates are never historized
-        boolean isCached = false;
+        boolean isToBeCached = false;
 
         try {
             if (output != null && !output.isEmpty()) {
@@ -161,7 +161,7 @@ public class DocumentTemplateBinaryResource {
             } else {
                 binaryContentInputStream = storageManager.getBinaryResourceInputStream(binaryResource);
             }
-            return BinaryResourceDownloadResponseBuilder.prepareResponse(binaryContentInputStream, binaryResourceDownloadMeta, range, isCached);
+            return BinaryResourceDownloadResponseBuilder.prepareResponse(binaryContentInputStream, binaryResourceDownloadMeta, range, isToBeCached);
         } catch (StorageException | FileConversionException e) {
             Streams.close(binaryContentInputStream);
             return BinaryResourceDownloadResponseBuilder.downloadError(e, fullName);

@@ -212,15 +212,12 @@ public class DocumentBinaryResource {
 
         InputStream binaryContentInputStream = null;
 
-        DocumentIteration lastIteration = documentService.getDocumentRevision(new DocumentIterationKey(workspaceId, documentId, version, iteration).getDocumentRevision()).getLastIteration();
+        DocumentIteration workingIteration = documentService.getDocumentRevision(new DocumentIterationKey(workspaceId, documentId, version, iteration).getDocumentRevision()).getWorkingIteration();
 
-        Set<BinaryResource> binaryresources = lastIteration.getAttachedFiles();
-
-        boolean isCheckedOut = documentService.getDocumentRevision(new DocumentIterationKey(workspaceId, documentId, version, iteration).getDocumentRevision()).isCheckedOut();
-
-        boolean isWorkingCopy = binaryresources.contains(binaryResource) && isCheckedOut;
-
-        boolean isCached = !isWorkingCopy;
+        boolean isToBeCached = false;
+        if(workingIteration == null){
+            isToBeCached = true;
+        }
 
         try {
 
@@ -233,7 +230,7 @@ public class DocumentBinaryResource {
                 binaryContentInputStream = storageManager.getBinaryResourceInputStream(binaryResource);
             }
 
-            return BinaryResourceDownloadResponseBuilder.prepareResponse(binaryContentInputStream, binaryResourceDownloadMeta, range, isCached);
+            return BinaryResourceDownloadResponseBuilder.prepareResponse(binaryContentInputStream, binaryResourceDownloadMeta, range, isToBeCached);
 
         } catch (StorageException | FileConversionException e) {
             Streams.close(binaryContentInputStream);

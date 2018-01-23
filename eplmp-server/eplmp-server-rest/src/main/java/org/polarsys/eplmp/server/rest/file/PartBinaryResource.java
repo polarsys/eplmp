@@ -298,15 +298,12 @@ public class PartBinaryResource {
             return rb.build();
         }
 
-        PartIteration lastIteration = productService.getPartRevision(new PartIterationKey(workspaceId, partNumber, version, iteration).getPartRevision()).getLastIteration();
+        PartIteration workingIteration = productService.getPartRevision(new PartIterationKey(workspaceId, partNumber, version, iteration).getPartRevision()).getWorkingIteration();
 
-        Set<BinaryResource> binaryresources = lastIteration.getAttachedFiles();
-
-        boolean isCheckedOut = productService.getPartRevision(new PartIterationKey(workspaceId, partNumber, version, iteration).getPartRevision()).isCheckedOut();
-
-        boolean isWorkingCopy = binaryresources.contains(binaryResource) && isCheckedOut;
-
-        boolean isCached = !isWorkingCopy;
+        boolean isToBeCached = false;
+        if(workingIteration == null){
+            isToBeCached = true;
+        }
 
         try {
             if (ATTACHED_FILES_SUBTYPE.equals(subType) && output != null && !output.isEmpty()) {
@@ -317,7 +314,7 @@ public class PartBinaryResource {
             } else {
                 binaryContentInputStream = storageManager.getBinaryResourceInputStream(binaryResource);
             }
-            return BinaryResourceDownloadResponseBuilder.prepareResponse(binaryContentInputStream, binaryResourceDownloadMeta, range, isCached);
+            return BinaryResourceDownloadResponseBuilder.prepareResponse(binaryContentInputStream, binaryResourceDownloadMeta, range, isToBeCached);
         } catch (StorageException | FileConversionException e) {
             return BinaryResourceDownloadResponseBuilder.downloadError(e, fullName);
         }

@@ -44,11 +44,11 @@ public class BinaryResourceDownloadResponseBuilder {
      * @param binaryContentInputStream   The stream of the binary content to download.
      * @param binaryResourceDownloadMeta The header parameters for the binary content download.
      * @param range                      The string of the queried range. Null if no range are specified
-     * @param isCached
+     * @param isToBeCached               Boolean to set whether we should define maxage of cache control
      * @return A response builder with the header & the content.
      * @throws RequestedRangeNotSatisfiableException If the range is not satisfiable.
      */
-    public static Response prepareResponse(InputStream binaryContentInputStream, BinaryResourceDownloadMeta binaryResourceDownloadMeta, String range, boolean isCached)
+    public static Response prepareResponse(InputStream binaryContentInputStream, BinaryResourceDownloadMeta binaryResourceDownloadMeta, String range, boolean isToBeCached)
             throws RequestedRangeNotSatisfiableException {
 
         Response.ResponseBuilder responseBuilder;
@@ -68,7 +68,7 @@ public class BinaryResourceDownloadResponseBuilder {
             responseBuilder = prepareStreamingDownloadResponse(binaryResourceDownloadMeta, binaryContentInputStream, range);
         }
 
-        responseBuilder = applyCachePolicyToResponse(responseBuilder, binaryResourceDownloadMeta.getETag(), binaryResourceDownloadMeta.getLastModified(), isCached);
+        responseBuilder = applyCachePolicyToResponse(responseBuilder, binaryResourceDownloadMeta.getETag(), binaryResourceDownloadMeta.getLastModified(), isToBeCached);
         return responseBuilder.build();
     }
 
@@ -124,12 +124,12 @@ public class BinaryResourceDownloadResponseBuilder {
      * @param response     The response builder.
      * @param eTag         The ETag of the resource.
      * @param lastModified The last modified date of the resource.
-     * @param isCached
+     * @param isToBeCached     Boolean to set whether we should define maxage of cache control
      * @return The response builder with the cache policy.
      */
-    private static Response.ResponseBuilder applyCachePolicyToResponse(Response.ResponseBuilder response, EntityTag eTag, Date lastModified, boolean isCached) {
+    private static Response.ResponseBuilder applyCachePolicyToResponse(Response.ResponseBuilder response, EntityTag eTag, Date lastModified, boolean isToBeCached) {
 
-        if (isCached == true) {
+        if (isToBeCached) {
             CacheControl cc = new CacheControl();
             cc.setMaxAge(CACHE_SECOND);
             cc.setNoTransform(false);

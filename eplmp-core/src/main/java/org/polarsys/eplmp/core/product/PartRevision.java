@@ -366,7 +366,16 @@ public class PartRevision implements Serializable, Comparable<PartRevision> {
             return 0;
         }
     }
-    
+
+    public PartIteration getWorkingIteration(){
+
+        if(isCheckedOut()){
+            return getLastIteration();
+        }else{
+            return null;
+        }
+    }
+
     public PartIteration removeLastIteration() {
         int index = partIterations.size()-1;
         if(index < 0) {

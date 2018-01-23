@@ -243,6 +243,15 @@ public class DocumentIteration implements Serializable, FileHolder, Comparable<D
         return documentRevision==null ? "" : this.documentRevision.getTitle();
     }
 
+    public boolean isWorkingCopy(){
+
+        DocumentRevision documentRevision = getDocumentRevision();
+        if(documentRevision.getLastIteration() != null){
+            return documentRevision.isCheckedOut() && documentRevision.getLastIteration().getIteration() == getIteration();
+        }
+        return false;
+    }
+
     @Override
     public String toString() {
         return documentRevision + "-" + iteration;
