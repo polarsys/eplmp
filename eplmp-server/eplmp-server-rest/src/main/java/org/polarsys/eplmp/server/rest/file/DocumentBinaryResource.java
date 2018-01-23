@@ -52,6 +52,7 @@ import java.security.NoSuchAlgorithmException;
 import java.text.Normalizer;
 import java.util.Collection;
 import java.util.Date;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -211,6 +212,16 @@ public class DocumentBinaryResource {
 
         InputStream binaryContentInputStream = null;
 
+        DocumentIteration lastIteration = documentService.getDocumentRevision(new DocumentIterationKey(workspaceId, documentId, version, iteration).getDocumentRevision()).getLastIteration();
+
+        Set<BinaryResource> binaryresources = lastIteration.getAttachedFiles();
+
+        boolean isCheckedOut = documentService.getDocumentRevision(new DocumentIterationKey(workspaceId, documentId, version, iteration).getDocumentRevision()).isCheckedOut();
+
+        boolean isWorkingCopy = binaryresources.contains(binaryResource) && isCheckedOut;
+
+        boolean isCached = !isWorkingCopy;
+
         try {
 
             if (output != null && !output.isEmpty()) {
@@ -222,7 +233,7 @@ public class DocumentBinaryResource {
                 binaryContentInputStream = storageManager.getBinaryResourceInputStream(binaryResource);
             }
 
-            return BinaryResourceDownloadResponseBuilder.prepareResponse(binaryContentInputStream, binaryResourceDownloadMeta, range);
+            return BinaryResourceDownloadResponseBuilder.prepareResponse(binaryContentInputStream, binaryResourceDownloadMeta, range, isCached);
 
         } catch (StorageException | FileConversionException e) {
             Streams.close(binaryContentInputStream);

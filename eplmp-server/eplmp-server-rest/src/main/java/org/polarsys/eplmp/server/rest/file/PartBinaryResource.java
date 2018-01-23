@@ -50,6 +50,7 @@ import java.security.NoSuchAlgorithmException;
 import java.text.Normalizer;
 import java.util.Collection;
 import java.util.Date;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -296,6 +297,17 @@ public class PartBinaryResource {
         if (rb != null) {
             return rb.build();
         }
+
+        PartIteration lastIteration = productService.getPartRevision(new PartIterationKey(workspaceId, partNumber, version, iteration).getPartRevision()).getLastIteration();
+
+        Set<BinaryResource> binaryresources = lastIteration.getAttachedFiles();
+
+        boolean isCheckedOut = productService.getPartRevision(new PartIterationKey(workspaceId, partNumber, version, iteration).getPartRevision()).isCheckedOut();
+
+        boolean isWorkingCopy = binaryresources.contains(binaryResource) && isCheckedOut;
+
+        boolean isCached = !isWorkingCopy;
+
         try {
             if (ATTACHED_FILES_SUBTYPE.equals(subType) && output != null && !output.isEmpty()) {
                 binaryContentInputStream = getConvertedBinaryResource(binaryResource, output);
@@ -305,7 +317,7 @@ public class PartBinaryResource {
             } else {
                 binaryContentInputStream = storageManager.getBinaryResourceInputStream(binaryResource);
             }
-            return BinaryResourceDownloadResponseBuilder.prepareResponse(binaryContentInputStream, binaryResourceDownloadMeta, range);
+            return BinaryResourceDownloadResponseBuilder.prepareResponse(binaryContentInputStream, binaryResourceDownloadMeta, range, isCached);
         } catch (StorageException | FileConversionException e) {
             return BinaryResourceDownloadResponseBuilder.downloadError(e, fullName);
         }

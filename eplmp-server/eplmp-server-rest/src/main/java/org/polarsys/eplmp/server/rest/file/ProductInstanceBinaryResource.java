@@ -13,6 +13,7 @@ package org.polarsys.eplmp.server.rest.file;
 
 import org.polarsys.eplmp.core.common.BinaryResource;
 import org.polarsys.eplmp.core.configuration.ProductInstanceIterationKey;
+import org.polarsys.eplmp.core.configuration.ProductInstanceMasterKey;
 import org.polarsys.eplmp.core.exceptions.*;
 import org.polarsys.eplmp.core.exceptions.NotAllowedException;
 import org.polarsys.eplmp.core.security.UserGroupMapping;
@@ -149,9 +150,16 @@ public class ProductInstanceBinaryResource {
             return rb.build();
         }
         InputStream binaryContentInputStream = null;
+
+        ProductInstanceMasterKey productInstanceMasterKey = new ProductInstanceMasterKey(serialNumber, workspaceId, configurationItemId);
+
+        boolean workingCopy = productInstanceManagerLocal.getProductInstanceIterations(productInstanceMasterKey).size() == iteration;
+
+        boolean isCached = !workingCopy;
+
         try {
             binaryContentInputStream = storageManager.getBinaryResourceInputStream(binaryResource);
-            return BinaryResourceDownloadResponseBuilder.prepareResponse(binaryContentInputStream, binaryResourceDownloadMeta, range);
+            return BinaryResourceDownloadResponseBuilder.prepareResponse(binaryContentInputStream, binaryResourceDownloadMeta, range, isCached);
         } catch (StorageException e) {
             Streams.close(binaryContentInputStream);
             return BinaryResourceDownloadResponseBuilder.downloadError(e, fullName);
@@ -238,9 +246,13 @@ public class ProductInstanceBinaryResource {
         }
 
         InputStream binaryContentInputStream = null;
+
+        // TODO : It seems this method is not used anywhere (to be confirmed). This variable is set only for refactoring consideration
+        boolean isCached = false;
+
         try {
             binaryContentInputStream = storageManager.getBinaryResourceInputStream(binaryResource);
-            return BinaryResourceDownloadResponseBuilder.prepareResponse(binaryContentInputStream, binaryResourceDownloadMeta, range);
+            return BinaryResourceDownloadResponseBuilder.prepareResponse(binaryContentInputStream, binaryResourceDownloadMeta, range, isCached);
         } catch (StorageException e) {
             Streams.close(binaryContentInputStream);
             return BinaryResourceDownloadResponseBuilder.downloadError(e, fullName);
@@ -285,9 +297,12 @@ public class ProductInstanceBinaryResource {
 
         InputStream binaryContentInputStream = null;
 
+        //TODO set conditions for not caching when working copy is requested
+        boolean isCached = false;
+
         try {
             binaryContentInputStream = storageManager.getBinaryResourceInputStream(binaryResource);
-            return BinaryResourceDownloadResponseBuilder.prepareResponse(binaryContentInputStream, binaryResourceDownloadMeta, range);
+            return BinaryResourceDownloadResponseBuilder.prepareResponse(binaryContentInputStream, binaryResourceDownloadMeta, range, isCached);
         } catch (StorageException e) {
             Streams.close(binaryContentInputStream);
             return BinaryResourceDownloadResponseBuilder.downloadError(e, fullName);

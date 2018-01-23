@@ -44,10 +44,11 @@ public class BinaryResourceDownloadResponseBuilder {
      * @param binaryContentInputStream   The stream of the binary content to download.
      * @param binaryResourceDownloadMeta The header parameters for the binary content download.
      * @param range                      The string of the queried range. Null if no range are specified
+     * @param isCached
      * @return A response builder with the header & the content.
      * @throws RequestedRangeNotSatisfiableException If the range is not satisfiable.
      */
-    public static Response prepareResponse(InputStream binaryContentInputStream, BinaryResourceDownloadMeta binaryResourceDownloadMeta, String range)
+    public static Response prepareResponse(InputStream binaryContentInputStream, BinaryResourceDownloadMeta binaryResourceDownloadMeta, String range, boolean isCached)
             throws RequestedRangeNotSatisfiableException {
 
         Response.ResponseBuilder responseBuilder;
@@ -67,7 +68,7 @@ public class BinaryResourceDownloadResponseBuilder {
             responseBuilder = prepareStreamingDownloadResponse(binaryResourceDownloadMeta, binaryContentInputStream, range);
         }
 
-        responseBuilder = applyCachePolicyToResponse(responseBuilder, binaryResourceDownloadMeta.getETag(), binaryResourceDownloadMeta.getLastModified());
+        responseBuilder = applyCachePolicyToResponse(responseBuilder, binaryResourceDownloadMeta.getETag(), binaryResourceDownloadMeta.getLastModified(), isCached);
         return responseBuilder.build();
     }
 
@@ -123,20 +124,25 @@ public class BinaryResourceDownloadResponseBuilder {
      * @param response     The response builder.
      * @param eTag         The ETag of the resource.
      * @param lastModified The last modified date of the resource.
+     * @param isCached
      * @return The response builder with the cache policy.
      */
-    private static Response.ResponseBuilder applyCachePolicyToResponse(Response.ResponseBuilder response, EntityTag eTag, Date lastModified) {
-        CacheControl cc = new CacheControl();
-        cc.setMaxAge(CACHE_SECOND);
-        cc.setNoTransform(false);
-        cc.setPrivate(false);
+    private static Response.ResponseBuilder applyCachePolicyToResponse(Response.ResponseBuilder response, EntityTag eTag, Date lastModified, boolean isCached) {
 
-        Calendar expirationDate = Calendar.getInstance();
-        expirationDate.add(Calendar.SECOND, CACHE_SECOND);
+        if (isCached == true) {
+            CacheControl cc = new CacheControl();
+            cc.setMaxAge(CACHE_SECOND);
+            cc.setNoTransform(false);
+            cc.setPrivate(false);
 
-        return response.cacheControl(cc)
-                .expires(expirationDate.getTime())
-                .lastModified(lastModified)
+            Calendar expirationDate = Calendar.getInstance();
+            expirationDate.add(Calendar.SECOND, CACHE_SECOND);
+            response.cacheControl(cc)
+                    .expires(expirationDate.getTime());
+
+        }
+
+        return response.lastModified(lastModified)
                 .tag(eTag);
     }
 
