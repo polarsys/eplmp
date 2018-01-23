@@ -148,12 +148,18 @@
         <finalName>${project.artifactId}</finalName>
     </build>
 
-    <!-- Default mode-->
+    <!-- Customize PU properties -->
+
+    <!--Default values-->
     <properties>
-        <clusterPropertiesInclude><![CDATA[]]></clusterPropertiesInclude>
+        <clusterPropertiesInclude><![CDATA[
+        ]]></clusterPropertiesInclude>
+        <sharedCacheModeInclude><![CDATA[
+            <property name="javax.persistence.sharedCache.mode" value="ALL"/>
+            ]]></sharedCacheModeInclude>
     </properties>
 
-    <!-- Cluster mode-->
+    <!--Override with profiles-->
     <profiles>
         <profile>
             <id>cluster</id>
@@ -163,6 +169,15 @@
             <property name="eclipselink.cache.coordination.jms.topic" value="jms/CacheCoordinationTopic" />
             <property name="eclipselink.cache.coordination.jms.factory" value="jms/CacheCoordinationFactory" />
             ]]></clusterPropertiesInclude>
+            </properties>
+        </profile>
+
+        <profile>
+            <id>no-shared-cache</id>
+            <properties>
+                <sharedCacheModeInclude><![CDATA[
+            <property name="javax.persistence.sharedCache.mode" value="NONE"/>
+            ]]></sharedCacheModeInclude>
             </properties>
         </profile>
     </profiles>
