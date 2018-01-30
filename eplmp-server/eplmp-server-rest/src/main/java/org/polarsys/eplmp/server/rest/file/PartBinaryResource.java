@@ -1,16 +1,20 @@
 /*******************************************************************************
-  * Copyright (c) 2017 DocDoku.
-  * All rights reserved. This program and the accompanying materials
-  * are made available under the terms of the Eclipse Public License v1.0
-  * which accompanies this distribution, and is available at
-  * http://www.eclipse.org/legal/epl-v10.html
-  *
-  * Contributors:
-  *    DocDoku - initial API and implementation
-  *******************************************************************************/
+ * Copyright (c) 2017 DocDoku.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *    DocDoku - initial API and implementation
+ *******************************************************************************/
 package org.polarsys.eplmp.server.rest.file;
 
 import org.polarsys.eplmp.core.common.BinaryResource;
+import org.polarsys.eplmp.core.document.DocumentIteration;
+import org.polarsys.eplmp.core.document.DocumentIterationKey;
+import org.polarsys.eplmp.core.document.DocumentRevision;
+import org.polarsys.eplmp.core.document.DocumentRevisionKey;
 import org.polarsys.eplmp.core.exceptions.*;
 import org.polarsys.eplmp.core.exceptions.NotAllowedException;
 import org.polarsys.eplmp.core.product.PartIteration;
@@ -19,6 +23,7 @@ import org.polarsys.eplmp.core.product.PartRevision;
 import org.polarsys.eplmp.core.product.PartRevisionKey;
 import org.polarsys.eplmp.core.security.UserGroupMapping;
 import org.polarsys.eplmp.core.services.*;
+import org.polarsys.eplmp.core.sharing.SharedDocument;
 import org.polarsys.eplmp.core.sharing.SharedEntity;
 import org.polarsys.eplmp.core.sharing.SharedPart;
 import org.polarsys.eplmp.core.util.FileIO;
@@ -242,6 +247,7 @@ public class PartBinaryResource {
         String decodedFileName = fileName;
         InputStream binaryContentInputStream;
 
+        boolean isWorkingCopy = false;
         try {
             decodedFileName = URLDecoder.decode(fileName, UTF8_ENCODING);
         } catch (UnsupportedEncodingException e) {
@@ -271,22 +277,46 @@ public class PartBinaryResource {
             }
 
             binaryResource = publicEntityManager.getBinaryResourceForSharedEntity(fullName);
+            // sharedEntity is always a SharedPart
+
+            if (sharedEntity instanceof SharedPart) {
+
+                SharedPart part = (SharedPart) sharedEntity;
+
+                PartRevision partRevision = part.getPartRevision();
+
+                PartIteration workingIteration = partRevision.getWorkingIteration();
+
+                isWorkingCopy = partRevision.getLastIteration().equals(workingIteration);
+            }
 
         } else {
             // Check access right
 
             if (accessToken != null && !accessToken.isEmpty()) {
                 String decodedEntityKey = JWTokenFactory.validateEntityToken(authConfig.getJWTKey(), accessToken);
-                boolean tokenValid = new PartRevisionKey(workspaceId, partNumber, version).toString().equals(decodedEntityKey);
+                PartRevisionKey partRevisionKey = new PartRevisionKey(workspaceId, partNumber, version);
+                boolean tokenValid = partRevisionKey.toString().equals(decodedEntityKey);
                 if (!tokenValid) {
                     throw new SharedResourceAccessException();
                 }
                 binaryResource = publicEntityManager.getBinaryResourceForSharedEntity(fullName);
+                PartRevision partRevision = publicEntityManager.getPublicPartRevision(partRevisionKey);
+                if (partRevision == null) {
+                    throw new SharedResourceAccessException();
+                }
+                PartIteration workingIteration = partRevision.getWorkingIteration();
+                isWorkingCopy = partRevision.getLastIteration().equals(workingIteration);
             } else {
                 if (!canAccess(new PartIterationKey(workspaceId, partNumber, version, iteration))) {
                     throw new SharedResourceAccessException();
                 }
                 binaryResource = getBinaryResource(fullName);
+                PartRevision partRevision = productService.getPartRevision(new PartIterationKey(workspaceId, partNumber, version, iteration).getPartRevision());
+                PartIteration workingIteration = partRevision.getWorkingIteration();
+                if(workingIteration != null){
+                    isWorkingCopy = workingIteration.getIteration() == iteration;
+                }
             }
         }
 
@@ -298,12 +328,7 @@ public class PartBinaryResource {
             return rb.build();
         }
 
-        PartIteration workingIteration = productService.getPartRevision(new PartIterationKey(workspaceId, partNumber, version, iteration).getPartRevision()).getWorkingIteration();
-
-        boolean isToBeCached = false;
-        if(workingIteration == null){
-            isToBeCached = true;
-        }
+        boolean isToBeCached = !isWorkingCopy;
 
         try {
             if (ATTACHED_FILES_SUBTYPE.equals(subType) && output != null && !output.isEmpty()) {
@@ -328,6 +353,7 @@ public class PartBinaryResource {
      * @return The binary resource stream in the wanted output
      * @throws org.polarsys.eplmp.server.rest.exceptions.FileConversionException
      */
+
     private InputStream getConvertedBinaryResource(BinaryResource binaryResource, String outputFormat) throws FileConversionException {
         try {
             return onDemandConverterManager.getPartConvertedResource(outputFormat, binaryResource);

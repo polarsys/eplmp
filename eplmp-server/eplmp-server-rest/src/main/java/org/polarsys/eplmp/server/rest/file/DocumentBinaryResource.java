@@ -1,13 +1,13 @@
 /*******************************************************************************
-  * Copyright (c) 2017 DocDoku.
-  * All rights reserved. This program and the accompanying materials
-  * are made available under the terms of the Eclipse Public License v1.0
-  * which accompanies this distribution, and is available at
-  * http://www.eclipse.org/legal/epl-v10.html
-  *
-  * Contributors:
-  *    DocDoku - initial API and implementation
-  *******************************************************************************/
+ * Copyright (c) 2017 DocDoku.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *    DocDoku - initial API and implementation
+ *******************************************************************************/
 package org.polarsys.eplmp.server.rest.file;
 
 import org.polarsys.eplmp.core.common.BinaryResource;
@@ -17,6 +17,9 @@ import org.polarsys.eplmp.core.document.DocumentRevision;
 import org.polarsys.eplmp.core.document.DocumentRevisionKey;
 import org.polarsys.eplmp.core.exceptions.*;
 import org.polarsys.eplmp.core.exceptions.NotAllowedException;
+import org.polarsys.eplmp.core.product.PartIteration;
+import org.polarsys.eplmp.core.product.PartIterationKey;
+import org.polarsys.eplmp.core.product.PartRevision;
 import org.polarsys.eplmp.core.security.UserGroupMapping;
 import org.polarsys.eplmp.core.services.*;
 import org.polarsys.eplmp.core.sharing.SharedDocument;
@@ -165,6 +168,8 @@ public class DocumentBinaryResource {
 
         String fullName = workspaceId + "/documents/" + FileIO.encode(documentId) + "/" + version + "/" + iteration + "/" + decodedFileName;
 
+        boolean isWorkingCopy = false;
+
         if (uuid != null && !uuid.isEmpty()) {
             SharedEntity sharedEntity = shareService.findSharedEntityForGivenUUID(uuid);
 
@@ -183,23 +188,49 @@ public class DocumentBinaryResource {
 
             binaryResource = publicEntityManager.getBinaryResourceForSharedEntity(fullName);
 
+            // sharedEntity is always a SharedDocument
+
+            if (sharedEntity instanceof SharedDocument) {
+
+                SharedDocument document = (SharedDocument) sharedEntity;
+
+                DocumentRevision documentRevision = document.getDocumentRevision();
+
+                DocumentIteration workingIteration = documentRevision.getWorkingIteration();
+
+                isWorkingCopy = documentRevision.getLastIteration().equals(workingIteration);
+
+            }
+
         } else {
             // Check access right
 
             if (accessToken != null && !accessToken.isEmpty()) {
                 String decodedEntityKey = JWTokenFactory.validateEntityToken(authConfig.getJWTKey(), accessToken);
-                boolean tokenValid = new DocumentRevisionKey(workspaceId, documentId, version).toString().equals(decodedEntityKey);
+                DocumentRevisionKey documentRevisionKey = new DocumentRevisionKey(workspaceId, documentId, version);
+                boolean tokenValid = documentRevisionKey.toString().equals(decodedEntityKey);
                 if (!tokenValid) {
                     throw new SharedResourceAccessException();
                 }
                 binaryResource = publicEntityManager.getBinaryResourceForSharedEntity(fullName);
+                DocumentRevision documentRevision = publicEntityManager.getPublicDocumentRevision(documentRevisionKey);
+                if (documentRevision == null) {
+                    throw new SharedResourceAccessException();
+                }
+                DocumentIteration workingIteration = documentRevision.getWorkingIteration();
+                isWorkingCopy = documentRevision.getLastIteration().equals(workingIteration);
+
             } else {
                 if (!canAccess(new DocumentIterationKey(workspaceId, documentId, version, iteration))) {
                     throw new SharedResourceAccessException();
                 }
                 binaryResource = getBinaryResource(fullName);
+                DocumentRevision docRevision = documentService.getDocumentRevision(new DocumentIterationKey(workspaceId, documentId, version, iteration).getDocumentRevision());
+                DocumentIteration workingIteration = docRevision.getWorkingIteration();
+                if (workingIteration != null) {
+                    isWorkingCopy = workingIteration.getIteration() == iteration;
+                }
             }
-
         }
 
         BinaryResourceDownloadMeta binaryResourceDownloadMeta = new BinaryResourceDownloadMeta(binaryResource, output, type);
@@ -212,12 +243,7 @@ public class DocumentBinaryResource {
 
         InputStream binaryContentInputStream = null;
 
-        DocumentIteration workingIteration = documentService.getDocumentRevision(new DocumentIterationKey(workspaceId, documentId, version, iteration).getDocumentRevision()).getWorkingIteration();
-
-        boolean isToBeCached = false;
-        if(workingIteration == null){
-            isToBeCached = true;
-        }
+        boolean isToBeCached = !isWorkingCopy;
 
         try {
 

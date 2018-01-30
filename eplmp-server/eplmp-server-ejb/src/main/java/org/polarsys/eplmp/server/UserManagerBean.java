@@ -407,7 +407,7 @@ public class UserManagerBean implements IUserManagerLocal {
         return recoveryRequest;
     }
 
-    @RolesAllowed({UserGroupMapping.REGULAR_USER_ROLE_ID})
+    @RolesAllowed({UserGroupMapping.REGULAR_USER_ROLE_ID, UserGroupMapping.GUEST_ROLE_ID})
     @Override
     public User checkWorkspaceReadAccess(String pWorkspaceId) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, WorkspaceNotEnabledException {
         String login = contextManager.getCallerPrincipalLogin();

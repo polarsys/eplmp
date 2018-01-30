@@ -281,6 +281,19 @@ public class DocumentManagerBean implements IDocumentManagerLocal {
 
     }
 
+    @RolesAllowed({UserGroupMapping.REGULAR_USER_ROLE_ID, UserGroupMapping.GUEST_ROLE_ID})
+    @Override
+    public boolean isWorkingCopy(DocumentRevisionKey pDocRPK) throws WorkspaceNotFoundException, DocumentRevisionNotFoundException, UserNotFoundException, UserNotActiveException, WorkspaceNotEnabledException {
+        boolean isWorking = false;
+        User user = userManager.checkWorkspaceReadAccess(pDocRPK.getDocumentMaster().getWorkspace());
+        Locale userLocale = new Locale(user.getLanguage());
+        DocumentRevision docR = new DocumentRevisionDAO(userLocale, em).loadDocR(pDocRPK);
+        if(isCheckoutByUser(user, docR) && docR.getWorkingIteration() != null) {
+            isWorking = true;
+        }
+        return isWorking;
+     }
+
     @RolesAllowed({UserGroupMapping.REGULAR_USER_ROLE_ID})
     @Override
     public DocumentIteration findDocumentIterationByBinaryResource(BinaryResource pBinaryResource) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, WorkspaceNotEnabledException {
