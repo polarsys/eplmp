@@ -282,6 +282,7 @@ public class ExcelGenerator {
                     data.add(sb.toString());
                     break;
 
+
                 case QueryField.CTX_P2P_SOURCE:
                     Map<String, List<PartLinkList>> sources = row.getSources();
                     String sourcePartLinksAsString = Tools.getPartLinksAsExcelString(sources);
