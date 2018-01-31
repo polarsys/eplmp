@@ -362,6 +362,15 @@ public class PartIteration implements Serializable, FileHolder, Comparable<PartI
         this.instanceAttributeTemplates = instanceAttributeTemplates;
     }
 
+    public boolean isWorkingCopy(){
+
+        PartRevision partRevision = getPartRevision();
+        if(partRevision.getLastIteration() != null){
+            return partRevision.isCheckedOut() && partRevision.getLastIteration().getIteration() == getIteration();
+        }
+        return false;
+    }
+
     @Override
     public String toString() {
         return partRevision + "-" + iteration;
