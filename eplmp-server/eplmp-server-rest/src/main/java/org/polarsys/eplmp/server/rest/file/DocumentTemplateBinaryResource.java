@@ -8,7 +8,7 @@
   * Contributors:
   *    DocDoku - initial API and implementation
   *******************************************************************************/
-package org.polarsys.eplmp.server.rest.file.util;
+package org.polarsys.eplmp.server.rest.file;
 
 import org.polarsys.eplmp.core.common.BinaryResource;
 import org.polarsys.eplmp.core.document.DocumentMasterTemplateKey;
@@ -148,10 +148,6 @@ public class DocumentTemplateBinaryResource {
         }
 
         InputStream binaryContentInputStream = null;
-
-        // Set to false because templates are never historized
-        boolean isToBeCached = false;
-
         try {
             if (output != null && !output.isEmpty()) {
                 binaryContentInputStream = getConvertedBinaryResource(binaryResource, output);
@@ -161,7 +157,7 @@ public class DocumentTemplateBinaryResource {
             } else {
                 binaryContentInputStream = storageManager.getBinaryResourceInputStream(binaryResource);
             }
-            return BinaryResourceDownloadResponseBuilder.prepareResponse(binaryContentInputStream, binaryResourceDownloadMeta, range, isToBeCached);
+            return BinaryResourceDownloadResponseBuilder.prepareResponse(binaryContentInputStream, binaryResourceDownloadMeta, range);
         } catch (StorageException | FileConversionException e) {
             Streams.close(binaryContentInputStream);
             return BinaryResourceDownloadResponseBuilder.downloadError(e, fullName);
@@ -174,7 +170,7 @@ public class DocumentTemplateBinaryResource {
      * @param binaryResource The binary resource
      * @param output         The wanted output
      * @return The binary resource stream in the wanted output
-     * @throws FileConversionException
+     * @throws org.polarsys.eplmp.server.rest.exceptions.FileConversionException
      */
     private InputStream getConvertedBinaryResource(BinaryResource binaryResource, String output) throws FileConversionException {
         try {
