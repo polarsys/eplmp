@@ -213,10 +213,6 @@ public class DocumentBinaryResource {
                 if (documentRevision == null) {
                     throw new SharedResourceAccessException();
                 }
-                DocumentIteration workingIteration = documentRevision.getWorkingIteration();
-                if (workingIteration != null) {
-                    isWorkingCopy = workingIteration.getIteration() == iteration;
-                }
             } else {
                 if (!canAccess(new DocumentIterationKey(workspaceId, documentId, version, iteration))) {
                     throw new SharedResourceAccessException();

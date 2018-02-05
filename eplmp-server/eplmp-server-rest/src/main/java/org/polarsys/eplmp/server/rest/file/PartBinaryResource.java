@@ -299,10 +299,6 @@ public class PartBinaryResource {
                 if (partRevision == null) {
                     throw new SharedResourceAccessException();
                 }
-                PartIteration workingIteration = partRevision.getWorkingIteration();
-                if (workingIteration != null) {
-                    isWorkingCopy = workingIteration.getIteration() == iteration;
-                }
             } else {
                 if (!canAccess(new PartIterationKey(workspaceId, partNumber, version, iteration))) {
                     throw new SharedResourceAccessException();
