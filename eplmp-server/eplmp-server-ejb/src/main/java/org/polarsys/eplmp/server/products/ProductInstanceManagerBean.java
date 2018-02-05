@@ -884,6 +884,7 @@ public class ProductInstanceManagerBean implements IProductInstanceManagerLocal 
 
     }
 
+
     @RolesAllowed({UserGroupMapping.REGULAR_USER_ROLE_ID})
     @Override
     public PathDataMaster getPathDataByPathIdAndProductInstanceIteration(String workspaceId, int pathId, ProductInstanceIteration productInstanceIteration) throws PathDataMasterNotFoundException, UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, WorkspaceNotEnabledException {

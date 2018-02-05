@@ -192,7 +192,7 @@ public class DocumentBinaryResource {
 
                 DocumentRevision documentRevision = document.getDocumentRevision();
 
-                DocumentIteration workingIteration = documentRevision.getWorkingIteration();
+                DocumentIteration workingIteration = documentRevision.getWorkingCopy();
 
                 isWorkingCopy = documentRevision.getLastIteration().equals(workingIteration);
 
@@ -208,18 +208,14 @@ public class DocumentBinaryResource {
                 if (!tokenValid) {
                     throw new SharedResourceAccessException();
                 }
-                binaryResource = publicEntityManager.getBinaryResourceForSharedEntity(fullName);
-                DocumentRevision documentRevision = publicEntityManager.getPublicDocumentRevision(documentRevisionKey);
-                if (documentRevision == null) {
-                    throw new SharedResourceAccessException();
-                }
+             binaryResource = publicEntityManager.getBinaryResourceForSharedEntity(fullName);
             } else {
                 if (!canAccess(new DocumentIterationKey(workspaceId, documentId, version, iteration))) {
                     throw new SharedResourceAccessException();
                 }
                 binaryResource = getBinaryResource(fullName);
-                DocumentRevision docRevision = documentService.getDocumentRevision(new DocumentIterationKey(workspaceId, documentId, version, iteration).getDocumentRevision());
-                DocumentIteration workingIteration = docRevision.getWorkingIteration();
+                DocumentRevision docRevision = documentService.getDocumentRevision(new DocumentRevisionKey(workspaceId, documentId, version));
+                DocumentIteration workingIteration = docRevision.getWorkingCopy();
                 if (workingIteration != null) {
                     isWorkingCopy = workingIteration.getIteration() == iteration;
                 }

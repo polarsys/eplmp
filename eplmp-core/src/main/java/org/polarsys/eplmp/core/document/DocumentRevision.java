@@ -349,7 +349,7 @@ public class DocumentRevision implements Serializable, Comparable<DocumentRevisi
         }
     }
 
-    public DocumentIteration getWorkingIteration(){
+    public DocumentIteration getWorkingCopy(){
 
         if(isCheckedOut()){
             return getLastIteration();

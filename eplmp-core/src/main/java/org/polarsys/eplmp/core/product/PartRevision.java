@@ -367,7 +367,7 @@ public class PartRevision implements Serializable, Comparable<PartRevision> {
         }
     }
 
-    public PartIteration getWorkingIteration(){
+    public PartIteration getWorkingCopy(){
 
         if(isCheckedOut()){
             return getLastIteration();

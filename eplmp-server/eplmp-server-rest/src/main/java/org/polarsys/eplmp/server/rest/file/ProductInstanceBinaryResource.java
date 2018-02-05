@@ -49,6 +49,7 @@ import java.io.OutputStream;
 import java.net.URLEncoder;
 import java.text.Normalizer;
 import java.util.Collection;
+import java.util.List;
 
 /**
  * @author Asmae CHADID on 30/03/15.
@@ -301,7 +302,12 @@ public class ProductInstanceBinaryResource {
 
         ProductInstanceIterationKey productInstanceIterationKey = new ProductInstanceIterationKey(serialNumber, workspaceId, configurationItemId, iteration);
         ProductInstanceIteration productInstanceIteration = productInstanceManagerLocal.getProductInstanceIteration(productInstanceIterationKey).getProductInstanceMaster().getLastIteration();
-        PathDataMaster pathDataMaster = productInstanceManagerLocal.getPathDataByPathIdAndProductInstanceIteration(workspaceId, pathDataId, productInstanceIteration);
+        List<PathDataMaster> pathDataMasterList = productInstanceIteration.getPathDataMasterList();
+
+        PathDataMaster pathDataMaster = pathDataMasterList.stream()
+                .filter(x -> pathDataId == x.getId())
+                .findAny()
+                .orElse(null);
 
         boolean workingCopy = false;
         if(pathDataMaster != null && pathDataMaster.getLastIteration() != null){

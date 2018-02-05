@@ -279,7 +279,7 @@ public class PartBinaryResource {
 
                 PartRevision partRevision = part.getPartRevision();
 
-                PartIteration workingIteration = partRevision.getWorkingIteration();
+                PartIteration workingIteration = partRevision.getWorkingCopy();
 
                 isWorkingCopy = partRevision.getLastIteration().equals(workingIteration);
             }
@@ -304,8 +304,8 @@ public class PartBinaryResource {
                     throw new SharedResourceAccessException();
                 }
                 binaryResource = getBinaryResource(fullName);
-                PartRevision partRevision = productService.getPartRevision(new PartIterationKey(workspaceId, partNumber, version, iteration).getPartRevision());
-                PartIteration workingIteration = partRevision.getWorkingIteration();
+                PartRevision partRevision = productService.getPartRevision(new PartRevisionKey(workspaceId, partNumber, version));
+                PartIteration workingIteration = partRevision.getWorkingCopy();
                 if(workingIteration != null){
                     isWorkingCopy = workingIteration.getIteration() == iteration;
                 }
