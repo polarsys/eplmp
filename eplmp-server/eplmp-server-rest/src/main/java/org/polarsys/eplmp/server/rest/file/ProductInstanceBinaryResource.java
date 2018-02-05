@@ -11,8 +11,12 @@
 
 package org.polarsys.eplmp.server.rest.file;
 
+import io.swagger.annotations.*;
 import org.polarsys.eplmp.core.common.BinaryResource;
+import org.polarsys.eplmp.core.configuration.PathDataMaster;
+import org.polarsys.eplmp.core.configuration.ProductInstanceIteration;
 import org.polarsys.eplmp.core.configuration.ProductInstanceIterationKey;
+import org.polarsys.eplmp.core.configuration.ProductInstanceMasterKey;
 import org.polarsys.eplmp.core.exceptions.*;
 import org.polarsys.eplmp.core.exceptions.NotAllowedException;
 import org.polarsys.eplmp.core.security.UserGroupMapping;
@@ -25,7 +29,6 @@ import org.polarsys.eplmp.server.rest.exceptions.*;
 import org.polarsys.eplmp.server.rest.file.util.BinaryResourceDownloadMeta;
 import org.polarsys.eplmp.server.rest.file.util.BinaryResourceDownloadResponseBuilder;
 import org.polarsys.eplmp.server.rest.file.util.BinaryResourceUpload;
-import io.swagger.annotations.*;
 
 import javax.annotation.security.DeclareRoles;
 import javax.annotation.security.RolesAllowed;
@@ -149,9 +152,16 @@ public class ProductInstanceBinaryResource {
             return rb.build();
         }
         InputStream binaryContentInputStream = null;
+
+        ProductInstanceMasterKey productInstanceMasterKey = new ProductInstanceMasterKey(serialNumber, workspaceId, configurationItemId);
+
+        boolean workingCopy = productInstanceManagerLocal.getProductInstanceIterations(productInstanceMasterKey).size() == iteration;
+
+        boolean isToBeCached = !workingCopy;
+
         try {
             binaryContentInputStream = storageManager.getBinaryResourceInputStream(binaryResource);
-            return BinaryResourceDownloadResponseBuilder.prepareResponse(binaryContentInputStream, binaryResourceDownloadMeta, range);
+            return BinaryResourceDownloadResponseBuilder.prepareResponse(binaryContentInputStream, binaryResourceDownloadMeta, range, isToBeCached);
         } catch (StorageException e) {
             Streams.close(binaryContentInputStream);
             return BinaryResourceDownloadResponseBuilder.downloadError(e, fullName);
@@ -238,9 +248,13 @@ public class ProductInstanceBinaryResource {
         }
 
         InputStream binaryContentInputStream = null;
+
+        // TODO : It seems this method is not used anywhere (to be confirmed). This variable is set only for refactoring consideration
+        boolean isToBeCached = false;
+
         try {
             binaryContentInputStream = storageManager.getBinaryResourceInputStream(binaryResource);
-            return BinaryResourceDownloadResponseBuilder.prepareResponse(binaryContentInputStream, binaryResourceDownloadMeta, range);
+            return BinaryResourceDownloadResponseBuilder.prepareResponse(binaryContentInputStream, binaryResourceDownloadMeta, range, isToBeCached);
         } catch (StorageException e) {
             Streams.close(binaryContentInputStream);
             return BinaryResourceDownloadResponseBuilder.downloadError(e, fullName);
@@ -285,9 +299,20 @@ public class ProductInstanceBinaryResource {
 
         InputStream binaryContentInputStream = null;
 
+        ProductInstanceIterationKey productInstanceIterationKey = new ProductInstanceIterationKey(serialNumber, workspaceId, configurationItemId, iteration);
+        ProductInstanceIteration productInstanceIteration = productInstanceManagerLocal.getProductInstanceIteration(productInstanceIterationKey).getProductInstanceMaster().getLastIteration();
+        PathDataMaster pathDataMaster = productInstanceManagerLocal.getPathDataByPathIdAndProductInstanceIteration(workspaceId, pathDataId, productInstanceIteration);
+
+        boolean workingCopy = false;
+        if(pathDataMaster != null && pathDataMaster.getLastIteration() != null){
+            workingCopy = pathDataMaster.getLastIteration().getIteration() == iteration;
+        }
+
+        boolean isToBeCached = !workingCopy;
+
         try {
             binaryContentInputStream = storageManager.getBinaryResourceInputStream(binaryResource);
-            return BinaryResourceDownloadResponseBuilder.prepareResponse(binaryContentInputStream, binaryResourceDownloadMeta, range);
+            return BinaryResourceDownloadResponseBuilder.prepareResponse(binaryContentInputStream, binaryResourceDownloadMeta, range, isToBeCached);
         } catch (StorageException e) {
             Streams.close(binaryContentInputStream);
             return BinaryResourceDownloadResponseBuilder.downloadError(e, fullName);
