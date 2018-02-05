@@ -11,6 +11,11 @@
 
 package org.polarsys.eplmp.server.rest.file;
 
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Ignore;
+import org.junit.Test;
+import org.mockito.*;
 import org.polarsys.eplmp.core.common.BinaryResource;
 import org.polarsys.eplmp.core.product.PartMasterTemplateKey;
 import org.polarsys.eplmp.core.services.IBinaryStorageManagerLocal;
@@ -18,11 +23,6 @@ import org.polarsys.eplmp.core.services.IProductManagerLocal;
 import org.polarsys.eplmp.server.rest.file.util.BinaryResourceBinaryStreamingOutput;
 import org.polarsys.eplmp.server.util.PartImpl;
 import org.polarsys.eplmp.server.util.ResourceUtil;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.mockito.*;
 
 import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.Part;
