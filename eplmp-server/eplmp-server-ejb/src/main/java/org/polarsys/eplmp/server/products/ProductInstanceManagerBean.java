@@ -886,6 +886,22 @@ public class ProductInstanceManagerBean implements IProductInstanceManagerLocal 
 
     @RolesAllowed({UserGroupMapping.REGULAR_USER_ROLE_ID})
     @Override
+    public PathDataMaster getPathDataByPathIdAndProductInstanceIteration(String workspaceId, int pathId, ProductInstanceIteration productInstanceIteration) throws PathDataMasterNotFoundException, UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, WorkspaceNotEnabledException {
+        User user = userManager.checkWorkspaceReadAccess(workspaceId);
+        Locale locale = new Locale(user.getLanguage());
+
+        PathDataMasterDAO pathDataMasterDAO = new PathDataMasterDAO(locale, em);
+        PathDataMaster pathDataMaster = null;
+        try {
+            pathDataMaster = pathDataMasterDAO.findByPathIdAndProductInstanceIteration(pathId, productInstanceIteration);
+        } catch (PathDataMasterNotFoundException pEx) {
+            //not found return null;
+        }
+        return pathDataMaster;
+    }
+
+    @RolesAllowed({UserGroupMapping.REGULAR_USER_ROLE_ID})
+    @Override
     public BinaryResource saveFileInPathData(String workspaceId, String configurationItemId, String serialNumber, int pathDataId, int iteration, String fileName, int pSize) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, NotAllowedException, AccessRightException, ProductInstanceMasterNotFoundException, FileAlreadyExistsException, CreationException, WorkspaceNotEnabledException {
         // Check the read access to the workspace
         User user = userManager.checkWorkspaceReadAccess(workspaceId);
