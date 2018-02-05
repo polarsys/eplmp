@@ -203,8 +203,7 @@ public class DocumentBinaryResource {
 
             if (accessToken != null && !accessToken.isEmpty()) {
                 String decodedEntityKey = JWTokenFactory.validateEntityToken(authConfig.getJWTKey(), accessToken);
-                DocumentRevisionKey documentRevisionKey = new DocumentRevisionKey(workspaceId, documentId, version);
-                boolean tokenValid = documentRevisionKey.toString().equals(decodedEntityKey);
+                boolean tokenValid = new DocumentRevisionKey(workspaceId, documentId, version).toString().equals(decodedEntityKey);
                 if (!tokenValid) {
                     throw new SharedResourceAccessException();
                 }

@@ -289,16 +289,11 @@ public class PartBinaryResource {
 
             if (accessToken != null && !accessToken.isEmpty()) {
                 String decodedEntityKey = JWTokenFactory.validateEntityToken(authConfig.getJWTKey(), accessToken);
-                PartRevisionKey partRevisionKey = new PartRevisionKey(workspaceId, partNumber, version);
-                boolean tokenValid = partRevisionKey.toString().equals(decodedEntityKey);
+                boolean tokenValid = new PartRevisionKey(workspaceId, partNumber, version).toString().equals(decodedEntityKey);
                 if (!tokenValid) {
                     throw new SharedResourceAccessException();
                 }
                 binaryResource = publicEntityManager.getBinaryResourceForSharedEntity(fullName);
-                PartRevision partRevision = publicEntityManager.getPublicPartRevision(partRevisionKey);
-                if (partRevision == null) {
-                    throw new SharedResourceAccessException();
-                }
             } else {
                 if (!canAccess(new PartIterationKey(workspaceId, partNumber, version, iteration))) {
                     throw new SharedResourceAccessException();
