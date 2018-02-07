@@ -66,7 +66,7 @@ public class PartRevision implements Serializable, Comparable<PartRevision> {
     private User author;
        
     @Temporal(TemporalType.TIMESTAMP)
-    private java.util.Date creationDate;
+    private Date creationDate;
 
     @Lob
     private String description;
@@ -96,7 +96,7 @@ public class PartRevision implements Serializable, Comparable<PartRevision> {
     })
     private User checkOutUser;
     
-    @javax.persistence.Temporal(javax.persistence.TemporalType.TIMESTAMP)
+    @Temporal(TemporalType.TIMESTAMP)
     private Date checkOutDate;
     
     @OneToOne(orphanRemoval=true, cascade=CascadeType.ALL, fetch=FetchType.EAGER)
@@ -366,7 +366,16 @@ public class PartRevision implements Serializable, Comparable<PartRevision> {
             return 0;
         }
     }
-    
+
+    public PartIteration getWorkingCopy(){
+
+        if(isCheckedOut()){
+            return getLastIteration();
+        }else{
+            return null;
+        }
+    }
+
     public PartIteration removeLastIteration() {
         int index = partIterations.size()-1;
         if(index < 0) {
