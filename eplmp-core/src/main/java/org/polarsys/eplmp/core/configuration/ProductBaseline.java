@@ -1,13 +1,13 @@
 /*******************************************************************************
-  * Copyright (c) 2017 DocDoku.
-  * All rights reserved. This program and the accompanying materials
-  * are made available under the terms of the Eclipse Public License v1.0
-  * which accompanies this distribution, and is available at
-  * http://www.eclipse.org/legal/epl-v10.html
-  *
-  * Contributors:
-  *    DocDoku - initial API and implementation
-  *******************************************************************************/
+ * Copyright (c) 2017 DocDoku.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ * <p>
+ * Contributors:
+ * DocDoku - initial API and implementation
+ *******************************************************************************/
 package org.polarsys.eplmp.core.configuration;
 
 import org.polarsys.eplmp.core.common.User;
@@ -24,7 +24,7 @@ import java.util.*;
  * Baseline refers to a specific configuration, it could be seen as
  * "snapshots in time" of a configuration. More concretely, baselines are
  * collections of items (like parts) at a specified iteration.
- *
+ * <p>
  * Within a baseline, there must not be two different iterations of the same part.
  * Because {@link PartIteration} may reference documents
  * baselines capture also {@link DocumentCollection}.
@@ -98,7 +98,7 @@ public class ProductBaseline implements Serializable {
 
     /**
      * Set of optional usage links (actually their path from the root node)
-     * that have been excluded from the baseline.
+     * that have been included into the baseline.
      * <p>
      * Paths are strings made of ordered lists of usage link ids joined by "-".
      */
@@ -251,10 +251,6 @@ public class ProductBaseline implements Serializable {
     }
 
     public boolean isOptionalLinkRetained(String link) {
-        return !isOptionalLinkExcluded(link);
-    }
-
-    public boolean isOptionalLinkExcluded(String link) {
         return optionalUsageLinks.contains(link);
     }
 
