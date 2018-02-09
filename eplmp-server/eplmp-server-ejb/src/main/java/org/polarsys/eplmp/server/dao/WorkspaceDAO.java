@@ -269,7 +269,7 @@ public class WorkspaceDAO {
         i = 0;
         while (true) {
             List<DocumentIteration> documentIterations =
-                    em.createQuery("SELECT d FROM DocumentIteration d WHERE d.documentRevision.partMaster.workspace = :workspace", DocumentIteration.class)
+                    em.createQuery("SELECT d FROM DocumentIteration d WHERE d.documentRevision.documentMaster.workspace = :workspace", DocumentIteration.class)
                             .setParameter("workspace", workspace)
                             .setFirstResult(i)
                             .setMaxResults(batchSize)
