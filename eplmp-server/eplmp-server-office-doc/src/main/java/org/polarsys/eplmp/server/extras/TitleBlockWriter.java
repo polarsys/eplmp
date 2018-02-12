@@ -68,10 +68,11 @@ public class TitleBlockWriter {
     private static final java.awt.Color LIGHT_SEPARATOR_COLOR = java.awt.Color.lightGray;
     private static final char SUBSTITUTION_CHAR = '?';
 
-    private PDFont webIconFont;
-    private PDFont regularIconFont;
-    private PDFont boldIconFont;
-    private PDFont italicIconFont;
+    private static PDFont webIconFont;
+    private static PDFont regularTextFont;
+    private static PDFont boldTextFont;
+    private static PDFont italicTextFont;
+
 
     private static final Logger LOGGER = Logger.getLogger(TitleBlockWriter.class.getName());
     private static final String ICON_FONT_WEB_FILE = "org/polarsys/eplmp/server/extras/fonts/fontawesome-webfont.ttf";
@@ -112,33 +113,33 @@ public class TitleBlockWriter {
 
         try {
             Paragraph titleParagraph = new Paragraph();
-            titleParagraph.addText(getTextWithSymbol(data.getTitle(), boldIconFont), DOCUMENT_TITLE_SIZE, boldIconFont);
+            titleParagraph.addText(getTextWithSymbol(data.getTitle(), boldTextFont), DOCUMENT_TITLE_SIZE, boldTextFont);
             document.add(titleParagraph, new VerticalLayoutHint(Alignment.Left, 0, 0, 0, TITLE_MARGIN_BOTTOM));
 
             Paragraph paragraph = new Paragraph();
-            paragraph.addText(data.getBundleString("original.author"), TEXT_SIZE, boldIconFont);
+            paragraph.addText(data.getBundleString("original.author"), TEXT_SIZE, boldTextFont);
             space(paragraph);
-            paragraph.addText(getTextWithSymbol(data.getAuthorName(), regularIconFont), TEXT_SIZE, regularIconFont);
+            paragraph.addText(getTextWithSymbol(data.getAuthorName(), regularTextFont), TEXT_SIZE, regularTextFont);
             breakLine(paragraph);
-            paragraph.addText(data.getBundleString("iteration.date"), TEXT_SIZE, boldIconFont);
+            paragraph.addText(data.getBundleString("iteration.date"), TEXT_SIZE, boldTextFont);
             space(paragraph);
-            paragraph.addText(data.getCreationDate(), TEXT_SIZE, regularIconFont);
+            paragraph.addText(data.getCreationDate(), TEXT_SIZE, regularTextFont);
             breakLine(paragraph);
-            paragraph.addText(data.getBundleString("iteration"), TEXT_SIZE, boldIconFont);
+            paragraph.addText(data.getBundleString("iteration"), TEXT_SIZE, boldTextFont);
             space(paragraph);
-            paragraph.addText(data.getCurrentIteration(), TEXT_SIZE, regularIconFont);
+            paragraph.addText(data.getCurrentIteration(), TEXT_SIZE, regularTextFont);
             breakLine(paragraph);
-            paragraph.addText(data.getBundleString("iteration.date"), TEXT_SIZE, boldIconFont);
+            paragraph.addText(data.getBundleString("iteration.date"), TEXT_SIZE, boldTextFont);
             space(paragraph);
-            paragraph.addText(data.getIterationDate(), TEXT_SIZE, regularIconFont);
+            paragraph.addText(data.getIterationDate(), TEXT_SIZE, regularTextFont);
             breakLine(paragraph);
 
             String revisionNote = data.getRevisionNote();
 
             if (revisionNote != null) {
-                paragraph.addText(data.getBundleString("iteration.note"), TEXT_SIZE, boldIconFont);
+                paragraph.addText(data.getBundleString("iteration.note"), TEXT_SIZE, boldTextFont);
                 space(paragraph);
-                paragraph.addText(revisionNote, TEXT_SIZE, regularIconFont);
+                paragraph.addText(revisionNote, TEXT_SIZE, regularTextFont);
             }
 
             document.add(paragraph, new VerticalLayoutHint(Alignment.Left, 0, 0, 0, 5));
@@ -148,7 +149,7 @@ public class TitleBlockWriter {
             if (description != null && !description.isEmpty()) {
                 drawLightHorizontalSeparator();
                 Paragraph descriptionParagraph = new Paragraph();
-                descriptionParagraph.addText(description, TEXT_SIZE, italicIconFont);
+                descriptionParagraph.addText(description, TEXT_SIZE, italicTextFont);
                 document.add(descriptionParagraph);
             }
         } catch (IOException e) {
@@ -169,7 +170,7 @@ public class TitleBlockWriter {
                 drawHorizontalSeparator();
 
                 Paragraph mapTitle = new Paragraph();
-                mapTitle.addText(data.getBundleString("attributes"), TITLE_MAP_SIZE, boldIconFont);
+                mapTitle.addText(data.getBundleString("attributes"), TITLE_MAP_SIZE, boldTextFont);
                 breakLine(mapTitle);
 
                 document.add(mapTitle, new VerticalLayoutHint(Alignment.Left, 0, 0, 0, MAP_TITLE_MARGIN_BOTTOM));
@@ -200,14 +201,14 @@ public class TitleBlockWriter {
         document.add(new ColumnLayout(4, CELLS_SPACING));
 
         Paragraph keyParagraph = new Paragraph();
-        keyParagraph.addText(attr.getName(), TEXT_SIZE, boldIconFont);
+        keyParagraph.addText(attr.getName(), TEXT_SIZE, boldTextFont);
         document.add(keyParagraph);
 
         document.add(ColumnLayout.NEWCOLUMN);
 
         Paragraph valueParagraph = new Paragraph();
         valueParagraph.setMaxWidth(360.0f);
-        valueParagraph.addText(String.valueOf(attr.getValue()), TEXT_SIZE, isHeaderRow ? boldIconFont : regularIconFont);
+        valueParagraph.addText(String.valueOf(attr.getValue()), TEXT_SIZE, isHeaderRow ? boldTextFont : regularTextFont);
         document.add(valueParagraph);
 
     }
@@ -225,7 +226,7 @@ public class TitleBlockWriter {
             resetLayout();
             drawHorizontalSeparator();
             Paragraph paragraph = new Paragraph();
-            paragraph.addText(data.getBundleString("lifecycle"), TITLE_MAP_SIZE, boldIconFont);
+            paragraph.addText(data.getBundleString("lifecycle"), TITLE_MAP_SIZE, boldTextFont);
             document.add(paragraph, new VerticalLayoutHint(Alignment.Left, 0, 0, 0, 10));
 
             for (Activity activity : workflow.getActivities()) {
@@ -237,7 +238,7 @@ public class TitleBlockWriter {
     private void drawActivity(Activity activity) throws IOException {
 
         Paragraph activityTitle = new Paragraph();
-        activityTitle.addText(activity.getLifeCycleState(), TEXT_SIZE, boldIconFont);
+        activityTitle.addText(activity.getLifeCycleState(), TEXT_SIZE, boldTextFont);
         breakLine(activityTitle);
         document.add(activityTitle);
 
@@ -271,7 +272,7 @@ public class TitleBlockWriter {
         document.add(new ColumnLayout(2, CELLS_SPACING));
         left.addText(iconMessage, TEXT_SIZE, webIconFont);
         space(left);
-        left.addText(task.getTitle(), TEXT_SIZE, boldIconFont);
+        left.addText(task.getTitle(), TEXT_SIZE, boldTextFont);
 
         document.add(left, new VerticalLayoutHint(Alignment.Left, 0, 0, 0, 0));
 
@@ -280,7 +281,7 @@ public class TitleBlockWriter {
         Date closureDate = task.getClosureDate();
         Paragraph right = new Paragraph();
         if (closureDate != null) {
-            right.addText(data.format(closureDate), TEXT_SIZE, italicIconFont);
+            right.addText(data.format(closureDate), TEXT_SIZE, italicTextFont);
         }
         document.add(right, new VerticalLayoutHint(Alignment.Right, 0, 0, 0, 0));
 
@@ -289,15 +290,15 @@ public class TitleBlockWriter {
         document.add(new ColumnLayout(4, CELLS_SPACING));
 
         Paragraph taskDetailsLeft = new Paragraph();
-        taskDetailsLeft.addText(taskMessage, TEXT_SIZE, italicIconFont);
+        taskDetailsLeft.addText(taskMessage, TEXT_SIZE, italicTextFont);
         space(taskDetailsLeft);
-        taskDetailsLeft.addText(task.getWorker().getName(), TEXT_SIZE, boldIconFont);
+        taskDetailsLeft.addText(task.getWorker().getName(), TEXT_SIZE, boldTextFont);
         document.add(taskDetailsLeft, new VerticalLayoutHint(Alignment.Left, 0, 0, 10, 10));
 
         document.add(ColumnLayout.NEWCOLUMN);
 
         Paragraph taskDetailsRight = new Paragraph();
-        taskDetailsRight.addText(task.getClosureComment(), SMALL_TEXT_SIZE, italicIconFont);
+        taskDetailsRight.addText(task.getClosureComment(), SMALL_TEXT_SIZE, italicTextFont);
         document.add(taskDetailsRight, new VerticalLayoutHint(Alignment.Left, 0, 0, 10, 10));
         taskDetailsRight.setMaxWidth(360.0f);
 
@@ -323,11 +324,11 @@ public class TitleBlockWriter {
     }
 
     private void breakLine(Paragraph p) throws IOException {
-        p.addText("\n", TEXT_SIZE, regularIconFont);
+        p.addText("\n", TEXT_SIZE, regularTextFont);
     }
 
     private void space(Paragraph p) throws IOException {
-        p.addText(" ", TEXT_SIZE, regularIconFont);
+        p.addText(" ", TEXT_SIZE, regularTextFont);
     }
 
     private void resetLayout() {
@@ -354,14 +355,13 @@ public class TitleBlockWriter {
              InputStream inputStream3 = TitleBlockWriter.class.getClassLoader()
                      .getResourceAsStream(ICON_FONT_ITALIC_FILE)) {
             webIconFont = PDType0Font.load(pdDocument, inputStream0);
-            regularIconFont = PDType0Font.load(pdDocument, inputStream1);
-            boldIconFont = PDType0Font.load(pdDocument, inputStream2);
-            italicIconFont = PDType0Font.load(pdDocument, inputStream3);
+            regularTextFont = PDType0Font.load(pdDocument, inputStream1);
+            boldTextFont = PDType0Font.load(pdDocument, inputStream2);
+            italicTextFont = PDType0Font.load(pdDocument, inputStream3);
         } catch (IOException e) {
             LOGGER.log(Level.SEVERE, null, e);
         }
     }
-
 
     private String getTextWithSymbol(String text, PDFont font) throws IOException {
 

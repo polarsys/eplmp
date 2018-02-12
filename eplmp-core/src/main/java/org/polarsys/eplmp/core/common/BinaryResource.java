@@ -40,7 +40,7 @@ import java.util.Date;
 @Entity
 public class BinaryResource implements Serializable, Comparable<BinaryResource>{
 
-    @Column(length=722)
+    @Column(length=1024)
     @Id
     protected String fullName="";
 
