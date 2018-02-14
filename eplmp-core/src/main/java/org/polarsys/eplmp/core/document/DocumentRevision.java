@@ -349,6 +349,15 @@ public class DocumentRevision implements Serializable, Comparable<DocumentRevisi
         }
     }
 
+    public DocumentIteration getWorkingCopy(){
+
+        if(isCheckedOut()){
+            return getLastIteration();
+        }else{
+            return null;
+        }
+    }
+
     public DocumentIteration removeLastIteration() {
         int index = documentIterations.size() - 1;
         if (index < 0) {
