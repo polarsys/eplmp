@@ -856,10 +856,10 @@ public class PartResource {
                     if (substitute != null) {
 
                         PartSubstituteLink partSubstituteLink = new PartSubstituteLink();
-                        partSubstituteLink.setAmount(partUsageLinkDTO.getAmount());
+                        partSubstituteLink.setAmount(substituteLinkDTO.getAmount());
                         partSubstituteLink.setComment(partUsageLinkDTO.getComment());
                         partSubstituteLink.setReferenceDescription(partUsageLinkDTO.getReferenceDescription());
-                        partSubstituteLink.setUnit(partUsageLinkDTO.getUnit());
+                        partSubstituteLink.setUnit(substituteLinkDTO.getUnit());
                         partSubstituteLink.setId(partUsageLinkDTO.getId());
 
                         List<CADInstance> subCADInstances = new ArrayList<>();
