@@ -296,8 +296,13 @@ public class ConverterBean implements IConverterManagerLocal {
     private CADConverter selectConverter(BinaryResource cadBinaryResource) {
         String ext = FileIO.getExtension(cadBinaryResource.getName());
         for (CADConverter converter : converters) {
-            if (converter.canConvertToOBJ(ext)) {
-                return converter;
+            try {
+                if (converter.canConvertToOBJ(ext)) {
+                    return converter;
+                }
+            } catch (Exception e) {
+                // javax.ejb.CreateException can be thrown when static initialization fail inside plugin
+                LOGGER.log(Level.SEVERE, "Something gone wrong with converter instantiation " + converter, e);
             }
         }
         return null;
