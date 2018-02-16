@@ -1,13 +1,13 @@
 /*******************************************************************************
-  * Copyright (c) 2017 DocDoku.
-  * All rights reserved. This program and the accompanying materials
-  * are made available under the terms of the Eclipse Public License v1.0
-  * which accompanies this distribution, and is available at
-  * http://www.eclipse.org/legal/epl-v10.html
-  *
-  * Contributors:
-  *    DocDoku - initial API and implementation
-  *******************************************************************************/
+ * Copyright (c) 2017 DocDoku.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ * <p>
+ * Contributors:
+ * DocDoku - initial API and implementation
+ *******************************************************************************/
 package org.polarsys.eplmp.server;
 
 import javax.naming.*;
@@ -43,7 +43,7 @@ public class BeanLocator {
             InitialContext context = new InitialContext();
             Context ctx = (Context) context.lookup("java:global");
             result.addAll(search(type, ctx));
-        } catch (NamingException e) {
+        } catch (Exception e) {
             LOGGER.log(Level.SEVERE, null, e);
         }
 
@@ -80,11 +80,11 @@ public class BeanLocator {
                         result.addAll(search(type, (Context) o));
                     }
                     // else ignore this object
-                } catch (NamingException e) {
+                } catch (Exception e) {
                     LOGGER.log(Level.INFO, "Ignoring JNDI entry: " + e.getMessage());
                 }
             }
-        } catch (NamingException e) {
+        } catch (Exception e) {
             LOGGER.log(Level.SEVERE, e.getMessage(), e);
         }
         return result;
