@@ -9,9 +9,10 @@
   *    DocDoku - initial API and implementation
   *******************************************************************************/
 
-package org.polarsys.eplmp.server.converters;
+package org.polarsys.eplmp.server.geometry;
 
 import jdk.nashorn.api.scripting.ScriptObjectMirror;
+import org.polarsys.eplmp.server.converters.ConverterUtils;
 
 import javax.script.Invocable;
 import javax.script.ScriptEngine;

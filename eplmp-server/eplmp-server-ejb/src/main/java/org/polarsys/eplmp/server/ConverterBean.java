@@ -22,7 +22,7 @@ import org.polarsys.eplmp.server.converters.CADConverter;
 import org.polarsys.eplmp.server.converters.CADConverter.ConversionException;
 import org.polarsys.eplmp.server.converters.ConversionResult;
 import org.polarsys.eplmp.server.converters.ConverterUtils;
-import org.polarsys.eplmp.server.converters.GeometryParser;
+import org.polarsys.eplmp.server.geometry.GeometryParser;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.security.DeclareRoles;
