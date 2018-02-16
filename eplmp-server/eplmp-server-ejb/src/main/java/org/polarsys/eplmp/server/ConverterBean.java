@@ -1,13 +1,13 @@
 /*******************************************************************************
-  * Copyright (c) 2017 DocDoku.
-  * All rights reserved. This program and the accompanying materials
-  * are made available under the terms of the Eclipse Public License v1.0
-  * which accompanies this distribution, and is available at
-  * http://www.eclipse.org/legal/epl-v10.html
-  *
-  * Contributors:
-  *    DocDoku - initial API and implementation
-  *******************************************************************************/
+ * Copyright (c) 2017 DocDoku.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ * <p>
+ * Contributors:
+ * DocDoku - initial API and implementation
+ *******************************************************************************/
 package org.polarsys.eplmp.server;
 
 import org.polarsys.eplmp.core.common.BinaryResource;
@@ -31,7 +31,6 @@ import javax.ejb.Asynchronous;
 import javax.ejb.Local;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
-import javax.script.ScriptException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -190,14 +189,7 @@ public class ConverterBean implements IConverterManagerLocal {
 
         // manage converted file
         Path convertedFile = conversionResult.getConvertedFile();
-
-        double[] box;
-
-        try {
-            box = new GeometryParser(convertedFile).calculateBox();
-        } catch (IOException | ScriptException | NoSuchMethodException e) {
-            box = new double[6];
-        }
+        double[] box = new GeometryParser(convertedFile).calculateBox();
 
         if (decimate(convertedFile, tempDir, RATIO)) {
             String fileName = convertedFile.getFileName().toString();
@@ -223,10 +215,8 @@ public class ConverterBean implements IConverterManagerLocal {
     /**
      * Update the current Part from the imported assembly description
      *
-     * @param componentPositionMap
-     *            Assembly description root component.
-     * @param partToConvert
-     *            Current Part ID
+     * @param componentPositionMap Assembly description root component.
+     * @param partToConvert        Current Part ID
      * @throws UserNotFoundException
      * @throws UserNotActiveException
      * @throws WorkspaceNotEnabledException
