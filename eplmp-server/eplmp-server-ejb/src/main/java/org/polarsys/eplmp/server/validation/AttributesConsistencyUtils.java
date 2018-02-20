@@ -17,7 +17,8 @@ import org.polarsys.eplmp.core.meta.InstanceAttributeTemplate;
 import java.util.*;
 
 /**
- * @author kelto on 15/07/15.
+ * @author Charles Fallourd
+ * @version 2.5, 15/07/15
  */
 
 public class AttributesConsistencyUtils {

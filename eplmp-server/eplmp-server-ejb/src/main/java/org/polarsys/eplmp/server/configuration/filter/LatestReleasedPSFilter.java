@@ -25,7 +25,7 @@ import java.util.List;
  * A {@link org.polarsys.eplmp.core.configuration.ProductStructureFilter} implementation
  * which selects the last iteration of the latest released revision.
  *
- * @author Taylor LABEJOF
+ * @author Taylor Labejof
  * @version 2.0, 29/08/14
  * @since   V2.0
  */

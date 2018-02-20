@@ -39,7 +39,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Creates a title block to append to other documents
+ * Creates a title block to append to other documents.
  *
  * @author Morgan Guimard
  */

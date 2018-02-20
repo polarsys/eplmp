@@ -26,7 +26,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * @author kelto on 13/01/16.
+ * @author Charles Fallourd
+ * @version 2.5, 13/01/16
  */
 @RunWith(MockitoJUnitRunner.class)
 public class WIPPSFilterTest {

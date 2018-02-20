@@ -24,10 +24,11 @@ import java.util.Locale;
 import java.util.logging.Logger;
 
 /**
+ * This class define the default pdf generation for both part and document.
+ * This behaviour can be overridden.
+ *
  * @author Morgan Guimard
- *         <p>
- *         This class define the default pdf generation for both part and document.
- *         This behaviour can be overridden:
+ *
  * @see PartTitleBlockData
  * @see DocumentTitleBlockData
  */

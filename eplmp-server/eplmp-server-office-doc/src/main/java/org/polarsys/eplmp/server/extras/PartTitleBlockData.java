@@ -18,10 +18,12 @@ import java.text.SimpleDateFormat;
 import java.util.Locale;
 
 /**
- * @author kelto on 05/01/16.
- *         <p>
- *         This class should be used to override the default Pdf generation for parts.
- * @see org.polarsys.eplmp.server.extras.TitleBlockGenerator
+ * This class should be used to override the default PDF layout applied
+ * when generating part.
+ *
+ * @author Charles Fallourd
+ * @version 2.5, 05/01/16
+ * @see TitleBlockGenerator
  */
 public class PartTitleBlockData extends TitleBlockData {
 

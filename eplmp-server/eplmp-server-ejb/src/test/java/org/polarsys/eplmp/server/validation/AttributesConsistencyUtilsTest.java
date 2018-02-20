@@ -24,7 +24,8 @@ import java.util.Collection;
 import java.util.List;
 
 /**
- * @author kelto on 16/07/15.
+ * @author Charles Fallourd
+ * @version 2.5, 16/07/15
  */
 @RunWith(Parameterized.class)
 public class AttributesConsistencyUtilsTest extends TestCase {
