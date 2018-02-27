@@ -4,9 +4,9 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- *
+ * <p>
  * Contributors:
- *    DocDoku - initial API and implementation
+ * DocDoku - initial API and implementation
  *******************************************************************************/
 
 package org.polarsys.eplmp.server.rest.file;
@@ -122,7 +122,6 @@ public class DocumentBinaryResourceTest {
      * @throws Exception
      */
     @Test
-    @Ignore
     public void uploadFileWithSpecialCharactersToDocumentTemplates() throws Exception {
 
         //Given
@@ -148,8 +147,8 @@ public class DocumentBinaryResourceTest {
 
         //Then
         assertNotNull(response);
-        assertEquals(response.getStatus(), 201);
-        assertEquals(response.getStatusInfo(), Response.Status.CREATED);
+        assertEquals(201, response.getStatus());
+        assertEquals(Response.Status.CREATED, response.getStatusInfo());
 
         //delete tem file
         uploadedFile1.deleteOnExit();
@@ -161,7 +160,6 @@ public class DocumentBinaryResourceTest {
      * @throws Exception
      */
     @Test
-    @Ignore
     public void uploadSeveralFilesToDocumentsTemplates() throws Exception {
 
         //Given
@@ -190,8 +188,7 @@ public class DocumentBinaryResourceTest {
 
         //Then
         assertNotNull(response);
-        assertEquals(response.getStatus(), 200);
-        assertEquals(response.getStatusInfo(), Response.Status.OK);
+        assertEquals(Response.Status.NO_CONTENT, response.getStatusInfo());
 
         //delete temp files
         uploadedFile1.deleteOnExit();
