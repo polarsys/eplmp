@@ -509,6 +509,10 @@ public class DocumentManagerBean implements IDocumentManagerLocal {
     @Override
     public DocumentRevision[] searchDocumentRevisions(DocumentSearchQuery pQuery, int from, int size) throws WorkspaceNotFoundException, UserNotFoundException, UserNotActiveException, WorkspaceNotEnabledException, AccountNotFoundException, NotAllowedException {
         User user = userManager.checkWorkspaceReadAccess(pQuery.getWorkspaceId());
+        String docId = pQuery.getDocMId();
+        if(docId != null){
+            checkDocumentIdValidity(docId, new Locale(user.getLanguage()));
+        }
         List<DocumentRevision> fetchedDocRs = indexerManager.searchDocumentRevisions(pQuery, from, size);
         List<DocumentRevision> docList = new ArrayList<>();
 

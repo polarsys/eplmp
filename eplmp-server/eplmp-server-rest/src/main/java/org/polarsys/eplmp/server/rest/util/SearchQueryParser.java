@@ -1,13 +1,13 @@
 /*******************************************************************************
-  * Copyright (c) 2017 DocDoku.
-  * All rights reserved. This program and the accompanying materials
-  * are made available under the terms of the Eclipse Public License v1.0
-  * which accompanies this distribution, and is available at
-  * http://www.eclipse.org/legal/epl-v10.html
-  *
-  * Contributors:
-  *    DocDoku - initial API and implementation
-  *******************************************************************************/
+ * Copyright (c) 2017 DocDoku.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *    DocDoku - initial API and implementation
+ *******************************************************************************/
 
 package org.polarsys.eplmp.server.rest.util;
 
@@ -61,7 +61,8 @@ public class SearchQueryParser {
             if (values.size() == 1) {
                 String value = null;
                 try {
-                    value = URLDecoder.decode(values.get(0), "UTF-8");
+                    value = processPercent(values.get(0));
+                    value = URLDecoder.decode(value, "UTF-8");
                 } catch (UnsupportedEncodingException e) {
                     LOGGER.log(Level.FINEST, null, e);
                 }
@@ -169,7 +170,8 @@ public class SearchQueryParser {
             if (values.size() == 1) {
                 String value = null;
                 try {
-                    value = URLDecoder.decode(values.get(0), "UTF-8");
+                    value = processPercent(values.get(0));
+                    value = URLDecoder.decode(value, "UTF-8");
                 } catch (UnsupportedEncodingException e) {
                     LOGGER.log(Level.FINEST, null, e);
                 }
@@ -308,6 +310,14 @@ public class SearchQueryParser {
 
         }
         return pAttributes;
+    }
+
+    private static String processPercent(String input) {
+
+        String output = input;
+        output = output.replaceAll("%(?![0-9a-fA-F]{2})", "%25");
+        output = output.replaceAll("\\+", "%2B");
+        return output;
     }
 
 }
