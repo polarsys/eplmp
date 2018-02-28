@@ -1,13 +1,13 @@
 /*******************************************************************************
-  * Copyright (c) 2017 DocDoku.
-  * All rights reserved. This program and the accompanying materials
-  * are made available under the terms of the Eclipse Public License v1.0
-  * which accompanies this distribution, and is available at
-  * http://www.eclipse.org/legal/epl-v10.html
-  *
-  * Contributors:
-  *    DocDoku - initial API and implementation
-  *******************************************************************************/
+ * Copyright (c) 2017 DocDoku.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *    DocDoku - initial API and implementation
+ *******************************************************************************/
 
 package org.polarsys.eplmp.server.rest.util;
 
@@ -17,8 +17,6 @@ import org.polarsys.eplmp.core.query.SearchQuery;
 import org.polarsys.eplmp.core.util.DateUtils;
 
 import javax.ws.rs.core.MultivaluedMap;
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -59,12 +57,7 @@ public class SearchQueryParser {
         for (String filter : query.keySet()) {
             List<String> values = query.get(filter);
             if (values.size() == 1) {
-                String value = null;
-                try {
-                    value = URLDecoder.decode(values.get(0), "UTF-8");
-                } catch (UnsupportedEncodingException e) {
-                    LOGGER.log(Level.FINEST, null, e);
-                }
+                String value = values.get(0);
                 switch (filter) {
                     case "q":
                         fullText = value;
@@ -167,12 +160,7 @@ public class SearchQueryParser {
         for (String filter : query.keySet()) {
             List<String> values = query.get(filter);
             if (values.size() == 1) {
-                String value = null;
-                try {
-                    value = URLDecoder.decode(values.get(0), "UTF-8");
-                } catch (UnsupportedEncodingException e) {
-                    LOGGER.log(Level.FINEST, null, e);
-                }
+                String value = values.get(0);
                 switch (filter) {
                     case "q":
                         fullText = value;
@@ -309,5 +297,4 @@ public class SearchQueryParser {
         }
         return pAttributes;
     }
-
 }
