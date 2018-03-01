@@ -2013,7 +2013,7 @@ public class DocumentManagerBean implements IDocumentManagerLocal {
 
     private void checkDocumentIdValidity(String name, Locale locale) throws NotAllowedException {
         if (!NamingConvention.correctDocumentId(name)) {
-            throw new NotAllowedException(locale, "NotAllowedException9", name);
+            throw new NotAllowedException(locale, "NotAllowedException69", name);
         }
     }
 

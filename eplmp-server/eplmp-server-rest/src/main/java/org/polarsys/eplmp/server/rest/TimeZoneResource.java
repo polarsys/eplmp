@@ -1,23 +1,20 @@
 /*******************************************************************************
-  * Copyright (c) 2017 DocDoku.
-  * All rights reserved. This program and the accompanying materials
-  * are made available under the terms of the Eclipse Public License v1.0
-  * which accompanies this distribution, and is available at
-  * http://www.eclipse.org/legal/epl-v10.html
-  *
-  * Contributors:
-  *    DocDoku - initial API and implementation
-  *******************************************************************************/
+ * Copyright (c) 2017 DocDoku.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ * <p>
+ * Contributors:
+ * DocDoku - initial API and implementation
+ *******************************************************************************/
 package org.polarsys.eplmp.server.rest;
 
-import org.polarsys.eplmp.core.security.UserGroupMapping;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 
-import javax.annotation.security.DeclareRoles;
-import javax.annotation.security.RolesAllowed;
 import javax.enterprise.context.RequestScoped;
 import javax.json.Json;
 import javax.json.JsonArrayBuilder;
@@ -31,8 +28,6 @@ import java.util.TimeZone;
 @RequestScoped
 @Path("timezones")
 @Api(value = "timezone", description = "Operations about timezones")
-@DeclareRoles({UserGroupMapping.REGULAR_USER_ROLE_ID, UserGroupMapping.ADMIN_ROLE_ID})
-@RolesAllowed({UserGroupMapping.REGULAR_USER_ROLE_ID, UserGroupMapping.ADMIN_ROLE_ID})
 public class TimeZoneResource {
 
     public TimeZoneResource() {

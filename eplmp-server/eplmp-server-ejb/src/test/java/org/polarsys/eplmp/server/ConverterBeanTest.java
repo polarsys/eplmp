@@ -92,6 +92,8 @@ public class ConverterBeanTest {
 
         when(product.saveFileInPartIteration(eq(ipk), anyString(), eq("attachedfiles"), anyLong()))
                 .thenReturn(attachedFile, attachedFile);
+        when(product.getPartIteration(eq(ipk)))
+                .thenReturn(partIter);
         when(storage.getBinaryResourceOutputStream(attachedFile)).thenReturn(new ByteArrayOutputStream());
 
         when(conv.canConvertToOBJ("dae")).thenReturn(true);
@@ -108,7 +110,6 @@ public class ConverterBeanTest {
     }
 
     @Test
-    @Ignore
     public void testNominalConvert() throws Exception {
         // * test *
         bean.convertCADFileToOBJ(ipk, cadBinRes);

@@ -41,7 +41,7 @@ public class ResourceUtil {
     public static final String PART_NUMBER = "PART01";
     public static final java.lang.String TEMP_SUFFIX = ".tmp";
 
-    public static final String FILENAME_TO_UPLOAD_PART_SPECIAL_CHARACTER = "part_file_to_upload-èé_spécial&.txt";
+    public static final String FILENAME_TO_UPLOAD_PART_SPECIAL_CHARACTER = "TestFile_With_éàè.txt";
     public static final long PART_SIZE = 363666;
     public static final String TARGET_PART_STORAGE = System.getProperty("java.io.tmpdir") + "/org/polarsys/eplmp/server/rest/part/uploaded/";
     public static final String SOURCE_PART_STORAGE = "org/polarsys/eplmp/server/rest/part/toUpload/";
