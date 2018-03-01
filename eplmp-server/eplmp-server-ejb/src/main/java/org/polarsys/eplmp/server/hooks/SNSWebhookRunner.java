@@ -11,9 +11,11 @@
 package org.polarsys.eplmp.server.hooks;
 
 
+import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.regions.Region;
 import com.amazonaws.regions.Regions;
+import com.amazonaws.services.sns.AmazonSNS;
 import com.amazonaws.services.sns.AmazonSNSClient;
 import com.amazonaws.services.sns.model.PublishRequest;
 import org.polarsys.eplmp.core.hooks.SNSWebhookApp;
@@ -39,8 +41,15 @@ public class SNSWebhookRunner implements WebhookRunner {
         String awsAccount = webhookApp.getAwsAccount();
         String awsSecret = webhookApp.getAwsSecret();
         String region = webhookApp.getRegion();
-        AmazonSNSClient snsClient = new AmazonSNSClient(new BasicAWSCredentials(awsAccount, awsSecret));
-        snsClient.setRegion(Region.getRegion(Regions.fromName(region)));
+        //AmazonSNSClient snsClient = new AmazonSNSClient(new BasicAWSCredentials(awsAccount, awsSecret));
+        //snsClient.setRegion(Region.getRegion(Regions.fromName(region)));
+
+
+        AmazonSNS snsClient = AmazonSNSClient.builder()
+                .withRegion(Regions.fromName(region))
+                .withCredentials(new AWSStaticCredentialsProvider(new BasicAWSCredentials(awsAccount, awsSecret)))
+                .build();
+
 
         try {
             PublishRequest publishReq = new PublishRequest()
