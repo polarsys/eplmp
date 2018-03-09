@@ -53,15 +53,15 @@ public class IndexerQueryBuilder {
         String folder = documentSearchQuery.getFolder();
 
         if (docMId != null && !docMId.isEmpty()) {
-            queries.add(QueryBuilders.fuzzyQuery(IndexerMapping.DOCUMENT_ID_KEY, docMId));
+            queries.add(QueryBuilders.multiMatchQuery(docMId, IndexerMapping.DOCUMENT_ID_KEY).fuzziness("AUTO"));
         }
 
         if (title != null && !title.isEmpty()) {
-            queries.add(QueryBuilders.fuzzyQuery(IndexerMapping.TITLE_KEY, title));
+            queries.add(QueryBuilders.multiMatchQuery(title, IndexerMapping.TITLE_KEY).fuzziness("AUTO"));
         }
 
         if (folder != null && !folder.isEmpty()) {
-            queries.add(QueryBuilders.fuzzyQuery(IndexerMapping.FOLDER_KEY, folder));
+            queries.add(QueryBuilders.multiMatchQuery(folder, IndexerMapping.FOLDER_KEY).fuzziness("AUTO"));
         }
 
         queries.addAll(getCommonQueries(documentSearchQuery));
@@ -76,11 +76,11 @@ public class IndexerQueryBuilder {
         String partName = partSearchQuery.getName();
 
         if (partNumber != null && !partNumber.isEmpty()) {
-            queries.add(QueryBuilders.fuzzyQuery(IndexerMapping.PART_NUMBER_KEY, partNumber));
+            queries.add(QueryBuilders.multiMatchQuery(partNumber, IndexerMapping.PART_NUMBER_KEY).fuzziness("AUTO"));
         }
 
         if (partName != null && !partName.isEmpty()) {
-            queries.add(QueryBuilders.fuzzyQuery(IndexerMapping.PART_NAME_KEY, partName));
+            queries.add(QueryBuilders.multiMatchQuery(partName, IndexerMapping.PART_NAME_KEY).fuzziness("AUTO"));
         }
 
         queries.addAll(getCommonQueries(partSearchQuery));
@@ -102,12 +102,12 @@ public class IndexerQueryBuilder {
         }
         if (searchQuery.getAuthor() != null) {
             BoolQueryBuilder authorQuery = QueryBuilders.boolQuery();
-            authorQuery.should(QueryBuilders.fuzzyQuery(IndexerMapping.AUTHOR_NAME_KEY, searchQuery.getAuthor()));
-            authorQuery.should(QueryBuilders.fuzzyQuery(IndexerMapping.AUTHOR_LOGIN_KEY, searchQuery.getAuthor()));
+            authorQuery.should(QueryBuilders.multiMatchQuery(searchQuery.getAuthor(), IndexerMapping.AUTHOR_NAME_KEY).fuzziness("AUTO"));
+            authorQuery.should(QueryBuilders.multiMatchQuery(searchQuery.getAuthor(), IndexerMapping.AUTHOR_LOGIN_KEY).fuzziness("AUTO"));
             queries.add(authorQuery);
         }
         if (searchQuery.getType() != null) {
-            queries.add(QueryBuilders.fuzzyQuery(IndexerMapping.TYPE_KEY, searchQuery.getType()));
+            queries.add(QueryBuilders.multiMatchQuery(searchQuery.getType(), IndexerMapping.TYPE_KEY).fuzziness("AUTO"));
         }
 
         if (searchQuery.getCreationDateFrom() != null) {

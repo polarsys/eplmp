@@ -17,7 +17,13 @@ import io.searchbox.core.*;
 import io.searchbox.indices.CreateIndex;
 import io.searchbox.indices.mapping.PutMapping;
 import io.searchbox.params.SearchType;
+import org.apache.commons.io.IOUtils;
+import org.elasticsearch.client.transport.TransportClient;
+import org.elasticsearch.common.io.stream.InputStreamStreamInput;
+import org.elasticsearch.common.io.stream.StreamInput;
 import org.elasticsearch.common.settings.Settings;
+import org.elasticsearch.common.transport.InetSocketTransportAddress;
+import org.elasticsearch.common.transport.TransportAddress;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
 import org.elasticsearch.index.query.QueryBuilder;
@@ -48,9 +54,13 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.InetAddress;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import org.elasticsearch.client.*;
 
 /**
  * @author Morgan Guimard
@@ -79,6 +89,8 @@ public class IndexerManagerBean implements IIndexerManagerLocal {
     private IBinaryStorageManagerLocal storageManager;
 
     private static final String I18N_CONF = "/org/polarsys/eplmp/core/i18n/LocalStrings";
+
+    private static final String ANALYZER_SETTING_RESOURCE = "/org/polarsys/eplmp/server/indexer/analyzer-setting.json";
 
     private static final Logger LOGGER = Logger.getLogger(IndexerManagerBean.class.getName());
 
@@ -166,15 +178,15 @@ public class IndexerManagerBean implements IIndexerManagerLocal {
 
         try {
             searchResult = esClient.execute(new Search.Builder(
-                            new SearchSourceBuilder()
-                                    .query(query)
-                                    .from(from)
-                                    .size(size)
-                                    .toString())
-                            .addIndex(IndexerUtils.formatIndexName(workspaceId))
-                            .addType(IndexerMapping.DOCUMENT_TYPE)
-                            .setSearchType(SearchType.QUERY_THEN_FETCH)
-                            .build()
+                    new SearchSourceBuilder()
+                            .query(query)
+                            .from(from)
+                            .size(size)
+                            .toString())
+                    .addIndex(IndexerUtils.formatIndexName(workspaceId))
+                    .addType(IndexerMapping.DOCUMENT_TYPE)
+                    .setSearchType(SearchType.QUERY_THEN_FETCH)
+                    .build()
             );
 
         } catch (IOException e) {
@@ -213,15 +225,15 @@ public class IndexerManagerBean implements IIndexerManagerLocal {
 
         try {
             searchResult = esClient.execute(new Search.Builder(
-                            new SearchSourceBuilder()
-                                    .query(query)
-                                    .from(from)
-                                    .size(size)
-                                    .toString())
-                            .addIndex(IndexerUtils.formatIndexName(workspaceId))
-                            .addType(IndexerMapping.PART_TYPE)
-                            .setSearchType(SearchType.QUERY_THEN_FETCH)
-                            .build()
+                    new SearchSourceBuilder()
+                            .query(query)
+                            .from(from)
+                            .size(size)
+                            .toString())
+                    .addIndex(IndexerUtils.formatIndexName(workspaceId))
+                    .addType(IndexerMapping.PART_TYPE)
+                    .setSearchType(SearchType.QUERY_THEN_FETCH)
+                    .build()
             );
 
         } catch (IOException e) {
@@ -342,7 +354,8 @@ public class IndexerManagerBean implements IIndexerManagerLocal {
 
     private void createIndex(String pIndex) throws IOException {
 
-        Settings settings = Settings.builder()
+       Settings settings = Settings.builder()
+                .loadFromStream(ANALYZER_SETTING_RESOURCE, this.getClass().getResourceAsStream(ANALYZER_SETTING_RESOURCE))
                 .put("number_of_shards", indexerConfigManager.getNumberOfShards())
                 .put("number_of_replicas", indexerConfigManager.getNumberOfReplicas())
                 .put("auto_expand_replicas", indexerConfigManager.getAutoExpandReplicas())
