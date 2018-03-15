@@ -17,13 +17,7 @@ import io.searchbox.core.*;
 import io.searchbox.indices.CreateIndex;
 import io.searchbox.indices.mapping.PutMapping;
 import io.searchbox.params.SearchType;
-import org.apache.commons.io.IOUtils;
-import org.elasticsearch.client.transport.TransportClient;
-import org.elasticsearch.common.io.stream.InputStreamStreamInput;
-import org.elasticsearch.common.io.stream.StreamInput;
 import org.elasticsearch.common.settings.Settings;
-import org.elasticsearch.common.transport.InetSocketTransportAddress;
-import org.elasticsearch.common.transport.TransportAddress;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
 import org.elasticsearch.index.query.QueryBuilder;
@@ -54,13 +48,9 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.InetAddress;
-import java.nio.file.Paths;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import org.elasticsearch.client.*;
 
 /**
  * @author Morgan Guimard
