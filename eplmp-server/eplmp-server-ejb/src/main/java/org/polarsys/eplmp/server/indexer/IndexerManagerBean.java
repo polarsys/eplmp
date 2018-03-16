@@ -93,7 +93,7 @@ public class IndexerManagerBean implements IIndexerManagerLocal {
             createIndex(IndexerUtils.formatIndexName(workspaceId));
         } catch (IOException e) {
             //Throw an application exception?
-            LOGGER.log(Level.SEVERE, "Cannot create index for workspace [" + workspaceId + "]", e);
+            LOGGER.log(Level.WARNING, "Cannot create index for workspace [" + workspaceId + "]", e);
         }
     }
 
@@ -279,7 +279,7 @@ public class IndexerManagerBean implements IIndexerManagerLocal {
                 mailer.sendBulkIndexationSuccess(account);
             } else {
                 String failureMessage = result.getErrorMessage();
-                LOGGER.log(Level.SEVERE, "Failures while bulk indexing workspace [" + workspaceId + "]: \n" + failureMessage);
+                LOGGER.log(Level.WARNING, "Failures while bulk indexing workspace [" + workspaceId + "]: \n" + failureMessage);
                 mailer.sendBulkIndexationFailure(account, failureMessage);
             }
         } catch (IOException e) {
@@ -357,7 +357,7 @@ public class IndexerManagerBean implements IIndexerManagerLocal {
                 .build());
 
         if (!result.isSucceeded()) {
-            LOGGER.log(Level.SEVERE, "Cannot create index settings: " + result.getErrorMessage());
+            LOGGER.log(Level.WARNING, "Cannot create index settings: " + result.getErrorMessage());
             return;
         }
 
@@ -367,7 +367,7 @@ public class IndexerManagerBean implements IIndexerManagerLocal {
 
 
         if (!result.isSucceeded()) {
-            LOGGER.log(Level.SEVERE, "Cannot create index DEFAULT_TYPE mappings: " + result.getErrorMessage());
+            LOGGER.log(Level.WARNING, "Cannot create index DEFAULT_TYPE mappings: " + result.getErrorMessage());
             return;
         }
 
@@ -377,7 +377,7 @@ public class IndexerManagerBean implements IIndexerManagerLocal {
 
 
         if (!result.isSucceeded()) {
-            LOGGER.log(Level.SEVERE, "Cannot create index PART_TYPE mappings: " + result.getErrorMessage());
+            LOGGER.log(Level.WARNING, "Cannot create index PART_TYPE mappings: " + result.getErrorMessage());
             return;
         }
 
@@ -387,7 +387,7 @@ public class IndexerManagerBean implements IIndexerManagerLocal {
 
 
         if (!result.isSucceeded()) {
-            LOGGER.log(Level.SEVERE, "Cannot create index DOCUMENT_TYPE mappings: " + result.getErrorMessage());
+            LOGGER.log(Level.WARNING, "Cannot create index DOCUMENT_TYPE mappings: " + result.getErrorMessage());
             return;
         }
 
@@ -402,7 +402,7 @@ public class IndexerManagerBean implements IIndexerManagerLocal {
             createIndex(index);
         } catch (IOException e) {
             //Throw an application exception?
-            LOGGER.log(Level.SEVERE, "Cannot create index for workspace [" + workspaceId + "]", e);
+            LOGGER.log(Level.WARNING, "Cannot create index for workspace [" + workspaceId + "]", e);
         }
 
         bulkDocumentsIndexRequestBuilder(pBulkRequest, workspaceId);
@@ -484,7 +484,7 @@ public class IndexerManagerBean implements IIndexerManagerLocal {
             try (InputStream in = storageManager.getBinaryResourceInputStream(bin)) {
                 contentInputs.put(bin.getName(), IndexerUtils.streamToString(bin.getFullName(), in));
             } catch (StorageException | IOException e) {
-                LOGGER.log(Level.SEVERE, "Cannot read file " + bin.getFullName(), e);
+                LOGGER.log(Level.WARNING, "Cannot read file " + bin.getFullName(), e);
             }
         }
         return contentInputs;
