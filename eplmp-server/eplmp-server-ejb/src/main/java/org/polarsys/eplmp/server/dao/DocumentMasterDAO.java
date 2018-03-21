@@ -18,6 +18,8 @@ import org.polarsys.eplmp.core.exceptions.DocumentMasterAlreadyExistsException;
 import javax.persistence.EntityExistsException;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceException;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -66,10 +68,24 @@ public class DocumentMasterDAO {
         em.remove(pDocM);
     }
 
-
     public List<DocumentMaster> getAllByWorkspace(String workspaceId) {
         return em.createNamedQuery("DocumentMaster.findByWorkspace",DocumentMaster.class)
                                                  .setParameter("workspaceId",workspaceId)
                                                  .getResultList();
+    }
+
+    public List<DocumentMaster> getPaginatedByWorkspace(String workspaceId, int limit, int offset) {
+        return em.createNamedQuery("DocumentMaster.findByWorkspace",DocumentMaster.class)
+                .setParameter("workspaceId",workspaceId)
+                .setFirstResult(offset)
+                .setMaxResults(limit)
+                .getResultList();
+    }
+
+    public Long getCountByWorkspace(String workspaceId) {
+        CriteriaBuilder cb = em.getCriteriaBuilder();
+        CriteriaQuery<Long> countQuery = cb.createQuery(Long.class);
+        countQuery.select(cb.count(countQuery.from(DocumentMaster.class)));
+        return em.createQuery(countQuery).getSingleResult();
     }
 }

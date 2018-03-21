@@ -413,33 +413,50 @@ public class IndexerManagerBean implements IIndexerManagerLocal {
 
     private Bulk.Builder bulkDocumentsIndexRequestBuilder(Bulk.Builder pBulkRequest, String workspaceId) {
         DocumentMasterDAO docMasterDAO = new DocumentMasterDAO(em);
-        for (DocumentMaster docM : docMasterDAO.getAllByWorkspace(workspaceId)) {
-            for (DocumentRevision docR : docM.getDocumentRevisions()) {
-                docR.getDocumentIterations().stream().filter(documentIteration -> documentIteration.getCheckInDate() != null)
-                        .forEach(documentIteration -> {
-                            try {
-                                pBulkRequest.addAction(indexRequest(documentIteration));
-                            } catch (IOException e) {
-                                LOGGER.log(Level.WARNING, "The document " + documentIteration + " cannot be indexed.", e);
-                            }
-                        });
+
+        Long countByWorkspace = docMasterDAO.getCountByWorkspace(workspaceId);
+        Integer limit = 1000;
+        Integer numberOfPage = (int) Math.ceil(countByWorkspace.doubleValue() / limit.doubleValue());
+        
+        for(int pageIndex = 0 ; pageIndex < numberOfPage ; pageIndex++) {
+            int offset = pageIndex * limit;
+            for (DocumentMaster docM : docMasterDAO.getPaginatedByWorkspace(workspaceId, limit, offset)) {
+                for (DocumentRevision docR : docM.getDocumentRevisions()) {
+                    docR.getDocumentIterations().stream().filter(documentIteration -> documentIteration.getCheckInDate() != null)
+                            .forEach(documentIteration -> {
+                                try {
+                                    pBulkRequest.addAction(indexRequest(documentIteration));
+                                } catch (IOException e) {
+                                    LOGGER.log(Level.WARNING, "The document " + documentIteration + " cannot be indexed.", e);
+                                }
+                            });
+                }
             }
         }
+
         return pBulkRequest;
     }
 
     private Bulk.Builder bulkPartsIndexRequestBuilder(Bulk.Builder pBulkRequest, String workspaceId) {
         PartMasterDAO partMasterDAO = new PartMasterDAO(em);
-        for (PartMaster partMaster : partMasterDAO.getAllByWorkspace(workspaceId)) {
-            for (PartRevision partRev : partMaster.getPartRevisions()) {
-                partRev.getPartIterations().stream().filter(partIteration -> partIteration.getCheckInDate() != null)
-                        .forEach(partIteration -> {
-                            try {
-                                pBulkRequest.addAction(indexRequest(partIteration));
-                            } catch (IOException e) {
-                                LOGGER.log(Level.WARNING, "The part " + partIteration.getKey() + " cannot be indexed.", e);
-                            }
-                        });
+
+        Long countByWorkspace = partMasterDAO.getCountByWorkspace(workspaceId);
+        Integer limit = 1000;
+        Integer numberOfPage = (int) Math.ceil(countByWorkspace.doubleValue() / limit.doubleValue());
+
+        for(int pageIndex = 0 ; pageIndex < numberOfPage ; pageIndex++) {
+            int offset = pageIndex * limit;
+            for (PartMaster partMaster : partMasterDAO.getPaginatedByWorkspace(workspaceId, limit, offset)) {
+                for (PartRevision partRev : partMaster.getPartRevisions()) {
+                    partRev.getPartIterations().stream().filter(partIteration -> partIteration.getCheckInDate() != null)
+                            .forEach(partIteration -> {
+                                try {
+                                    pBulkRequest.addAction(indexRequest(partIteration));
+                                } catch (IOException e) {
+                                    LOGGER.log(Level.WARNING, "The part " + partIteration.getKey() + " cannot be indexed.", e);
+                                }
+                            });
+                }
             }
         }
         return pBulkRequest;

@@ -19,6 +19,8 @@ import org.polarsys.eplmp.core.product.PartMasterKey;
 import org.polarsys.eplmp.core.product.PartRevision;
 
 import javax.persistence.*;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
 import java.util.List;
 import java.util.Locale;
 import java.util.logging.Level;
@@ -142,5 +144,20 @@ public class PartMasterDAO {
         return em.createNamedQuery("PartMaster.findByWorkspace",PartMaster.class)
                 .setParameter("workspaceId",workspaceId)
                 .getResultList();
+    }
+
+    public List<PartMaster> getPaginatedByWorkspace(String workspaceId, int limit, int offset) {
+        return em.createNamedQuery("PartMaster.findByWorkspace",PartMaster.class)
+                .setParameter("workspaceId",workspaceId)
+                .setFirstResult(offset)
+                .setMaxResults(limit)
+                .getResultList();
+    }
+
+    public Long getCountByWorkspace(String workspaceId) {
+        CriteriaBuilder cb = em.getCriteriaBuilder();
+        CriteriaQuery<Long> countQuery = cb.createQuery(Long.class);
+        countQuery.select(cb.count(countQuery.from(PartMaster.class)));
+        return em.createQuery(countQuery).getSingleResult();
     }
 }
