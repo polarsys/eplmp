@@ -30,6 +30,12 @@ public class SearchQueryParser {
     private static final Logger LOGGER = Logger.getLogger(SearchQueryParser.class.getName());
     private static final String ATTRIBUTES_DELIMITER = ";";
     private static final String ATTRIBUTES_SPLITTER = ":";
+    private static final char CHAR_DELIMITER = ';';
+    private static final char QUOTE_CHAR_DELIMITER = '~';
+    private static final char OTHER_CHAR_DELIMITER = 's';
+    private static final char CHAR_SPLITTER = ':';
+    private static final char QUOTE_SPLITTER = '!';
+    private static final char OTHER_CHAR_SPLITTER = 'c';
 
     private SearchQueryParser() {
         super();
@@ -245,13 +251,20 @@ public class SearchQueryParser {
 
         for (String attributeString : attributesString) {
 
-            int firstColon = attributeString.indexOf(ATTRIBUTES_SPLITTER);
-            String attributeType = attributeString.substring(0, firstColon);
-            attributeString = attributeString.substring(firstColon + 1);
-
-            int secondColon = attributeString.indexOf(ATTRIBUTES_SPLITTER);
-            String attributeName = attributeString.substring(0, secondColon);
-            String attributeValue = attributeString.substring(secondColon + 1);
+            String attributeType = null;
+            String attributeName = null;
+            String attributeValue = null;
+            String[] tokens = attributeString.split(ATTRIBUTES_SPLITTER);
+            if (tokens != null && (tokens.length < 3 || tokens.length > 3)) {
+                attributeType = "UnKnown";
+                LOGGER.log(Level.FINEST, "Parsing Error : " + attributeString, new ParseException("Parsing Error : " + attributeString, 0));
+            }else{
+                attributeType = tokens[0];
+                attributeName = UnquoteSeparator(tokens[1], CHAR_DELIMITER, QUOTE_CHAR_DELIMITER, OTHER_CHAR_DELIMITER);
+                attributeName = UnquoteSeparator(attributeName, CHAR_SPLITTER, QUOTE_SPLITTER, OTHER_CHAR_SPLITTER);
+                attributeValue = UnquoteSeparator(tokens[2], CHAR_DELIMITER, QUOTE_CHAR_DELIMITER, OTHER_CHAR_DELIMITER);
+                attributeValue = UnquoteSeparator(attributeValue, CHAR_SPLITTER, QUOTE_SPLITTER, OTHER_CHAR_SPLITTER);
+            }
 
             switch (attributeType) {
                 case "BOOLEAN":
@@ -296,5 +309,34 @@ public class SearchQueryParser {
 
         }
         return pAttributes;
+    }
+
+    private static String UnquoteSeparator(String str, char separator, char quoteChar, char otherChar) // "~~" -> "~"     "~s" -> ";"
+    {
+
+        StringBuilder sb = new StringBuilder(str.length());
+        boolean isQuoted = false;
+        for (char c : str.toCharArray())
+        {
+            if (isQuoted)
+            {
+                if (c == otherChar)
+                    sb.append(separator);
+                else
+                    sb.append(c);
+                isQuoted = false;
+            }
+            else
+            {
+                if (c == quoteChar)
+                    isQuoted = true;
+                else
+                    sb.append(c);
+            }
+        }
+        if (isQuoted){
+            LOGGER.log(Level.FINEST, "input string is not correctly quoted", new ParseException("input string is not correctly quoted", 0));
+        }
+        return sb.toString(); // ";" are restored
     }
 }
