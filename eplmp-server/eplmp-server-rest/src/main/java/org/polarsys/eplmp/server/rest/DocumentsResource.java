@@ -11,6 +11,9 @@
 
 package org.polarsys.eplmp.server.rest;
 
+import io.swagger.annotations.*;
+import org.dozer.DozerBeanMapperSingletonWrapper;
+import org.dozer.Mapper;
 import org.polarsys.eplmp.core.document.DocumentRevision;
 import org.polarsys.eplmp.core.exceptions.*;
 import org.polarsys.eplmp.core.exceptions.NotAllowedException;
@@ -21,9 +24,6 @@ import org.polarsys.eplmp.core.services.IDocumentWorkflowManagerLocal;
 import org.polarsys.eplmp.server.rest.dto.CountDTO;
 import org.polarsys.eplmp.server.rest.dto.DocumentRevisionDTO;
 import org.polarsys.eplmp.server.rest.util.SearchQueryParser;
-import io.swagger.annotations.*;
-import org.dozer.DozerBeanMapperSingletonWrapper;
-import org.dozer.Mapper;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.security.DeclareRoles;
@@ -126,6 +126,7 @@ public class DocumentsResource {
         size = size == 0 ? 10 : size;
 
         MultivaluedMap<String, String> params = uri.getQueryParameters();
+        // params is a multivalued Map which keys are json object base64 urlencoded
         DocumentSearchQuery documentSearchQuery = SearchQueryParser.parseDocumentStringQuery(workspaceId, params);
         DocumentRevision[] docRs = documentService.searchDocumentRevisions(documentSearchQuery, from, size);
         return mapToDTOs(docRs);
