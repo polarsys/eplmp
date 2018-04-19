@@ -187,8 +187,6 @@ public class QueryResultMessageBodyWriter implements MessageBodyWriter<QueryResu
                 jg.write(QueryField.CTX_DEPTH, row.getDepth());
             }
 
-            jg.flush();
-
             if (selects.contains(QueryField.PART_ITERATION_LINKED_DOCUMENTS)) {
 
                 StringBuilder sb = new StringBuilder();
@@ -230,12 +228,7 @@ public class QueryResultMessageBodyWriter implements MessageBodyWriter<QueryResu
                 }
 
                 jg.write(QueryField.PART_ITERATION_LINKED_DOCUMENTS, sb.toString());
-                // Clearing the StringBuilder
-                sb.delete(0, sb.length());
-
             }
-
-            jg.flush();
 
             for (String attributeSelect : partIterationSelectedAttributes) {
 
@@ -283,8 +276,6 @@ public class QueryResultMessageBodyWriter implements MessageBodyWriter<QueryResu
                 }
             }
 
-            jg.flush();
-
             for (String attributeSelect : pathDataSelectedAttributes) {
 
                 String attributeSelectType = attributeSelect.substring(0, attributeSelect.indexOf(".")).substring(QueryField.PATH_DATA_ATTRIBUTES_PREFIX.length());
@@ -327,8 +318,6 @@ public class QueryResultMessageBodyWriter implements MessageBodyWriter<QueryResu
                 }
             }
 
-            jg.flush();
-
             if (selects.contains(QueryField.CTX_PRODUCT_ID)) {
                 String configurationItemId = queryContext != null ? queryContext.getConfigurationItemId() : "";
                 jg.write(QueryField.CTX_PRODUCT_ID, configurationItemId);
@@ -360,10 +349,10 @@ public class QueryResultMessageBodyWriter implements MessageBodyWriter<QueryResu
             }
 
             jg.writeEnd();
+            jg.flush();
         }
 
         jg.writeEnd();
-        jg.flush();
     }
 
 
