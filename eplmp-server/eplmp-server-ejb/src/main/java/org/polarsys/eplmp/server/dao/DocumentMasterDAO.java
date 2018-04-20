@@ -68,12 +68,6 @@ public class DocumentMasterDAO {
         em.remove(pDocM);
     }
 
-    public List<DocumentMaster> getAllByWorkspace(String workspaceId) {
-        return em.createNamedQuery("DocumentMaster.findByWorkspace",DocumentMaster.class)
-                                                 .setParameter("workspaceId",workspaceId)
-                                                 .getResultList();
-    }
-
     public List<DocumentMaster> getPaginatedByWorkspace(String workspaceId, int limit, int offset) {
         return em.createNamedQuery("DocumentMaster.findByWorkspace",DocumentMaster.class)
                 .setParameter("workspaceId",workspaceId)

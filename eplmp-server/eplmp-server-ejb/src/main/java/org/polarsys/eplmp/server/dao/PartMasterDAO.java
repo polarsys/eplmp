@@ -140,12 +140,6 @@ public class PartMasterDAO {
         return result != null ? result.longValue() : 0L;
     }
 
-    public List<PartMaster> getAllByWorkspace(String workspaceId) {
-        return em.createNamedQuery("PartMaster.findByWorkspace",PartMaster.class)
-                .setParameter("workspaceId",workspaceId)
-                .getResultList();
-    }
-
     public List<PartMaster> getPaginatedByWorkspace(String workspaceId, int limit, int offset) {
         return em.createNamedQuery("PartMaster.findByWorkspace",PartMaster.class)
                 .setParameter("workspaceId",workspaceId)
