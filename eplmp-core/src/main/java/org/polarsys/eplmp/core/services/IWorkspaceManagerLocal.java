@@ -27,7 +27,7 @@ public interface IWorkspaceManagerLocal {
 
     void deleteWorkspace(String workspaceId);
 
-    Workspace changeAdmin(String workspaceId, String login) throws WorkspaceNotFoundException, AccountNotFoundException, UserNotFoundException, UserNotActiveException, AccessRightException, WorkspaceNotEnabledException;
+    Workspace changeAdmin(String workspaceId, String login) throws WorkspaceNotFoundException, AccountNotFoundException, UserNotFoundException, UserNotActiveException, AccessRightException, WorkspaceNotEnabledException, NotAllowedException;
 
     Workspace enableWorkspace(String workspaceId, boolean enabled) throws WorkspaceNotFoundException;
 
