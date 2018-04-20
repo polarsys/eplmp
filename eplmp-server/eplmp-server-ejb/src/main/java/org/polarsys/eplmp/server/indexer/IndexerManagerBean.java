@@ -416,7 +416,7 @@ public class IndexerManagerBean implements IIndexerManagerLocal {
 
         Long countByWorkspace = docMasterDAO.getCountByWorkspace(workspaceId);
         Integer limit = 1000;
-        Integer numberOfPage = (int) Math.ceil(countByWorkspace.doubleValue() / limit.doubleValue());
+        int numberOfPage = (int) Math.ceil(countByWorkspace.doubleValue() / limit.doubleValue());
         
         for(int pageIndex = 0 ; pageIndex < numberOfPage ; pageIndex++) {
             int offset = pageIndex * limit;
@@ -442,7 +442,7 @@ public class IndexerManagerBean implements IIndexerManagerLocal {
 
         Long countByWorkspace = partMasterDAO.getCountByWorkspace(workspaceId);
         Integer limit = 1000;
-        Integer numberOfPage = (int) Math.ceil(countByWorkspace.doubleValue() / limit.doubleValue());
+        int numberOfPage = (int) Math.ceil(countByWorkspace.doubleValue() / limit.doubleValue());
 
         for(int pageIndex = 0 ; pageIndex < numberOfPage ; pageIndex++) {
             int offset = pageIndex * limit;
