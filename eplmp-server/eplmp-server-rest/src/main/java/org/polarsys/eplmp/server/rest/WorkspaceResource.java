@@ -388,7 +388,7 @@ public class WorkspaceResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "New admin user") UserDTO userDTO)
             throws AccountNotFoundException, AccessRightException, WorkspaceNotFoundException,
-            UserNotFoundException, UserNotActiveException, WorkspaceNotEnabledException {
+            UserNotFoundException, UserNotActiveException, WorkspaceNotEnabledException, NotAllowedException {
 
         Workspace workspace = workspaceManager.changeAdmin(workspaceId, userDTO.getLogin());
         return Response.ok(mapper.map(workspace, WorkspaceDTO.class)).build();
