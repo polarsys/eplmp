@@ -34,6 +34,7 @@ import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -125,7 +126,7 @@ public class WorkspaceManagerBean implements IWorkspaceManagerLocal {
 
     @Override
     @RolesAllowed({UserGroupMapping.REGULAR_USER_ROLE_ID, UserGroupMapping.ADMIN_ROLE_ID})
-    public Workspace changeAdmin(String workspaceId, String login) throws WorkspaceNotFoundException, AccountNotFoundException, UserNotFoundException, UserNotActiveException, AccessRightException, WorkspaceNotEnabledException {
+    public Workspace changeAdmin(String workspaceId, String login) throws WorkspaceNotFoundException, AccountNotFoundException, UserNotFoundException, UserNotActiveException, AccessRightException, WorkspaceNotEnabledException, NotAllowedException {
         Workspace workspace = new WorkspaceDAO(em).loadWorkspace(workspaceId);
         Account account = new AccountDAO(em).loadAccount(login);
 
@@ -134,6 +135,11 @@ public class WorkspaceManagerBean implements IWorkspaceManagerLocal {
 
         } else {
             if (workspace.getAdmin().getLogin().equals(contextManager.getCallerPrincipalLogin())) {
+                User[] users = userManager.getUsers(workspaceId);
+                if(Arrays.stream(users).noneMatch(u -> u.getLogin().equals(login))) {
+                    User user = userManager.whoAmI(workspaceId);
+                    throw new NotAllowedException(new Locale(user.getLanguage()), "NotAllowedException70");
+                }
                 workspace.setAdmin(account);
             } else {
                 User user = userManager.whoAmI(workspaceId);
