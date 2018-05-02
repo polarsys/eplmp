@@ -27,6 +27,9 @@ public class OrganizationDTO implements Serializable {
     @ApiModelProperty(value = "Description of the organization")
     private String description;
 
+    @ApiModelProperty(value = "Login of the organization admin")
+    private String owner;
+
     public OrganizationDTO() {
     }
 
@@ -38,4 +41,11 @@ public class OrganizationDTO implements Serializable {
 
     public void setDescription(String description) { this.description = description; }
 
+    public String getOwner() {
+        return owner;
+    }
+
+    public void setOwner(String owner) {
+        this.owner = owner;
+    }
 }

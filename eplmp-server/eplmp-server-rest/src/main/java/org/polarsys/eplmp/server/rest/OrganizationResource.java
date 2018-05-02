@@ -253,4 +253,5 @@ public class OrganizationResource {
             organizationManager.updateOrganization(organization);
         }
     }
+
 }
