@@ -21,7 +21,7 @@ import java.io.Serializable;
  * @author Yassine Belouad
  */
 @XmlRootElement
-@ApiModel(value="DocumentCreationDTO", description="Use this class to create a new {@link org.polarsys.eplmp.core.document.DocumentLink} entity")
+@ApiModel(value="DocumentCreationDTO", description="Use this class to create a new {@link org.polarsys.eplmp.core.document.DocumentMaster} entity  and its {@link org.polarsys.eplmp.core.document.DocumentRevision} ")
 public class DocumentCreationDTO implements Serializable, Comparable<DocumentCreationDTO> {
 
     @ApiModelProperty(value = "Workspace id")

@@ -21,7 +21,7 @@ import java.util.List;
  * @author Florent Garin
  */
 @XmlRootElement
-@ApiModel(value="ConfigurationItemDTO", description="This class is the representation of an {@link org.polarsys.eplmp.core.product.ConfigurationItem} entity")
+@ApiModel(value="ConfigurationItemDTO", description="This class is the representation of a {@link org.polarsys.eplmp.core.product.ConfigurationItem} entity")
 public class ConfigurationItemDTO implements Serializable {
 
     @ApiModelProperty(value = "Configuration item id")

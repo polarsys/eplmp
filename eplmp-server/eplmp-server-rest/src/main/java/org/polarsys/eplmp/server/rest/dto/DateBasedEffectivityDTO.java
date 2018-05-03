@@ -20,7 +20,7 @@ import java.util.Date;
 
 @XmlRootElement
 @ApiModel(value = "DateBasedEffectivityDTO",
-        description = "This class is the representation of an {@link org.polarsys.eplmp.core.common.DateBasedEffectivity} entity",
+        description = "This class is the representation of a {@link org.polarsys.eplmp.core.common.DateBasedEffectivity} entity",
         parent = EffectivityDTO.class)
 public class DateBasedEffectivityDTO extends EffectivityDTO implements Serializable {
 

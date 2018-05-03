@@ -20,7 +20,7 @@ import java.util.Date;
 import java.util.List;
 
 @XmlRootElement
-@ApiModel(value="ImportDTO", description="This class is a representation of a {@link org.polarsys.eplmp.core.product.Import} entity")
+@ApiModel(value="ImportDTO", description="This class is a representation of an {@link org.polarsys.eplmp.core.product.Import} entity")
 public class ImportDTO implements Serializable {
 
     @ApiModelProperty(value = "Import id")
