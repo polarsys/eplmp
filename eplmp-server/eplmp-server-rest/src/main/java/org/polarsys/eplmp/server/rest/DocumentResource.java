@@ -74,7 +74,7 @@ public class DocumentResource {
     }
 
     @GET
-    @ApiOperation(value = "Get document",
+    @ApiOperation(value = "Get document revision",
             response = DocumentRevisionDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of DocumentRevisionDTO"),
@@ -104,7 +104,7 @@ public class DocumentResource {
 
 
     @PUT
-    @ApiOperation(value = "Checkin document",
+    @ApiOperation(value = "Checkin document revision",
             response = DocumentRevisionDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of checked in DocumentRevisionDTO"),
@@ -126,7 +126,7 @@ public class DocumentResource {
     }
 
     @PUT
-    @ApiOperation(value = "Checkout document",
+    @ApiOperation(value = "Checkout document revision",
             response = DocumentRevisionDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of checked out DocumentRevisionDTO"),
@@ -151,7 +151,7 @@ public class DocumentResource {
     }
 
     @PUT
-    @ApiOperation(value = "Undo checkout document",
+    @ApiOperation(value = "Undo checkout document revision",
             response = DocumentRevisionDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of undo checked out DocumentRevisionDTO"),
@@ -174,7 +174,7 @@ public class DocumentResource {
     }
 
     @PUT
-    @ApiOperation(value = "Move document to folder",
+    @ApiOperation(value = "Move document revision to given folder",
             response = DocumentRevisionDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of updated DocumentRevisionDTO"),
@@ -201,7 +201,7 @@ public class DocumentResource {
     }
 
     @PUT
-    @ApiOperation(value = "Subscribe to notifications on change events",
+    @ApiOperation(value = "Subscribe to notifications on change events for given document revision",
             response = Response.class)
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful change event subscription"),
@@ -219,7 +219,7 @@ public class DocumentResource {
     }
 
     @PUT
-    @ApiOperation(value = "Unsubscribe from notifications on change events",
+    @ApiOperation(value = "Unsubscribe from notifications on change events for given document revision",
             response = Response.class)
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful change event un-subscription"),
@@ -237,7 +237,7 @@ public class DocumentResource {
     }
 
     @PUT
-    @ApiOperation(value = "Subscribe to notifications on state events",
+    @ApiOperation(value = "Subscribe to notifications on state events for given document revision",
             response = Response.class)
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful state event subscription"),
@@ -255,7 +255,7 @@ public class DocumentResource {
     }
 
     @PUT
-    @ApiOperation(value = "Unsubscribe to notifications on state events",
+    @ApiOperation(value = "Unsubscribe to notifications on state events for given document revision",
             response = Response.class)
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful state event un-subscription"),
@@ -326,7 +326,7 @@ public class DocumentResource {
     }
 
     @PUT
-    @ApiOperation(value = "Create a new version of the document",
+    @ApiOperation(value = "Create a new version of the document revision",
             response = DocumentRevisionDTO.class,
             responseContainer = "List")
     @ApiResponses(value = {
@@ -382,7 +382,7 @@ public class DocumentResource {
     }
 
     @PUT
-    @ApiOperation(value = "Release document",
+    @ApiOperation(value = "Release document revision",
             response = DocumentRevisionDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of released DocumentRevisionDTO"),
@@ -404,7 +404,7 @@ public class DocumentResource {
     }
 
     @PUT
-    @ApiOperation(value = "Set document as obsolete",
+    @ApiOperation(value = "Set document revision as obsolete",
             response = DocumentRevisionDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of obsolete DocumentRevisionDTO"),
@@ -426,7 +426,7 @@ public class DocumentResource {
     }
 
     @PUT
-    @ApiOperation(value = "Set the tags of the document",
+    @ApiOperation(value = "Set the tags of the document revision",
             response = DocumentRevisionDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of updated DocumentRevisionDTO"),
@@ -458,7 +458,7 @@ public class DocumentResource {
     }
 
     @POST
-    @ApiOperation(value = "Add tags to document",
+    @ApiOperation(value = "Add tags to document revision",
             response = DocumentRevisionDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of updated DocumentRevisionDTO"),
@@ -497,7 +497,7 @@ public class DocumentResource {
     }
 
     @DELETE
-    @ApiOperation(value = "Remove tags from document",
+    @ApiOperation(value = "Remove tags from document revision",
             response = DocumentRevisionDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of updated DocumentRevisionDTO"),
@@ -519,7 +519,7 @@ public class DocumentResource {
         return documentRevisionDTO;
     }
 
-    @ApiOperation(value = "Delete the document",
+    @ApiOperation(value = "Delete the document revision",
             response = Response.class)
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful deletion of DocumentRevisionDTO"),
@@ -539,7 +539,7 @@ public class DocumentResource {
     }
 
     @PUT
-    @ApiOperation(value = "Rename attached files of document",
+    @ApiOperation(value = "Rename attached files of document iteration",
             response = FileDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of updated FileDTO"),
@@ -565,7 +565,7 @@ public class DocumentResource {
     }
 
     @DELETE
-    @ApiOperation(value = "Remove attached file from document",
+    @ApiOperation(value = "Remove attached file from document iteration",
             response = Response.class)
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful deletion of file"),
@@ -586,7 +586,7 @@ public class DocumentResource {
     }
 
     @POST
-    @ApiOperation(value = "Create a shared document",
+    @ApiOperation(value = "Create a shared document for given document revision",
             response = SharedDocumentDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of created SharedDocumentDTO"),
@@ -615,7 +615,7 @@ public class DocumentResource {
 
 
     @PUT
-    @ApiOperation(value = "Publish a document",
+    @ApiOperation(value = "Publish a document revision",
             response = Response.class)
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful publication"),
@@ -634,7 +634,7 @@ public class DocumentResource {
     }
 
     @PUT
-    @ApiOperation(value = "Un-publish a document",
+    @ApiOperation(value = "Un-publish a document revision",
             response = Response.class)
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful un-publication"),
@@ -653,7 +653,7 @@ public class DocumentResource {
     }
 
     @PUT
-    @ApiOperation(value = "Update document's ACL",
+    @ApiOperation(value = "Update document revision ACL",
             response = Response.class)
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful ACL removal"),
@@ -679,7 +679,7 @@ public class DocumentResource {
     }
 
     @GET
-    @ApiOperation(value = "Get document's aborted workflow history",
+    @ApiOperation(value = "Get document revision aborted workflow history",
             response = WorkflowDTO.class,
             responseContainer = "List")
     @ApiResponses(value = {
@@ -708,7 +708,7 @@ public class DocumentResource {
     }
 
     @GET
-    @ApiOperation(value = "Get inverse documents links",
+    @ApiOperation(value = "Get inverse document revisions links",
             response = DocumentRevisionDTO.class,
             responseContainer = "List")
     @ApiResponses(value = {
@@ -736,7 +736,7 @@ public class DocumentResource {
     }
 
     @GET
-    @ApiOperation(value = "Get inverse parts links",
+    @ApiOperation(value = "Get inverse part revisions links",
             response = PartRevisionDTO.class,
             responseContainer = "List")
     @ApiResponses(value = {

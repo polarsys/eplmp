@@ -58,7 +58,7 @@ public class WorkflowResource {
     }
 
     @GET
-    @ApiOperation(value = "Get instantiated workflow",
+    @ApiOperation(value = "Get instantiated workflow in workspace",
             response = WorkflowDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of WorkflowDTO"),

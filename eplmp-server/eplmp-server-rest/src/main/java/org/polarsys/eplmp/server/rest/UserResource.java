@@ -68,7 +68,7 @@ public class UserResource {
     }
 
     @GET
-    @ApiOperation(value = "Get users",
+    @ApiOperation(value = "Get users in workspace",
             response = UserDTO.class,
             responseContainer = "List")
     @ApiResponses(value = {
@@ -92,7 +92,7 @@ public class UserResource {
     }
 
     @GET
-    @ApiOperation(value = "Get current user details",
+    @ApiOperation(value = "Get authenticated user details",
             response = UserDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of UserDTO"),

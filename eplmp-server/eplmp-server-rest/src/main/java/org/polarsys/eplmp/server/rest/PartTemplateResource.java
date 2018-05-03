@@ -120,7 +120,7 @@ public class PartTemplateResource {
     }
 
     @POST
-    @ApiOperation(value = "Crate part master template",
+    @ApiOperation(value = "Crate a new part master template",
             response = PartMasterTemplateDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of created PartMasterTemplateDTO"),

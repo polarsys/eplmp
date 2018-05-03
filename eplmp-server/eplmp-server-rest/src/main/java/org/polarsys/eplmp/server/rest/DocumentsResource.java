@@ -69,7 +69,7 @@ public class DocumentsResource {
     }
 
     @GET
-    @ApiOperation(value = "Get documents in workspace",
+    @ApiOperation(value = "Get document revisions in workspace",
             response = DocumentRevisionDTO.class,
             responseContainer = "List")
     @ApiResponses(value = {
@@ -91,7 +91,7 @@ public class DocumentsResource {
     }
 
     @GET
-    @ApiOperation(value = "Search documents",
+    @ApiOperation(value = "Search document revisions",
             response = DocumentRevisionDTO.class,
             responseContainer = "List")
     @ApiResponses(value = {
@@ -132,7 +132,7 @@ public class DocumentsResource {
     }
 
     @GET
-    @ApiOperation(value = "Count documents",
+    @ApiOperation(value = "Count document revisions",
             response = CountDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of documents count"),
@@ -150,7 +150,7 @@ public class DocumentsResource {
 
 
     @GET
-    @ApiOperation(value = "Get checked out documents",
+    @ApiOperation(value = "Get checked out document revisions",
             response = DocumentRevisionDTO.class,
             responseContainer = "List")
     @ApiResponses(value = {
@@ -169,7 +169,7 @@ public class DocumentsResource {
     }
 
     @GET
-    @ApiOperation(value = "Count checked out documents",
+    @ApiOperation(value = "Count checked out document revisions",
             response = DocumentRevisionDTO.class,
             responseContainer = "List")
     @ApiResponses(value = {
@@ -188,7 +188,7 @@ public class DocumentsResource {
 
 
     @GET
-    @ApiOperation(value = "Search documents by id and/or name",
+    @ApiOperation(value = "Search document revisions by id and/or name",
             response = DocumentRevisionDTO.class,
             responseContainer = "List")
     @ApiResponses(value = {

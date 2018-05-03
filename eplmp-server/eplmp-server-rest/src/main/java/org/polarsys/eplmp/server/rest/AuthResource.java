@@ -97,7 +97,7 @@ public class AuthResource {
 
     @POST
     @Path("/login")
-    @ApiOperation(value = "Try to authenticate",
+    @ApiOperation(value = "Try to authenticate with credentials",
             response = AccountDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful login"),
@@ -183,7 +183,7 @@ public class AuthResource {
 
     @POST
     @Path("/recover")
-    @ApiOperation(value = "Recover password",
+    @ApiOperation(value = "Recover account password",
             response = Response.class)
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful recover request"),
@@ -225,7 +225,7 @@ public class AuthResource {
 
     @GET
     @Path("/providers")
-    @ApiOperation(value = "Get supported providers",
+    @ApiOperation(value = "Get registered OAuth providers",
             response = OAuthProviderPublicDTO.class,
             responseContainer = "List")
     @ApiResponses(value = {
@@ -251,7 +251,7 @@ public class AuthResource {
 
     @GET
     @Path("/providers/{id}")
-    @ApiOperation(value = "Get provider details",
+    @ApiOperation(value = "Get OAuth provider details",
             response = OAuthProviderPublicDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of provider."),
@@ -291,7 +291,7 @@ public class AuthResource {
 
     @POST
     @Path("/oauth")
-    @ApiOperation(value = "Try to authenticate with oauth",
+    @ApiOperation(value = "Try to authenticate with OAuth",
             response = AccountDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful login"),

@@ -104,13 +104,13 @@ public class ChangeItemDAO {
         return pChange;
     }
 
-    public List<ChangeIssue> findAllChangeIssuesWithReferenceLike(String pWorkspaceId, String reference, int maxResults) {
-        return em.createNamedQuery("ChangeIssue.findByReference",ChangeIssue.class)
+    public List<ChangeIssue> findAllChangeIssuesWithNameLike(String pWorkspaceId, String reference, int maxResults) {
+        return em.createNamedQuery("ChangeIssue.findByName",ChangeIssue.class)
                 .setParameter(WORKSPACEID, pWorkspaceId).setParameter("name", "%" + reference + "%").setMaxResults(maxResults).getResultList();
     }
 
-    public List<ChangeRequest> findAllChangeRequestsWithReferenceLike(String pWorkspaceId, String reference, int maxResults) {
-        return em.createNamedQuery("ChangeRequest.findByReference",ChangeRequest.class)
+    public List<ChangeRequest> findAllChangeRequestsWithNameLike(String pWorkspaceId, String reference, int maxResults) {
+        return em.createNamedQuery("ChangeRequest.findByName",ChangeRequest.class)
                 .setParameter(WORKSPACEID, pWorkspaceId).setParameter("name", "%" + reference + "%").setMaxResults(maxResults).getResultList();
     }
 

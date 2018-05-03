@@ -70,7 +70,7 @@ public class ProductBaselinesResource {
     }
 
     @GET
-    @ApiOperation(value = "Get product-baselines with given workspace",
+    @ApiOperation(value = "Get product-baselines in given workspace",
             response = ProductBaselineDTO.class,
             responseContainer = "List")
     @ApiResponses(value = {
@@ -110,7 +110,7 @@ public class ProductBaselinesResource {
     }
 
     @POST
-    @ApiOperation(value = "Create product-baseline",
+    @ApiOperation(value = "Create a new product-baseline",
             response = ProductBaselineDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of ProductBaselineDTO"),
@@ -168,7 +168,7 @@ public class ProductBaselinesResource {
     }
 
     @GET
-    @ApiOperation(value = "Get product-baseline",
+    @ApiOperation(value = "Get product-baseline by id",
             response = ProductBaselineDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of ProductBaselineDTO"),
@@ -216,7 +216,7 @@ public class ProductBaselinesResource {
     }
 
     @GET
-    @ApiOperation(value = "Get product-baseline's part",
+    @ApiOperation(value = "Get product-baseline's baselined parts",
             response = BaselinedPartDTO.class,
             responseContainer = "List")
     @ApiResponses(value = {

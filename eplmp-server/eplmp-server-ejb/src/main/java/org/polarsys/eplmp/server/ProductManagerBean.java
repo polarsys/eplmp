@@ -1990,6 +1990,7 @@ public class ProductManagerBean implements IProductManagerLocal {
         User user = userManager.checkWorkspaceReadAccess(pWorkspaceId);
         List<PartRevision> partRevisions;
 
+        // potential OOM => should restrict pMaxResults
         if (pMaxResults == 0) {
             partRevisions = new PartRevisionDAO(new Locale(user.getLanguage()), em).getAllPartRevisions(pWorkspaceId);
         } else {

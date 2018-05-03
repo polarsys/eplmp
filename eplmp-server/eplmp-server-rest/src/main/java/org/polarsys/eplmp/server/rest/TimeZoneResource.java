@@ -34,7 +34,7 @@ public class TimeZoneResource {
     }
 
     @GET
-    @ApiOperation(value = "Get timezones",
+    @ApiOperation(value = "Get supported timezones",
             response = String.class,
             responseContainer = "List")
     @ApiResponses(value = {

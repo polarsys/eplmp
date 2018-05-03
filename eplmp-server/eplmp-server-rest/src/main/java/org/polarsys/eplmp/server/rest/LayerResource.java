@@ -49,7 +49,7 @@ public class LayerResource {
     }
 
     @GET
-    @ApiOperation(value = "Get layers",
+    @ApiOperation(value = "Get layers for given product",
             response = LayerDTO.class,
             responseContainer = "List")
     @ApiResponses(value = {
@@ -74,7 +74,7 @@ public class LayerResource {
 
 
     @POST
-    @ApiOperation(value = "Create layers",
+    @ApiOperation(value = "Create a new layer for given product",
             response = LayerDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of created LayerDTO"),
@@ -137,7 +137,7 @@ public class LayerResource {
     }
 
     @GET
-    @ApiOperation(value = "Get markers",
+    @ApiOperation(value = "Get markers of a given layer",
             response = MarkerDTO.class,
             responseContainer = "List")
     @ApiResponses(value = {
@@ -164,7 +164,7 @@ public class LayerResource {
     }
 
     @POST
-    @ApiOperation(value = "Create marker",
+    @ApiOperation(value = "Create a new marker in a given layer",
             response = MarkerDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of created MarkerDTO"),

@@ -60,7 +60,7 @@ public class FolderResource {
 
     @GET
     @Path("{folderId}/documents/")
-    @ApiOperation(value = "Get documents in folder",
+    @ApiOperation(value = "Get document revisions in given folder",
             response = DocumentRevisionDTO.class,
             responseContainer = "List")
     @ApiResponses(value = {
@@ -92,7 +92,7 @@ public class FolderResource {
 
     @POST
     @Path("{folderId}/documents/")
-    @ApiOperation(value = "Create document",
+    @ApiOperation(value = "Create a new document revision in given folder",
             response = DocumentRevisionDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 201, message = "Successful retrieval of created DocumentRevisionDTO"),
@@ -174,7 +174,7 @@ public class FolderResource {
     }
 
     @GET
-    @ApiOperation(value = "Get sub folders",
+    @ApiOperation(value = "Get sub folders of given folder",
             response = FolderDTO.class,
             responseContainer = "List")
     @ApiResponses(value = {
@@ -235,7 +235,7 @@ public class FolderResource {
      * PUT method for moving folder into an other
      */
     @PUT
-    @ApiOperation(value = "Move a folder",
+    @ApiOperation(value = "Move a folder to given folder",
             response = FolderDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of updated FolderDTO"),
@@ -271,7 +271,7 @@ public class FolderResource {
     }
 
     @POST
-    @ApiOperation(value = "Create a sub folder",
+    @ApiOperation(value = "Create a sub folder in a given folder",
             response = FolderDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of created FolderDTO"),
