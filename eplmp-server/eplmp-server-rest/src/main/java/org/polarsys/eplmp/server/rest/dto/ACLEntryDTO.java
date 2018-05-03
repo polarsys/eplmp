@@ -21,6 +21,7 @@ import java.io.Serializable;
 @XmlRootElement
 @ApiModel(value = "ACLEntryDTO", description = "This class holds permission data")
 public class ACLEntryDTO implements Serializable {
+
     @ApiModelProperty(value = "Member id")
     private String key;
 

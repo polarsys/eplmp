@@ -25,6 +25,7 @@ public class ModificationNotificationDTO implements Serializable {
 
     @ApiModelProperty(value = "Modification notification id")
     private int id;
+
     @ApiModelProperty(value = "Impacted part number")
     private String impactedPartNumber;
 

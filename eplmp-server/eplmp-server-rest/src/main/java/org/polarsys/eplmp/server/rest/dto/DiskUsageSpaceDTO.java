@@ -1,13 +1,13 @@
 /*******************************************************************************
-  * Copyright (c) 2017 DocDoku.
-  * All rights reserved. This program and the accompanying materials
-  * are made available under the terms of the Eclipse Public License v1.0
-  * which accompanies this distribution, and is available at
-  * http://www.eclipse.org/legal/epl-v10.html
-  *
-  * Contributors:
-  *    DocDoku - initial API and implementation
-  *******************************************************************************/
+ * Copyright (c) 2017 DocDoku.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ * <p>
+ * Contributors:
+ * DocDoku - initial API and implementation
+ *******************************************************************************/
 
 package org.polarsys.eplmp.server.rest.dto;
 
@@ -21,7 +21,7 @@ import java.io.Serializable;
  * @author Morgan Guimard
  */
 @XmlRootElement
-@ApiModel(value="DiskUsageSpaceDTO", description="This class provides storage information")
+@ApiModel(value = "DiskUsageSpaceDTO", description = "This class provides storage information for a given workspace or for the entire platform")
 public class DiskUsageSpaceDTO implements Serializable {
 
     @ApiModelProperty(value = "Storage size for document files")

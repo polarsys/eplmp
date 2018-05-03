@@ -19,7 +19,7 @@ import java.io.Serializable;
 
 @XmlRootElement
 @ApiModel(value = "LotBasedEffectivityDTO",
-        description = "This class is the representation of an {@link org.polarsys.eplmp.core.common.LotBasedEffectivity} entity",
+        description = "This class is the representation of a {@link org.polarsys.eplmp.core.common.LotBasedEffectivity} entity",
         parent = EffectivityDTO.class)
 public class LotBasedEffectivityDTO extends EffectivityDTO implements Serializable {
 
