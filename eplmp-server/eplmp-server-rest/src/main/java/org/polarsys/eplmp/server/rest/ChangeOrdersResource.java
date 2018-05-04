@@ -13,9 +13,8 @@ package org.polarsys.eplmp.server.rest;
 import org.polarsys.eplmp.core.change.ChangeItem;
 import org.polarsys.eplmp.core.change.ChangeOrder;
 import org.polarsys.eplmp.core.document.DocumentIterationKey;
-import org.polarsys.eplmp.core.exceptions.AccessRightException;
-import org.polarsys.eplmp.core.exceptions.EntityNotFoundException;
-import org.polarsys.eplmp.core.exceptions.UserNotActiveException;
+import org.polarsys.eplmp.core.exceptions.*;
+import org.polarsys.eplmp.core.exceptions.NotAllowedException;
 import org.polarsys.eplmp.core.meta.Tag;
 import org.polarsys.eplmp.core.product.PartIterationKey;
 import org.polarsys.eplmp.core.security.UserGroupMapping;
@@ -97,7 +96,7 @@ public class ChangeOrdersResource {
     public ChangeOrderDTO createOrder(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Change order to create") ChangeOrderDTO changeOrderDTO)
-            throws EntityNotFoundException, AccessRightException {
+            throws EntityNotFoundException, AccessRightException, org.polarsys.eplmp.core.exceptions.NotAllowedException {
         ChangeOrder changeOrder = changeManager.createChangeOrder(workspaceId,
                 changeOrderDTO.getName(),
                 changeOrderDTO.getDescription(),
@@ -145,7 +144,7 @@ public class ChangeOrdersResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Order id") @PathParam("orderId") int orderId,
             @ApiParam(required = true, value = "Change order to update") ChangeOrderDTO pChangeOrderDTO)
-            throws EntityNotFoundException, UserNotActiveException, AccessRightException {
+            throws EntityNotFoundException, UserNotActiveException, AccessRightException, NotAllowedException {
         ChangeOrder changeOrder = changeManager.updateChangeOrder(orderId,
                 workspaceId,
                 pChangeOrderDTO.getDescription(),

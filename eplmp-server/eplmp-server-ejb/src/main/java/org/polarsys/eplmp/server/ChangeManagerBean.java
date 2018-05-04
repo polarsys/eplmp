@@ -99,10 +99,14 @@ public class ChangeManagerBean implements IChangeManagerLocal {
 
     @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
     @Override
-    public ChangeIssue createChangeIssue(String pWorkspaceId, String name, String description, String initiator, ChangeItemPriority priority, String assignee, ChangeItemCategory category) throws UserNotFoundException, AccessRightException, WorkspaceNotFoundException, WorkspaceNotEnabledException {
+    public ChangeIssue createChangeIssue(String pWorkspaceId, String name, String description, String initiator, ChangeItemPriority priority, String assignee, ChangeItemCategory category)
+            throws UserNotFoundException, AccessRightException, WorkspaceNotFoundException, WorkspaceNotEnabledException, NotAllowedException, AccountNotFoundException {
         User user = userManager.checkWorkspaceWriteAccess(pWorkspaceId);
         User assigneeUser = null;
-        if (assignee != null && pWorkspaceId != null) {
+        if (assignee != null && !assignee.isEmpty() && pWorkspaceId != null && !pWorkspaceId.isEmpty()) {
+            if (!userManager.isUserEnabled(assignee, pWorkspaceId)) {
+                throw new NotAllowedException(new Locale(user.getLanguage()), "NotAllowedException71");
+            }
             assigneeUser = em.find(User.class, new UserKey(pWorkspaceId, assignee));
         }
         ChangeIssue change = new ChangeIssue(name,
@@ -120,14 +124,23 @@ public class ChangeManagerBean implements IChangeManagerLocal {
 
     @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
     @Override
-    public ChangeIssue updateChangeIssue(int pId, String pWorkspaceId, String description, ChangeItemPriority priority, String assignee, ChangeItemCategory category) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, ChangeIssueNotFoundException, AccessRightException, WorkspaceNotEnabledException {
+    public ChangeIssue updateChangeIssue(int pId, String pWorkspaceId, String description, ChangeItemPriority priority, String assignee, ChangeItemCategory category) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, ChangeIssueNotFoundException, AccessRightException, WorkspaceNotEnabledException, AccountNotFoundException, NotAllowedException {
         User user = userManager.checkWorkspaceReadAccess(pWorkspaceId);
         ChangeIssue changeIssue = new ChangeItemDAO(new Locale(user.getLanguage()), em).loadChangeIssue(pId);
         checkChangeItemWriteAccess(changeIssue, user);
         changeIssue.setDescription(description);
         changeIssue.setPriority(priority);
         changeIssue.setCategory(category);
-        changeIssue.setAssignee(em.find(User.class, new UserKey(pWorkspaceId, assignee)));
+
+        if (assignee != null && !assignee.isEmpty()) {
+            if (!userManager.isUserEnabled(assignee, pWorkspaceId)) {
+                throw new NotAllowedException(new Locale(user.getLanguage()), "NotAllowedException71");
+            }
+            changeIssue.setAssignee(em.find(User.class, new UserKey(pWorkspaceId, assignee)));
+        } else {
+            changeIssue.setAssignee(null);
+        }
+
         return changeIssue;
     }
 
@@ -270,10 +283,13 @@ public class ChangeManagerBean implements IChangeManagerLocal {
 
     @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
     @Override
-    public ChangeRequest createChangeRequest(String pWorkspaceId, String name, String description, int milestoneId, ChangeItemPriority priority, String assignee, ChangeItemCategory category) throws UserNotFoundException, AccessRightException, WorkspaceNotFoundException, WorkspaceNotEnabledException {
+    public ChangeRequest createChangeRequest(String pWorkspaceId, String name, String description, int milestoneId, ChangeItemPriority priority, String assignee, ChangeItemCategory category) throws UserNotFoundException, AccessRightException, WorkspaceNotFoundException, WorkspaceNotEnabledException, AccountNotFoundException, NotAllowedException {
         User user = userManager.checkWorkspaceWriteAccess(pWorkspaceId);
         User assigneeUser = null;
-        if (assignee != null && pWorkspaceId != null) {
+        if (assignee != null && !assignee.isEmpty() && pWorkspaceId != null && !pWorkspaceId.isEmpty()) {
+            if (!userManager.isUserEnabled(assignee, pWorkspaceId)) {
+                throw new NotAllowedException(new Locale(user.getLanguage()), "NotAllowedException71");
+            }
             assigneeUser = em.find(User.class, new UserKey(pWorkspaceId, assignee));
         }
         ChangeRequest changeRequest = new ChangeRequest(name,
@@ -291,14 +307,23 @@ public class ChangeManagerBean implements IChangeManagerLocal {
 
     @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
     @Override
-    public ChangeRequest updateChangeRequest(int pId, String pWorkspaceId, String description, int milestoneId, ChangeItemPriority priority, String assignee, ChangeItemCategory category) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, ChangeRequestNotFoundException, AccessRightException, WorkspaceNotEnabledException {
+    public ChangeRequest updateChangeRequest(int pId, String pWorkspaceId, String description, int milestoneId, ChangeItemPriority priority, String assignee, ChangeItemCategory category) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, ChangeRequestNotFoundException, AccessRightException, WorkspaceNotEnabledException, AccountNotFoundException, NotAllowedException {
         User user = userManager.checkWorkspaceReadAccess(pWorkspaceId);
         ChangeRequest changeRequest = new ChangeItemDAO(new Locale(user.getLanguage()), em).loadChangeRequest(pId);
         checkChangeItemWriteAccess(changeRequest, user);
         changeRequest.setDescription(description);
         changeRequest.setPriority(priority);
         changeRequest.setCategory(category);
-        changeRequest.setAssignee(em.find(User.class, new UserKey(pWorkspaceId, assignee)));
+
+        if (assignee != null && !assignee.isEmpty()) {
+            if (!userManager.isUserEnabled(assignee, pWorkspaceId)) {
+                throw new NotAllowedException(new Locale(user.getLanguage()), "NotAllowedException71");
+            }
+            changeRequest.setAssignee(em.find(User.class, new UserKey(pWorkspaceId, assignee)));
+        } else {
+            changeRequest.setAssignee(null);
+        }
+
         changeRequest.setMilestone(em.find(Milestone.class, milestoneId));
         return changeRequest;
     }
@@ -442,10 +467,13 @@ public class ChangeManagerBean implements IChangeManagerLocal {
 
     @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
     @Override
-    public ChangeOrder createChangeOrder(String pWorkspaceId, String name, String description, int milestoneId, ChangeItemPriority priority, String assignee, ChangeItemCategory category) throws UserNotFoundException, AccessRightException, WorkspaceNotFoundException, WorkspaceNotEnabledException {
+    public ChangeOrder createChangeOrder(String pWorkspaceId, String name, String description, int milestoneId, ChangeItemPriority priority, String assignee, ChangeItemCategory category) throws UserNotFoundException, AccessRightException, WorkspaceNotFoundException, WorkspaceNotEnabledException, AccountNotFoundException, NotAllowedException {
         User user = userManager.checkWorkspaceWriteAccess(pWorkspaceId);
         User assigneeUser = null;
-        if (assignee != null && pWorkspaceId != null) {
+        if (assignee != null && !assignee.isEmpty() && pWorkspaceId != null && !pWorkspaceId.isEmpty()) {
+            if (!userManager.isUserEnabled(assignee, pWorkspaceId)) {
+                throw new NotAllowedException(new Locale(user.getLanguage()), "NotAllowedException71");
+            }
             assigneeUser = em.find(User.class, new UserKey(pWorkspaceId, assignee));
         }
         ChangeOrder changeOrder = new ChangeOrder(name,
@@ -463,14 +491,23 @@ public class ChangeManagerBean implements IChangeManagerLocal {
 
     @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
     @Override
-    public ChangeOrder updateChangeOrder(int pId, String pWorkspaceId, String description, int milestoneId, ChangeItemPriority priority, String assignee, ChangeItemCategory category) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, ChangeOrderNotFoundException, AccessRightException, WorkspaceNotEnabledException {
+    public ChangeOrder updateChangeOrder(int pId, String pWorkspaceId, String description, int milestoneId, ChangeItemPriority priority, String assignee, ChangeItemCategory category) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, ChangeOrderNotFoundException, AccessRightException, WorkspaceNotEnabledException, AccountNotFoundException, NotAllowedException {
         User user = userManager.checkWorkspaceReadAccess(pWorkspaceId);
         ChangeOrder changeOrder = new ChangeItemDAO(new Locale(user.getLanguage()), em).loadChangeOrder(pId);
         checkChangeItemWriteAccess(changeOrder, user);
         changeOrder.setDescription(description);
         changeOrder.setPriority(priority);
         changeOrder.setCategory(category);
-        changeOrder.setAssignee(em.find(User.class, new UserKey(pWorkspaceId, assignee)));
+
+        if (assignee != null && !assignee.isEmpty()) {
+            if (!userManager.isUserEnabled(assignee, pWorkspaceId)) {
+                throw new NotAllowedException(new Locale(user.getLanguage()), "NotAllowedException71");
+            }
+            changeOrder.setAssignee(em.find(User.class, new UserKey(pWorkspaceId, assignee)));
+        } else {
+            changeOrder.setAssignee(null);
+        }
+
         changeOrder.setMilestone(em.find(Milestone.class, milestoneId));
         return changeOrder;
     }

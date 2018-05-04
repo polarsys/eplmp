@@ -10,12 +10,13 @@
   *******************************************************************************/
 package org.polarsys.eplmp.server.rest;
 
+import io.swagger.annotations.*;
+import org.dozer.DozerBeanMapperSingletonWrapper;
+import org.dozer.Mapper;
 import org.polarsys.eplmp.core.change.ChangeRequest;
 import org.polarsys.eplmp.core.document.DocumentIterationKey;
-import org.polarsys.eplmp.core.exceptions.AccessRightException;
-import org.polarsys.eplmp.core.exceptions.EntityConstraintException;
-import org.polarsys.eplmp.core.exceptions.EntityNotFoundException;
-import org.polarsys.eplmp.core.exceptions.UserNotActiveException;
+import org.polarsys.eplmp.core.exceptions.*;
+import org.polarsys.eplmp.core.exceptions.NotAllowedException;
 import org.polarsys.eplmp.core.meta.Tag;
 import org.polarsys.eplmp.core.product.PartIterationKey;
 import org.polarsys.eplmp.core.security.UserGroupMapping;
@@ -24,9 +25,6 @@ import org.polarsys.eplmp.server.rest.dto.*;
 import org.polarsys.eplmp.server.rest.dto.change.ChangeIssueDTO;
 import org.polarsys.eplmp.server.rest.dto.change.ChangeIssueListDTO;
 import org.polarsys.eplmp.server.rest.dto.change.ChangeRequestDTO;
-import io.swagger.annotations.*;
-import org.dozer.DozerBeanMapperSingletonWrapper;
-import org.dozer.Mapper;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.security.DeclareRoles;
@@ -37,7 +35,10 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 @RequestScoped
 @Api(hidden = true, value = "requests", description = "Operations about requests",
@@ -97,7 +98,7 @@ public class ChangeRequestsResource {
     public ChangeRequestDTO createRequest(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Change request to create") ChangeRequestDTO changeRequestDTO)
-            throws EntityNotFoundException, AccessRightException {
+            throws EntityNotFoundException, AccessRightException, org.polarsys.eplmp.core.exceptions.NotAllowedException {
         ChangeRequest changeRequest = changeManager.createChangeRequest(workspaceId,
                 changeRequestDTO.getName(),
                 changeRequestDTO.getDescription(),
@@ -171,7 +172,7 @@ public class ChangeRequestsResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Request id") @PathParam("requestId") int requestId,
             @ApiParam(required = true, value = "Request to update") ChangeRequestDTO pChangeRequestDTO)
-            throws EntityNotFoundException, UserNotActiveException, AccessRightException {
+            throws EntityNotFoundException, UserNotActiveException, AccessRightException, NotAllowedException {
         ChangeRequest changeRequest = changeManager.updateChangeRequest(requestId,
                 workspaceId,
                 pChangeRequestDTO.getDescription(),
