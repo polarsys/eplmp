@@ -12,10 +12,8 @@ package org.polarsys.eplmp.server.rest;
 
 import org.polarsys.eplmp.core.change.ChangeIssue;
 import org.polarsys.eplmp.core.document.DocumentIterationKey;
-import org.polarsys.eplmp.core.exceptions.AccessRightException;
-import org.polarsys.eplmp.core.exceptions.EntityConstraintException;
-import org.polarsys.eplmp.core.exceptions.EntityNotFoundException;
-import org.polarsys.eplmp.core.exceptions.UserNotActiveException;
+import org.polarsys.eplmp.core.exceptions.*;
+import org.polarsys.eplmp.core.exceptions.NotAllowedException;
 import org.polarsys.eplmp.core.meta.Tag;
 import org.polarsys.eplmp.core.product.PartIterationKey;
 import org.polarsys.eplmp.core.security.UserGroupMapping;
@@ -96,7 +94,7 @@ public class ChangeIssuesResource {
     public ChangeIssueDTO createIssue(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Change issue to create") ChangeIssueDTO changeIssueDTO)
-            throws EntityNotFoundException, AccessRightException {
+            throws EntityNotFoundException, AccessRightException, org.polarsys.eplmp.core.exceptions.NotAllowedException {
         ChangeIssue changeIssue = changeManager.createChangeIssue(workspaceId,
                 changeIssueDTO.getName(),
                 changeIssueDTO.getDescription(),
@@ -170,7 +168,7 @@ public class ChangeIssuesResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Issue id") @PathParam("issueId") int issueId,
             @ApiParam(required = true, value = "Change issue to update") ChangeIssueDTO pChangeIssueDTO)
-            throws EntityNotFoundException, UserNotActiveException, AccessRightException {
+            throws EntityNotFoundException, UserNotActiveException, AccessRightException, NotAllowedException {
         ChangeIssue changeIssue = changeManager.updateChangeIssue(issueId,
                 workspaceId,
                 pChangeIssueDTO.getDescription(),

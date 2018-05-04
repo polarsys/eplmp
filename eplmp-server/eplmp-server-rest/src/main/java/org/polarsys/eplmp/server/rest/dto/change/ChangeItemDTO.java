@@ -11,13 +11,13 @@
 
 package org.polarsys.eplmp.server.rest.dto.change;
 
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import org.polarsys.eplmp.core.change.ChangeItemCategory;
 import org.polarsys.eplmp.core.change.ChangeItemPriority;
 import org.polarsys.eplmp.server.rest.dto.ACLDTO;
 import org.polarsys.eplmp.server.rest.dto.DocumentIterationDTO;
 import org.polarsys.eplmp.server.rest.dto.PartIterationDTO;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -26,7 +26,7 @@ import java.util.Date;
 import java.util.List;
 
 @XmlRootElement
-@ApiModel(value="ChangeItemDTO", description="This class is the representation of a {@link org.polarsys.eplmp.core.change.ChangeItem} entity")
+@ApiModel(value = "ChangeItemDTO", description = "This class is the representation of a {@link org.polarsys.eplmp.core.change.ChangeItem} entity")
 public class ChangeItemDTO implements Serializable {
 
     @ApiModelProperty(value = "Change item id")
@@ -45,9 +45,11 @@ public class ChangeItemDTO implements Serializable {
     private String authorName;
 
     @ApiModelProperty(value = "Change item assignee user login")
+    @XmlElement(nillable = true)
     private String assignee;
 
     @ApiModelProperty(value = "Change item assignee user name")
+    @XmlElement(nillable = true)
     private String assigneeName;
 
     @ApiModelProperty(value = "Change item creation date")
