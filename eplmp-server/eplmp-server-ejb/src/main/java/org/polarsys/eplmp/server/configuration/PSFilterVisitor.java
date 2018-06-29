@@ -47,8 +47,8 @@ public abstract class PSFilterVisitor {
         em = pEm;
         user = pUser;
         workspaceId = user.getWorkspaceId();
-        locale = new Locale(user.getLanguage());
-        partMasterDAO = new PartMasterDAO(locale, em);
+        locale = user.getLocale();
+        partMasterDAO = new PartMasterDAO();
     }
 
     /**

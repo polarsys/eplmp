@@ -18,50 +18,59 @@ import org.polarsys.eplmp.core.exceptions.ProductInstanceMasterNotFoundException
 import org.polarsys.eplmp.core.product.ConfigurationItemKey;
 import org.polarsys.eplmp.core.product.PartRevision;
 
+import javax.ejb.Stateless;
+import javax.inject.Inject;
 import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceException;
 import java.util.List;
 import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+@Stateless(name = "ProductBaselineDAO")
 public class ProductBaselineDAO {
 
-    private final EntityManager em;
-    private final Locale mLocale;
+    public static final String WORKSPACE_ID = "workspaceId";
+    @PersistenceContext
+    private EntityManager em;
+
+    @Inject
+    private ProductInstanceMasterDAO productInstanceMasterDAO;
+
+    private Locale mLocale;
     private static final Logger LOGGER = Logger.getLogger(ProductBaselineDAO.class.getName());
 
-    public ProductBaselineDAO(EntityManager pEM) {
-        em = pEM;
+    public ProductBaselineDAO() {
         mLocale = Locale.getDefault();
-    }
-
-    public ProductBaselineDAO(Locale pLocale, EntityManager pEM) {
-        em = pEM;
-        mLocale = pLocale;
     }
 
     public List<ProductBaseline> findBaselines(String workspaceId) {
         return em.createQuery("SELECT b FROM ProductBaseline b WHERE b.configurationItem.workspace.id = :workspaceId", ProductBaseline.class)
-                .setParameter("workspaceId",workspaceId)
+                .setParameter(WORKSPACE_ID,workspaceId)
                 .getResultList();
     }
 
     public List<ProductBaseline> findBaselines(String ciId, String workspaceId){
         return em.createNamedQuery("ProductBaseline.findByConfigurationItemId", ProductBaseline.class)
                 .setParameter("ciId", ciId)
-                .setParameter("workspaceId",workspaceId)
+                .setParameter(WORKSPACE_ID,workspaceId)
                 .getResultList();
     }
 
-    public void createBaseline(ProductBaseline productBaseline) throws CreationException {
+    public void createBaseline(ProductBaseline pProductBaseline) throws CreationException {
         try {
-            em.persist(productBaseline);
+            em.persist(pProductBaseline);
             em.flush();
         } catch (PersistenceException pPEx) {
             LOGGER.log(Level.FINEST,null,pPEx);
             throw new CreationException(mLocale);
         }
+    }
+
+    public void createBaseline(Locale pLocale, ProductBaseline pProductBaseline) throws CreationException {
+        mLocale = pLocale;
+        createBaseline(pProductBaseline);
     }
 
     public ProductBaseline loadBaseline(int pId) throws BaselineNotFoundException {
@@ -73,6 +82,11 @@ public class ProductBaselineDAO {
         }
     }
 
+    public ProductBaseline loadBaseline(Locale pLocale, int pId) throws BaselineNotFoundException {
+        mLocale = pLocale;
+        return loadBaseline(pId);
+    }
+
     public void deleteBaseline(ProductBaseline productBaseline) {
         flushBaselinedParts(productBaseline);
         em.remove(productBaseline);
@@ -82,7 +96,7 @@ public class ProductBaselineDAO {
     public boolean existBaselinedPart(String workspaceId, String partNumber) {
         return em.createNamedQuery("BaselinedPart.existBaselinedPart", Long.class)
             .setParameter("partNumber", partNumber)
-            .setParameter("workspaceId", workspaceId)
+            .setParameter(WORKSPACE_ID, workspaceId)
             .getSingleResult() > 0;
     }
 
@@ -100,7 +114,7 @@ public class ProductBaselineDAO {
     public List<PartRevision> findObsoletePartsInBaseline(String workspaceId, ProductBaseline productBaseline) {
         return em.createNamedQuery("ProductBaseline.findObsoletePartRevisions", PartRevision.class)
                 .setParameter("productBaseline", productBaseline)
-                .setParameter("workspaceId", workspaceId)
+                .setParameter(WORKSPACE_ID, workspaceId)
                 .getResultList();
     }
 
@@ -108,7 +122,7 @@ public class ProductBaselineDAO {
         return em.find(ProductBaseline.class, baselineId);
     }
 
-    public List<BaselinedPart> findBaselinedPartWithReferenceLike(int collectionId, String q, int maxResults) throws BaselineNotFoundException {
+    public List<BaselinedPart> findBaselinedPartWithReferenceLike(int collectionId, String q, int maxResults) {
         return em.createNamedQuery("BaselinedPart.findByReference",BaselinedPart.class)
                                                   .setParameter("id", "%" + q + "%")
                                                   .setParameter("partCollection",collectionId)
@@ -118,7 +132,7 @@ public class ProductBaselineDAO {
 
     public ProductBaseline findLastBaselineWithSerialNumber(ConfigurationItemKey ciKey, String serialNumber) throws ProductInstanceMasterNotFoundException {
         ProductInstanceMasterKey productInstanceMasterKey = new ProductInstanceMasterKey(serialNumber, ciKey);
-        ProductInstanceMaster productIM = new ProductInstanceMasterDAO(em).loadProductInstanceMaster(productInstanceMasterKey);
+        ProductInstanceMaster productIM = productInstanceMasterDAO.loadProductInstanceMaster(productInstanceMasterKey);
         ProductInstanceIteration productII = productIM.getLastIteration();
 
         if (productII != null) {

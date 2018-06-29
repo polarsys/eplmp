@@ -45,6 +45,15 @@ public class AccountManagerBean implements IAccountManagerLocal {
     private EntityManager em;
 
     @Inject
+    private AccountDAO accountDAO;
+
+    @Inject
+    private GCMAccountDAO gcmAccountDAO;
+
+    @Inject
+    private OrganizationDAO organizationDAO;
+
+    @Inject
     private IContextManagerLocal contextManager;
 
     @Inject
@@ -63,7 +72,6 @@ public class AccountManagerBean implements IAccountManagerLocal {
 
     @Override
     public Account authenticateAccount(String login, String password) {
-        AccountDAO accountDAO = new AccountDAO(em);
         Account account = null;
 
         if(accountDAO.authenticate(login, password, configManager.getDigestAlgorithm())){
@@ -89,14 +97,14 @@ public class AccountManagerBean implements IAccountManagerLocal {
         Date now = new Date();
         Account account = new Account(pLogin, pName, pEmail, pLanguage, now, pTimeZone);
         account.setEnabled(registrationStrategy.equals(OperationSecurityStrategy.NONE));
-        new AccountDAO(new Locale(pLanguage), em).createAccount(account, pPassword, configManager.getDigestAlgorithm());
+        accountDAO.createAccount(new Locale(pLanguage), account, pPassword, configManager.getDigestAlgorithm());
         mailer.sendCredential(account);
         return account;
     }
 
     @Override
     public Account getAccount(String pLogin) throws AccountNotFoundException {
-        return new AccountDAO(em).loadAccount(pLogin);
+        return accountDAO.loadAccount(pLogin);
     }
 
     public String getRole(String login) {
@@ -111,7 +119,6 @@ public class AccountManagerBean implements IAccountManagerLocal {
     @RolesAllowed({UserGroupMapping.REGULAR_USER_ROLE_ID, UserGroupMapping.ADMIN_ROLE_ID})
     @Override
     public Account updateAccount(String pName, String pEmail, String pLanguage, String pPassword, String pTimeZone) throws AccountNotFoundException {
-        AccountDAO accountDAO = new AccountDAO(new Locale(pLanguage), em);
         Account account = accountDAO.loadAccount(contextManager.getCallerPrincipalLogin());
         account.setName(pName);
         account.setEmail(pEmail);
@@ -126,7 +133,7 @@ public class AccountManagerBean implements IAccountManagerLocal {
     @RolesAllowed({UserGroupMapping.REGULAR_USER_ROLE_ID, UserGroupMapping.ADMIN_ROLE_ID})
     @Override
     public Account checkAdmin(Organization pOrganization) throws AccessRightException, AccountNotFoundException {
-        Account account = new AccountDAO(em).loadAccount(contextManager.getCallerPrincipalLogin());
+        Account account = accountDAO.loadAccount(contextManager.getCallerPrincipalLogin());
 
         if (!contextManager.isCallerInRole(UserGroupMapping.ADMIN_ROLE_ID) && !pOrganization.getOwner().equals(account)) {
             throw new AccessRightException(new Locale(account.getLanguage()), account);
@@ -140,8 +147,8 @@ public class AccountManagerBean implements IAccountManagerLocal {
     public Account checkAdmin(String pOrganizationName)
             throws AccessRightException, AccountNotFoundException, OrganizationNotFoundException {
 
-        Account account = new AccountDAO(em).loadAccount(contextManager.getCallerPrincipalLogin());
-        Organization organization = new OrganizationDAO(em).loadOrganization(pOrganizationName);
+        Account account = accountDAO.loadAccount(contextManager.getCallerPrincipalLogin());
+        Organization organization = organizationDAO.loadOrganization(pOrganizationName);
 
         if (!contextManager.isCallerInRole(UserGroupMapping.ADMIN_ROLE_ID) && !organization.getOwner().equals(account)) {
             throw new AccessRightException(new Locale(account.getLanguage()), account);
@@ -155,13 +162,13 @@ public class AccountManagerBean implements IAccountManagerLocal {
     public void setGCMAccount(String gcmId) throws AccountNotFoundException, GCMAccountAlreadyExistsException, CreationException {
         String callerLogin = contextManager.getCallerPrincipalLogin();
         Account account = getAccount(callerLogin);
-        GCMAccountDAO gcmAccountDAO = new GCMAccountDAO(em);
 
+        Locale accountLocale = account.getLocale();
         try {
-            GCMAccount gcmAccount = gcmAccountDAO.loadGCMAccount(account);
+            GCMAccount gcmAccount = gcmAccountDAO.loadGCMAccount(accountLocale, account);
             gcmAccount.setGcmId(gcmId);
         } catch (GCMAccountNotFoundException e) {
-            gcmAccountDAO.createGCMAccount(new GCMAccount(account, gcmId));
+            gcmAccountDAO.createGCMAccount(accountLocale, new GCMAccount(account, gcmId));
         }
 
     }
@@ -171,8 +178,7 @@ public class AccountManagerBean implements IAccountManagerLocal {
     public void deleteGCMAccount() throws AccountNotFoundException, GCMAccountNotFoundException {
         String callerLogin = contextManager.getCallerPrincipalLogin();
         Account account = getAccount(callerLogin);
-        GCMAccountDAO gcmAccountDAO = new GCMAccountDAO(new Locale(account.getLanguage()), em);
-        GCMAccount gcmAccount = gcmAccountDAO.loadGCMAccount(account);
+        GCMAccount gcmAccount = gcmAccountDAO.loadGCMAccount(account.getLocale(), account);
         gcmAccountDAO.deleteGCMAccount(gcmAccount);
     }
 
@@ -185,7 +191,6 @@ public class AccountManagerBean implements IAccountManagerLocal {
     @Override
     @RolesAllowed(UserGroupMapping.ADMIN_ROLE_ID)
     public List<Account> getAccounts() {
-        AccountDAO accountDAO = new AccountDAO(em);
         return accountDAO.getAccounts();
     }
 
@@ -211,9 +216,7 @@ public class AccountManagerBean implements IAccountManagerLocal {
 
     @Override
     @RolesAllowed(UserGroupMapping.ADMIN_ROLE_ID)
-    public Account updateAccount(String pLogin, String pName, String pEmail, String pLanguage, String pPassword, String pTimeZone) throws AccountNotFoundException, NotAllowedException {
-        Account account = getMyAccount();
-        AccountDAO accountDAO = new AccountDAO(new Locale(account.getLanguage()), em);
+    public Account updateAccount(String pLogin, String pName, String pEmail, String pLanguage, String pPassword, String pTimeZone) throws AccountNotFoundException {
         Account otherAccount = getAccount(pLogin);
         otherAccount.setName(pName);
         otherAccount.setEmail(pEmail);

@@ -49,6 +49,12 @@ public class TaskManagerBean implements ITaskManagerLocal {
     private EntityManager em;
 
     @Inject
+    private DocumentRevisionDAO documentRevisionDAO;
+
+    @Inject
+    private PartRevisionDAO partRevisionDAO;
+
+    @Inject
     private IUserManagerLocal userManager;
 
     @Inject
@@ -60,11 +66,14 @@ public class TaskManagerBean implements ITaskManagerLocal {
     @Inject
     private IWorkflowManagerLocal workflowService;
 
+    @Inject
+    private WorkflowDAO workflowDAO;
+
     @Override
     @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
     public TaskWrapper[] getAssignedTasksForGivenUser(String workspaceId, String userLogin) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, WorkspaceNotEnabledException {
         User user = userManager.checkWorkspaceReadAccess(workspaceId);
-        TaskDAO taskDAO = new TaskDAO(new Locale(user.getLanguage()), em);
+        TaskDAO taskDAO = new TaskDAO(user.getLocale(), em);
         Task[] assignedTasks = taskDAO.findAssignedTasks(workspaceId, userLogin);
 
         List<TaskWrapper> taskWrappers = Stream.of(assignedTasks)
@@ -79,7 +88,7 @@ public class TaskManagerBean implements ITaskManagerLocal {
     @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
     public TaskWrapper[] getInProgressTasksForGivenUser(String workspaceId, String userLogin) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, WorkspaceNotEnabledException {
         User user = userManager.checkWorkspaceReadAccess(workspaceId);
-        TaskDAO taskDAO = new TaskDAO(new Locale(user.getLanguage()), em);
+        TaskDAO taskDAO = new TaskDAO(user.getLocale(), em);
         Task[] inProgressTasks = taskDAO.findInProgressTasks(workspaceId, userLogin);
 
         List<TaskWrapper> taskWrappers = Stream.of(inProgressTasks)
@@ -94,11 +103,12 @@ public class TaskManagerBean implements ITaskManagerLocal {
     @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
     public TaskWrapper getTask(String workspaceId, TaskKey taskKey) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, TaskNotFoundException, AccessRightException, WorkspaceNotEnabledException {
         User user = userManager.checkWorkspaceReadAccess(workspaceId);
-        TaskDAO taskDAO = new TaskDAO(new Locale(user.getLanguage()), em);
+        Locale userLocale = user.getLocale();
+        TaskDAO taskDAO = new TaskDAO(userLocale, em);
         Task task = taskDAO.loadTask(taskKey);
         TaskWrapper taskWrapper = wrapTask(task, workspaceId);
         if (taskWrapper == null) {
-            throw new AccessRightException(new Locale(user.getLanguage()), user);
+            throw new AccessRightException(userLocale, user);
         }
         return taskWrapper;
     }
@@ -107,11 +117,12 @@ public class TaskManagerBean implements ITaskManagerLocal {
     @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
     public void processTask(String workspaceId, TaskKey taskKey, String action, String comment, String signature) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, TaskNotFoundException, NotAllowedException, WorkflowNotFoundException, AccessRightException, DocumentRevisionNotFoundException, WorkspaceNotEnabledException {
         User user = userManager.checkWorkspaceReadAccess(workspaceId);
-        TaskDAO taskDAO = new TaskDAO(new Locale(user.getLanguage()), em);
+        Locale userLocale = user.getLocale();
+        TaskDAO taskDAO = new TaskDAO(userLocale, em);
         Task task = taskDAO.loadTask(taskKey);
         TaskWrapper taskWrapper = wrapTask(task, workspaceId);
         if (taskWrapper == null) {
-            throw new AccessRightException(new Locale(user.getLanguage()), user);
+            throw new AccessRightException(userLocale, user);
         }
         switch (taskWrapper.getHolderType()) {
             case "documents":
@@ -146,12 +157,12 @@ public class TaskManagerBean implements ITaskManagerLocal {
     @Override
     public void checkTask(String workspaceId, TaskKey taskKey) throws UserNotFoundException, WorkspaceNotFoundException, UserNotActiveException, WorkspaceNotEnabledException, TaskNotFoundException, WorkflowNotFoundException, NotAllowedException {
         User user = userManager.checkWorkspaceReadAccess(workspaceId);
-        Locale locale = new Locale(user.getLanguage());
-        Task task = new TaskDAO(locale, em).loadTask(taskKey);
+        Locale userLocale = user.getLocale();
+        Task task = new TaskDAO(userLocale, em).loadTask(taskKey);
         Workflow workflow = task.getActivity().getWorkflow();
-        DocumentRevision docR = new WorkflowDAO(em).getDocumentTarget(workflow);
+        DocumentRevision docR = workflowDAO.getDocumentTarget(workflow);
         if (docR == null) {
-            throw new WorkflowNotFoundException(locale, workflow.getId());
+            throw new WorkflowNotFoundException(userLocale, workflow.getId());
         }
         DocumentIteration doc = docR.getLastIteration();
         if (em.createNamedQuery("findLogByDocumentAndUserAndEvent").
@@ -162,7 +173,7 @@ public class TaskManagerBean implements ITaskManagerLocal {
                 setParameter("documentIteration", doc.getIteration()).
                 setParameter("event", "DOWNLOAD").
                 getResultList().isEmpty()) {
-            throw new NotAllowedException(locale, "NotAllowedException10");
+            throw new NotAllowedException(userLocale, "NotAllowedException10");
         }
     }
 
@@ -170,7 +181,6 @@ public class TaskManagerBean implements ITaskManagerLocal {
     private TaskWrapper wrapTask(Task task, String workspaceId) {
         TaskWrapper taskWrapper = new TaskWrapper(task, workspaceId);
 
-        DocumentRevisionDAO documentRevisionDAO = new DocumentRevisionDAO(em);
         DocumentRevision documentRevision = documentRevisionDAO.getWorkflowHolder(task.getActivity().getWorkflow());
 
         if (documentRevision != null) {
@@ -180,7 +190,6 @@ public class TaskManagerBean implements ITaskManagerLocal {
             taskWrapper.setTask(documentRevision.getWorkflow().getTasks().stream().filter(pTask -> pTask.getKey().equals(task.getKey())).findFirst().get());
             return taskWrapper;
         }
-        PartRevisionDAO partRevisionDAO = new PartRevisionDAO(em);
         PartRevision partRevision = partRevisionDAO.getWorkflowHolder(task.getActivity().getWorkflow());
 
         if (partRevision != null) {
@@ -191,7 +200,7 @@ public class TaskManagerBean implements ITaskManagerLocal {
             return taskWrapper;
         }
 
-        WorkspaceWorkflow workspaceWorkflowTarget = new WorkflowDAO(em).getWorkspaceWorkflowTarget(workspaceId, task.getActivity().getWorkflow());
+        WorkspaceWorkflow workspaceWorkflowTarget = workflowDAO.getWorkspaceWorkflowTarget(workspaceId, task.getActivity().getWorkflow());
         if (workspaceWorkflowTarget != null) {
             taskWrapper.setHolderType("workspace-workflows");
             taskWrapper.setHolderReference(workspaceWorkflowTarget.getId());

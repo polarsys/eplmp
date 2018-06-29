@@ -64,6 +64,114 @@ public class ProductManagerBean implements IProductManagerLocal {
     private EntityManager em;
 
     @Inject
+    private AccountDAO accountDAO;
+
+    @Inject
+    private ACLDAO aclDAO;
+
+    @Inject
+    private ACLFactory aclFactory;
+
+    @Inject
+    private BinaryResourceDAO binaryResourceDAO;
+
+    @Inject
+    private ChangeItemDAO changeItemDAO;
+
+    @Inject
+    private ConfigurationItemDAO configurationItemDAO;
+
+    @Inject
+    private ConversionDAO conversionDAO;
+
+    @Inject
+    private DocumentLinkDAO documentLinkDAO;
+
+    @Inject
+    private DocumentRevisionDAO documentRevisionDAO;
+
+    @Inject
+    private ImportDAO importDAO;
+
+    @Inject
+    private InstanceAttributeDAO instanceAttributeDAO;
+
+    @Inject
+    private LayerDAO layerDAO;
+
+    @Inject
+    private LOVDAO lovDAO;
+
+    @Inject
+    private MarkerDAO markerDAO;
+
+    @Inject
+    private ModificationNotificationDAO modificationNotificationDAO;
+
+    @Inject
+    private PartIterationDAO partIterationDAO;
+
+    @Inject
+    private PartMasterDAO partMasterDAO;
+
+    @Inject
+    private PartMasterTemplateDAO partMasterTemplateDAO;
+
+    @Inject
+    private PartRevisionDAO partRevisionDAO;
+
+    @Inject
+    private PartRevisionQueryDAO partRevisionQueryDAO;
+
+    @Inject
+    private PartUsageLinkDAO partUsageLinkDAO;
+
+    @Inject
+    private PathDataIterationDAO pathDataIterationDAO;
+
+    @Inject
+    private PathDataMasterDAO pathDataMasterDAO;
+
+    @Inject
+    private PathDataQueryDAO pathDataQueryDAO;
+
+    @Inject
+    private PathToPathLinkDAO pathToPathLinkDAO;
+
+    @Inject
+    private ProductConfigurationDAO productConfigurationDAO;
+
+    @Inject
+    private ProductBaselineDAO productBaselineDAO;
+
+    @Inject
+    private ProductInstanceMasterDAO productInstanceMasterDAO;
+
+    @Inject
+    private QueryDAO queryDAO;
+
+    @Inject
+    private RoleDAO roleDAO;
+
+    @Inject
+    private SharedEntityDAO sharedEntityDAO;
+
+    @Inject
+    private TagDAO tagDAO;
+
+    @Inject
+    private UserDAO userDAO;
+
+    @Inject
+    private UserGroupDAO userGroupDAO;
+
+    @Inject
+    private WorkflowModelDAO workflowModelDAO;
+
+    @Inject
+    private WorkspaceDAO workspaceDAO;
+
+    @Inject
     private INotifierLocal mailer;
 
     @Inject
@@ -100,8 +208,7 @@ public class ProductManagerBean implements IProductManagerLocal {
 
         List<PartLink[]> usagePaths = new ArrayList<>();
 
-        ConfigurationItemDAO configurationItemDAO = new ConfigurationItemDAO(new Locale(user.getLanguage()), em);
-        ConfigurationItem ci = configurationItemDAO.loadConfigurationItem(pKey);
+        ConfigurationItem ci = configurationItemDAO.loadConfigurationItem(user.getLocale(), pKey);
 
         PSFilterVisitor psFilterVisitor = new PSFilterVisitor(em, user, filter) {
             @Override
@@ -156,27 +263,26 @@ public class ProductManagerBean implements IProductManagerLocal {
     @Override
     public List<PartMaster> findPartMasters(String pWorkspaceId, String pPartNumber, String pPartName, int pMaxResults) throws UserNotFoundException, AccessRightException, WorkspaceNotFoundException, WorkspaceNotEnabledException {
         User user = userManager.checkWorkspaceWriteAccess(pWorkspaceId);
-        PartMasterDAO partMDAO = new PartMasterDAO(new Locale(user.getLanguage()), em);
-        return partMDAO.findPartMasters(pWorkspaceId, pPartNumber, pPartName, pMaxResults);
+        return partMasterDAO.findPartMasters(pWorkspaceId, pPartNumber, pPartName, pMaxResults);
     }
 
     @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
     @Override
     public ConfigurationItem createConfigurationItem(String pWorkspaceId, String pId, String pDescription, String pDesignItemNumber) throws UserNotFoundException, WorkspaceNotFoundException, AccessRightException, NotAllowedException, ConfigurationItemAlreadyExistsException, CreationException, PartMasterNotFoundException, WorkspaceNotEnabledException {
         User user = userManager.checkWorkspaceWriteAccess(pWorkspaceId);
-        Locale locale = new Locale(user.getLanguage());
-        checkNameValidity(pId, locale);
+        Locale userLocale = user.getLocale();
+        checkNameValidity(pId, userLocale);
 
         ConfigurationItem ci = new ConfigurationItem(user, user.getWorkspace(), pId, pDescription);
 
         try {
-            PartMaster designedPartMaster = new PartMasterDAO(locale, em).loadPartM(new PartMasterKey(pWorkspaceId, pDesignItemNumber));
+            PartMaster designedPartMaster = partMasterDAO.loadPartM(userLocale, new PartMasterKey(pWorkspaceId, pDesignItemNumber));
             ci.setDesignItem(designedPartMaster);
-            new ConfigurationItemDAO(locale, em).createConfigurationItem(ci);
+            configurationItemDAO.createConfigurationItem(userLocale, ci);
             return ci;
         } catch (PartMasterNotFoundException e) {
             LOGGER.log(Level.FINEST, null, e);
-            throw new PartMasterNotFoundException(locale, pDesignItemNumber);
+            throw new PartMasterNotFoundException(userLocale, pDesignItemNumber);
         }
 
     }
@@ -185,8 +291,8 @@ public class ProductManagerBean implements IProductManagerLocal {
     @Override
     public PartMaster createPartMaster(String pWorkspaceId, String pNumber, String pName, boolean pStandardPart, String pWorkflowModelId, String pPartRevisionDescription, String templateId, Map<String, String> pACLUserEntries, Map<String, String> pACLUserGroupEntries, Map<String, Collection<String>> userRoleMapping, Map<String, Collection<String>> groupRoleMapping) throws NotAllowedException, UserNotFoundException, WorkspaceNotFoundException, AccessRightException, WorkflowModelNotFoundException, PartMasterAlreadyExistsException, CreationException, PartMasterTemplateNotFoundException, FileAlreadyExistsException, RoleNotFoundException, UserGroupNotFoundException, WorkspaceNotEnabledException {
         User user = userManager.checkWorkspaceWriteAccess(pWorkspaceId);
-        Locale locale = new Locale(user.getLanguage());
-        checkNumberValidity(pNumber, locale);
+        Locale userLocale = user.getLocale();
+        checkNumberValidity(pNumber, userLocale);
 
         PartMaster pm = new PartMaster(user.getWorkspace(), pNumber, user);
         pm.setName(pName);
@@ -198,19 +304,15 @@ public class ProductManagerBean implements IProductManagerLocal {
         Collection<Task> runningTasks = null;
         if (pWorkflowModelId != null) {
 
-            UserDAO userDAO = new UserDAO(locale, em);
-            UserGroupDAO groupDAO = new UserGroupDAO(locale, em);
-            RoleDAO roleDAO = new RoleDAO(locale, em);
-
             Map<Role, Collection<User>> roleUserMap = new HashMap<>();
             for (Map.Entry<String, Collection<String>> pair : userRoleMapping.entrySet()) {
                 String roleName = pair.getKey();
                 Collection<String> userLogins = pair.getValue();
-                Role role = roleDAO.loadRole(new RoleKey(pWorkspaceId, roleName));
+                Role role = roleDAO.loadRole(userLocale, new RoleKey(pWorkspaceId, roleName));
                 Set<User> users = new HashSet<>();
                 roleUserMap.put(role, users);
                 for (String login : userLogins) {
-                    User u = userDAO.loadUser(new UserKey(pWorkspaceId, login));
+                    User u = userDAO.loadUser(userLocale, new UserKey(pWorkspaceId, login));
                     users.add(u);
                 }
             }
@@ -219,22 +321,22 @@ public class ProductManagerBean implements IProductManagerLocal {
             for (Map.Entry<String, Collection<String>> pair : groupRoleMapping.entrySet()) {
                 String roleName = pair.getKey();
                 Collection<String> groupIds = pair.getValue();
-                Role role = roleDAO.loadRole(new RoleKey(pWorkspaceId, roleName));
+                Role role = roleDAO.loadRole(userLocale, new RoleKey(pWorkspaceId, roleName));
                 Set<UserGroup> groups = new HashSet<>();
                 roleGroupMap.put(role, groups);
                 for (String groupId : groupIds) {
-                    UserGroup g = groupDAO.loadUserGroup(new UserGroupKey(pWorkspaceId, groupId));
+                    UserGroup g = userGroupDAO.loadUserGroup(userLocale, new UserGroupKey(pWorkspaceId, groupId));
                     groups.add(g);
                 }
             }
 
-            WorkflowModel workflowModel = new WorkflowModelDAO(locale, em).loadWorkflowModel(new WorkflowModelKey(user.getWorkspaceId(), pWorkflowModelId));
+            WorkflowModel workflowModel = workflowModelDAO.loadWorkflowModel(userLocale, new WorkflowModelKey(user.getWorkspaceId(), pWorkflowModelId));
             Workflow workflow = workflowModel.createWorkflow(roleUserMap, roleGroupMap);
             newRevision.setWorkflow(workflow);
 
             for (Task task : workflow.getTasks()) {
                 if (!task.hasPotentialWorker()) {
-                    throw new NotAllowedException(locale, "NotAllowedException56");
+                    throw new NotAllowedException(userLocale, "NotAllowedException56");
                 }
             }
 
@@ -252,10 +354,10 @@ public class ProductManagerBean implements IProductManagerLocal {
 
         if (templateId != null) {
 
-            PartMasterTemplate partMasterTemplate = new PartMasterTemplateDAO(locale, em).loadPartMTemplate(new PartMasterTemplateKey(pWorkspaceId, templateId));
+            PartMasterTemplate partMasterTemplate = partMasterTemplateDAO.loadPartMTemplate(userLocale, new PartMasterTemplateKey(pWorkspaceId, templateId));
 
             if (!Tools.validateMask(partMasterTemplate.getMask(), pNumber)) {
-                throw new NotAllowedException(locale, "NotAllowedException42");
+                throw new NotAllowedException(userLocale, "NotAllowedException42");
             }
 
             pm.setType(partMasterTemplate.getPartType());
@@ -268,7 +370,6 @@ public class ProductManagerBean implements IProductManagerLocal {
             }
             ite.setInstanceAttributes(attrs);
 
-            BinaryResourceDAO binDAO = new BinaryResourceDAO(locale, em);
             BinaryResource sourceFile = partMasterTemplate.getAttachedFile();
 
             if (sourceFile != null) {
@@ -277,7 +378,7 @@ public class ProductManagerBean implements IProductManagerLocal {
                 Date lastModified = sourceFile.getLastModified();
                 String fullName = pWorkspaceId + "/parts/" + FileIO.encode(pm.getNumber()) + "/A/1/nativecad/" + fileName;
                 BinaryResource targetFile = new BinaryResource(fullName, length, lastModified);
-                binDAO.createBinaryResource(targetFile);
+                binaryResourceDAO.createBinaryResource(userLocale, targetFile);
                 ite.setNativeCADFile(targetFile);
                 try {
                     storageManager.copyData(sourceFile, targetFile);
@@ -289,11 +390,11 @@ public class ProductManagerBean implements IProductManagerLocal {
         }
 
         if (pACLUserEntries != null && !pACLUserEntries.isEmpty() || pACLUserGroupEntries != null && !pACLUserGroupEntries.isEmpty()) {
-            ACL acl = new ACLFactory(em).createACL(user.getWorkspace().getId(), pACLUserEntries, pACLUserGroupEntries);
+            ACL acl = aclFactory.createACL(user.getWorkspace().getId(), pACLUserEntries, pACLUserGroupEntries);
             newRevision.setACL(acl);
         }
 
-        new PartMasterDAO(locale, em).createPartM(pm);
+        partMasterDAO.createPartM(userLocale, pm);
 
         if (runningTasks != null) {
             mailer.sendApproval(newRevision.getWorkspaceId(), runningTasks, newRevision);
@@ -306,29 +407,27 @@ public class ProductManagerBean implements IProductManagerLocal {
     @Override
     public PartRevision undoCheckOutPart(PartRevisionKey pPartRPK) throws NotAllowedException, PartRevisionNotFoundException, UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, AccessRightException, WorkspaceNotEnabledException {
         User user = userManager.checkWorkspaceReadAccess(pPartRPK.getPartMaster().getWorkspace());
-        Locale locale = new Locale(user.getLanguage());
+        Locale userLocale = user.getLocale();
 
-        PartRevisionDAO partRDAO = new PartRevisionDAO(locale, em);
-        PartRevision partR = partRDAO.loadPartR(pPartRPK);
+        PartRevision partR = partRevisionDAO.loadPartR(userLocale, pPartRPK);
         if (partR.getACL() == null) {
             userManager.checkWorkspaceWriteAccess(pPartRPK.getWorkspaceId());
         }
 
         //Check access rights on partR
         if (!hasPartRevisionWriteAccess(user, partR)) {
-            throw new AccessRightException(locale, user);
+            throw new AccessRightException(userLocale, user);
         }
 
         if (isCheckoutByUser(user, partR)) {
             if (partR.getLastIteration().getIteration() <= 1) {
-                throw new NotAllowedException(locale, "NotAllowedException41");
+                throw new NotAllowedException(userLocale, "NotAllowedException41");
             }
             PartIteration partIte = partR.removeLastIteration();
             partIterationEvent.select(new AnnotationLiteral<Removed>() {
             }).fire(new PartIterationEvent(partIte));
 
-            PartIterationDAO partIDAO = new PartIterationDAO(locale, em);
-            partIDAO.removeIteration(partIte);
+            partIterationDAO.removeIteration(partIte);
             partR.setCheckOutDate(null);
             partR.setCheckOutUser(null);
 
@@ -362,13 +461,11 @@ public class ProductManagerBean implements IProductManagerLocal {
 
             return partR;
         } else {
-            throw new NotAllowedException(locale, "NotAllowedException19");
+            throw new NotAllowedException(userLocale, "NotAllowedException19");
         }
     }
 
     private void removeObsoletePathToPathLinks(User user, String workspaceId) throws UserNotFoundException, WorkspaceNotFoundException, UserNotActiveException, PartRevisionNotFoundException, AccessRightException, WorkspaceNotEnabledException {
-        Locale locale = new Locale(user.getLanguage());
-        ConfigurationItemDAO configurationItemDAO = new ConfigurationItemDAO(locale, em);
         List<ConfigurationItem> configurationItems = configurationItemDAO.findAllConfigurationItems(workspaceId);
 
         for (ConfigurationItem configurationItem : configurationItems) {
@@ -392,24 +489,23 @@ public class ProductManagerBean implements IProductManagerLocal {
     @Override
     public PartRevision checkOutPart(PartRevisionKey pPartRPK) throws UserNotFoundException, AccessRightException, WorkspaceNotFoundException, PartRevisionNotFoundException, NotAllowedException, FileAlreadyExistsException, CreationException, UserNotActiveException, WorkspaceNotEnabledException {
         User user = userManager.checkWorkspaceReadAccess(pPartRPK.getPartMaster().getWorkspace());
-        Locale locale = new Locale(user.getLanguage());
+        Locale userLocale = user.getLocale();
 
-        PartRevisionDAO partRDAO = new PartRevisionDAO(locale, em);
-        PartRevision partR = partRDAO.loadPartR(pPartRPK);
+        PartRevision partR = partRevisionDAO.loadPartR(userLocale, pPartRPK);
         if (partR.getACL() == null) {
             userManager.checkWorkspaceWriteAccess(pPartRPK.getWorkspaceId());
         }
         //Check access rights on partR
         if (!hasPartRevisionWriteAccess(user, partR)) {
-            throw new AccessRightException(locale, user);
+            throw new AccessRightException(userLocale, user);
         }
 
         if (partR.isCheckedOut()) {
-            throw new NotAllowedException(locale, "NotAllowedException37");
+            throw new NotAllowedException(userLocale, "NotAllowedException37");
         }
 
         if (partR.isReleased() || partR.isObsolete()) {
-            throw new NotAllowedException(locale, "NotAllowedException47");
+            throw new NotAllowedException(userLocale, "NotAllowedException47");
         }
 
         PartIteration beforeLastPartIteration = partR.getLastIteration();
@@ -424,7 +520,6 @@ public class ProductManagerBean implements IProductManagerLocal {
         partR.setCheckOutDate(now);
 
         if (beforeLastPartIteration != null) {
-            BinaryResourceDAO binDAO = new BinaryResourceDAO(locale, em);
             String encodedPartNumber = FileIO.encode(partR.getPartNumber());
             for (BinaryResource sourceFile : beforeLastPartIteration.getAttachedFiles()) {
                 String fileName = sourceFile.getName();
@@ -432,7 +527,7 @@ public class ProductManagerBean implements IProductManagerLocal {
                 Date lastModified = sourceFile.getLastModified();
                 String fullName = partR.getWorkspaceId() + "/parts/" + encodedPartNumber + "/" + partR.getVersion() + "/" + newPartIteration.getIteration() + "/attachedfiles/" + fileName;
                 BinaryResource targetFile = new BinaryResource(fullName, length, lastModified);
-                binDAO.createBinaryResource(targetFile);
+                binaryResourceDAO.createBinaryResource(userLocale, targetFile);
                 newPartIteration.addAttachedFile(targetFile);
             }
 
@@ -445,7 +540,7 @@ public class ProductManagerBean implements IProductManagerLocal {
                 Date lastModified = sourceFile.getLastModified();
                 String fullName = partR.getWorkspaceId() + "/parts/" + encodedPartNumber + "/" + partR.getVersion() + "/" + newPartIteration.getIteration() + "/" + fileName;
                 Geometry targetFile = new Geometry(quality, fullName, length, lastModified);
-                binDAO.createBinaryResource(targetFile);
+                binaryResourceDAO.createBinaryResource(userLocale, targetFile);
                 newPartIteration.addGeometry(targetFile);
             }
 
@@ -456,7 +551,7 @@ public class ProductManagerBean implements IProductManagerLocal {
                 Date lastModified = nativeCADFile.getLastModified();
                 String fullName = partR.getWorkspaceId() + "/parts/" + encodedPartNumber + "/" + partR.getVersion() + "/" + newPartIteration.getIteration() + "/nativecad/" + fileName;
                 BinaryResource targetFile = new BinaryResource(fullName, length, lastModified);
-                binDAO.createBinaryResource(targetFile);
+                binaryResourceDAO.createBinaryResource(userLocale, targetFile);
                 newPartIteration.setNativeCADFile(targetFile);
             }
 
@@ -467,12 +562,11 @@ public class ProductManagerBean implements IProductManagerLocal {
             }
             newPartIteration.setLinkedDocuments(links);
 
-            InstanceAttributeDAO attrDAO = new InstanceAttributeDAO(em);
             List<InstanceAttribute> attrs = new ArrayList<>();
             for (InstanceAttribute attr : beforeLastPartIteration.getInstanceAttributes()) {
                 InstanceAttribute newAttr = attr.clone();
                 //Workaround for the NULL DTYPE bug
-                attrDAO.createAttribute(newAttr);
+                instanceAttributeDAO.createAttribute(newAttr);
                 attrs.add(newAttr);
             }
             newPartIteration.setInstanceAttributes(attrs);
@@ -493,17 +587,16 @@ public class ProductManagerBean implements IProductManagerLocal {
     @Override
     public PartRevision checkInPart(PartRevisionKey pPartRPK) throws PartRevisionNotFoundException, UserNotFoundException, WorkspaceNotFoundException, AccessRightException, NotAllowedException, EntityConstraintException, UserNotActiveException, PartMasterNotFoundException, WorkspaceNotEnabledException {
         User user = userManager.checkWorkspaceReadAccess(pPartRPK.getPartMaster().getWorkspace());
-        Locale locale = new Locale(user.getLanguage());
+        Locale userLocale = user.getLocale();
 
-        PartRevisionDAO partRDAO = new PartRevisionDAO(locale, em);
-        PartRevision partR = partRDAO.loadPartR(pPartRPK);
+        PartRevision partR = partRevisionDAO.loadPartR(userLocale, pPartRPK);
         if (partR.getACL() == null) {
             userManager.checkWorkspaceWriteAccess(pPartRPK.getWorkspaceId());
         }
 
         //Check access rights on partR
         if (!hasPartRevisionWriteAccess(user, partR)) {
-            throw new AccessRightException(locale, user);
+            throw new AccessRightException(userLocale, user);
         }
 
         if (isCheckoutByUser(user, partR)) {
@@ -522,7 +615,7 @@ public class ProductManagerBean implements IProductManagerLocal {
             }).fire(new PartIterationEvent(lastIteration));
             return partR;
         } else {
-            throw new NotAllowedException(locale, "NotAllowedException20");
+            throw new NotAllowedException(userLocale, "NotAllowedException20");
         }
 
     }
@@ -532,17 +625,16 @@ public class ProductManagerBean implements IProductManagerLocal {
     public BinaryResource getBinaryResource(String pFullName) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, FileNotFoundException, NotAllowedException, AccessRightException, WorkspaceNotEnabledException {
 
         User user = userManager.checkWorkspaceReadAccess(BinaryResource.parseWorkspaceId(pFullName));
-        Locale userLocale = new Locale(user.getLanguage());
-        BinaryResourceDAO binDAO = new BinaryResourceDAO(userLocale, em);
-        BinaryResource binaryResource = binDAO.loadBinaryResource(pFullName);
+        Locale userLocale = user.getLocale();
+        BinaryResource binaryResource = binaryResourceDAO.loadBinaryResource(userLocale, pFullName);
 
-        PartIteration partIte = binDAO.getPartHolder(binaryResource);
+        PartIteration partIte = binaryResourceDAO.getPartHolder(binaryResource);
         if (partIte != null) {
             PartRevision partR = partIte.getPartRevision();
 
             if (isACLGrantReadAccess(user, partR)) {
                 if (isCheckoutByAnotherUser(user, partR) && partR.getLastIteration().equals(partIte)) {
-                    throw new NotAllowedException(new Locale(user.getLanguage()), "NotAllowedException34");
+                    throw new NotAllowedException(userLocale, "NotAllowedException34");
                 } else {
                     return binaryResource;
                 }
@@ -558,21 +650,17 @@ public class ProductManagerBean implements IProductManagerLocal {
     @Override
     public BinaryResource getTemplateBinaryResource(String pFullName) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, FileNotFoundException, WorkspaceNotEnabledException {
         User user = userManager.checkWorkspaceReadAccess(BinaryResource.parseWorkspaceId(pFullName));
-        Locale userLocale = new Locale(user.getLanguage());
-        BinaryResourceDAO binDAO = new BinaryResourceDAO(userLocale, em);
-        return binDAO.loadBinaryResource(pFullName);
+        return binaryResourceDAO.loadBinaryResource(user.getLocale(), pFullName);
     }
 
     @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
     @Override
     public BinaryResource saveNativeCADInPartIteration(PartIterationKey pPartIPK, String pName, long pSize) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, NotAllowedException, PartRevisionNotFoundException, FileAlreadyExistsException, CreationException, WorkspaceNotEnabledException {
         User user = userManager.checkWorkspaceReadAccess(pPartIPK.getWorkspaceId());
-        Locale locale = new Locale(user.getLanguage());
-        checkNameFileValidity(pName, locale);
+        Locale userLocale = user.getLocale();
+        checkNameFileValidity(pName, userLocale);
 
-        BinaryResourceDAO binDAO = new BinaryResourceDAO(locale, em);
-        PartRevisionDAO partRDAO = new PartRevisionDAO(locale, em);
-        PartRevision partR = partRDAO.loadPartR(pPartIPK.getPartRevision());
+        PartRevision partR = partRevisionDAO.loadPartR(userLocale, pPartIPK.getPartRevision());
         PartIteration partI = partR.getIteration(pPartIPK.getIteration());
 
         if (isCheckoutByUser(user, partR) && partR.getLastIteration().equals(partI)) {
@@ -581,7 +669,7 @@ public class ProductManagerBean implements IProductManagerLocal {
 
             if (nativeCADBinaryResource == null) {
                 nativeCADBinaryResource = new BinaryResource(fullName, pSize, new Date());
-                binDAO.createBinaryResource(nativeCADBinaryResource);
+                binaryResourceDAO.createBinaryResource(userLocale, nativeCADBinaryResource);
                 partI.setNativeCADFile(nativeCADBinaryResource);
 
             } else if (nativeCADBinaryResource.getFullName().equals(fullName)) {
@@ -590,7 +678,7 @@ public class ProductManagerBean implements IProductManagerLocal {
 
             } else {
                 partI.setNativeCADFile(null);
-                binDAO.removeBinaryResource(nativeCADBinaryResource);
+                binaryResourceDAO.removeBinaryResource(nativeCADBinaryResource);
 
                 try {
                     storageManager.deleteData(nativeCADBinaryResource);
@@ -599,7 +687,7 @@ public class ProductManagerBean implements IProductManagerLocal {
                 }
 
                 nativeCADBinaryResource = new BinaryResource(fullName, pSize, new Date());
-                binDAO.createBinaryResource(nativeCADBinaryResource);
+                binaryResourceDAO.createBinaryResource(userLocale, nativeCADBinaryResource);
                 partI.setNativeCADFile(nativeCADBinaryResource);
             }
 
@@ -607,7 +695,7 @@ public class ProductManagerBean implements IProductManagerLocal {
             List<Geometry> geometries = new ArrayList<>(partI.getGeometries());
             for (Geometry geometry : geometries) {
                 partI.removeGeometry(geometry);
-                binDAO.removeBinaryResource(geometry);
+                binaryResourceDAO.removeBinaryResource(geometry);
                 try {
                     storageManager.deleteData(geometry);
                 } catch (StorageException e) {
@@ -616,7 +704,7 @@ public class ProductManagerBean implements IProductManagerLocal {
             }
             return nativeCADBinaryResource;
         } else {
-            throw new NotAllowedException(locale, "NotAllowedException4");
+            throw new NotAllowedException(userLocale, "NotAllowedException4");
         }
 
     }
@@ -625,11 +713,10 @@ public class ProductManagerBean implements IProductManagerLocal {
     @Override
     public BinaryResource saveGeometryInPartIteration(PartIterationKey pPartIPK, String pName, int quality, long pSize, double[] box) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, NotAllowedException, PartRevisionNotFoundException, FileAlreadyExistsException, CreationException, WorkspaceNotEnabledException {
         User user = userManager.checkWorkspaceReadAccess(pPartIPK.getWorkspaceId());
-        Locale locale = new Locale(user.getLanguage());
-        checkNameFileValidity(pName, locale);
+        Locale userLocale = user.getLocale();
+        checkNameFileValidity(pName, userLocale);
 
-        PartRevisionDAO partRDAO = new PartRevisionDAO(locale, em);
-        PartRevision partR = partRDAO.loadPartR(pPartIPK.getPartRevision());
+        PartRevision partR = partRevisionDAO.loadPartR(userLocale, pPartIPK.getPartRevision());
         PartIteration partI = partR.getIteration(pPartIPK.getIteration());
         if (isCheckoutByUser(user, partR) && partR.getLastIteration().equals(partI)) {
             Geometry geometryBinaryResource = null;
@@ -643,7 +730,7 @@ public class ProductManagerBean implements IProductManagerLocal {
             }
             if (geometryBinaryResource == null) {
                 geometryBinaryResource = new Geometry(quality, fullName, pSize, new Date());
-                new BinaryResourceDAO(locale, em).createBinaryResource(geometryBinaryResource);
+                binaryResourceDAO.createBinaryResource(userLocale, geometryBinaryResource);
                 partI.addGeometry(geometryBinaryResource);
             } else {
                 geometryBinaryResource.setContentLength(pSize);
@@ -657,7 +744,7 @@ public class ProductManagerBean implements IProductManagerLocal {
 
             return geometryBinaryResource;
         } else {
-            throw new NotAllowedException(locale, "NotAllowedException4");
+            throw new NotAllowedException(userLocale, "NotAllowedException4");
         }
     }
 
@@ -665,11 +752,10 @@ public class ProductManagerBean implements IProductManagerLocal {
     @Override
     public BinaryResource saveFileInPartIteration(PartIterationKey pPartIPK, String pName, String subType, long pSize) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, NotAllowedException, PartRevisionNotFoundException, FileAlreadyExistsException, CreationException, WorkspaceNotEnabledException {
         User user = userManager.checkWorkspaceReadAccess(pPartIPK.getWorkspaceId());
-        Locale locale = new Locale(user.getLanguage());
-        checkNameFileValidity(pName, locale);
+        Locale userLocale = user.getLocale();
+        checkNameFileValidity(pName, userLocale);
 
-        PartRevisionDAO partRDAO = new PartRevisionDAO(locale, em);
-        PartRevision partR = partRDAO.loadPartR(pPartIPK.getPartRevision());
+        PartRevision partR = partRevisionDAO.loadPartR(userLocale, pPartIPK.getPartRevision());
         PartIteration partI = partR.getIteration(pPartIPK.getIteration());
         if (isCheckoutByUser(user, partR) && partR.getLastIteration().equals(partI)) {
             BinaryResource binaryResource = null;
@@ -683,7 +769,7 @@ public class ProductManagerBean implements IProductManagerLocal {
             }
             if (binaryResource == null) {
                 binaryResource = new BinaryResource(fullName, pSize, new Date());
-                new BinaryResourceDAO(locale, em).createBinaryResource(binaryResource);
+                binaryResourceDAO.createBinaryResource(userLocale, binaryResource);
                 partI.addAttachedFile(binaryResource);
             } else {
                 binaryResource.setContentLength(pSize);
@@ -691,22 +777,17 @@ public class ProductManagerBean implements IProductManagerLocal {
             }
             return binaryResource;
         } else {
-            throw new NotAllowedException(locale, "NotAllowedException4");
+            throw new NotAllowedException(userLocale, "NotAllowedException4");
         }
     }
 
     @RolesAllowed({UserGroupMapping.REGULAR_USER_ROLE_ID, UserGroupMapping.ADMIN_ROLE_ID})
     @Override
     public List<ConfigurationItem> getConfigurationItems(String pWorkspaceId) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, WorkspaceNotEnabledException {
-        Locale locale;
-        if (!contextManager.isCallerInRole(UserGroupMapping.ADMIN_ROLE_ID)) {
-            User user = userManager.checkWorkspaceReadAccess(pWorkspaceId);
-            locale = new Locale(user.getLanguage());
-        } else {
-            locale = Locale.getDefault();
-        }
+        if (!contextManager.isCallerInRole(UserGroupMapping.ADMIN_ROLE_ID))
+            userManager.checkWorkspaceReadAccess(pWorkspaceId);
 
-        return new ConfigurationItemDAO(locale, em).findAllConfigurationItems(pWorkspaceId);
+        return configurationItemDAO.findAllConfigurationItems(pWorkspaceId);
     }
 
     @RolesAllowed({UserGroupMapping.REGULAR_USER_ROLE_ID, UserGroupMapping.ADMIN_ROLE_ID})
@@ -729,10 +810,9 @@ public class ProductManagerBean implements IProductManagerLocal {
     @Override
     public ConfigurationItem getConfigurationItem(ConfigurationItemKey ciKey) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, ConfigurationItemNotFoundException, WorkspaceNotEnabledException {
         User user = userManager.checkWorkspaceReadAccess(ciKey.getWorkspace());
-        Locale locale = new Locale(user.getLanguage());
         ConfigurationItem configurationItem = em.find(ConfigurationItem.class, ciKey);
         if (configurationItem == null) {
-            throw new ConfigurationItemNotFoundException(locale, ciKey.getId());
+            throw new ConfigurationItemNotFoundException(user.getLocale(), ciKey.getId());
         }
         return configurationItem;
     }
@@ -746,20 +826,17 @@ public class ProductManagerBean implements IProductManagerLocal {
             throws UserNotFoundException, WorkspaceNotFoundException, AccessRightException, NotAllowedException, PartRevisionNotFoundException, PartMasterNotFoundException, EntityConstraintException, UserNotActiveException, ListOfValuesNotFoundException, PartUsageLinkNotFoundException, DocumentRevisionNotFoundException, WorkspaceNotEnabledException {
 
         User user = userManager.checkWorkspaceReadAccess(pKey.getWorkspaceId());
-        Locale locale = new Locale(user.getLanguage());
-        DocumentRevisionDAO documentRevisionDAO = new DocumentRevisionDAO(locale, em);
+        Locale userLocale = user.getLocale();
 
-        PartRevisionDAO partRDAO = new PartRevisionDAO(locale, em);
-        PartRevision partRev = partRDAO.loadPartR(pKey.getPartRevision());
+        PartRevision partRev = partRevisionDAO.loadPartR(userLocale, pKey.getPartRevision());
         if (partRev.getACL() == null) {
             userManager.checkWorkspaceWriteAccess(pKey.getWorkspaceId());
         }
         //check access rights on partRevision
         if (!hasPartRevisionWriteAccess(user, partRev)) {
-            throw new AccessRightException(locale, user);
+            throw new AccessRightException(userLocale, user);
         }
 
-        DocumentLinkDAO linkDAO = new DocumentLinkDAO(locale, em);
         PartIteration partIte = partRev.getLastIteration();
 
         if (isCheckoutByUser(user, partRev) && partIte.getKey().equals(pKey)) {
@@ -775,9 +852,9 @@ public class ProductManagerBean implements IProductManagerLocal {
 
                 int counter = 0;
                 for (DocumentRevisionKey link : pLinkKeys) {
-                    DocumentLink newLink = new DocumentLink(documentRevisionDAO.loadDocR(link));
+                    DocumentLink newLink = new DocumentLink(documentRevisionDAO.loadDocR(userLocale, link));
                     newLink.setComment(documentLinkComments[counter]);
-                    linkDAO.createLink(newLink);
+                    documentLinkDAO.createLink(newLink);
                     partIte.getLinkedDocuments().add(newLink);
                     counter++;
                 }
@@ -792,7 +869,7 @@ public class ProductManagerBean implements IProductManagerLocal {
                 List<InstanceAttribute> currentAttrs = partRev.getLastIteration().getInstanceAttributes();
                 boolean valid = AttributesConsistencyUtils.hasValidChange(pAttributes, partRev.isAttributesLocked(), currentAttrs);
                 if (!valid) {
-                    throw new NotAllowedException(locale, "NotAllowedException59");
+                    throw new NotAllowedException(userLocale, "NotAllowedException59");
                 }
                 partRev.getLastIteration().setInstanceAttributes(pAttributes);
             }
@@ -802,19 +879,17 @@ public class ProductManagerBean implements IProductManagerLocal {
 
             if (pAttributeTemplates != null) {
 
-                LOVDAO lovDAO = new LOVDAO(locale, em);
-
                 List<InstanceAttributeTemplate> templateAttrs = new ArrayList<>();
                 for (int i = 0; i < pAttributeTemplates.size(); i++) {
                     templateAttrs.add(pAttributeTemplates.get(i));
                     if (pAttributeTemplates.get(i) instanceof ListOfValuesAttributeTemplate) {
                         ListOfValuesAttributeTemplate lovAttr = (ListOfValuesAttributeTemplate) pAttributeTemplates.get(i);
                         ListOfValuesKey lovKey = new ListOfValuesKey(user.getWorkspaceId(), lovNames[i]);
-                        lovAttr.setLov(lovDAO.loadLOV(lovKey));
+                        lovAttr.setLov(lovDAO.loadLOV(userLocale, lovKey));
                     }
                 }
                 if (!AttributesConsistencyUtils.isTemplateAttributesValid(templateAttrs, false)) {
-                    throw new NotAllowedException(locale, "NotAllowedException59");
+                    throw new NotAllowedException(userLocale, "NotAllowedException59");
                 }
                 partIte.setInstanceAttributeTemplates(pAttributeTemplates);
             }
@@ -829,7 +904,6 @@ public class ProductManagerBean implements IProductManagerLocal {
                 }
                 partIte.setComponents(links);
 
-                PartUsageLinkDAO partUsageLinkDAO = new PartUsageLinkDAO(new Locale(user.getLanguage()), em);
                 partUsageLinkDAO.removeOrphanPartLinks();
                 removeObsoletePathToPathLinks(user, pKey.getWorkspaceId());
                 checkCyclicAssemblyForPartIteration(partIte);
@@ -843,7 +917,7 @@ public class ProductManagerBean implements IProductManagerLocal {
             partIte.setSource(source);
 
         } else {
-            throw new NotAllowedException(locale, "NotAllowedException25", partIte.getPartNumber());
+            throw new NotAllowedException(userLocale, "NotAllowedException25", partIte.getPartNumber());
         }
 
         return partRev;
@@ -854,8 +928,7 @@ public class ProductManagerBean implements IProductManagerLocal {
         int id = partUsageLink.getId();
         PartUsageLink partLink;
         if (id != 0) {
-            PartUsageLinkDAO partUsageLinkDAO = new PartUsageLinkDAO(new Locale(user.getLanguage()), em);
-            partLink = partUsageLinkDAO.loadPartUsageLink(id);
+            partLink = partUsageLinkDAO.loadPartUsageLink(user.getLocale(), id);
         } else {
             partLink = createNewPartLink(partUsageLink, partIte);
         }
@@ -902,7 +975,7 @@ public class ProductManagerBean implements IProductManagerLocal {
 
         User user = checkPartRevisionReadAccess(pPartRPK);
 
-        PartRevision partR = new PartRevisionDAO(new Locale(user.getLanguage()), em).loadPartR(pPartRPK);
+        PartRevision partR = partRevisionDAO.loadPartR(user.getLocale(), pPartRPK);
 
         if (isCheckoutByAnotherUser(user, partR)) {
             em.detach(partR);
@@ -917,21 +990,21 @@ public class ProductManagerBean implements IProductManagerLocal {
     public List<ModificationNotification> getModificationNotifications(PartIterationKey pPartIPK) throws UserNotFoundException, WorkspaceNotFoundException, UserNotActiveException, PartRevisionNotFoundException, AccessRightException, WorkspaceNotEnabledException {
         PartRevisionKey partRevisionKey = pPartIPK.getPartRevision();
         checkPartRevisionReadAccess(partRevisionKey);
-        return new ModificationNotificationDAO(em).getModificationNotifications(pPartIPK);
+        return modificationNotificationDAO.getModificationNotifications(pPartIPK);
     }
 
     @RolesAllowed({UserGroupMapping.REGULAR_USER_ROLE_ID})
     @Override
     public void removeModificationNotificationsOnIteration(PartIterationKey pPartIPK) {
         //TODO insure access rights
-        new ModificationNotificationDAO(em).removeModificationNotifications(pPartIPK);
+        modificationNotificationDAO.removeModificationNotifications(pPartIPK);
     }
 
     @RolesAllowed({UserGroupMapping.REGULAR_USER_ROLE_ID})
     @Override
     public void removeModificationNotificationsOnRevision(PartRevisionKey pPartRPK) {
         //TODO insure access rights
-        new ModificationNotificationDAO(em).removeModificationNotifications(pPartRPK);
+        modificationNotificationDAO.removeModificationNotifications(pPartRPK);
     }
 
     @RolesAllowed({UserGroupMapping.REGULAR_USER_ROLE_ID})
@@ -942,13 +1015,12 @@ public class ProductManagerBean implements IProductManagerLocal {
         impactedParts.addAll(getUsedByAsComponent(modifiedPartIteration.getPartRevisionKey()));
         impactedParts.addAll(getUsedByAsSubstitute(modifiedPartIteration.getPartRevisionKey()));
 
-        ModificationNotificationDAO dao = new ModificationNotificationDAO(em);
         for (PartIteration impactedPart : impactedParts) {
             if (impactedPart.isLastIteration()) {
                 ModificationNotification notification = new ModificationNotification();
                 notification.setImpactedPart(impactedPart);
                 notification.setModifiedPart(modifiedPartIteration);
-                dao.createModificationNotification(notification);
+                modificationNotificationDAO.createModificationNotification(notification);
             }
         }
     }
@@ -957,19 +1029,18 @@ public class ProductManagerBean implements IProductManagerLocal {
     @Override
     public void updateModificationNotification(String pWorkspaceId, int pModificationNotificationId, String pAcknowledgementComment) throws UserNotFoundException, AccessRightException, WorkspaceNotFoundException, PartRevisionNotFoundException, WorkspaceNotEnabledException {
 
-        ModificationNotification modificationNotification = new ModificationNotificationDAO(em).getModificationNotification(pModificationNotificationId);
+        ModificationNotification modificationNotification = modificationNotificationDAO.getModificationNotification(pModificationNotificationId);
         PartIterationKey partIKey = modificationNotification.getImpactedPart().getKey();
         PartRevisionKey partRKey = partIKey.getPartRevision();
 
         User user = userManager.checkWorkspaceWriteAccess(partRKey.getPartMaster().getWorkspace());
-        Locale locale = new Locale(user.getLanguage());
+        Locale userLocale = user.getLocale();
 
-        PartRevisionDAO partRDAO = new PartRevisionDAO(locale, em);
-        PartRevision partR = partRDAO.loadPartR(partRKey);
+        PartRevision partR = partRevisionDAO.loadPartR(userLocale, partRKey);
 
         //Check access rights on partR
         if (!hasPartRevisionWriteAccess(user, partR)) {
-            throw new AccessRightException(locale, user);
+            throw new AccessRightException(userLocale, user);
         }
         Date now = new Date();
         modificationNotification.setAcknowledgementComment(pAcknowledgementComment);
@@ -983,16 +1054,14 @@ public class ProductManagerBean implements IProductManagerLocal {
     @Override
     public List<PartIteration> getUsedByAsComponent(PartRevisionKey partRevisionKey) throws UserNotFoundException, WorkspaceNotFoundException, UserNotActiveException, PartRevisionNotFoundException, AccessRightException, WorkspaceNotEnabledException {
         User user = checkPartRevisionReadAccess(partRevisionKey);
-        Locale locale = new Locale(user.getLanguage());
-        return new PartIterationDAO(locale, em).findUsedByAsComponent(partRevisionKey.getPartMaster());
+        return partIterationDAO.findUsedByAsComponent(partRevisionKey.getPartMaster());
     }
 
     @RolesAllowed({UserGroupMapping.REGULAR_USER_ROLE_ID})
     @Override
     public List<PartIteration> getUsedByAsSubstitute(PartRevisionKey partRevisionKey) throws UserNotFoundException, WorkspaceNotFoundException, UserNotActiveException, PartRevisionNotFoundException, AccessRightException, WorkspaceNotEnabledException {
         User user = checkPartRevisionReadAccess(partRevisionKey);
-        Locale locale = new Locale(user.getLanguage());
-        return new PartIterationDAO(locale, em).findUsedByAsSubstitute(partRevisionKey.getPartMaster());
+        return partIterationDAO.findUsedByAsSubstitute(partRevisionKey.getPartMaster());
     }
 
     @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
@@ -1001,16 +1070,15 @@ public class ProductManagerBean implements IProductManagerLocal {
 
         PartRevisionKey partRevisionKey = pPartIPK.getPartRevision();
         User user = checkPartRevisionReadAccess(partRevisionKey);
-        Locale locale = new Locale(user.getLanguage());
-        PartIterationDAO partIterationDAO = new PartIterationDAO(locale, em);
+        Locale userLocale = user.getLocale();
 
-        PartIteration partI = partIterationDAO.loadPartI(pPartIPK);
+        PartIteration partI = partIterationDAO.loadPartI(userLocale, pPartIPK);
         PartRevision partR = partI.getPartRevision();
         partR.getIteration(pPartIPK.getIteration());
         PartIteration lastIteration = partR.getLastIteration();
 
         if (isCheckoutByAnotherUser(user, partR) && lastIteration.getKey().equals(pPartIPK)) {
-            throw new NotAllowedException(locale, "NotAllowedException25", partR.getPartMaster().getNumber());
+            throw new NotAllowedException(userLocale, "NotAllowedException25", partR.getPartMaster().getNumber());
         }
 
         return partI;
@@ -1021,11 +1089,9 @@ public class ProductManagerBean implements IProductManagerLocal {
     public void updatePartRevisionACL(String workspaceId, PartRevisionKey revisionKey, Map<String, String> pACLUserEntries, Map<String, String> pACLUserGroupEntries) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, PartRevisionNotFoundException, AccessRightException, DocumentRevisionNotFoundException, WorkspaceNotEnabledException {
 
         User user = userManager.checkWorkspaceReadAccess(workspaceId);
-        Locale locale = new Locale(user.getLanguage());
-        ACLFactory aclFactory = new ACLFactory(em);
+        Locale userLocale = user.getLocale();
 
-        PartRevisionDAO partRevisionDAO = new PartRevisionDAO(locale, em);
-        PartRevision partRevision = partRevisionDAO.loadPartR(revisionKey);
+        PartRevision partRevision = partRevisionDAO.loadPartR(userLocale, revisionKey);
 
         if (isAuthor(user, partRevision) || user.isAdministrator()) {
 
@@ -1036,7 +1102,7 @@ public class ProductManagerBean implements IProductManagerLocal {
                 aclFactory.updateACL(workspaceId, partRevision.getACL(), pACLUserEntries, pACLUserGroupEntries);
             }
         } else {
-            throw new AccessRightException(locale, user);
+            throw new AccessRightException(userLocale, user);
         }
 
     }
@@ -1046,19 +1112,18 @@ public class ProductManagerBean implements IProductManagerLocal {
     public void removeACLFromPartRevision(PartRevisionKey revisionKey) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, PartRevisionNotFoundException, AccessRightException, WorkspaceNotEnabledException {
 
         User user = userManager.checkWorkspaceReadAccess(revisionKey.getPartMaster().getWorkspace());
-        Locale locale = new Locale(user.getLanguage());
+        Locale userLocale = user.getLocale();
 
-        PartRevisionDAO partRevisionDAO = new PartRevisionDAO(locale, em);
-        PartRevision partRevision = partRevisionDAO.loadPartR(revisionKey);
+        PartRevision partRevision = partRevisionDAO.loadPartR(userLocale, revisionKey);
 
         if (isAuthor(user, partRevision) || user.isAdministrator()) {
             ACL acl = partRevision.getACL();
             if (acl != null) {
-                new ACLDAO(em).removeACLEntries(acl);
+                aclDAO.removeACLEntries(acl);
                 partRevision.setACL(null);
             }
         } else {
-            throw new AccessRightException(locale, user);
+            throw new AccessRightException(userLocale, user);
         }
 
     }
@@ -1091,16 +1156,15 @@ public class ProductManagerBean implements IProductManagerLocal {
     @Override
     public PartMaster findPartMasterByCADFileName(String workspaceId, String cadFileName) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, WorkspaceNotEnabledException {
         User user = userManager.checkWorkspaceReadAccess(workspaceId);
-        Locale locale = new Locale(user.getLanguage());
 
-        BinaryResource br = new BinaryResourceDAO(locale, em).findNativeCadBinaryResourceInWorkspace(workspaceId, cadFileName);
+        BinaryResource br = binaryResourceDAO.findNativeCadBinaryResourceInWorkspace(workspaceId, cadFileName);
         if (br == null) {
             return null;
         }
         String partNumber = br.getHolderId();
         PartMasterKey partMasterKey = new PartMasterKey(workspaceId, partNumber);
         try {
-            return new PartMasterDAO(locale, em).loadPartM(partMasterKey);
+            return partMasterDAO.loadPartM(user.getLocale(), partMasterKey);
         } catch (PartMasterNotFoundException e) {
             return null;
         }
@@ -1111,10 +1175,7 @@ public class ProductManagerBean implements IProductManagerLocal {
     @Override
     public Conversion getConversion(PartIterationKey partIterationKey) throws UserNotFoundException, WorkspaceNotFoundException, UserNotActiveException, PartRevisionNotFoundException, AccessRightException, PartIterationNotFoundException, WorkspaceNotEnabledException {
         User user = checkPartRevisionReadAccess(partIterationKey.getPartRevision());
-        Locale locale = new Locale(user.getLanguage());
-        PartIterationDAO partIterationDAO = new PartIterationDAO(locale, em);
-        PartIteration partIteration = partIterationDAO.loadPartI(partIterationKey);
-        ConversionDAO conversionDAO = new ConversionDAO(locale, em);
+        PartIteration partIteration = partIterationDAO.loadPartI(user.getLocale(), partIterationKey);
         return conversionDAO.findConversion(partIteration);
     }
 
@@ -1123,12 +1184,10 @@ public class ProductManagerBean implements IProductManagerLocal {
     @Override
     public Conversion createConversion(PartIterationKey partIterationKey) throws UserNotFoundException, WorkspaceNotFoundException, UserNotActiveException, PartRevisionNotFoundException, AccessRightException, PartIterationNotFoundException, CreationException, WorkspaceNotEnabledException {
         User user = checkPartRevisionWriteAccess(partIterationKey.getPartRevision());
-        Locale locale = new Locale(user.getLanguage());
-        PartIterationDAO partIterationDAO = new PartIterationDAO(locale, em);
-        PartIteration partIteration = partIterationDAO.loadPartI(partIterationKey);
-        ConversionDAO conversionDAO = new ConversionDAO(locale, em);
+        Locale userLocale = user.getLocale();
+        PartIteration partIteration = partIterationDAO.loadPartI(userLocale, partIterationKey);
         Conversion conversion = new Conversion(partIteration);
-        conversionDAO.createConversion(conversion);
+        conversionDAO.createConversion(userLocale, conversion);
         return conversion;
     }
 
@@ -1137,10 +1196,7 @@ public class ProductManagerBean implements IProductManagerLocal {
     @Override
     public void removeConversion(PartIterationKey partIterationKey) throws UserNotFoundException, WorkspaceNotFoundException, UserNotActiveException, PartRevisionNotFoundException, AccessRightException, PartIterationNotFoundException, WorkspaceNotEnabledException {
         User user = checkPartRevisionWriteAccess(partIterationKey.getPartRevision());
-        Locale locale = new Locale(user.getLanguage());
-        PartIterationDAO partIterationDAO = new PartIterationDAO(locale, em);
-        PartIteration partIteration = partIterationDAO.loadPartI(partIterationKey);
-        ConversionDAO conversionDAO = new ConversionDAO(locale, em);
+        PartIteration partIteration = partIterationDAO.loadPartI(user.getLocale(), partIterationKey);
         Conversion conversion = conversionDAO.findConversion(partIteration);
         conversionDAO.deleteConversion(conversion);
     }
@@ -1150,10 +1206,7 @@ public class ProductManagerBean implements IProductManagerLocal {
     @Override
     public void endConversion(PartIterationKey partIterationKey, boolean succeed) throws UserNotFoundException, WorkspaceNotFoundException, UserNotActiveException, PartRevisionNotFoundException, AccessRightException, PartIterationNotFoundException, WorkspaceNotEnabledException {
         User user = checkPartRevisionWriteAccess(partIterationKey.getPartRevision());
-        Locale locale = new Locale(user.getLanguage());
-        PartIterationDAO partIterationDAO = new PartIterationDAO(locale, em);
-        PartIteration partIteration = partIterationDAO.loadPartI(partIterationKey);
-        ConversionDAO conversionDAO = new ConversionDAO(locale, em);
+        PartIteration partIteration = partIterationDAO.loadPartI(user.getLocale(), partIterationKey);
         Conversion conversion = conversionDAO.findConversion(partIteration);
         conversion.setPending(false);
         conversion.setSucceed(succeed);
@@ -1165,10 +1218,8 @@ public class ProductManagerBean implements IProductManagerLocal {
     @Override
     public Import createImport(String workspaceId, String fileName) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, CreationException, WorkspaceNotEnabledException {
         User user = userManager.checkWorkspaceReadAccess(workspaceId);
-        Locale locale = new Locale(user.getLanguage());
         Import importToCreate = new Import(user, fileName);
-        ImportDAO importDAO = new ImportDAO(locale, em);
-        importDAO.createImport(importToCreate);
+        importDAO.createImport(user.getLocale(), importToCreate);
         return importToCreate;
     }
 
@@ -1178,8 +1229,6 @@ public class ProductManagerBean implements IProductManagerLocal {
             throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, WorkspaceNotEnabledException {
 
         User user = userManager.checkWorkspaceReadAccess(workspaceId);
-        Locale locale = new Locale(user.getLanguage());
-        ImportDAO importDAO = new ImportDAO(locale, em);
         return importDAO.findImports(user, filename);
     }
 
@@ -1187,13 +1236,11 @@ public class ProductManagerBean implements IProductManagerLocal {
     @Override
     public Import getImport(String workspaceId, String id) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, AccessRightException, WorkspaceNotEnabledException {
         User user = userManager.checkWorkspaceReadAccess(workspaceId);
-        Locale locale = new Locale(user.getLanguage());
-        ImportDAO importDAO = new ImportDAO(locale, em);
         Import anImport = importDAO.findImport(user, id);
         if (anImport.getUser().equals(user)) {
             return anImport;
         } else {
-            throw new AccessRightException(locale, user);
+            throw new AccessRightException(user.getLocale(), user);
         }
     }
 
@@ -1202,8 +1249,6 @@ public class ProductManagerBean implements IProductManagerLocal {
     @Override
     public void endImport(String workspaceId, String id, ImportResult importResult) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, AccessRightException, WorkspaceNotEnabledException {
         User user = userManager.checkWorkspaceReadAccess(workspaceId);
-        Locale locale = new Locale(user.getLanguage());
-        ImportDAO importDAO = new ImportDAO(locale, em);
         Import anImport = importDAO.findImport(user, id);
         anImport.setPending(false);
         anImport.setEndDate(new Date());
@@ -1220,13 +1265,11 @@ public class ProductManagerBean implements IProductManagerLocal {
     @Override
     public void removeImport(String workspaceId, String id) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, AccessRightException, WorkspaceNotEnabledException {
         User user = userManager.checkWorkspaceReadAccess(workspaceId);
-        Locale locale = new Locale(user.getLanguage());
-        ImportDAO importDAO = new ImportDAO(locale, em);
         Import anImport = importDAO.findImport(user, id);
         if (anImport.getUser().equals(user)) {
             importDAO.deleteImport(anImport);
         } else {
-            throw new AccessRightException(locale, user);
+            throw new AccessRightException(user.getLocale(), user);
         }
     }
 
@@ -1234,13 +1277,11 @@ public class ProductManagerBean implements IProductManagerLocal {
     @Override
     public void updateACLForPartMasterTemplate(String pWorkspaceId, String templateId, Map<String, String> userEntries, Map<String, String> groupEntries) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, AccessRightException, PartMasterTemplateNotFoundException, WorkspaceNotEnabledException {
 
-        ACLFactory aclFactory = new ACLFactory(em);
-
         // Check the read access to the workspace
         User user = userManager.checkWorkspaceReadAccess(pWorkspaceId);
         // Load the part template
         PartMasterTemplateKey pKey = new PartMasterTemplateKey(pWorkspaceId, templateId);
-        PartMasterTemplate partMasterTemplate = new PartMasterTemplateDAO(new Locale(user.getLanguage()), em).loadPartMTemplate(pKey);
+        PartMasterTemplate partMasterTemplate = partMasterTemplateDAO.loadPartMTemplate(user.getLocale(), pKey);
 
         // Check the access to the part template
         checkPartTemplateWriteAccess(partMasterTemplate, user);
@@ -1259,17 +1300,16 @@ public class ProductManagerBean implements IProductManagerLocal {
 
         // Check the read access to the workspace
         User user = userManager.checkWorkspaceReadAccess(workspaceId);
-        Locale locale = new Locale(user.getLanguage());
         // Load the part template
         PartMasterTemplateKey pKey = new PartMasterTemplateKey(workspaceId, partTemplateId);
-        PartMasterTemplate partMaster = new PartMasterTemplateDAO(locale, em).loadPartMTemplate(pKey);
+        PartMasterTemplate partMaster = partMasterTemplateDAO.loadPartMTemplate(user.getLocale(), pKey);
 
         // Check the access to the part template
         checkPartTemplateWriteAccess(partMaster, user);
 
         ACL acl = partMaster.getAcl();
         if (acl != null) {
-            new ACLDAO(em).removeACLEntries(acl);
+            aclDAO.removeACLEntries(acl);
             partMaster.setAcl(null);
         }
     }
@@ -1280,9 +1320,8 @@ public class ProductManagerBean implements IProductManagerLocal {
 
         User user = checkPartRevisionWriteAccess(revisionKey);
 
-        Locale userLocale = new Locale(user.getLanguage());
-        PartRevisionDAO partRevDAO = new PartRevisionDAO(userLocale, em);
-        PartRevision partRevision = partRevDAO.loadPartR(revisionKey);
+        Locale userLocale = user.getLocale();
+        PartRevision partRevision = partRevisionDAO.loadPartR(userLocale, revisionKey);
 
         Set<Tag> tags = new HashSet<>();
         if (pTags != null) {
@@ -1290,7 +1329,6 @@ public class ProductManagerBean implements IProductManagerLocal {
                 tags.add(new Tag(user.getWorkspace(), label));
             }
 
-            TagDAO tagDAO = new TagDAO(userLocale, em);
             List<Tag> existingTags = Arrays.asList(tagDAO.findAllTags(user.getWorkspaceId()));
 
             Set<Tag> tagsToCreate = new HashSet<>(tags);
@@ -1298,7 +1336,7 @@ public class ProductManagerBean implements IProductManagerLocal {
 
             for (Tag t : tagsToCreate) {
                 try {
-                    tagDAO.createTag(t);
+                    tagDAO.createTag(userLocale, t);
                 } catch (CreationException | TagAlreadyExistsException ex) {
                     LOGGER.log(Level.SEVERE, null, ex);
                 }
@@ -1363,7 +1401,7 @@ public class ProductManagerBean implements IProductManagerLocal {
 
         User user = userManager.checkWorkspaceReadAccess(workspaceId);
 
-        List<PartRevision> partsRevision = new PartRevisionDAO(new Locale(user.getLanguage()), em).findPartByTag(new Tag(user.getWorkspace(), tagId));
+        List<PartRevision> partsRevision = partRevisionDAO.findPartByTag(new Tag(user.getWorkspace(), tagId));
         ListIterator<PartRevision> iterator = partsRevision.listIterator();
         while (iterator.hasNext()) {
             PartRevision partRevision = iterator.next();
@@ -1382,7 +1420,7 @@ public class ProductManagerBean implements IProductManagerLocal {
     @Override
     public PartRevision[] getPartRevisionsWithReferenceOrName(String pWorkspaceId, String reference, int maxResults) throws WorkspaceNotFoundException, UserNotFoundException, UserNotActiveException, WorkspaceNotEnabledException {
         User user = userManager.checkWorkspaceReadAccess(pWorkspaceId);
-        List<PartRevision> partRs = new PartRevisionDAO(new Locale(user.getLanguage()), em).findPartsRevisionsWithReferenceOrNameLike(pWorkspaceId, reference, maxResults);
+        List<PartRevision> partRs = partRevisionDAO.findPartsRevisionsWithReferenceOrNameLike(pWorkspaceId, reference, maxResults);
         return partRs.toArray(new PartRevision[partRs.size()]);
     }
 
@@ -1390,21 +1428,20 @@ public class ProductManagerBean implements IProductManagerLocal {
     @Override
     public PartRevision releasePartRevision(PartRevisionKey pRevisionKey) throws UserNotFoundException, WorkspaceNotFoundException, UserNotActiveException, PartRevisionNotFoundException, AccessRightException, NotAllowedException, WorkspaceNotEnabledException {
         User user = checkPartRevisionWriteAccess(pRevisionKey);                                                         // Check if the user can write the part
-        Locale locale = new Locale(user.getLanguage());
+        Locale userLocale = user.getLocale();
 
-        PartRevisionDAO partRevisionDAO = new PartRevisionDAO(locale, em);
-        PartRevision partRevision = partRevisionDAO.loadPartR(pRevisionKey);
+        PartRevision partRevision = partRevisionDAO.loadPartR(userLocale, pRevisionKey);
 
         if (partRevision.isCheckedOut()) {
-            throw new NotAllowedException(locale, "NotAllowedException46");
+            throw new NotAllowedException(userLocale, "NotAllowedException46");
         }
 
         if (partRevision.getNumberOfIterations() == 0) {
-            throw new NotAllowedException(locale, "NotAllowedException41");
+            throw new NotAllowedException(userLocale, "NotAllowedException41");
         }
 
         if (partRevision.isObsolete()) {
-            throw new NotAllowedException(locale, "NotAllowedException38");
+            throw new NotAllowedException(userLocale, "NotAllowedException38");
         }
 
         partRevision.release(user);
@@ -1415,13 +1452,12 @@ public class ProductManagerBean implements IProductManagerLocal {
     @Override
     public PartRevision markPartRevisionAsObsolete(PartRevisionKey pRevisionKey) throws UserNotFoundException, WorkspaceNotFoundException, UserNotActiveException, PartRevisionNotFoundException, AccessRightException, NotAllowedException, WorkspaceNotEnabledException {
         User user = checkPartRevisionWriteAccess(pRevisionKey);                                                         // Check if the user can write the part
-        Locale locale = new Locale(user.getLanguage());
+        Locale userLocale = user.getLocale();
 
-        PartRevisionDAO partRevisionDAO = new PartRevisionDAO(locale, em);
-        PartRevision partRevision = partRevisionDAO.loadPartR(pRevisionKey);
+        PartRevision partRevision = partRevisionDAO.loadPartR(userLocale, pRevisionKey);
 
         if (!partRevision.isReleased()) {
-            throw new NotAllowedException(locale, "NotAllowedException36");
+            throw new NotAllowedException(userLocale, "NotAllowedException36");
         }
 
         partRevision.markAsObsolete(user);
@@ -1433,15 +1469,15 @@ public class ProductManagerBean implements IProductManagerLocal {
     public PartRevision getLastReleasePartRevision(ConfigurationItemKey ciKey)
             throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, ConfigurationItemNotFoundException, AccessRightException, PartRevisionNotFoundException, WorkspaceNotEnabledException {
         User user = userManager.checkWorkspaceReadAccess(ciKey.getWorkspace());
-        Locale locale = new Locale(user.getLanguage());
-        ConfigurationItem ci = new ConfigurationItemDAO(locale, em).loadConfigurationItem(ciKey);
+        Locale userLocale = user.getLocale();
+        ConfigurationItem ci = configurationItemDAO.loadConfigurationItem(userLocale, ciKey);
         PartMaster partMaster = ci.getDesignItem();
         PartRevision lastReleasedRevision = partMaster.getLastReleasedRevision();
         if (lastReleasedRevision == null) {
-            throw new PartRevisionNotFoundException(locale, partMaster.getNumber(), "Released");
+            throw new PartRevisionNotFoundException(userLocale, partMaster.getNumber(), "Released");
         }
         if (!canUserAccess(user, lastReleasedRevision.getKey())) {
-            throw new AccessRightException(locale, user);
+            throw new AccessRightException(userLocale, user);
         }
         return lastReleasedRevision;
     }
@@ -1450,21 +1486,20 @@ public class ProductManagerBean implements IProductManagerLocal {
     @Override
     public List<ProductBaseline> findBaselinesWherePartRevisionHasIterations(PartRevisionKey partRevisionKey) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, PartRevisionNotFoundException, WorkspaceNotEnabledException {
         User user = userManager.checkWorkspaceReadAccess(partRevisionKey.getPartMaster().getWorkspace());
-        Locale locale = new Locale(user.getLanguage());
-        PartRevision partRevision = new PartRevisionDAO(locale, em).loadPartR(partRevisionKey);
-        return new ProductBaselineDAO(locale, em).findBaselineWherePartRevisionHasIterations(partRevision);
+        PartRevision partRevision = partRevisionDAO.loadPartR(user.getLocale(), partRevisionKey);
+        return productBaselineDAO.findBaselineWherePartRevisionHasIterations(partRevision);
     }
 
     @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
     @Override
     public List<PartUsageLink> getComponents(PartIterationKey pPartIPK) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, PartIterationNotFoundException, NotAllowedException, WorkspaceNotEnabledException {
         User user = userManager.checkWorkspaceReadAccess(pPartIPK.getWorkspaceId());
-        Locale locale = new Locale(user.getLanguage());
-        PartIteration partI = new PartIterationDAO(locale, em).loadPartI(pPartIPK);
+        Locale userLocale = user.getLocale();
+        PartIteration partI = partIterationDAO.loadPartI(userLocale, pPartIPK);
         PartRevision partR = partI.getPartRevision();
 
         if (isCheckoutByAnotherUser(user, partR) && partR.getLastIteration().equals(partI)) {
-            throw new NotAllowedException(locale, "NotAllowedException34");
+            throw new NotAllowedException(userLocale, "NotAllowedException34");
         }
         return partI.getComponents();
     }
@@ -1474,7 +1509,7 @@ public class ProductManagerBean implements IProductManagerLocal {
     public boolean partMasterExists(PartMasterKey partMasterKey) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, WorkspaceNotEnabledException {
         User user = userManager.checkWorkspaceReadAccess(partMasterKey.getWorkspace());
         try {
-            new PartMasterDAO(new Locale(user.getLanguage()), em).loadPartM(partMasterKey);
+            partMasterDAO.loadPartM(user.getLocale(), partMasterKey);
             return true;
         } catch (PartMasterNotFoundException e) {
             LOGGER.log(Level.FINEST, null, e);
@@ -1486,38 +1521,35 @@ public class ProductManagerBean implements IProductManagerLocal {
     @Override
     public void deleteConfigurationItem(ConfigurationItemKey configurationItemKey) throws UserNotFoundException, WorkspaceNotFoundException, AccessRightException, NotAllowedException, UserNotActiveException, ConfigurationItemNotFoundException, LayerNotFoundException, EntityConstraintException, WorkspaceNotEnabledException {
         User user = userManager.checkWorkspaceWriteAccess(configurationItemKey.getWorkspace());
-        Locale locale = new Locale(user.getLanguage());
+        Locale userLocale = user.getLocale();
 
-        ProductConfigurationDAO productConfigurationDAO = new ProductConfigurationDAO(locale, em);
         List<ProductConfiguration> productConfigurations = productConfigurationDAO.getAllProductConfigurationsByConfigurationItem(configurationItemKey);
 
         if (!productConfigurations.isEmpty()) {
-            throw new EntityConstraintException(locale, "EntityConstraintException23");
+            throw new EntityConstraintException(userLocale, "EntityConstraintException23");
         }
 
-        ProductBaselineDAO productBaselineDAO = new ProductBaselineDAO(locale, em);
         List<ProductBaseline> productBaselines = productBaselineDAO.findBaselines(configurationItemKey.getId(), configurationItemKey.getWorkspace());
 
         if (!productBaselines.isEmpty()) {
-            throw new EntityConstraintException(locale, "EntityConstraintException4");
+            throw new EntityConstraintException(userLocale, "EntityConstraintException4");
         }
 
-        ProductInstanceMasterDAO productInstanceMasterDAO = new ProductInstanceMasterDAO(locale, em);
         List<ProductInstanceMaster> productInstanceMasters = productInstanceMasterDAO.findProductInstanceMasters(configurationItemKey.getId(), configurationItemKey.getWorkspace());
 
         if (!productInstanceMasters.isEmpty()) {
-            throw new EntityConstraintException(locale, "EntityConstraintException13");
+            throw new EntityConstraintException(userLocale, "EntityConstraintException13");
         }
 
-        new ConfigurationItemDAO(locale, em).removeConfigurationItem(configurationItemKey);
+        configurationItemDAO.removeConfigurationItem(configurationItemKey);
     }
 
     @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
     @Override
     public void deleteLayer(String workspaceId, int layerId) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, LayerNotFoundException, AccessRightException, WorkspaceNotEnabledException {
-        Layer layer = new LayerDAO(em).loadLayer(layerId);
-        User user = userManager.checkWorkspaceWriteAccess(layer.getConfigurationItem().getWorkspaceId());
-        new LayerDAO(new Locale(user.getLanguage()), em).deleteLayer(layer);
+        Layer layer = layerDAO.loadLayer(layerId);
+        userManager.checkWorkspaceWriteAccess(layer.getConfigurationItem().getWorkspaceId());
+        layerDAO.deleteLayer(layer);
     }
 
     @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
@@ -1525,12 +1557,11 @@ public class ProductManagerBean implements IProductManagerLocal {
     public BinaryResource renameFileInPartIteration(String pSubType, String pFullName, String pNewName) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, NotAllowedException, FileNotFoundException, FileAlreadyExistsException, CreationException, StorageException, WorkspaceNotEnabledException {
 
         User user = userManager.checkWorkspaceReadAccess(BinaryResource.parseWorkspaceId(pFullName));
-        Locale userLocale = new Locale(user.getLanguage());
+        Locale userLocale = user.getLocale();
         checkNameFileValidity(pNewName, userLocale);
 
-        BinaryResourceDAO binDAO = new BinaryResourceDAO(userLocale, em);
-        BinaryResource file = binDAO.loadBinaryResource(pFullName);
-        PartIteration partIteration = binDAO.getPartHolder(file);
+        BinaryResource file = binaryResourceDAO.loadBinaryResource(userLocale, pFullName);
+        PartIteration partIteration = binaryResourceDAO.getPartHolder(file);
 
         PartRevision partR = partIteration.getPartRevision();
 
@@ -1538,18 +1569,18 @@ public class ProductManagerBean implements IProductManagerLocal {
 
             storageManager.renameFile(file, pNewName);
 
-            if (pSubType != null && "nativecad".equals(pSubType)) {
+            if ("nativecad".equals(pSubType)) {
                 partIteration.setNativeCADFile(null);
             } else {
                 partIteration.removeAttachedFile(file);
             }
-            binDAO.removeBinaryResource(file);
+            binaryResourceDAO.removeBinaryResource(file);
 
             BinaryResource newFile = new BinaryResource(file.getNewFullName(pNewName), file.getContentLength(), file.getLastModified());
 
-            binDAO.createBinaryResource(newFile);
+            binaryResourceDAO.createBinaryResource(userLocale, newFile);
 
-            if (pSubType != null && "nativecad".equals(pSubType)) {
+            if ("nativecad".equals(pSubType)) {
                 partIteration.setNativeCADFile(newFile);
             } else {
                 partIteration.addAttachedFile(newFile);
@@ -1610,14 +1641,14 @@ public class ProductManagerBean implements IProductManagerLocal {
 
         User user = userManager.checkWorkspaceReadAccess(pPartIPK.getWorkspaceId());
 
-        PartIteration partIteration = new PartIterationDAO(new Locale(user.getLanguage()), em).loadPartI(pPartIPK);
+        Locale userLocale = user.getLocale();
+        PartIteration partIteration = partIterationDAO.loadPartI(userLocale, pPartIPK);
         PartRevision partR = partIteration.getPartRevision();
 
         if (isCheckoutByUser(user, partR) && partR.getLastIteration().equals(partIteration)) {
-            BinaryResourceDAO binDAO = new BinaryResourceDAO(new Locale(user.getLanguage()), em);
-            BinaryResource file = binDAO.loadBinaryResource(pName);
+            BinaryResource file = binaryResourceDAO.loadBinaryResource(userLocale, pName);
 
-            if (pSubType != null && "nativecad".equals(pSubType)) {
+            if ("nativecad".equals(pSubType)) {
                 partIteration.setNativeCADFile(null);
             } else {
                 partIteration.removeAttachedFile(file);
@@ -1629,7 +1660,7 @@ public class ProductManagerBean implements IProductManagerLocal {
                 LOGGER.log(Level.INFO, null, e);
             }
 
-            binDAO.removeBinaryResource(file);
+            binaryResourceDAO.removeBinaryResource(file);
         }
 
     }
@@ -1645,7 +1676,7 @@ public class ProductManagerBean implements IProductManagerLocal {
     @Override
     public PartMaster getPartMaster(PartMasterKey pPartMPK) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, PartMasterNotFoundException, WorkspaceNotEnabledException {
         User user = userManager.checkWorkspaceReadAccess(pPartMPK.getWorkspace());
-        PartMaster partM = new PartMasterDAO(new Locale(user.getLanguage()), em).loadPartM(pPartMPK);
+        PartMaster partM = partMasterDAO.loadPartM(user.getLocale(), pPartMPK);
 
         for (PartRevision partR : partM.getPartRevisions()) {
             if (isCheckoutByAnotherUser(user, partR)) {
@@ -1659,14 +1690,14 @@ public class ProductManagerBean implements IProductManagerLocal {
     @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
     @Override
     public List<Layer> getLayers(ConfigurationItemKey pKey) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, WorkspaceNotEnabledException {
-        User user = userManager.checkWorkspaceReadAccess(pKey.getWorkspace());
-        return new LayerDAO(new Locale(user.getLanguage()), em).findAllLayers(pKey);
+        userManager.checkWorkspaceReadAccess(pKey.getWorkspace());
+        return layerDAO.findAllLayers(pKey);
     }
 
     @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
     @Override
     public Layer getLayer(int pId) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, LayerNotFoundException, WorkspaceNotEnabledException {
-        Layer layer = new LayerDAO(em).loadLayer(pId);
+        Layer layer = layerDAO.loadLayer(pId);
         userManager.checkWorkspaceReadAccess(layer.getConfigurationItem().getWorkspaceId());
         return layer;
     }
@@ -1675,14 +1706,11 @@ public class ProductManagerBean implements IProductManagerLocal {
     @Override
     public Layer createLayer(ConfigurationItemKey pKey, String pName, String color) throws UserNotFoundException, WorkspaceNotFoundException, AccessRightException, ConfigurationItemNotFoundException, WorkspaceNotEnabledException {
         User user = userManager.checkWorkspaceWriteAccess(pKey.getWorkspace());
-        Locale locale = new Locale(user.getLanguage());
-
-        ConfigurationItem ci = new ConfigurationItemDAO(locale, em).loadConfigurationItem(pKey);
+        ConfigurationItem ci = configurationItemDAO.loadConfigurationItem(user.getLocale(), pKey);
         Layer layer = new Layer(pName, user, ci, color);
         Date now = new Date();
         layer.setCreationDate(now);
-
-        new LayerDAO(locale, em).createLayer(layer);
+        layerDAO.createLayer(layer);
         return layer;
     }
 
@@ -1699,13 +1727,12 @@ public class ProductManagerBean implements IProductManagerLocal {
     @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
     @Override
     public Marker createMarker(int pLayerId, String pTitle, String pDescription, double pX, double pY, double pZ) throws LayerNotFoundException, UserNotFoundException, WorkspaceNotFoundException, AccessRightException, WorkspaceNotEnabledException {
-        Layer layer = new LayerDAO(em).loadLayer(pLayerId);
+        Layer layer = layerDAO.loadLayer(pLayerId);
         User user = userManager.checkWorkspaceWriteAccess(layer.getConfigurationItem().getWorkspaceId());
         Marker marker = new Marker(pTitle, user, pDescription, pX, pY, pZ);
         Date now = new Date();
         marker.setCreationDate(now);
-
-        new MarkerDAO(new Locale(user.getLanguage()), em).createMarker(marker);
+        markerDAO.createMarker(marker);
         layer.addMarker(marker);
         return marker;
     }
@@ -1713,17 +1740,17 @@ public class ProductManagerBean implements IProductManagerLocal {
     @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
     @Override
     public void deleteMarker(int pLayerId, int pMarkerId) throws WorkspaceNotFoundException, UserNotActiveException, LayerNotFoundException, UserNotFoundException, AccessRightException, MarkerNotFoundException, WorkspaceNotEnabledException {
-        Layer layer = new LayerDAO(em).loadLayer(pLayerId);
+        Layer layer = layerDAO.loadLayer(pLayerId);
         User user = userManager.checkWorkspaceWriteAccess(layer.getConfigurationItem().getWorkspaceId());
-        Locale locale = new Locale(user.getLanguage());
-        Marker marker = new MarkerDAO(locale, em).loadMarker(pMarkerId);
+        Locale userLocale = user.getLocale();
+        Marker marker = markerDAO.loadMarker(userLocale, pMarkerId);
 
         if (layer.getMarkers().contains(marker)) {
             layer.removeMarker(marker);
             em.flush();
-            new MarkerDAO(locale, em).removeMarker(pMarkerId);
+            markerDAO.removeMarker(pMarkerId);
         } else {
-            throw new MarkerNotFoundException(locale, pMarkerId);
+            throw new MarkerNotFoundException(userLocale, pMarkerId);
         }
 
     }
@@ -1732,7 +1759,7 @@ public class ProductManagerBean implements IProductManagerLocal {
     @Override
     public PartMasterTemplate[] getPartMasterTemplates(String pWorkspaceId) throws WorkspaceNotFoundException, UserNotFoundException, UserNotActiveException, WorkspaceNotEnabledException {
         User user = userManager.checkWorkspaceReadAccess(pWorkspaceId);
-        List<PartMasterTemplate> templates = new PartMasterTemplateDAO(new Locale(user.getLanguage()), em).findAllPartMTemplates(pWorkspaceId);
+        List<PartMasterTemplate> templates = partMasterTemplateDAO.findAllPartMTemplates(pWorkspaceId);
 
         ListIterator<PartMasterTemplate> ite = templates.listIterator();
         while (ite.hasNext()) {
@@ -1749,7 +1776,7 @@ public class ProductManagerBean implements IProductManagerLocal {
     @Override
     public PartMasterTemplate getPartMasterTemplate(PartMasterTemplateKey pKey) throws WorkspaceNotFoundException, PartMasterTemplateNotFoundException, UserNotFoundException, UserNotActiveException, WorkspaceNotEnabledException {
         User user = userManager.checkWorkspaceReadAccess(pKey.getWorkspaceId());
-        return new PartMasterTemplateDAO(new Locale(user.getLanguage()), em).loadPartMTemplate(pKey);
+        return partMasterTemplateDAO.loadPartMTemplate(user.getLocale(), pKey);
     }
 
 
@@ -1757,19 +1784,18 @@ public class ProductManagerBean implements IProductManagerLocal {
     @Override
     public PartMasterTemplate createPartMasterTemplate(String pWorkspaceId, String pId, String pPartType, String pWorkflowModelId, String pMask, List<InstanceAttributeTemplate> pAttributeTemplates, String[] lovNames, List<InstanceAttributeTemplate> pAttributeInstanceTemplates, String[] instanceLovNames, boolean idGenerated, boolean attributesLocked) throws WorkspaceNotFoundException, AccessRightException, PartMasterTemplateAlreadyExistsException, UserNotFoundException, NotAllowedException, CreationException, WorkflowModelNotFoundException, ListOfValuesNotFoundException, WorkspaceNotEnabledException {
         User user = userManager.checkWorkspaceWriteAccess(pWorkspaceId);
-        Locale locale = new Locale(user.getLanguage());
-        checkNameValidity(pId, locale);
+        Locale userLocale = user.getLocale();
+        checkNameValidity(pId, userLocale);
 
         //Check pMask
         if (pMask != null && !pMask.isEmpty() && !NamingConvention.correctNameMask(pMask)) {
-            throw new NotAllowedException(locale, "MaskCreationException");
+            throw new NotAllowedException(userLocale, "MaskCreationException");
         }
 
         PartMasterTemplate template = new PartMasterTemplate(user.getWorkspace(), pId, user, pPartType, pMask, attributesLocked);
         Date now = new Date();
         template.setCreationDate(now);
         template.setIdGenerated(idGenerated);
-        LOVDAO lovDAO = new LOVDAO(locale, em);
 
         List<InstanceAttributeTemplate> attrs = new ArrayList<>();
         for (int i = 0; i < pAttributeTemplates.size(); i++) {
@@ -1780,11 +1806,11 @@ public class ProductManagerBean implements IProductManagerLocal {
             if (pAttributeTemplates.get(i) instanceof ListOfValuesAttributeTemplate) {
                 ListOfValuesAttributeTemplate lovAttr = (ListOfValuesAttributeTemplate) pAttributeTemplates.get(i);
                 ListOfValuesKey lovKey = new ListOfValuesKey(user.getWorkspaceId(), lovNames[i]);
-                lovAttr.setLov(lovDAO.loadLOV(lovKey));
+                lovAttr.setLov(lovDAO.loadLOV(userLocale, lovKey));
             }
         }
         if (!AttributesConsistencyUtils.isTemplateAttributesValid(attrs, attributesLocked)) {
-            throw new NotAllowedException(locale, "NotAllowedException59");
+            throw new NotAllowedException(userLocale, "NotAllowedException59");
         }
         template.setAttributeTemplates(attrs);
 
@@ -1794,20 +1820,20 @@ public class ProductManagerBean implements IProductManagerLocal {
             if (pAttributeInstanceTemplates.get(i) instanceof ListOfValuesAttributeTemplate) {
                 ListOfValuesAttributeTemplate lovAttr = (ListOfValuesAttributeTemplate) pAttributeInstanceTemplates.get(i);
                 ListOfValuesKey lovKey = new ListOfValuesKey(user.getWorkspaceId(), instanceLovNames[i]);
-                lovAttr.setLov(lovDAO.loadLOV(lovKey));
+                lovAttr.setLov(lovDAO.loadLOV(userLocale, lovKey));
             }
         }
         if (!AttributesConsistencyUtils.isTemplateAttributesValid(instanceAttrs, false)) {
-            throw new NotAllowedException(locale, "NotAllowedException59");
+            throw new NotAllowedException(userLocale, "NotAllowedException59");
         }
         template.setAttributeInstanceTemplates(instanceAttrs);
 
         if (pWorkflowModelId != null) {
-            WorkflowModel workflowModel = new WorkflowModelDAO(locale, em).loadWorkflowModel(new WorkflowModelKey(user.getWorkspaceId(), pWorkflowModelId));
+            WorkflowModel workflowModel = workflowModelDAO.loadWorkflowModel(userLocale, new WorkflowModelKey(user.getWorkspaceId(), pWorkflowModelId));
             template.setWorkflowModel(workflowModel);
         }
 
-        new PartMasterTemplateDAO(locale, em).createPartMTemplate(template);
+        partMasterTemplateDAO.createPartMTemplate(userLocale, template);
         return template;
     }
 
@@ -1815,10 +1841,9 @@ public class ProductManagerBean implements IProductManagerLocal {
     @Override
     public PartMasterTemplate updatePartMasterTemplate(PartMasterTemplateKey pKey, String pPartType, String pWorkflowModelId, String pMask, List<InstanceAttributeTemplate> pAttributeTemplates, String[] lovNames, List<InstanceAttributeTemplate> pAttributeInstanceTemplates, String[] instanceLovNames, boolean idGenerated, boolean attributesLocked) throws WorkspaceNotFoundException, AccessRightException, PartMasterTemplateNotFoundException, UserNotFoundException, WorkflowModelNotFoundException, UserNotActiveException, ListOfValuesNotFoundException, NotAllowedException, WorkspaceNotEnabledException {
         User user = userManager.checkWorkspaceReadAccess(pKey.getWorkspaceId());
-        Locale locale = new Locale(user.getLanguage());
+        Locale userLocale = user.getLocale();
 
-        PartMasterTemplateDAO templateDAO = new PartMasterTemplateDAO(new Locale(user.getLanguage()), em);
-        PartMasterTemplate template = templateDAO.loadPartMTemplate(pKey);
+        PartMasterTemplate template = partMasterTemplateDAO.loadPartMTemplate(userLocale, pKey);
 
         checkPartTemplateWriteAccess(template, user);
 
@@ -1829,7 +1854,6 @@ public class ProductManagerBean implements IProductManagerLocal {
         template.setMask(pMask);
         template.setIdGenerated(idGenerated);
         template.setAttributesLocked(attributesLocked);
-        LOVDAO lovDAO = new LOVDAO(locale, em);
 
         List<InstanceAttributeTemplate> attrs = new ArrayList<>();
         for (int i = 0; i < pAttributeTemplates.size(); i++) {
@@ -1840,11 +1864,11 @@ public class ProductManagerBean implements IProductManagerLocal {
             if (pAttributeTemplates.get(i) instanceof ListOfValuesAttributeTemplate) {
                 ListOfValuesAttributeTemplate lovAttr = (ListOfValuesAttributeTemplate) pAttributeTemplates.get(i);
                 ListOfValuesKey lovKey = new ListOfValuesKey(user.getWorkspaceId(), lovNames[i]);
-                lovAttr.setLov(lovDAO.loadLOV(lovKey));
+                lovAttr.setLov(lovDAO.loadLOV(userLocale, lovKey));
             }
         }
         if (!AttributesConsistencyUtils.isTemplateAttributesValid(attrs, attributesLocked)) {
-            throw new NotAllowedException(locale, "NotAllowedException59");
+            throw new NotAllowedException(userLocale, "NotAllowedException59");
         }
         template.setAttributeTemplates(attrs);
 
@@ -1854,17 +1878,17 @@ public class ProductManagerBean implements IProductManagerLocal {
             if (pAttributeInstanceTemplates.get(i) instanceof ListOfValuesAttributeTemplate) {
                 ListOfValuesAttributeTemplate lovAttr = (ListOfValuesAttributeTemplate) pAttributeInstanceTemplates.get(i);
                 ListOfValuesKey lovKey = new ListOfValuesKey(user.getWorkspaceId(), instanceLovNames[i]);
-                lovAttr.setLov(lovDAO.loadLOV(lovKey));
+                lovAttr.setLov(lovDAO.loadLOV(userLocale, lovKey));
             }
         }
         if (!AttributesConsistencyUtils.isTemplateAttributesValid(instanceAttrs, false)) {
-            throw new NotAllowedException(locale, "NotAllowedException59");
+            throw new NotAllowedException(userLocale, "NotAllowedException59");
         }
         template.setAttributeInstanceTemplates(instanceAttrs);
 
         WorkflowModel workflowModel = null;
         if (pWorkflowModelId != null) {
-            workflowModel = new WorkflowModelDAO(locale, em).loadWorkflowModel(new WorkflowModelKey(user.getWorkspaceId(), pWorkflowModelId));
+            workflowModel = workflowModelDAO.loadWorkflowModel(userLocale, new WorkflowModelKey(user.getWorkspaceId(), pWorkflowModelId));
         }
         template.setWorkflowModel(workflowModel);
 
@@ -1875,12 +1899,11 @@ public class ProductManagerBean implements IProductManagerLocal {
     @Override
     public void deletePartMasterTemplate(PartMasterTemplateKey pKey) throws WorkspaceNotFoundException, AccessRightException, PartMasterTemplateNotFoundException, UserNotFoundException, UserNotActiveException, WorkspaceNotEnabledException {
         User user = userManager.checkWorkspaceReadAccess(pKey.getWorkspaceId());
-        PartMasterTemplateDAO templateDAO = new PartMasterTemplateDAO(new Locale(user.getLanguage()), em);
 
-        PartMasterTemplate partMasterTemplate = templateDAO.loadPartMTemplate(pKey);
+        PartMasterTemplate partMasterTemplate = partMasterTemplateDAO.loadPartMTemplate(user.getLocale(), pKey);
         checkPartTemplateWriteAccess(partMasterTemplate, user);
 
-        PartMasterTemplate template = templateDAO.removePartMTemplate(pKey);
+        PartMasterTemplate template = partMasterTemplateDAO.removePartMTemplate(pKey);
         BinaryResource file = template.getAttachedFile();
         if (file != null) {
             try {
@@ -1895,11 +1918,10 @@ public class ProductManagerBean implements IProductManagerLocal {
     @Override
     public BinaryResource saveFileInTemplate(PartMasterTemplateKey pPartMTemplateKey, String pName, long pSize) throws WorkspaceNotFoundException, NotAllowedException, PartMasterTemplateNotFoundException, FileAlreadyExistsException, UserNotFoundException, UserNotActiveException, CreationException, AccessRightException, WorkspaceNotEnabledException {
         User user = userManager.checkWorkspaceReadAccess(pPartMTemplateKey.getWorkspaceId());
-        Locale locale = new Locale(user.getLanguage());
-        checkNameFileValidity(pName, locale);
+        Locale userLocale = user.getLocale();
+        checkNameFileValidity(pName, userLocale);
 
-        PartMasterTemplateDAO templateDAO = new PartMasterTemplateDAO(locale, em);
-        PartMasterTemplate template = templateDAO.loadPartMTemplate(pPartMTemplateKey);
+        PartMasterTemplate template = partMasterTemplateDAO.loadPartMTemplate(userLocale, pPartMTemplateKey);
 
         checkPartTemplateWriteAccess(template, user);
 
@@ -1919,7 +1941,7 @@ public class ProductManagerBean implements IProductManagerLocal {
 
         if (binaryResource == null) {
             binaryResource = new BinaryResource(fullName, pSize, new Date());
-            new BinaryResourceDAO(locale, em).createBinaryResource(binaryResource);
+            binaryResourceDAO.createBinaryResource(userLocale, binaryResource);
             template.setAttachedFile(binaryResource);
         } else {
             binaryResource.setContentLength(pSize);
@@ -1932,14 +1954,13 @@ public class ProductManagerBean implements IProductManagerLocal {
     @Override
     public PartMasterTemplate removeFileFromTemplate(String pFullName) throws WorkspaceNotFoundException, PartMasterTemplateNotFoundException, AccessRightException, FileNotFoundException, UserNotFoundException, UserNotActiveException, WorkspaceNotEnabledException {
         User user = userManager.checkWorkspaceReadAccess(BinaryResource.parseWorkspaceId(pFullName));
-        BinaryResourceDAO binDAO = new BinaryResourceDAO(new Locale(user.getLanguage()), em);
-        BinaryResource file = binDAO.loadBinaryResource(pFullName);
+        BinaryResource file = binaryResourceDAO.loadBinaryResource(user.getLocale(), pFullName);
 
-        PartMasterTemplate template = binDAO.getPartTemplateHolder(file);
+        PartMasterTemplate template = binaryResourceDAO.getPartTemplateHolder(file);
         checkPartTemplateWriteAccess(template, user);
 
         template.setAttachedFile(null);
-        binDAO.removeBinaryResource(file);
+        binaryResourceDAO.removeBinaryResource(file);
 
         try {
             storageManager.deleteData(file);
@@ -1953,35 +1974,33 @@ public class ProductManagerBean implements IProductManagerLocal {
     @Override
     public BinaryResource renameFileInTemplate(String pFullName, String pNewName) throws UserNotFoundException, AccessRightException, WorkspaceNotFoundException, FileNotFoundException, UserNotActiveException, FileAlreadyExistsException, CreationException, StorageException, NotAllowedException, WorkspaceNotEnabledException {
         User user = userManager.checkWorkspaceReadAccess(BinaryResource.parseWorkspaceId(pFullName));
-        Locale userLocale = new Locale(user.getLanguage());
+        Locale userLocale = user.getLocale();
         checkNameFileValidity(pNewName, userLocale);
 
-        BinaryResourceDAO binDAO = new BinaryResourceDAO(new Locale(user.getLanguage()), em);
-        BinaryResource file = binDAO.loadBinaryResource(pFullName);
+        BinaryResource file = binaryResourceDAO.loadBinaryResource(userLocale, pFullName);
 
-        PartMasterTemplate template = binDAO.getPartTemplateHolder(file);
+        PartMasterTemplate template = binaryResourceDAO.getPartTemplateHolder(file);
 
         checkPartTemplateWriteAccess(template, user);
 
         storageManager.renameFile(file, pNewName);
 
         template.setAttachedFile(null);
-        binDAO.removeBinaryResource(file);
+        binaryResourceDAO.removeBinaryResource(file);
 
         BinaryResource newFile = new BinaryResource(file.getNewFullName(pNewName), file.getContentLength(), file.getLastModified());
 
-        binDAO.createBinaryResource(newFile);
+        binaryResourceDAO.createBinaryResource(userLocale, newFile);
         template.setAttachedFile(newFile);
 
         return newFile;
-
     }
 
     @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
     @Override
     public List<PartMaster> getPartMasters(String pWorkspaceId, int start, int pMaxResults) throws UserNotFoundException, AccessRightException, WorkspaceNotFoundException, UserNotActiveException, WorkspaceNotEnabledException {
         User user = userManager.checkWorkspaceReadAccess(pWorkspaceId);
-        return new PartMasterDAO(new Locale(user.getLanguage()), em).getPartMasters(pWorkspaceId, start, pMaxResults);
+        return partMasterDAO.getPartMasters(pWorkspaceId, start, pMaxResults);
     }
 
     @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
@@ -1992,9 +2011,9 @@ public class ProductManagerBean implements IProductManagerLocal {
 
         // potential OOM => should restrict pMaxResults
         if (pMaxResults == 0) {
-            partRevisions = new PartRevisionDAO(new Locale(user.getLanguage()), em).getAllPartRevisions(pWorkspaceId);
+            partRevisions = partRevisionDAO.getAllPartRevisions(pWorkspaceId);
         } else {
-            partRevisions = new PartRevisionDAO(new Locale(user.getLanguage()), em).getPartRevisions(pWorkspaceId, start, pMaxResults);
+            partRevisions = partRevisionDAO.getPartRevisions(pWorkspaceId, start, pMaxResults);
         }
 
         List<PartRevision> filteredPartRevisions = new ArrayList<>();
@@ -2024,16 +2043,14 @@ public class ProductManagerBean implements IProductManagerLocal {
         int count;
 
         if (contextManager.isCallerInRole(UserGroupMapping.ADMIN_ROLE_ID)) {
-            Account adminAccount = new AccountDAO(em).loadAccount(contextManager.getCallerPrincipalLogin());
-            Locale locale = new Locale(adminAccount.getLanguage());
-            count = new PartRevisionDAO(locale, em).getTotalNumberOfParts(pWorkspaceId);
+            accountDAO.loadAccount(contextManager.getCallerPrincipalLogin());
+            count = partRevisionDAO.getTotalNumberOfParts(pWorkspaceId);
         } else {
             User user = userManager.checkWorkspaceReadAccess(pWorkspaceId);
-            Locale locale = new Locale(user.getLanguage());
             if (user.isAdministrator()) {
-                count = new PartRevisionDAO(locale, em).getTotalNumberOfParts(pWorkspaceId);
+                count = partRevisionDAO.getTotalNumberOfParts(pWorkspaceId);
             } else {
-                count = new PartRevisionDAO(locale, em).getPartRevisionCountFiltered(user, pWorkspaceId);
+                count = partRevisionDAO.getPartRevisionCountFiltered(user, pWorkspaceId);
             }
         }
 
@@ -2045,18 +2062,11 @@ public class ProductManagerBean implements IProductManagerLocal {
     public void deletePartRevision(PartRevisionKey partRevisionKey) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, PartRevisionNotFoundException, EntityConstraintException, AccessRightException, WorkspaceNotEnabledException {
 
         User user = userManager.checkWorkspaceReadAccess(partRevisionKey.getPartMaster().getWorkspace());
-        Locale locale = new Locale(user.getLanguage());
+        Locale userLocale = user.getLocale();
 
-        PartMasterDAO partMasterDAO = new PartMasterDAO(locale, em);
-        PartRevisionDAO partRevisionDAO = new PartRevisionDAO(locale, em);
-        PartUsageLinkDAO partUsageLinkDAO = new PartUsageLinkDAO(locale, em);
-        ProductBaselineDAO productBaselineDAO = new ProductBaselineDAO(locale, em);
-
-        ConfigurationItemDAO configurationItemDAO = new ConfigurationItemDAO(locale, em);
-
-        PartRevision partR = partRevisionDAO.loadPartR(partRevisionKey);
+        PartRevision partR = partRevisionDAO.loadPartR(userLocale, partRevisionKey);
         if (!hasPartOrWorkspaceWriteAccess(user, partR)) {
-            throw new AccessRightException(locale, user);
+            throw new AccessRightException(userLocale, user);
         }
         PartMaster partMaster = partR.getPartMaster();
         boolean isLastRevision = partMaster.getPartRevisions().size() == 1;
@@ -2065,26 +2075,25 @@ public class ProductManagerBean implements IProductManagerLocal {
         //more precisely on PartRevision rather on PartMaster
         // check if part is linked to a product
         if (configurationItemDAO.isPartMasterLinkedToConfigurationItem(partMaster)) {
-            throw new EntityConstraintException(locale, "EntityConstraintException1");
+            throw new EntityConstraintException(userLocale, "EntityConstraintException1");
         }
         // check if this part is in a partUsage
         if (partUsageLinkDAO.hasPartUsages(partMaster.getWorkspaceId(), partMaster.getNumber())) {
-            throw new EntityConstraintException(locale, "EntityConstraintException2");
+            throw new EntityConstraintException(userLocale, "EntityConstraintException2");
         }
 
         // check if this part is in a partSubstitute
         if (partUsageLinkDAO.hasPartSubstitutes(partMaster.getWorkspaceId(), partMaster.getNumber())) {
-            throw new EntityConstraintException(locale, "EntityConstraintException22");
+            throw new EntityConstraintException(userLocale, "EntityConstraintException22");
         }
 
         // check if part is baselined
         if (productBaselineDAO.existBaselinedPart(partMaster.getWorkspaceId(), partMaster.getNumber())) {
-            throw new EntityConstraintException(locale, "EntityConstraintException5");
+            throw new EntityConstraintException(userLocale, "EntityConstraintException5");
         }
 
-        ChangeItemDAO changeItemDAO = new ChangeItemDAO(locale, em);
         if (changeItemDAO.hasChangeItems(partRevisionKey)) {
-            throw new EntityConstraintException(locale, "EntityConstraintException21");
+            throw new EntityConstraintException(userLocale, "EntityConstraintException21");
         }
 
         // delete Elasticsearch Index for this revision iteration
@@ -2096,7 +2105,7 @@ public class ProductManagerBean implements IProductManagerLocal {
         }).fire(new PartRevisionEvent(partR));
 
         if (isLastRevision) {
-            partMasterDAO.removePartM(partMaster);
+            partMasterDAO.removePartM(userLocale, partMaster);
         } else {
             partMaster.removeRevision(partR);
             partRevisionDAO.removeRevision(partR);
@@ -2117,25 +2126,23 @@ public class ProductManagerBean implements IProductManagerLocal {
     @Override
     public int getNumberOfIteration(PartRevisionKey partRevisionKey) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, PartRevisionNotFoundException, WorkspaceNotEnabledException {
         User user = userManager.checkWorkspaceReadAccess(partRevisionKey.getPartMaster().getWorkspace());
-        return new PartRevisionDAO(new Locale(user.getLanguage()), em).loadPartR(partRevisionKey).getLastIterationNumber();
+        return partRevisionDAO.loadPartR(user.getLocale(), partRevisionKey).getLastIterationNumber();
     }
 
     @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
     @Override
     public PartRevision createPartRevision(PartRevisionKey revisionKey, String pDescription, String pWorkflowModelId, Map<String, String> pACLUserEntries, Map<String, String> pACLUserGroupEntries, Map<String, Collection<String>> userRoleMapping, Map<String, Collection<String>> groupRoleMapping) throws UserNotFoundException, AccessRightException, WorkspaceNotFoundException, PartRevisionNotFoundException, NotAllowedException, FileAlreadyExistsException, CreationException, RoleNotFoundException, WorkflowModelNotFoundException, PartRevisionAlreadyExistsException, UserGroupNotFoundException, WorkspaceNotEnabledException {
         User user = userManager.checkWorkspaceWriteAccess(revisionKey.getPartMaster().getWorkspace());
-        Locale locale = new Locale(user.getLanguage());
+        Locale userLocale = user.getLocale();
 
-        PartRevisionDAO partRevisionDAO = new PartRevisionDAO(locale, em);
-
-        PartRevision originalPartR = partRevisionDAO.loadPartR(revisionKey);
+        PartRevision originalPartR = partRevisionDAO.loadPartR(userLocale, revisionKey);
 
         if (originalPartR.isCheckedOut()) {
-            throw new NotAllowedException(locale, "NotAllowedException40");
+            throw new NotAllowedException(userLocale, "NotAllowedException40");
         }
 
         if (originalPartR.getNumberOfIterations() == 0) {
-            throw new NotAllowedException(locale, "NotAllowedException41");
+            throw new NotAllowedException(userLocale, "NotAllowedException41");
         }
 
         PartRevision partR = originalPartR.getPartMaster().createNextRevision(user);
@@ -2145,8 +2152,6 @@ public class ProductManagerBean implements IProductManagerLocal {
 
 
         if (lastPartI != null) {
-
-            BinaryResourceDAO binDAO = new BinaryResourceDAO(locale, em);
             String encodedPartNumber = FileIO.encode(partR.getPartNumber());
             for (BinaryResource sourceFile : lastPartI.getAttachedFiles()) {
                 String fileName = sourceFile.getName();
@@ -2154,7 +2159,7 @@ public class ProductManagerBean implements IProductManagerLocal {
                 Date lastModified = sourceFile.getLastModified();
                 String fullName = partR.getWorkspaceId() + "/parts/" + encodedPartNumber + "/" + partR.getVersion() + "/1/" + fileName;
                 BinaryResource targetFile = new BinaryResource(fullName, length, lastModified);
-                binDAO.createBinaryResource(targetFile);
+                binaryResourceDAO.createBinaryResource(userLocale, targetFile);
                 firstPartI.addAttachedFile(targetFile);
                 try {
                     storageManager.copyData(sourceFile, targetFile);
@@ -2178,7 +2183,6 @@ public class ProductManagerBean implements IProductManagerLocal {
             firstPartI.setComponents(newComponents);
             //flush to ensure the new PartUsageLinks have their id generated
             em.flush();
-            PathToPathLinkDAO pathToPathLinkDAO = new PathToPathLinkDAO(locale, em);
             pathToPathLinkDAO.cloneAndUpgradePathToPathLinks(oldComponents, newComponents);
 
             // copy geometries
@@ -2189,7 +2193,7 @@ public class ProductManagerBean implements IProductManagerLocal {
                 Date lastModified = sourceFile.getLastModified();
                 String fullName = partR.getWorkspaceId() + "/parts/" + encodedPartNumber + "/" + partR.getVersion() + "/1/" + fileName;
                 Geometry targetFile = new Geometry(quality, fullName, length, lastModified);
-                binDAO.createBinaryResource(targetFile);
+                binaryResourceDAO.createBinaryResource(userLocale, targetFile);
                 firstPartI.addGeometry(targetFile);
                 try {
                     storageManager.copyData(sourceFile, targetFile);
@@ -2205,7 +2209,7 @@ public class ProductManagerBean implements IProductManagerLocal {
                 Date lastModified = nativeCADFile.getLastModified();
                 String fullName = partR.getWorkspaceId() + "/parts/" + encodedPartNumber + "/" + partR.getVersion() + "/1/nativecad/" + fileName;
                 BinaryResource targetFile = new BinaryResource(fullName, length, lastModified);
-                binDAO.createBinaryResource(targetFile);
+                binaryResourceDAO.createBinaryResource(userLocale, targetFile);
                 firstPartI.setNativeCADFile(targetFile);
                 try {
                     storageManager.copyData(nativeCADFile, targetFile);
@@ -2235,19 +2239,15 @@ public class ProductManagerBean implements IProductManagerLocal {
         Collection<Task> runningTasks = null;
         if (pWorkflowModelId != null) {
 
-            UserDAO userDAO = new UserDAO(locale, em);
-            UserGroupDAO groupDAO = new UserGroupDAO(locale, em);
-            RoleDAO roleDAO = new RoleDAO(locale, em);
-
             Map<Role, Collection<User>> roleUserMap = new HashMap<>();
             for (Map.Entry<String, Collection<String>> pair : userRoleMapping.entrySet()) {
                 String roleName = pair.getKey();
                 Collection<String> userLogins = pair.getValue();
-                Role role = roleDAO.loadRole(new RoleKey(originalPartR.getWorkspaceId(), roleName));
+                Role role = roleDAO.loadRole(userLocale, new RoleKey(originalPartR.getWorkspaceId(), roleName));
                 Set<User> users = new HashSet<>();
                 roleUserMap.put(role, users);
                 for (String login : userLogins) {
-                    User u = userDAO.loadUser(new UserKey(originalPartR.getWorkspaceId(), login));
+                    User u = userDAO.loadUser(userLocale, new UserKey(originalPartR.getWorkspaceId(), login));
                     users.add(u);
                 }
             }
@@ -2256,22 +2256,22 @@ public class ProductManagerBean implements IProductManagerLocal {
             for (Map.Entry<String, Collection<String>> pair : groupRoleMapping.entrySet()) {
                 String roleName = pair.getKey();
                 Collection<String> groupIds = pair.getValue();
-                Role role = roleDAO.loadRole(new RoleKey(originalPartR.getWorkspaceId(), roleName));
+                Role role = roleDAO.loadRole(userLocale, new RoleKey(originalPartR.getWorkspaceId(), roleName));
                 Set<UserGroup> groups = new HashSet<>();
                 roleGroupMap.put(role, groups);
                 for (String groupId : groupIds) {
-                    UserGroup g = groupDAO.loadUserGroup(new UserGroupKey(originalPartR.getWorkspaceId(), groupId));
+                    UserGroup g = userGroupDAO.loadUserGroup(userLocale, new UserGroupKey(originalPartR.getWorkspaceId(), groupId));
                     groups.add(g);
                 }
             }
 
-            WorkflowModel workflowModel = new WorkflowModelDAO(locale, em).loadWorkflowModel(new WorkflowModelKey(user.getWorkspaceId(), pWorkflowModelId));
+            WorkflowModel workflowModel = workflowModelDAO.loadWorkflowModel(userLocale, new WorkflowModelKey(user.getWorkspaceId(), pWorkflowModelId));
             Workflow workflow = workflowModel.createWorkflow(roleUserMap, roleGroupMap);
             partR.setWorkflow(workflow);
 
             for (Task task : workflow.getTasks()) {
                 if (!task.hasPotentialWorker()) {
-                    throw new NotAllowedException(locale, "NotAllowedException56");
+                    throw new NotAllowedException(userLocale, "NotAllowedException56");
                 }
             }
 
@@ -2284,7 +2284,7 @@ public class ProductManagerBean implements IProductManagerLocal {
         partR.setDescription(pDescription);
 
         if (pACLUserEntries != null && !pACLUserEntries.isEmpty() || pACLUserGroupEntries != null && !pACLUserGroupEntries.isEmpty()) {
-            ACL acl = new ACLFactory(em).createACL(user.getWorkspace().getId(), pACLUserEntries, pACLUserGroupEntries);
+            ACL acl = aclFactory.createACL(user.getWorkspace().getId(), pACLUserEntries, pACLUserGroupEntries);
             partR.setACL(acl);
         }
 
@@ -2310,13 +2310,12 @@ public class ProductManagerBean implements IProductManagerLocal {
     public String generateId(String pWorkspaceId, String pPartMTemplateId) throws WorkspaceNotFoundException, UserNotFoundException, UserNotActiveException, PartMasterTemplateNotFoundException, WorkspaceNotEnabledException {
 
         User user = userManager.checkWorkspaceReadAccess(pWorkspaceId);
-        Locale locale = new Locale(user.getLanguage());
         PartMasterTemplateKey partMasterTemplateKey = new PartMasterTemplateKey(user.getWorkspaceId(), pPartMTemplateId);
-        PartMasterTemplate template = new PartMasterTemplateDAO(locale, em).loadPartMTemplate(partMasterTemplateKey);
+        PartMasterTemplate template = partMasterTemplateDAO.loadPartMTemplate(user.getLocale(), partMasterTemplateKey);
 
         String newId = null;
         try {
-            String latestId = new PartMasterDAO(locale, em).findLatestPartMId(pWorkspaceId, template.getPartType());
+            String latestId = partMasterDAO.findLatestPartMId(pWorkspaceId, template.getPartType());
             String inputMask = template.getMask();
             String convertedMask = Tools.convertMask(inputMask);
             newId = Tools.increaseId(latestId, convertedMask);
@@ -2334,20 +2333,20 @@ public class ProductManagerBean implements IProductManagerLocal {
     @Override
     public long getDiskUsageForPartsInWorkspace(String pWorkspaceId) throws WorkspaceNotFoundException, AccessRightException, AccountNotFoundException {
         Account account = userManager.checkAdmin(pWorkspaceId);
-        return new PartMasterDAO(new Locale(account.getLanguage()), em).getDiskUsageForPartsInWorkspace(pWorkspaceId);
+        return partMasterDAO.getDiskUsageForPartsInWorkspace(pWorkspaceId);
     }
 
     @RolesAllowed({UserGroupMapping.REGULAR_USER_ROLE_ID, UserGroupMapping.ADMIN_ROLE_ID})
     @Override
     public long getDiskUsageForPartTemplatesInWorkspace(String pWorkspaceId) throws WorkspaceNotFoundException, AccessRightException, AccountNotFoundException {
         Account account = userManager.checkAdmin(pWorkspaceId);
-        return new PartMasterDAO(new Locale(account.getLanguage()), em).getDiskUsageForPartTemplatesInWorkspace(pWorkspaceId);
+        return partMasterDAO.getDiskUsageForPartTemplatesInWorkspace(pWorkspaceId);
     }
 
     @Override
     public PartRevision[] getCheckedOutPartRevisions(String pWorkspaceId) throws WorkspaceNotFoundException, AccessRightException, AccountNotFoundException, UserNotFoundException, UserNotActiveException, WorkspaceNotEnabledException {
         User user = userManager.checkWorkspaceReadAccess(pWorkspaceId);
-        List<PartRevision> partRevisions = new PartRevisionDAO(new Locale(user.getLanguage()), em).findCheckedOutPartRevisionsForUser(pWorkspaceId, user.getLogin());
+        List<PartRevision> partRevisions = partRevisionDAO.findCheckedOutPartRevisionsForUser(pWorkspaceId, user.getLogin());
         return partRevisions.toArray(new PartRevision[partRevisions.size()]);
     }
 
@@ -2355,7 +2354,7 @@ public class ProductManagerBean implements IProductManagerLocal {
     @Override
     public PartRevision[] getAllCheckedOutPartRevisions(String pWorkspaceId) throws WorkspaceNotFoundException, AccessRightException, AccountNotFoundException {
         Account account = userManager.checkAdmin(pWorkspaceId);
-        List<PartRevision> partRevisions = new PartRevisionDAO(new Locale(account.getLanguage()), em).findAllCheckedOutPartRevisions(pWorkspaceId);
+        List<PartRevision> partRevisions = partRevisionDAO.findAllCheckedOutPartRevisions(pWorkspaceId);
         return partRevisions.toArray(new PartRevision[partRevisions.size()]);
     }
 
@@ -2364,7 +2363,6 @@ public class ProductManagerBean implements IProductManagerLocal {
     public SharedPart createSharedPart(PartRevisionKey pPartRevisionKey, String pPassword, Date pExpireDate) throws UserNotFoundException, AccessRightException, WorkspaceNotFoundException, PartRevisionNotFoundException, UserNotActiveException, WorkspaceNotEnabledException {
         User user = userManager.checkWorkspaceWriteAccess(pPartRevisionKey.getPartMaster().getWorkspace());
         SharedPart sharedPart = new SharedPart(user.getWorkspace(), user, pExpireDate, pPassword, getPartRevision(pPartRevisionKey));
-        SharedEntityDAO sharedEntityDAO = new SharedEntityDAO(new Locale(user.getLanguage()), em);
         sharedEntityDAO.createSharedPart(sharedPart);
         return sharedPart;
     }
@@ -2373,8 +2371,7 @@ public class ProductManagerBean implements IProductManagerLocal {
     @Override
     public void deleteSharedPart(SharedEntityKey pSharedEntityKey) throws UserNotFoundException, AccessRightException, WorkspaceNotFoundException, SharedEntityNotFoundException, WorkspaceNotEnabledException {
         User user = userManager.checkWorkspaceWriteAccess(pSharedEntityKey.getWorkspace());
-        SharedEntityDAO sharedEntityDAO = new SharedEntityDAO(new Locale(user.getLanguage()), em);
-        SharedPart sharedPart = sharedEntityDAO.loadSharedPart(pSharedEntityKey.getUuid());
+        SharedPart sharedPart = sharedEntityDAO.loadSharedPart(user.getLocale(), pSharedEntityKey.getUuid());
         sharedEntityDAO.deleteSharedPart(sharedPart);
     }
 
@@ -2396,15 +2393,14 @@ public class ProductManagerBean implements IProductManagerLocal {
     @RolesAllowed({UserGroupMapping.REGULAR_USER_ROLE_ID, UserGroupMapping.ADMIN_ROLE_ID})
     @Override
     public boolean canUserAccess(User user, PartRevisionKey partRKey) throws PartRevisionNotFoundException {
-        PartRevision partRevision = new PartRevisionDAO(new Locale(user.getLanguage()), em).loadPartR(partRKey);
+        PartRevision partRevision = partRevisionDAO.loadPartR(partRKey);
         return hasPartRevisionReadAccess(user, partRevision);
     }
 
     @RolesAllowed({UserGroupMapping.REGULAR_USER_ROLE_ID, UserGroupMapping.ADMIN_ROLE_ID})
     @Override
     public boolean canUserAccess(User user, PartIterationKey partIKey) throws PartRevisionNotFoundException, PartIterationNotFoundException {
-        PartRevisionDAO partRevisionDAO = new PartRevisionDAO(new Locale(user.getLanguage()), em);
-        PartRevision partR = partRevisionDAO.loadPartR(partIKey.getPartRevision());
+        PartRevision partR = partRevisionDAO.loadPartR(user.getLocale(), partIKey.getPartRevision());
         return hasPartRevisionReadAccess(user, partR) &&
                 (!partRevisionDAO.isCheckedOutIteration(partIKey) ||
                         user.equals(partR.getCheckOutUser()));
@@ -2415,7 +2411,7 @@ public class ProductManagerBean implements IProductManagerLocal {
     public User checkPartRevisionReadAccess(PartRevisionKey partRevisionKey) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, PartRevisionNotFoundException, AccessRightException, WorkspaceNotEnabledException {
         User user = userManager.checkWorkspaceReadAccess(partRevisionKey.getPartMaster().getWorkspace());
         if (!canUserAccess(user, partRevisionKey)) {
-            throw new AccessRightException(new Locale(user.getLanguage()), user);
+            throw new AccessRightException(user.getLocale(), user);
         }
         return user;
     }
@@ -2461,8 +2457,6 @@ public class ProductManagerBean implements IProductManagerLocal {
     public Component filterProductStructure(ConfigurationItemKey ciKey, ProductStructureFilter filter, List<PartLink> path, Integer pDepth) throws ConfigurationItemNotFoundException, WorkspaceNotFoundException, NotAllowedException, UserNotFoundException, UserNotActiveException, PartUsageLinkNotFoundException, AccessRightException, PartMasterNotFoundException, EntityConstraintException, WorkspaceNotEnabledException {
 
         User user = userManager.checkWorkspaceReadAccess(ciKey.getWorkspace());
-        Locale locale = new Locale(user.getLanguage());
-
 
         PSFilterVisitor psFilterVisitor = new PSFilterVisitor(em, user, filter) {
             @Override
@@ -2503,7 +2497,7 @@ public class ProductManagerBean implements IProductManagerLocal {
         };
 
         if (path == null) {
-            ConfigurationItem ci = new ConfigurationItemDAO(locale, em).loadConfigurationItem(ciKey);
+            ConfigurationItem ci = configurationItemDAO.loadConfigurationItem(user.getLocale(), ciKey);
             psFilterVisitor.visit(ci.getDesignItem(), pDepth);
         } else {
             psFilterVisitor.visit(path, pDepth);
@@ -2580,10 +2574,8 @@ public class ProductManagerBean implements IProductManagerLocal {
     public Component filterProductStructureOnLinkType(ConfigurationItemKey ciKey, ProductStructureFilter filter, String configSpecType, String path, String linkType) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, ConfigurationItemNotFoundException, PartUsageLinkNotFoundException, ProductInstanceMasterNotFoundException, BaselineNotFoundException, WorkspaceNotEnabledException {
 
         User user = userManager.checkWorkspaceReadAccess(ciKey.getWorkspace());
-        Locale locale = new Locale(user.getLanguage());
-        ConfigurationItem ci = new ConfigurationItemDAO(locale, em).loadConfigurationItem(ciKey);
-
-        PathToPathLinkDAO pathToPathLinkDAO = new PathToPathLinkDAO(locale, em);
+        Locale userLocale = user.getLocale();
+        ConfigurationItem ci = configurationItemDAO.loadConfigurationItem(userLocale, ciKey);
 
         Component component = new Component();
         component.setUser(user);
@@ -2597,7 +2589,7 @@ public class ProductManagerBean implements IProductManagerLocal {
             if (configSpecType.startsWith("pi-")) {
                 String serialNumber = configSpecType.substring(3);
                 ProductInstanceMasterKey productInstanceMasterKey = new ProductInstanceMasterKey(serialNumber, ciKey.getWorkspace(), ciKey.getId());
-                ProductInstanceIteration pii = new ProductInstanceMasterDAO(locale, em).loadProductInstanceMaster(productInstanceMasterKey).getLastIteration();
+                ProductInstanceIteration pii = productInstanceMasterDAO.loadProductInstanceMaster(userLocale, productInstanceMasterKey).getLastIteration();
                 rootPathToPathLinks = pathToPathLinkDAO.findRootPathToPathLinks(pii, linkType);
 
             } else if (!"wip".equals(configSpecType) && !"latest".equals(configSpecType) && !"released".equals(configSpecType)) {
@@ -2607,7 +2599,7 @@ public class ProductManagerBean implements IProductManagerLocal {
                 } catch (NumberFormatException e) {
                     LOGGER.log(Level.FINEST, null, e);
                 }
-                ProductBaseline pb = new ProductBaselineDAO(locale, em).loadBaseline(baselineId);
+                ProductBaseline pb = productBaselineDAO.loadBaseline(userLocale, baselineId);
                 rootPathToPathLinks = pathToPathLinkDAO.findRootPathToPathLinks(pb, linkType);
 
             } else {
@@ -2706,7 +2698,6 @@ public class ProductManagerBean implements IProductManagerLocal {
 
             } else {
                 ProductBaseline productBaseline;
-                ProductBaselineDAO productBaselineDAO = new ProductBaselineDAO(locale, em);
 
                 if (configSpecType.startsWith("pi-")) {
                     String serialNumber = configSpecType.substring(3);
@@ -2719,7 +2710,7 @@ public class ProductManagerBean implements IProductManagerLocal {
                     } catch (NumberFormatException e) {
                         LOGGER.log(Level.FINEST, null, e);
                     }
-                    productBaseline = productBaselineDAO.loadBaseline(baselineId);
+                    productBaseline = productBaselineDAO.loadBaseline(userLocale, baselineId);
                 }
 
                 List<PathToPathLink> sourcesPathToPathLinksInProduct = pathToPathLinkDAO.getSourcesPathToPathLinksInBaseline(productBaseline, linkType, path);
@@ -2806,13 +2797,10 @@ public class ProductManagerBean implements IProductManagerLocal {
     @Override
     public List<PartRevision> searchPartRevisions(String workspaceId, Query query) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, WorkspaceNotEnabledException {
         User user = userManager.checkWorkspaceReadAccess(workspaceId);
-        Locale locale = new Locale(user.getLanguage());
 
-        WorkspaceDAO workspaceDAO = new WorkspaceDAO(locale, em);
-        Workspace workspace = workspaceDAO.loadWorkspace(workspaceId);
+        Workspace workspace = workspaceDAO.loadWorkspace(user.getLocale(), workspaceId);
 
-        PartRevisionQueryDAO queryDAO = new PartRevisionQueryDAO(locale, user.getTimeZone(), em);
-        List<PartRevision> parts = queryDAO.runQuery(workspace, query);
+        List<PartRevision> parts = partRevisionQueryDAO.runQuery(user.getTimeZone(), workspace, query);
 
         ListIterator<PartRevision> ite = parts.listIterator();
 
@@ -2838,7 +2826,6 @@ public class ProductManagerBean implements IProductManagerLocal {
 
         User user = userManager.checkWorkspaceReadAccess(workspaceId);
 
-        QueryDAO queryDAO = new QueryDAO(new Locale(user.getLanguage()), em);
         Query query = queryDAO.loadQuery(queryId);
 
         if (!query.getAuthor().getWorkspace().getId().equals(workspaceId)) {
@@ -2852,8 +2839,6 @@ public class ProductManagerBean implements IProductManagerLocal {
     @Override
     public void createQuery(String workspaceId, Query query) throws UserNotFoundException, AccessRightException, WorkspaceNotFoundException, QueryAlreadyExistsException, CreationException, WorkspaceNotEnabledException {
         User user = userManager.checkWorkspaceWriteAccess(workspaceId);
-        Locale locale = new Locale(user.getLanguage());
-        QueryDAO queryDAO = new QueryDAO(locale, em);
 
         Query existingQuery = queryDAO.findQueryByName(workspaceId, query.getName());
         if (existingQuery != null) {
@@ -2862,15 +2847,13 @@ public class ProductManagerBean implements IProductManagerLocal {
 
         query.setAuthor(user);
         query.setCreationDate(new Date());
-        queryDAO.createQuery(query);
+        queryDAO.createQuery(user.getLocale(), query);
     }
 
     @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
     @Override
     public void deleteQuery(String workspaceId, int queryId) throws UserNotFoundException, AccessRightException, WorkspaceNotFoundException, WorkspaceNotEnabledException {
         User user = userManager.checkWorkspaceWriteAccess(workspaceId);
-        Locale locale = new Locale(user.getLanguage());
-        QueryDAO queryDAO = new QueryDAO(locale, em);
         Query query = queryDAO.loadQuery(queryId);
 
         Workspace workspace = query.getAuthor().getWorkspace();
@@ -2879,7 +2862,7 @@ public class ProductManagerBean implements IProductManagerLocal {
         if (query.getAuthor().equals(userInQueryWorkspace) || userInQueryWorkspace.isAdministrator()) {
             queryDAO.removeQuery(query);
         } else {
-            throw new AccessRightException(locale, userInQueryWorkspace);
+            throw new AccessRightException(user.getLocale(), userInQueryWorkspace);
         }
     }
 
@@ -2887,25 +2870,22 @@ public class ProductManagerBean implements IProductManagerLocal {
     @Override
     public List<Query> getQueries(String workspaceId) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, WorkspaceNotEnabledException {
         User user = userManager.checkWorkspaceReadAccess(workspaceId);
-        QueryDAO queryDAO = new QueryDAO(new Locale(user.getLanguage()), em);
         return queryDAO.loadQueries(workspaceId);
     }
 
     private PartUsageLink getPartUsageLink(User user, int id) throws PartUsageLinkNotFoundException {
-        PartUsageLinkDAO partUsageLinkDAO = new PartUsageLinkDAO(new Locale(user.getLanguage()), em);
-        return partUsageLinkDAO.loadPartUsageLink(id);
+        return partUsageLinkDAO.loadPartUsageLink(user.getLocale(), id);
     }
 
     private PartSubstituteLink getPartSubstituteLink(User user, int id) throws PartUsageLinkNotFoundException {
-        PartUsageLinkDAO partUsageLinkDAO = new PartUsageLinkDAO(new Locale(user.getLanguage()), em);
-        return partUsageLinkDAO.loadPartSubstituteLink(id);
+        return partUsageLinkDAO.loadPartSubstituteLink(user.getLocale(), id);
     }
 
     @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
     @Override
     public PartLink getRootPartUsageLink(ConfigurationItemKey pKey) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, ConfigurationItemNotFoundException, WorkspaceNotEnabledException {
         User user = userManager.checkWorkspaceReadAccess(pKey.getWorkspace());
-        ConfigurationItem ci = new ConfigurationItemDAO(new Locale(user.getLanguage()), em).loadConfigurationItem(pKey);
+        ConfigurationItem ci = configurationItemDAO.loadConfigurationItem(user.getLocale(), pKey);
 
         return new PartLink() {
             @Override
@@ -3035,11 +3015,7 @@ public class ProductManagerBean implements IProductManagerLocal {
 
 
         User user = userManager.checkWorkspaceReadAccess(ciKey.getWorkspace());
-        Locale locale = new Locale(user.getLanguage());
-        ConfigurationItemDAO configurationItemDAO = new ConfigurationItemDAO(locale, em);
-        ConfigurationItem configurationItem = configurationItemDAO.loadConfigurationItem(ciKey);
-
-        ModificationNotificationDAO modificationNotificationDAO = new ModificationNotificationDAO(em);
+        ConfigurationItem configurationItem = configurationItemDAO.loadConfigurationItem(user.getLocale(), ciKey);
 
         List<String> visitedPartNumbers = new ArrayList<>();
         LatestPSFilter latestPSFilter = new LatestPSFilter(user, true);
@@ -3103,7 +3079,6 @@ public class ProductManagerBean implements IProductManagerLocal {
     @Override
     public List<InstanceAttribute> getPartIterationsInstanceAttributesInWorkspace(String workspaceId) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, WorkspaceNotEnabledException {
         userManager.checkWorkspaceReadAccess(workspaceId);
-        InstanceAttributeDAO instanceAttributeDAO = new InstanceAttributeDAO(em);
         return instanceAttributeDAO.getPartIterationsInstanceAttributesInWorkspace(workspaceId);
     }
 
@@ -3111,7 +3086,6 @@ public class ProductManagerBean implements IProductManagerLocal {
     @Override
     public List<InstanceAttribute> getPathDataInstanceAttributesInWorkspace(String workspaceId) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, WorkspaceNotEnabledException {
         userManager.checkWorkspaceReadAccess(workspaceId);
-        InstanceAttributeDAO instanceAttributeDAO = new InstanceAttributeDAO(em);
         return instanceAttributeDAO.getPathDataInstanceAttributesInWorkspace(workspaceId);
     }
 
@@ -3131,7 +3105,6 @@ public class ProductManagerBean implements IProductManagerLocal {
     public List<BinaryResource> getBinaryResourceFromBaseline(int baselineId) {
         List<BinaryResource> binaryResources = new ArrayList<>();
 
-        ProductBaselineDAO productBaselineDAO = new ProductBaselineDAO(em);
         for (Map.Entry<BaselinedDocumentKey, BaselinedDocument> doc : productBaselineDAO.findBaselineById(baselineId).getBaselinedDocuments().entrySet()) {
             for (BinaryResource binary : doc.getValue().getTargetDocument().getAttachedFiles()) {
                 if (!binaryResources.contains(binary)) {
@@ -3149,9 +3122,7 @@ public class ProductManagerBean implements IProductManagerLocal {
         User user = userManager.checkWorkspaceReadAccess(workspaceId);
         Map<String, Set<BinaryResource>> result = new HashMap<>();
 
-        Locale locale = new Locale(user.getLanguage());
-
-        ConfigurationItem ci = new ConfigurationItemDAO(locale, em).loadConfigurationItem(ciKey);
+        ConfigurationItem ci = configurationItemDAO.loadConfigurationItem(user.getLocale(), ciKey);
         PartMaster root = ci.getDesignItem();
 
 
@@ -3261,14 +3232,13 @@ public class ProductManagerBean implements IProductManagerLocal {
     @Override
     public ProductBaseline loadProductBaselineForProductInstanceMaster(ConfigurationItemKey ciKey, String serialNumber) throws ProductInstanceMasterNotFoundException, UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, WorkspaceNotEnabledException {
         User user = userManager.checkWorkspaceReadAccess(ciKey.getWorkspace());
-        return new ProductBaselineDAO(new Locale(user.getLanguage()), em).findLastBaselineWithSerialNumber(ciKey, serialNumber);
+        return productBaselineDAO.findLastBaselineWithSerialNumber(ciKey, serialNumber);
     }
 
     @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
     @Override
     public Query loadQuery(String workspaceId, int queryId) throws WorkspaceNotFoundException, UserNotFoundException, UserNotActiveException, WorkspaceNotEnabledException {
         User user = userManager.checkWorkspaceReadAccess(workspaceId);
-        QueryDAO queryDAO = new QueryDAO(new Locale(user.getLanguage()), em);
         return queryDAO.loadQuery(queryId);
     }
 
@@ -3278,7 +3248,7 @@ public class ProductManagerBean implements IProductManagerLocal {
         String serialNumber = queryContext.getSerialNumber();
 
         ConfigurationItemKey ciKey = new ConfigurationItemKey(workspaceId, configurationItemId);
-        Locale locale = new Locale(user.getLanguage());
+        Locale userLocale = user.getLocale();
 
         List<QueryResultRow> rows = new ArrayList<>();
 
@@ -3286,15 +3256,14 @@ public class ProductManagerBean implements IProductManagerLocal {
 
         ProductInstanceIteration productInstanceIteration = null;
         if (serialNumber != null) {
-            ProductInstanceMaster productIM = new ProductInstanceMasterDAO(em).loadProductInstanceMaster(new ProductInstanceMasterKey(serialNumber, ciKey));
+            ProductInstanceMaster productIM = productInstanceMasterDAO.loadProductInstanceMaster(userLocale, new ProductInstanceMasterKey(serialNumber, ciKey));
             productInstanceIteration = productIM.getLastIteration();
         }
 
-        ConfigurationItem ci = new ConfigurationItemDAO(locale, em).loadConfigurationItem(ciKey);
+        ConfigurationItem ci = configurationItemDAO.loadConfigurationItem(userLocale, ciKey);
         PartMaster root = ci.getDesignItem();
 
         List<PathToPathLink> pathToPathLinks = ci.getPathToPathLinks();
-        PathDataIterationDAO pathDataIterationDAO = new PathDataIterationDAO(em);
 
         List<PathDataIteration> lastPathDataIterations = pathDataIterationDAO.getLastPathDataIterations(productInstanceIteration);
         Map<String, PathDataIteration> lastPathDataIterationsMap = new HashMap<>();
@@ -3311,7 +3280,7 @@ public class ProductManagerBean implements IProductManagerLocal {
         boolean shouldFilterPathDataWithCriteriaBuilder = finalProductInstanceIteration != null && pathDataQueryRule != null;
 
         if (shouldFilterPathDataWithCriteriaBuilder) {
-            filteredPathsFromQuery = new PathDataQueryDAO(locale, user.getTimeZone(), em).runQuery(finalProductInstanceIteration, query);
+            filteredPathsFromQuery = pathDataQueryDAO.runQuery(user.getTimeZone(), finalProductInstanceIteration, query);
         }
 
         final List<String> finalFilteredPathsFromQuery = filteredPathsFromQuery;
@@ -3408,11 +3377,8 @@ public class ProductManagerBean implements IProductManagerLocal {
     public List<PartIteration> getInversePartsLink(DocumentRevisionKey docKey) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, DocumentRevisionNotFoundException, PartIterationNotFoundException, PartRevisionNotFoundException, WorkspaceNotEnabledException {
         User user = userManager.checkWorkspaceReadAccess(docKey.getWorkspaceId());
 
-        Locale locale = new Locale(user.getLanguage());
+        DocumentRevision documentRevision = documentRevisionDAO.loadDocR(user.getLocale(), docKey);
 
-        DocumentRevision documentRevision = new DocumentRevisionDAO(locale, em).loadDocR(docKey);
-
-        DocumentLinkDAO documentLinkDAO = new DocumentLinkDAO(locale, em);
         List<PartIteration> iterations = documentLinkDAO.getInversePartsLinks(documentRevision);
         ListIterator<PartIteration> ite = iterations.listIterator();
 
@@ -3430,11 +3396,8 @@ public class ProductManagerBean implements IProductManagerLocal {
     public Set<ProductInstanceMaster> getInverseProductInstancesLink(DocumentRevisionKey docKey) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, DocumentRevisionNotFoundException, PartIterationNotFoundException, PartRevisionNotFoundException, WorkspaceNotEnabledException {
         User user = userManager.checkWorkspaceReadAccess(docKey.getWorkspaceId());
 
-        Locale locale = new Locale(user.getLanguage());
+        DocumentRevision documentRevision = documentRevisionDAO.loadDocR(user.getLocale(), docKey);
 
-        DocumentRevision documentRevision = new DocumentRevisionDAO(locale, em).loadDocR(docKey);
-
-        DocumentLinkDAO documentLinkDAO = new DocumentLinkDAO(locale, em);
         List<ProductInstanceIteration> iterations = documentLinkDAO.getInverseProductInstanceIteration(documentRevision);
         Set<ProductInstanceMaster> productInstanceMasterSet = new HashSet<>();
         for (ProductInstanceIteration productInstanceIteration : iterations) {
@@ -3449,11 +3412,8 @@ public class ProductManagerBean implements IProductManagerLocal {
     public Set<PathDataMaster> getInversePathDataLink(DocumentRevisionKey docKey) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, DocumentRevisionNotFoundException, PartIterationNotFoundException, PartRevisionNotFoundException, WorkspaceNotEnabledException {
         User user = userManager.checkWorkspaceReadAccess(docKey.getWorkspaceId());
 
-        Locale locale = new Locale(user.getLanguage());
+        DocumentRevision documentRevision = documentRevisionDAO.loadDocR(user.getLocale(), docKey);
 
-        DocumentRevision documentRevision = new DocumentRevisionDAO(locale, em).loadDocR(docKey);
-
-        DocumentLinkDAO documentLinkDAO = new DocumentLinkDAO(locale, em);
         List<PathDataIteration> pathDataIterations = documentLinkDAO.getInversefindPathData(documentRevision);
         Set<PathDataMaster> productInstanceMasterSet = new HashSet<>();
         for (PathDataIteration pathDataIteration : pathDataIterations) {
@@ -3467,17 +3427,17 @@ public class ProductManagerBean implements IProductManagerLocal {
     @Override
     public PathToPathLink createPathToPathLink(String workspaceId, String configurationItemId, String type, String pathFrom, String pathTo, String description) throws UserNotFoundException, AccessRightException, WorkspaceNotFoundException, ConfigurationItemNotFoundException, PathToPathLinkAlreadyExistsException, CreationException, PathToPathCyclicException, PartUsageLinkNotFoundException, UserNotActiveException, NotAllowedException, WorkspaceNotEnabledException {
         User user = userManager.checkWorkspaceWriteAccess(workspaceId);
-        Locale locale = new Locale(user.getLanguage());
+        Locale userLocale = user.getLocale();
 
         // Load the product
-        ConfigurationItem ci = new ConfigurationItemDAO(locale, em).loadConfigurationItem(new ConfigurationItemKey(workspaceId, configurationItemId));
+        ConfigurationItem ci = configurationItemDAO.loadConfigurationItem(userLocale, new ConfigurationItemKey(workspaceId, configurationItemId));
 
         if (type == null || type.isEmpty()) {
-            throw new NotAllowedException(locale, "NotAllowedException54");
+            throw new NotAllowedException(userLocale, "NotAllowedException54");
         }
 
         if (pathFrom != null && pathTo != null && pathFrom.equals(pathTo)) {
-            throw new NotAllowedException(locale, "NotAllowedException57");
+            throw new NotAllowedException(userLocale, "NotAllowedException57");
         }
 
         // Decode the paths to insure path validity
@@ -3489,18 +3449,17 @@ public class ProductManagerBean implements IProductManagerLocal {
         PartLink targetLink = targetPath.get(targetPath.size() - 1);
 
         if (sourceLink.getSubstitutes() != null && sourceLink.getSubstitutes().contains(targetLink) || targetLink.getSubstitutes() != null && targetLink.getSubstitutes().contains(sourceLink)) {
-            throw new NotAllowedException(locale, "NotAllowedException58");
+            throw new NotAllowedException(userLocale, "NotAllowedException58");
         }
 
         PathToPathLink pathToPathLink = new PathToPathLink(type, pathFrom, pathTo, description);
-        PathToPathLinkDAO pathToPathLinkDAO = new PathToPathLinkDAO(locale, em);
         PathToPathLink samePathToPathLink = pathToPathLinkDAO.getSamePathToPathLink(ci, pathToPathLink);
 
         if (samePathToPathLink != null) {
-            throw new PathToPathLinkAlreadyExistsException(locale, pathToPathLink);
+            throw new PathToPathLinkAlreadyExistsException(userLocale, pathToPathLink);
         }
 
-        pathToPathLinkDAO.createPathToPathLink(pathToPathLink);
+        pathToPathLinkDAO.createPathToPathLink(userLocale, pathToPathLink);
 
         ci.addPathToPathLink(pathToPathLink);
 
@@ -3515,16 +3474,14 @@ public class ProductManagerBean implements IProductManagerLocal {
             throws UserNotFoundException, AccessRightException, WorkspaceNotFoundException, ConfigurationItemNotFoundException, PartUsageLinkNotFoundException, UserNotActiveException, NotAllowedException, PathToPathLinkNotFoundException, WorkspaceNotEnabledException {
 
         User user = userManager.checkWorkspaceWriteAccess(workspaceId);
-        Locale locale = new Locale(user.getLanguage());
+        Locale userLocale = user.getLocale();
 
         // Load the product
-        ConfigurationItem ci = new ConfigurationItemDAO(locale, em).loadConfigurationItem(new ConfigurationItemKey(workspaceId, configurationItemId));
-
-        PathToPathLinkDAO pathToPathLinkDAO = new PathToPathLinkDAO(locale, em);
-        PathToPathLink pathToPathLink = pathToPathLinkDAO.loadPathToPathLink(pathToPathLinkId);
+        ConfigurationItem ci = configurationItemDAO.loadConfigurationItem(userLocale, new ConfigurationItemKey(workspaceId, configurationItemId));
+        PathToPathLink pathToPathLink = pathToPathLinkDAO.loadPathToPathLink(userLocale, pathToPathLinkId);
 
         if (!ci.getPathToPathLinks().contains(pathToPathLink)) {
-            throw new NotAllowedException(locale, "NotAllowedException60");
+            throw new NotAllowedException(userLocale, "NotAllowedException60");
         }
 
         pathToPathLink.setDescription(description);
@@ -3536,32 +3493,29 @@ public class ProductManagerBean implements IProductManagerLocal {
     @Override
     public List<String> getPathToPathLinkTypes(String workspaceId, String configurationItemId) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, ConfigurationItemNotFoundException, WorkspaceNotEnabledException {
         User user = userManager.checkWorkspaceReadAccess(workspaceId);
-        Locale locale = new Locale(user.getLanguage());
-        ConfigurationItem configurationItem = new ConfigurationItemDAO(locale, em).loadConfigurationItem(new ConfigurationItemKey(workspaceId, configurationItemId));
-        return new PathToPathLinkDAO(locale, em).getDistinctPathToPathLinkTypes(configurationItem);
+        ConfigurationItem configurationItem = configurationItemDAO.loadConfigurationItem(user.getLocale(), new ConfigurationItemKey(workspaceId, configurationItemId));
+        return pathToPathLinkDAO.getDistinctPathToPathLinkTypes(configurationItem);
     }
 
     @RolesAllowed({UserGroupMapping.REGULAR_USER_ROLE_ID})
     @Override
     public List<PathToPathLink> getPathToPathLinkFromSourceAndTarget(String workspaceId, String configurationItemId, String sourcePath, String targetPath) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, ConfigurationItemNotFoundException, WorkspaceNotEnabledException {
         User user = userManager.checkWorkspaceReadAccess(workspaceId);
-        Locale locale = new Locale(user.getLanguage());
-        ConfigurationItem configurationItem = new ConfigurationItemDAO(locale, em).loadConfigurationItem(new ConfigurationItemKey(workspaceId, configurationItemId));
-        return new PathToPathLinkDAO(locale, em).getPathToPathLinkFromSourceAndTarget(configurationItem, sourcePath, targetPath);
+        ConfigurationItem configurationItem = configurationItemDAO.loadConfigurationItem(user.getLocale(), new ConfigurationItemKey(workspaceId, configurationItemId));
+        return pathToPathLinkDAO.getPathToPathLinkFromSourceAndTarget(configurationItem, sourcePath, targetPath);
     }
 
     @RolesAllowed({UserGroupMapping.REGULAR_USER_ROLE_ID})
     @Override
     public ProductInstanceMaster findProductByPathMaster(String workspaceId, PathDataMaster pathDataMaster) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, WorkspaceNotEnabledException {
-        User user = userManager.checkWorkspaceReadAccess(workspaceId);
-        PathDataMasterDAO pathDataMasterDAO = new PathDataMasterDAO(new Locale(user.getLanguage()), em);
+        userManager.checkWorkspaceReadAccess(workspaceId);
         return pathDataMasterDAO.findByPathData(pathDataMaster);
     }
 
     @RolesAllowed({UserGroupMapping.REGULAR_USER_ROLE_ID})
     @Override
     public PartMaster getPartMasterFromPath(String workspaceId, String configurationItemId, String partPath) throws ConfigurationItemNotFoundException, UserNotFoundException, WorkspaceNotFoundException, UserNotActiveException, PartUsageLinkNotFoundException, WorkspaceNotEnabledException {
-        ConfigurationItem configurationItem = new ConfigurationItemDAO(em).loadConfigurationItem(new ConfigurationItemKey(workspaceId, configurationItemId));
+        ConfigurationItem configurationItem = configurationItemDAO.loadConfigurationItem(new ConfigurationItemKey(workspaceId, configurationItemId));
         List<PartLink> path = decodePath(configurationItem.getKey(), partPath);
         return path.get(path.size() - 1).getComponent();
     }
@@ -3571,13 +3525,12 @@ public class ProductManagerBean implements IProductManagerLocal {
     public void deletePathToPathLink(String workspaceId, String configurationItemId, int pathToPathLinkId) throws UserNotFoundException, AccessRightException, WorkspaceNotFoundException, ConfigurationItemNotFoundException, PathToPathLinkNotFoundException, WorkspaceNotEnabledException {
 
         User user = userManager.checkWorkspaceWriteAccess(workspaceId);
-        Locale locale = new Locale(user.getLanguage());
+        Locale userLocale = user.getLocale();
 
         // Load the product
-        ConfigurationItem ci = new ConfigurationItemDAO(locale, em).loadConfigurationItem(new ConfigurationItemKey(workspaceId, configurationItemId));
+        ConfigurationItem ci = configurationItemDAO.loadConfigurationItem(userLocale, new ConfigurationItemKey(workspaceId, configurationItemId));
 
-        PathToPathLinkDAO pathToPathLinkDAO = new PathToPathLinkDAO(locale, em);
-        PathToPathLink pathToPathLink = pathToPathLinkDAO.loadPathToPathLink(pathToPathLinkId);
+        PathToPathLink pathToPathLink = pathToPathLinkDAO.loadPathToPathLink(userLocale, pathToPathLinkId);
         ci.removePathToPathLink(pathToPathLink);
         pathToPathLinkDAO.removePathToPathLink(pathToPathLink);
 
@@ -3587,10 +3540,9 @@ public class ProductManagerBean implements IProductManagerLocal {
     @Override
     public List<ResolvedDocumentLink> getDocumentLinksAsDocumentIterations(String workspaceId, String configurationItemId, String configSpec, PartIterationKey partIterationKey) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, BaselineNotFoundException, PartIterationNotFoundException, ProductInstanceMasterNotFoundException, WorkspaceNotEnabledException {
         User user = userManager.checkWorkspaceReadAccess(workspaceId);
-        Locale locale = new Locale(user.getLanguage());
+        Locale userLocale = user.getLocale();
 
-        PartIterationDAO partIterationDAO = new PartIterationDAO(locale, em);
-        PartIteration partIteration = partIterationDAO.loadPartI(partIterationKey);
+        PartIteration partIteration = partIterationDAO.loadPartI(userLocale, partIterationKey);
 
         if (null == configSpec) {
             throw new IllegalArgumentException("Config spec cannot be null");
@@ -3600,13 +3552,11 @@ public class ProductManagerBean implements IProductManagerLocal {
 
         if (configSpec.startsWith("pi-")) {
             String serialNumber = configSpec.substring(3);
-            ProductInstanceMasterDAO productInstanceMasterDAO = new ProductInstanceMasterDAO(locale, em);
-            ProductInstanceMaster productInstanceMaster = productInstanceMasterDAO.loadProductInstanceMaster(new ProductInstanceMasterKey(serialNumber, workspaceId, configurationItemId));
+            ProductInstanceMaster productInstanceMaster = productInstanceMasterDAO.loadProductInstanceMaster(userLocale, new ProductInstanceMasterKey(serialNumber, workspaceId, configurationItemId));
             baseline = productInstanceMaster.getLastIteration().getBasedOn();
         } else {
             int baselineId = Integer.parseInt(configSpec);
-            ProductBaselineDAO productBaselineDAO = new ProductBaselineDAO(locale, em);
-            baseline = productBaselineDAO.loadBaseline(baselineId);
+            baseline = productBaselineDAO.loadBaseline(userLocale, baselineId);
         }
 
         DocumentCollection documentCollection = baseline.getDocumentCollection();
@@ -3629,9 +3579,7 @@ public class ProductManagerBean implements IProductManagerLocal {
     @RolesAllowed({UserGroupMapping.REGULAR_USER_ROLE_ID})
     @Override
     public PartIteration findPartIterationByBinaryResource(BinaryResource binaryResource) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, WorkspaceNotEnabledException {
-        BinaryResourceDAO binaryResourceDAO;
-        User user = userManager.checkWorkspaceReadAccess(binaryResource.getWorkspaceId());
-        binaryResourceDAO = new BinaryResourceDAO(new Locale(user.getLanguage()), em);
+        userManager.checkWorkspaceReadAccess(binaryResource.getWorkspaceId());
         return binaryResourceDAO.getPartHolder(binaryResource);
     }
 
@@ -3640,7 +3588,7 @@ public class ProductManagerBean implements IProductManagerLocal {
     public PartRevision[] getPartRevisionsWithAssignedTasksForGivenUser(String pWorkspaceId, String assignedUserLogin)
             throws WorkspaceNotFoundException, UserNotFoundException, UserNotActiveException, WorkspaceNotEnabledException {
         User user = userManager.checkWorkspaceReadAccess(pWorkspaceId);
-        List<PartRevision> partRs = new PartRevisionDAO(new Locale(user.getLanguage()), em).findPartsWithAssignedTasksForGivenUser(pWorkspaceId, assignedUserLogin);
+        List<PartRevision> partRs = partRevisionDAO.findPartsWithAssignedTasksForGivenUser(pWorkspaceId, assignedUserLogin);
 
         ListIterator<PartRevision> ite = partRs.listIterator();
         while (ite.hasNext()) {
@@ -3661,7 +3609,7 @@ public class ProductManagerBean implements IProductManagerLocal {
     public PartRevision[] getPartRevisionsWithOpenedTasksForGivenUser(String pWorkspaceId, String assignedUserLogin)
             throws WorkspaceNotFoundException, UserNotFoundException, UserNotActiveException, WorkspaceNotEnabledException {
         User user = userManager.checkWorkspaceReadAccess(pWorkspaceId);
-        List<PartRevision> partRs = new PartRevisionDAO(new Locale(user.getLanguage()), em).findPartsWithOpenedTasksForGivenUser(pWorkspaceId, assignedUserLogin);
+        List<PartRevision> partRs = partRevisionDAO.findPartsWithOpenedTasksForGivenUser(pWorkspaceId, assignedUserLogin);
 
         ListIterator<PartRevision> ite = partRs.listIterator();
         while (ite.hasNext()) {
@@ -3678,13 +3626,11 @@ public class ProductManagerBean implements IProductManagerLocal {
     }
 
     private void checkCyclicPathToPathLink(ConfigurationItem ci, PathToPathLink startLink, User user, List<PathToPathLink> visitedLinks) throws PathToPathCyclicException {
-        Locale locale = new Locale(user.getLanguage());
-        PathToPathLinkDAO pathToPathLinkDAO = new PathToPathLinkDAO(locale, em);
 
         List<PathToPathLink> nextPathToPathLinks = pathToPathLinkDAO.getNextPathToPathLinkInProduct(ci, startLink);
         for (PathToPathLink nextPathToPathLink : nextPathToPathLinks) {
             if (visitedLinks.contains(nextPathToPathLink)) {
-                throw new PathToPathCyclicException(locale);
+                throw new PathToPathCyclicException(user.getLocale());
             }
             visitedLinks.add(nextPathToPathLink);
             checkCyclicPathToPathLink(ci, startLink, user, visitedLinks);
@@ -3697,14 +3643,15 @@ public class ProductManagerBean implements IProductManagerLocal {
         if (user.isAdministrator()) {                                                                                     // Check if it is the workspace's administrator
             return user;
         }
-        PartRevision partRevision = new PartRevisionDAO(em).loadPartR(partRevisionKey);
+        Locale userLocale = user.getLocale();
+        PartRevision partRevision = partRevisionDAO.loadPartR(userLocale, partRevisionKey);
         if (partRevision.getACL() == null) {                                                                                // Check if the part haven't ACL
             return userManager.checkWorkspaceWriteAccess(workspaceId);
         }
         if (partRevision.getACL().hasWriteAccess(user)) {                                                                 // Check if the ACL grant write access
             return user;
         }
-        throw new AccessRightException(new Locale(user.getLanguage()), user);                                            // Else throw a AccessRightException
+        throw new AccessRightException(userLocale, user);                                            // Else throw a AccessRightException
     }
 
     private User checkPartTemplateWriteAccess(PartMasterTemplate template, User user) throws UserNotFoundException, AccessRightException, WorkspaceNotFoundException, WorkspaceNotEnabledException {
@@ -3721,7 +3668,7 @@ public class ProductManagerBean implements IProductManagerLocal {
             return user;
         } else {
             // Else throw a AccessRightException
-            throw new AccessRightException(new Locale(user.getLanguage()), user);
+            throw new AccessRightException(user.getLocale(), user);
         }
 
 

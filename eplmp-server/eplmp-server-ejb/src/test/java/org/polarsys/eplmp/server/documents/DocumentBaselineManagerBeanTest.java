@@ -47,6 +47,8 @@ public class DocumentBaselineManagerBeanTest {
     @InjectMocks
     DocumentBaselineManagerBean docBaselineManagerBean = new DocumentBaselineManagerBean();
     @Mock
+    WorkspaceDAO workspaceDAO;
+    @Mock
     IDocumentManagerLocal documentManagerLocal;
     @Mock
     IUserManagerLocal userManager;
@@ -78,7 +80,7 @@ public class DocumentBaselineManagerBeanTest {
         Mockito.when(em.find(Workspace.class, workspace.getId())).thenReturn(workspace);
         Mockito.when(em.createQuery("SELECT DISTINCT f FROM Folder f WHERE f.parentFolder.completePath = :completePath", Folder.class)).thenReturn(folderTypedQuery);
         Mockito.when(folderTypedQuery.getResultList()).thenReturn(new ArrayList<>(0));
-        Mockito.when(new WorkspaceDAO(new Locale("en"), em).loadWorkspace(workspace.getId())).thenReturn(workspace);
+        Mockito.when(workspaceDAO.loadWorkspace(workspace.getId())).thenReturn(workspace);
         Mockito.when(em.find(Folder.class, workspace.getId())).thenReturn(folder);
         Mockito.when(documentService.getAllDocumentsInWorkspace(workspace.getId())).thenReturn(new DocumentRevision[0]);
 
@@ -86,7 +88,7 @@ public class DocumentBaselineManagerBeanTest {
         try {
             docBaselineManagerBean.createBaseline(workspace.getId(), "name", DocumentBaselineType.RELEASED, "description", new ArrayList<>());
         } catch (NotAllowedException e) {
-            Properties properties = PropertiesLoader.loadLocalizedProperties(new Locale(user.getLanguage()), PROPERTIES_BASE_NAME, getClass());
+            Properties properties = PropertiesLoader.loadLocalizedProperties(user.getLocale(), PROPERTIES_BASE_NAME, getClass());
             String expected = properties.getProperty("NotAllowedException66");
             Assert.assertEquals(expected, e.getMessage());
         }
@@ -106,7 +108,7 @@ public class DocumentBaselineManagerBeanTest {
         Mockito.when(em.find(Workspace.class, workspace.getId())).thenReturn(workspace);
         Mockito.when(em.createQuery("SELECT DISTINCT f FROM Folder f WHERE f.parentFolder.completePath = :completePath", Folder.class)).thenReturn(folderTypedQuery);
         Mockito.when(folderTypedQuery.getResultList()).thenReturn(new ArrayList<>(0));
-        Mockito.when(new WorkspaceDAO(new Locale("en"), em).loadWorkspace(workspace.getId())).thenReturn(workspace);
+        Mockito.when(workspaceDAO.loadWorkspace(workspace.getId())).thenReturn(workspace);
         Mockito.when(em.find(Folder.class, workspace.getId())).thenReturn(folder);
         DocumentRevision[] revisions = new DocumentRevision[2];
 

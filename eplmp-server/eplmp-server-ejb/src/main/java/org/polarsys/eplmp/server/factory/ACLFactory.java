@@ -18,18 +18,30 @@ import org.polarsys.eplmp.core.security.ACL;
 import org.polarsys.eplmp.core.security.ACLPermission;
 import org.polarsys.eplmp.server.dao.ACLDAO;
 
+import javax.ejb.Stateless;
+import javax.inject.Inject;
 import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import java.util.HashMap;
 import java.util.Map;
 
 /**
  * @author Asmae CHADID on 26/02/15.
  */
+@Stateless(name = "ACLFactory")
 public class ACLFactory {
+
+    @PersistenceContext
     private EntityManager em;
 
-    public ACLFactory(EntityManager em) {
-        this.em = em;
+    @Inject
+    private ACLDAO aclDAO;
+
+    @Inject
+    private ACLFactory aclFactory;
+
+    public ACLFactory() {
+
     }
 
     public ACL createACL(String pWorkspaceId, Map<String, String> pUserEntries, Map<String, String> pGroupEntries) {
@@ -46,14 +58,14 @@ public class ACLFactory {
                         ACLPermission.valueOf(entry.getValue()));
             }
         }
-        new ACLDAO(em).createACL(acl);
+        aclDAO.createACL(acl);
         return acl;
     }
 
     public ACL updateACL(String workspaceId, ACL acl, Map<String, String> pUserEntries, Map<String, String> pGroupEntries) {
 
         if (acl != null) {
-            new ACLDAO(em).removeACLEntries(acl);
+            aclDAO.removeACLEntries(acl);
             acl.setUserEntries(new HashMap<>());
             acl.setGroupEntries(new HashMap<>());
             for (Map.Entry<String, String> entry : pUserEntries.entrySet()) {

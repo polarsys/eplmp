@@ -44,12 +44,17 @@ public class PSFilterManagerBean implements IPSFilterManagerLocal {
     private EntityManager em;
 
     @Inject
+    private ProductBaselineDAO productBaselineDAO;
+
+    @Inject
+    private ProductInstanceMasterDAO productInstanceMasterDAO;
+
+    @Inject
     private IUserManagerLocal userManager;
 
     @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
     @Override
     public ProductStructureFilter getBaselinePSFilter(int baselineId) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, BaselineNotFoundException, WorkspaceNotEnabledException {
-        ProductBaselineDAO productBaselineDAO = new ProductBaselineDAO(em);
         ProductBaseline productBaseline = productBaselineDAO.loadBaseline(baselineId);
         //User user = userManager.checkWorkspaceReadAccess(productBaseline.getConfigurationItem().getWorkspaceId());
         return new ProductBaselineConfigSpec(productBaseline);
@@ -60,7 +65,7 @@ public class PSFilterManagerBean implements IPSFilterManagerLocal {
     public ProductStructureFilter getProductInstanceConfigSpec(ConfigurationItemKey ciKey, String serialNumber) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, ProductInstanceMasterNotFoundException, WorkspaceNotEnabledException {
         User user = userManager.checkWorkspaceReadAccess(ciKey.getWorkspace());
         ProductInstanceMasterKey productInstanceMasterKey = new ProductInstanceMasterKey(serialNumber, ciKey);
-        ProductInstanceMaster productIM = new ProductInstanceMasterDAO(em).loadProductInstanceMaster(productInstanceMasterKey);
+        ProductInstanceMaster productIM = productInstanceMasterDAO.loadProductInstanceMaster(user.getLocale(), productInstanceMasterKey);
         ProductInstanceIteration productII = productIM.getLastIteration();
         return new ProductInstanceConfigSpec(productII, user);
     }

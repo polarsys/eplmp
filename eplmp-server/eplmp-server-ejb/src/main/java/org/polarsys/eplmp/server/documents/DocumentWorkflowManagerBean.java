@@ -46,6 +46,12 @@ public class DocumentWorkflowManagerBean implements IDocumentWorkflowManagerLoca
     private EntityManager em;
 
     @Inject
+    private DocumentRevisionDAO documentRevisionDAO;
+
+    @Inject
+    private SubscriptionDAO subscriptionDAO;
+
+    @Inject
     private IUserManagerLocal userManager;
 
     @Inject
@@ -57,16 +63,18 @@ public class DocumentWorkflowManagerBean implements IDocumentWorkflowManagerLoca
     @Inject
     private IGCMSenderLocal gcmNotifier;
 
+    @Inject
+    private WorkflowDAO workflowDAO;
+
     @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
     @Override
     public Workflow getCurrentWorkflow(DocumentRevisionKey documentRevisionKey) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, DocumentRevisionNotFoundException, AccessRightException, WorkflowNotFoundException, WorkspaceNotEnabledException {
         User user = userManager.checkWorkspaceReadAccess(documentRevisionKey.getDocumentMaster().getWorkspace());
+        Locale userLocale = user.getLocale();
         if (!documentManager.canUserAccess(user, documentRevisionKey)) {
-            throw new AccessRightException(new Locale(user.getLanguage()), user);
+            throw new AccessRightException(userLocale, user);
         }
-
-        Locale locale = new Locale(user.getLanguage());
-        DocumentRevision docR = new DocumentRevisionDAO(locale, em).loadDocR(documentRevisionKey);
+        DocumentRevision docR = documentRevisionDAO.loadDocR(userLocale, documentRevisionKey);
         return docR.getWorkflow();
     }
 
@@ -74,12 +82,12 @@ public class DocumentWorkflowManagerBean implements IDocumentWorkflowManagerLoca
     @Override
     public Workflow[] getAbortedWorkflow(DocumentRevisionKey documentRevisionKey) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, DocumentRevisionNotFoundException, AccessRightException, WorkspaceNotEnabledException {
         User user = userManager.checkWorkspaceReadAccess(documentRevisionKey.getDocumentMaster().getWorkspace());
+        Locale userLocale = user.getLocale();
         if (!documentManager.canUserAccess(user, documentRevisionKey)) {
-            throw new AccessRightException(new Locale(user.getLanguage()), user);
+            throw new AccessRightException(userLocale, user);
         }
 
-        Locale locale = new Locale(user.getLanguage());
-        DocumentRevision docR = new DocumentRevisionDAO(locale, em).loadDocR(documentRevisionKey);
+        DocumentRevision docR = documentRevisionDAO.loadDocR(userLocale, documentRevisionKey);
         List<Workflow> abortedWorkflowList = docR.getAbortedWorkflows();
         return abortedWorkflowList.toArray(new Workflow[abortedWorkflowList.size()]);
     }
@@ -101,7 +109,6 @@ public class DocumentWorkflowManagerBean implements IDocumentWorkflowManagerLoca
         int currentStep = workflow.getCurrentStep();
 
         if (previousStep != currentStep) {
-            SubscriptionDAO subscriptionDAO = new SubscriptionDAO(em);
 
             Collection<User> subscribers = subscriptionDAO.getStateChangeEventSubscribers(docR);
             if (!subscribers.isEmpty()) {
@@ -160,23 +167,23 @@ public class DocumentWorkflowManagerBean implements IDocumentWorkflowManagerLoca
      * @throws NotAllowedException       If you can not make this task
      */
     private DocumentRevision checkTaskAccess(User user, Task task) throws WorkflowNotFoundException, NotAllowedException {
-        Locale locale = new Locale(user.getLanguage());
+        Locale userLocale = user.getLocale();
         Workflow workflow = task.getActivity().getWorkflow();
-        DocumentRevision docR = new WorkflowDAO(em).getDocumentTarget(workflow);
+        DocumentRevision docR = workflowDAO.getDocumentTarget(workflow);
         if (docR == null) {
-            throw new WorkflowNotFoundException(locale, workflow.getId());
+            throw new WorkflowNotFoundException(userLocale, workflow.getId());
         }
         if (!task.isInProgress()) {
-            throw new NotAllowedException(locale, "NotAllowedException15");
+            throw new NotAllowedException(userLocale, "NotAllowedException15");
         }
         if (!task.isPotentialWorker(user)) {
-            throw new NotAllowedException(locale, "NotAllowedException14");
+            throw new NotAllowedException(userLocale, "NotAllowedException14");
         }
         if (!workflow.getRunningTasks().contains(task)) {
-            throw new NotAllowedException(locale, "NotAllowedException15");
+            throw new NotAllowedException(userLocale, "NotAllowedException15");
         }
         if (docR.isCheckedOut()) {
-            throw new NotAllowedException(locale, "NotAllowedException16");
+            throw new NotAllowedException(userLocale, "NotAllowedException16");
         }
         return docR;
     }
@@ -184,7 +191,7 @@ public class DocumentWorkflowManagerBean implements IDocumentWorkflowManagerLoca
     private void relaunchWorkflow(DocumentRevision docR, int activityStep) {
         Workflow workflow = docR.getWorkflow();
         // Clone new workflow
-        Workflow relaunchedWorkflow = new WorkflowDAO(em).duplicateWorkflow(workflow);
+        Workflow relaunchedWorkflow = workflowDAO.duplicateWorkflow(workflow);
 
         // Move aborted workflow in docR list
         workflow.abort();

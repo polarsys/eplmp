@@ -68,6 +68,21 @@ public class IndexerManagerBean implements IIndexerManagerLocal {
     private JestClient esClient;
 
     @Inject
+    private DocumentMasterDAO documentMasterDAO;
+
+    @Inject
+    private DocumentRevisionDAO documentRevisionDAO;
+
+    @Inject
+    private PartMasterDAO partMasterDAO;
+
+    @Inject
+    private PartRevisionDAO partRevisionDAO;
+
+    @Inject
+    private WorkspaceDAO workspaceDAO;
+
+    @Inject
     private IAccountManagerLocal accountManager;
 
     @Inject
@@ -254,9 +269,8 @@ public class IndexerManagerBean implements IIndexerManagerLocal {
     @Asynchronous
     @RolesAllowed({UserGroupMapping.ADMIN_ROLE_ID})
     public void indexAllWorkspacesData() throws AccountNotFoundException {
-        WorkspaceDAO wDAO = new WorkspaceDAO(em);
 
-        for (Workspace workspace : wDAO.getAll()) {
+        for (Workspace workspace : workspaceDAO.getAll()) {
             indexWorkspaceData(workspace.getId());
         }
     }
@@ -412,15 +426,13 @@ public class IndexerManagerBean implements IIndexerManagerLocal {
     }
 
     private Bulk.Builder bulkDocumentsIndexRequestBuilder(Bulk.Builder pBulkRequest, String workspaceId) {
-        DocumentMasterDAO docMasterDAO = new DocumentMasterDAO(em);
-
-        Long countByWorkspace = docMasterDAO.getCountByWorkspace(workspaceId);
+        Long countByWorkspace = documentMasterDAO.getCountByWorkspace(workspaceId);
         Integer limit = 1000;
         int numberOfPage = (int) Math.ceil(countByWorkspace.doubleValue() / limit.doubleValue());
         
         for(int pageIndex = 0 ; pageIndex < numberOfPage ; pageIndex++) {
             int offset = pageIndex * limit;
-            for (DocumentMaster docM : docMasterDAO.getPaginatedByWorkspace(workspaceId, limit, offset)) {
+            for (DocumentMaster docM : documentMasterDAO.getPaginatedByWorkspace(workspaceId, limit, offset)) {
                 for (DocumentRevision docR : docM.getDocumentRevisions()) {
                     docR.getDocumentIterations().stream().filter(documentIteration -> documentIteration.getCheckInDate() != null)
                             .forEach(documentIteration -> {
@@ -438,8 +450,6 @@ public class IndexerManagerBean implements IIndexerManagerLocal {
     }
 
     private Bulk.Builder bulkPartsIndexRequestBuilder(Bulk.Builder pBulkRequest, String workspaceId) {
-        PartMasterDAO partMasterDAO = new PartMasterDAO(em);
-
         Long countByWorkspace = partMasterDAO.getCountByWorkspace(workspaceId);
         Integer limit = 1000;
         int numberOfPage = (int) Math.ceil(countByWorkspace.doubleValue() / limit.doubleValue());
@@ -550,7 +560,7 @@ public class IndexerManagerBean implements IIndexerManagerLocal {
 
     private DocumentRevision getDocumentRevision(DocumentRevisionKey documentRevisionKey) {
         try {
-            return new DocumentRevisionDAO(em).loadDocR(documentRevisionKey);
+            return documentRevisionDAO.loadDocR(documentRevisionKey);
         } catch (DocumentRevisionNotFoundException e) {
             LOGGER.log(Level.INFO, "Cannot infer document revision from key [" + documentRevisionKey + "]", e);
             return null;
@@ -583,7 +593,7 @@ public class IndexerManagerBean implements IIndexerManagerLocal {
 
     private PartRevision getPartRevision(PartRevisionKey partRevision) {
         try {
-            return new PartRevisionDAO(em).loadPartR(partRevision);
+            return partRevisionDAO.loadPartR(partRevision);
         } catch (PartRevisionNotFoundException e) {
             LOGGER.log(Level.INFO, "Cannot infer part revision from key [" + partRevision + "]", e);
             return null;

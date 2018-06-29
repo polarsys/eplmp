@@ -42,6 +42,12 @@ public class DocumentBaselineManagerBean implements IDocumentBaselineManagerLoca
     private EntityManager em;
 
     @Inject
+    private DocumentBaselineDAO documentBaselineDAO;
+
+    @Inject
+    private DocumentRevisionDAO documentRevisionDAO;
+
+    @Inject
     private IUserManagerLocal userManager;
 
     @Inject
@@ -56,10 +62,10 @@ public class DocumentBaselineManagerBean implements IDocumentBaselineManagerLoca
         DocumentBaseline baseline = new DocumentBaseline(user, name, type, description);
         baseline.getDocumentCollection().setCreationDate(new Date());
         baseline.getDocumentCollection().setAuthor(user);
-        new DocumentBaselineDAO(em, new Locale(user.getLanguage())).createBaseline(baseline);
+        documentBaselineDAO.createBaseline(baseline);
         snapshotDocuments(baseline, workspaceId, documentRevisionKeys);
         if (baseline.getDocumentCollection().getBaselinedDocuments().isEmpty()) {
-            throw new NotAllowedException(new Locale(user.getLanguage()), "NotAllowedException66");
+            throw new NotAllowedException(user.getLocale(), "NotAllowedException66");
         }
         return baseline;
     }
@@ -67,8 +73,7 @@ public class DocumentBaselineManagerBean implements IDocumentBaselineManagerLoca
     @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
     @Override
     public List<DocumentBaseline> getBaselines(String workspaceId) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, WorkspaceNotEnabledException {
-        User user = userManager.checkWorkspaceReadAccess(workspaceId);
-        DocumentBaselineDAO documentBaselineDAO = new DocumentBaselineDAO(em, new Locale(user.getLanguage()));
+        userManager.checkWorkspaceReadAccess(workspaceId);
         return documentBaselineDAO.findBaselines(workspaceId);
     }
 
@@ -77,21 +82,21 @@ public class DocumentBaselineManagerBean implements IDocumentBaselineManagerLoca
     public void deleteBaseline(String workspaceId, int baselineId) throws UserNotFoundException, AccessRightException, WorkspaceNotFoundException, BaselineNotFoundException, UserNotActiveException, WorkspaceNotEnabledException {
         User user = userManager.checkWorkspaceWriteAccess(workspaceId);
         DocumentBaseline documentBaseline = getBaselineLight(workspaceId, baselineId);
-        new DocumentBaselineDAO(em, new Locale(user.getLanguage())).deleteBaseline(documentBaseline);
+        documentBaselineDAO.deleteBaseline(documentBaseline);
     }
 
     @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
     @Override
     public DocumentBaseline getBaselineLight(String workspaceId, int baselineId) throws BaselineNotFoundException, UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, WorkspaceNotEnabledException {
         User user = userManager.checkWorkspaceReadAccess(workspaceId);
-        return new DocumentBaselineDAO(em, new Locale(user.getLanguage())).loadBaseline(baselineId);
+        return documentBaselineDAO.loadBaseline(user.getLocale(), baselineId);
     }
 
     @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
     @Override
     public DocumentCollection getACLFilteredDocumentCollection(String workspaceId, int baselineId) throws BaselineNotFoundException, UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, WorkspaceNotEnabledException {
         User user = userManager.checkWorkspaceReadAccess(workspaceId);
-        DocumentBaseline documentBaseline = new DocumentBaselineDAO(em).loadBaseline(baselineId);
+        DocumentBaseline documentBaseline = documentBaselineDAO.loadBaseline(user.getLocale(), baselineId);
         DocumentCollection filteredDocumentCollection = new DocumentCollection();
 
         for (Map.Entry<BaselinedDocumentKey, BaselinedDocument> map : documentBaseline.getDocumentCollection().getBaselinedDocuments().entrySet()) {
@@ -157,7 +162,6 @@ public class DocumentBaselineManagerBean implements IDocumentBaselineManagerLoca
     }
 
     private DocumentIteration filterBaselinedDocument(DocumentBaselineType type, DocumentRevisionKey documentRevisionKey) throws DocumentRevisionNotFoundException {
-        DocumentRevisionDAO documentRevisionDAO = new DocumentRevisionDAO(em);
         DocumentRevision documentRevision = documentRevisionDAO.loadDocR(documentRevisionKey);
 
         if (type.equals(DocumentBaselineType.RELEASED)) {

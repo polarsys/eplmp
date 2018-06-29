@@ -19,24 +19,36 @@ import org.polarsys.eplmp.core.meta.Tag;
 import org.polarsys.eplmp.core.product.*;
 import org.polarsys.eplmp.core.workflow.Workflow;
 
+import javax.ejb.Stateless;
+import javax.inject.Inject;
 import javax.persistence.*;
 import java.util.List;
 import java.util.Locale;
 
+@Stateless(name = "PartRevisionDAO")
 public class PartRevisionDAO {
 
+    public static final String WORKSPACE_ID = "workspaceId";
+    @PersistenceContext
     private EntityManager em;
+
+    @Inject
+    private ACLDAO aclDAO;
+
+    @Inject
+    private ConversionDAO conversionDAO;
+
+    @Inject
+    private SharedEntityDAO sharedEntityDAO;
+
+    @Inject
+    private WorkflowDAO workflowDAO;
+
     private Locale mLocale;
 
-    public PartRevisionDAO(Locale pLocale, EntityManager pEM) {
-        em = pEM;
-        mLocale = pLocale;
-    }
-    public PartRevisionDAO(EntityManager pEM) {
-        em = pEM;
+    public PartRevisionDAO() {
         mLocale = Locale.getDefault();
     }
-
 
     public PartRevision loadPartR(PartRevisionKey pKey) throws PartRevisionNotFoundException {
         PartRevision partR = em.find(PartRevision.class, pKey);
@@ -47,15 +59,20 @@ public class PartRevisionDAO {
         }
     }
 
+    public PartRevision loadPartR(Locale pLocale, PartRevisionKey pKey) throws PartRevisionNotFoundException {
+        mLocale = pLocale;
+        return loadPartR(pKey);
+    }
+
     public void updateRevision(PartRevision pPartR) {
         em.merge(pPartR);
     }
 
     public void removeRevision(PartRevision pPartR) {
-        new SharedEntityDAO(em).deleteSharesForPart(pPartR);
-        new WorkflowDAO(em).removeWorkflowConstraints(pPartR);
+        sharedEntityDAO.deleteSharesForPart(pPartR);
+        workflowDAO.removeWorkflowConstraints(pPartR);
         em.flush();
-        new ConversionDAO(em).removePartRevisionConversions(pPartR);
+        conversionDAO.removePartRevisionConversions(pPartR);
         for(PartIteration partIteration:pPartR.getPartIterations()){
             for(PartUsageLink partUsageLink:partIteration.getComponents()){
                 em.remove(partUsageLink);
@@ -66,20 +83,20 @@ public class PartRevisionDAO {
 
     public List<PartRevision> findAllCheckedOutPartRevisions(String pWorkspaceId) {
         TypedQuery<PartRevision> query = em.createQuery("SELECT DISTINCT p FROM PartRevision p WHERE p.checkOutUser is not null and p.partMaster.workspace.id = :workspaceId", PartRevision.class);
-        query.setParameter("workspaceId", pWorkspaceId);
+        query.setParameter(WORKSPACE_ID, pWorkspaceId);
         return query.getResultList();
     }
 
     public List<PartRevision> findCheckedOutPartRevisionsForUser(String pWorkspaceId, String pUserLogin) {
         TypedQuery<PartRevision> query = em.createQuery("SELECT DISTINCT p FROM PartRevision p WHERE p.checkOutUser is not null and p.partMaster.workspace.id = :workspaceId and p.checkOutUser.login = :userLogin", PartRevision.class);
-        query.setParameter("workspaceId", pWorkspaceId);
+        query.setParameter(WORKSPACE_ID, pWorkspaceId);
         query.setParameter("userLogin", pUserLogin);
         return query.getResultList();
     }
 
     public List<PartRevision> getPartRevisions(String pWorkspaceId, int pStart, int pMaxResults) {
         return em.createNamedQuery("PartRevision.findByWorkspace", PartRevision.class)
-                .setParameter("workspaceId", pWorkspaceId)
+                .setParameter(WORKSPACE_ID, pWorkspaceId)
                 .setFirstResult(pStart)
                 .setMaxResults(pMaxResults)
                 .getResultList();
@@ -87,19 +104,19 @@ public class PartRevisionDAO {
 
     public List<PartRevision> getAllPartRevisions(String pWorkspaceId) {
         return em.createNamedQuery("PartRevision.findByWorkspace", PartRevision.class)
-                .setParameter("workspaceId", pWorkspaceId)
+                .setParameter(WORKSPACE_ID, pWorkspaceId)
                 .getResultList();
     }
 
     public int getTotalNumberOfParts(String pWorkspaceId) {
         return ((Number)em.createNamedQuery("PartRevision.countByWorkspace")
-                .setParameter("workspaceId", pWorkspaceId)
+                .setParameter(WORKSPACE_ID, pWorkspaceId)
                 .getSingleResult()).intValue();
     }
 
     public int getPartRevisionCountFiltered(User caller, String workspaceId) {
         return ((Number) em.createNamedQuery("PartRevision.countByWorkspace.filterACLEntry")
-                .setParameter("workspaceId", workspaceId)
+                .setParameter(WORKSPACE_ID, workspaceId)
                 .setParameter("user", caller)
                 .getSingleResult()).intValue();
     }
@@ -108,12 +125,10 @@ public class PartRevisionDAO {
 
         try {
             if (partR.getWorkflow() != null) {
-                WorkflowDAO workflowDAO = new WorkflowDAO(em);
                 workflowDAO.createWorkflow(partR.getWorkflow());
             }
 
             if (partR.getACL() != null) {
-                ACLDAO aclDAO = new ACLDAO(em);
                 aclDAO.createACL(partR.getACL());
             }
 
@@ -128,13 +143,17 @@ public class PartRevisionDAO {
             //thrown instead of EntityExistsException
             throw new CreationException(mLocale);
         }
+    }
 
+    public void createPartR(Locale pLocale, PartRevision partR) throws PartRevisionAlreadyExistsException, CreationException {
+        mLocale = pLocale;
+        createPartR(partR);
     }
 
 
     public List<PartRevision> findPartsRevisionsWithReferenceOrNameLike(String pWorkspaceId, String reference, int maxResults) {
         return em.createNamedQuery("PartRevision.findByReferenceOrName",PartRevision.class)
-                .setParameter("workspaceId", pWorkspaceId)
+                .setParameter(WORKSPACE_ID, pWorkspaceId)
                 .setParameter("partNumber", "%" + reference + "%")
                 .setParameter("partName", "%" + reference + "%")
                 .setMaxResults(maxResults)
@@ -163,14 +182,14 @@ public class PartRevisionDAO {
 
     public List<PartRevision> findPartsWithAssignedTasksForGivenUser(String pWorkspaceId, String assignedUserLogin) {
         return em.createNamedQuery("PartRevision.findWithAssignedTasksForUser", PartRevision.class)
-                .setParameter("workspaceId", pWorkspaceId)
+                .setParameter(WORKSPACE_ID, pWorkspaceId)
                 .setParameter("login", assignedUserLogin)
                 .getResultList();
     }
 
     public List<PartRevision> findPartsWithOpenedTasksForGivenUser(String pWorkspaceId, String assignedUserLogin) {
         return em.createNamedQuery("PartRevision.findWithOpenedTasksForUser", PartRevision.class)
-                .setParameter("workspaceId", pWorkspaceId)
+                .setParameter(WORKSPACE_ID, pWorkspaceId)
                 .setParameter("login", assignedUserLogin)
                 .getResultList();
     }

@@ -15,28 +15,27 @@ import org.polarsys.eplmp.core.exceptions.PartIterationNotFoundException;
 import org.polarsys.eplmp.core.meta.ListOfValuesKey;
 import org.polarsys.eplmp.core.product.*;
 
+import javax.ejb.Stateless;
+import javax.inject.Inject;
 import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import java.util.List;
 import java.util.Locale;
 
-
-
+@Stateless(name = "PartIterationDAO")
 public class PartIterationDAO {
 
+    @PersistenceContext
     private EntityManager em;
+
+    @Inject
+    private ConversionDAO conversionDAO;
+
     private Locale mLocale;
 
-    public PartIterationDAO(Locale pLocale, EntityManager pEM) {
-        em = pEM;
-        mLocale = pLocale;
-    }
-
-    public PartIterationDAO(EntityManager pEM) {
-        em = pEM;
+    public PartIterationDAO() {
         mLocale = Locale.getDefault();
     }
-
-
 
     public PartIteration loadPartI(PartIterationKey pKey) throws PartIterationNotFoundException {
         PartIteration partI = em.find(PartIteration.class, pKey);
@@ -47,13 +46,17 @@ public class PartIterationDAO {
         }
     }
 
+    public PartIteration loadPartI(Locale pLocale, PartIterationKey pKey) throws PartIterationNotFoundException {
+        mLocale = pLocale;
+        return loadPartI(pKey);
+    }
     
     public void updateIteration(PartIteration pPartI){
         em.merge(pPartI);
     }
 
     public void removeIteration(PartIteration pPartI){
-        new ConversionDAO(em).removePartIterationConversion(pPartI);
+        conversionDAO.removePartIterationConversion(pPartI);
         for(PartUsageLink partUsageLink:pPartI.getComponents()){
             if(!partLinkIsUsedInPreviousIteration(partUsageLink,pPartI)){
                 em.remove(partUsageLink);
@@ -76,9 +79,8 @@ public class PartIterationDAO {
     }
 
     public List<PartIteration> findUsedByAsComponent(PartMaster pPart) {
-        List<PartIteration> usedByParts =  em.createNamedQuery("PartIteration.findUsedByAsComponent", PartIteration.class)
+        return em.createNamedQuery("PartIteration.findUsedByAsComponent", PartIteration.class)
                 .setParameter("partMaster", pPart).getResultList();
-        return usedByParts;
     }
 
     public List<PartIteration> findUsedByAsSubstitute(PartMasterKey pPart) {
@@ -86,9 +88,8 @@ public class PartIterationDAO {
     }
 
     public List<PartIteration> findUsedByAsSubstitute(PartMaster pPart) {
-        List<PartIteration> usedByParts =  em.createNamedQuery("PartIteration.findUsedByAsSubstitute", PartIteration.class)
+        return em.createNamedQuery("PartIteration.findUsedByAsSubstitute", PartIteration.class)
                 .setParameter("partMaster", pPart).getResultList();
-        return usedByParts;
     }
 
 

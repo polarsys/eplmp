@@ -17,22 +17,20 @@ import org.polarsys.eplmp.core.meta.ListOfValuesKey;
 import org.polarsys.eplmp.core.product.PartMasterTemplate;
 import org.polarsys.eplmp.core.product.PartMasterTemplateKey;
 
+import javax.ejb.Stateless;
 import javax.persistence.*;
 import java.util.List;
 import java.util.Locale;
 
+@Stateless(name = "PartMasterTemplateDAO")
 public class PartMasterTemplateDAO {
 
+    @PersistenceContext
     private EntityManager em;
+
     private Locale mLocale;
 
-    public PartMasterTemplateDAO(Locale pLocale, EntityManager pEM) {
-        em = pEM;
-        mLocale = pLocale;
-    }
-
-    public PartMasterTemplateDAO(EntityManager pEM) {
-        em = pEM;
+    public PartMasterTemplateDAO() {
         mLocale = Locale.getDefault();
     }
 
@@ -57,6 +55,11 @@ public class PartMasterTemplateDAO {
         }
     }
 
+    public PartMasterTemplate loadPartMTemplate(Locale pLocale, PartMasterTemplateKey pKey) throws PartMasterTemplateNotFoundException {
+        mLocale = pLocale;
+        return loadPartMTemplate(pKey);
+    }
+
     public void createPartMTemplate(PartMasterTemplate pTemplate) throws PartMasterTemplateAlreadyExistsException, CreationException {
         try {
             //the EntityExistsException is thrown only when flush occurs
@@ -70,6 +73,11 @@ public class PartMasterTemplateDAO {
             //thrown instead of EntityExistsException
             throw new CreationException(mLocale);
         }
+    }
+
+    public void createPartMTemplate(Locale pLocale, PartMasterTemplate pTemplate) throws PartMasterTemplateAlreadyExistsException, CreationException {
+        mLocale = pLocale;
+        createPartMTemplate(pTemplate);
     }
 
     public List<PartMasterTemplate> findAllPartMTemplatesFromLOV(ListOfValuesKey lovKey){

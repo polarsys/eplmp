@@ -17,35 +17,34 @@ import org.polarsys.eplmp.core.exceptions.CreationException;
 import org.polarsys.eplmp.core.exceptions.OrganizationAlreadyExistsException;
 import org.polarsys.eplmp.core.exceptions.OrganizationNotFoundException;
 
-import javax.persistence.EntityExistsException;
-import javax.persistence.EntityManager;
-import javax.persistence.NoResultException;
-import javax.persistence.PersistenceException;
+import javax.ejb.Stateless;
+import javax.persistence.*;
 import java.util.Locale;
 
+@Stateless(name = "OrganizationDAO")
 public class OrganizationDAO {
 
+    @PersistenceContext
     private EntityManager em;
+
     private Locale mLocale;
 
-    public OrganizationDAO(Locale pLocale, EntityManager pEM) {
-        em = pEM;
-        mLocale = pLocale;
-    }
-
-    public OrganizationDAO(EntityManager pEM) {
-        em = pEM;
+    public OrganizationDAO() {
         mLocale = Locale.getDefault();
     }
 
-
-    public Organization findOrganizationOfAccount(Account account) throws OrganizationNotFoundException {
+    public Organization findOrganizationOfAccount(Account pAccount) throws OrganizationNotFoundException {
         try {
             return em.createNamedQuery("Organization.ofAccount", Organization.class)
-                    .setParameter("account", account).getSingleResult();
+                    .setParameter("account", pAccount).getSingleResult();
         } catch (NoResultException ex) {
-            throw new OrganizationNotFoundException(mLocale, account.getLogin());
+            throw new OrganizationNotFoundException(mLocale, pAccount.getLogin());
         }
+    }
+
+    public Organization findOrganizationOfAccount(Locale pLocale, Account pAccount) throws OrganizationNotFoundException {
+        mLocale = pLocale;
+        return findOrganizationOfAccount(pAccount);
     }
 
     public void updateOrganization(Organization pOrganization) {
@@ -69,6 +68,11 @@ public class OrganizationDAO {
         }
     }
 
+    public void createOrganization(Locale pLocale, Organization pOrganization) throws OrganizationAlreadyExistsException, CreationException {
+        mLocale = pLocale;
+        createOrganization(pOrganization);
+    }
+
     public void deleteOrganization(Organization pOrganization) {
         em.remove(pOrganization);
         em.flush();
@@ -83,5 +87,8 @@ public class OrganizationDAO {
         }
     }
 
-
+    public Organization loadOrganization(Locale pLocale, String pName) throws OrganizationNotFoundException {
+        mLocale = pLocale;
+        return loadOrganization(pName);
+    }
 }

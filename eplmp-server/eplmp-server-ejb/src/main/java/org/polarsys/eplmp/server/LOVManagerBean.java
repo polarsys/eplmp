@@ -46,14 +46,27 @@ public class LOVManagerBean implements ILOVManagerLocal {
     private EntityManager em;
 
     @Inject
+    private LOVDAO lovDAO;
+
+    @Inject
+    private DocumentMasterTemplateDAO documentMasterTemplateDAO;
+
+    @Inject
+    private PartIterationDAO partIterationDAO;
+
+    @Inject
+    private PartMasterTemplateDAO partMasterTemplateDAO;
+
+    @Inject
+    private WorkspaceDAO workspaceDAO;
+
+    @Inject
     private IUserManagerLocal userManager;
 
     @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
     @Override
     public List<ListOfValues> findLOVFromWorkspace(String workspaceId) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, WorkspaceNotEnabledException {
-
-        User user = userManager.checkWorkspaceReadAccess(workspaceId);
-        LOVDAO lovDAO = new LOVDAO(new Locale(user.getLanguage()), em);
+        userManager.checkWorkspaceReadAccess(workspaceId);
         return lovDAO.loadLOVList(workspaceId);
     }
 
@@ -61,9 +74,7 @@ public class LOVManagerBean implements ILOVManagerLocal {
     @Override
     public ListOfValues findLov(ListOfValuesKey lovKey) throws ListOfValuesNotFoundException, UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, WorkspaceNotEnabledException {
         User user = userManager.checkWorkspaceReadAccess(lovKey.getWorkspaceId());
-        LOVDAO lovDAO = new LOVDAO(new Locale(user.getLanguage()), em);
-
-        return lovDAO.loadLOV(lovKey);
+        return lovDAO.loadLOV(user.getLocale(), lovKey);
     }
 
     @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
@@ -71,8 +82,6 @@ public class LOVManagerBean implements ILOVManagerLocal {
     public void createLov(String workspaceId, String name, List<NameValuePair> nameValuePairList) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, AccessRightException, ListOfValuesAlreadyExistsException, CreationException, WorkspaceNotEnabledException {
         User user = userManager.checkWorkspaceReadAccess(workspaceId);
         userManager.checkWorkspaceWriteAccess(workspaceId);
-        Locale locale = new Locale(user.getLanguage());
-        LOVDAO lovDAO = new LOVDAO(locale, em);
 
         if (name == null || name.trim().isEmpty()) {
             throw new CreationException("LOVNameEmptyException");
@@ -82,13 +91,13 @@ public class LOVManagerBean implements ILOVManagerLocal {
             throw new CreationException("LOVPossibleValueException");
         }
 
-        WorkspaceDAO workspaceDAO = new WorkspaceDAO(locale, em);
-        Workspace workspace = workspaceDAO.loadWorkspace(workspaceId);
+        Locale userLocale = user.getLocale();
+        Workspace workspace = workspaceDAO.loadWorkspace(userLocale, workspaceId);
 
         ListOfValues lov = new ListOfValues(workspace, name);
         lov.setValues(nameValuePairList);
 
-        lovDAO.createLOV(lov);
+        lovDAO.createLOV(userLocale, lov);
     }
 
     @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
@@ -96,32 +105,27 @@ public class LOVManagerBean implements ILOVManagerLocal {
     public void deleteLov(ListOfValuesKey lovKey) throws ListOfValuesNotFoundException, UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, AccessRightException, EntityConstraintException, WorkspaceNotEnabledException {
         User user = userManager.checkWorkspaceReadAccess(lovKey.getWorkspaceId());
         userManager.checkWorkspaceWriteAccess(lovKey.getWorkspaceId());
-        Locale locale = new Locale(user.getLanguage());
-        LOVDAO lovDAO = new LOVDAO(locale, em);
+        Locale userLocale = user.getLocale();
 
         if (isLovUsedInDocumentMasterTemplate(lovKey)) {
-            throw new EntityConstraintException(locale, "EntityConstraintException14");
+            throw new EntityConstraintException(userLocale, "EntityConstraintException14");
         }
 
         if (isLovUsedInPartMasterTemplate(lovKey)) {
-            throw new EntityConstraintException(locale, "EntityConstraintException15");
+            throw new EntityConstraintException(userLocale, "EntityConstraintException15");
         }
 
-        ListOfValues lov = lovDAO.loadLOV(lovKey);
+        ListOfValues lov = lovDAO.loadLOV(userLocale, lovKey);
         lovDAO.deleteLOV(lov);
     }
 
     @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
     @Override
     public ListOfValues updateLov(ListOfValuesKey lovKey, String name, String workspaceId, List<NameValuePair> nameValuePairList) throws ListOfValuesAlreadyExistsException, CreationException, ListOfValuesNotFoundException, UserNotFoundException, WorkspaceNotFoundException, UserNotActiveException, AccessRightException, WorkspaceNotEnabledException {
-        User user = userManager.checkWorkspaceReadAccess(lovKey.getWorkspaceId());
+        userManager.checkWorkspaceReadAccess(lovKey.getWorkspaceId());
         userManager.checkWorkspaceWriteAccess(lovKey.getWorkspaceId());
-        LOVDAO lovDAO = new LOVDAO(new Locale(user.getLanguage()), em);
-
         ListOfValues lovToUpdate = findLov(lovKey);
-
         lovToUpdate.setValues(nameValuePairList);
-
         return lovDAO.updateLOV(lovToUpdate);
     }
 
@@ -132,19 +136,16 @@ public class LOVManagerBean implements ILOVManagerLocal {
     }
 
     private boolean isLovUsedInDocumentMasterTemplate(ListOfValuesKey lovKey) {
-        DocumentMasterTemplateDAO documentMasterTemplateDAO = new DocumentMasterTemplateDAO(em);
         List<DocumentMasterTemplate> documentsUsingLOV = documentMasterTemplateDAO.findAllDocMTemplatesFromLOV(lovKey);
         return documentsUsingLOV != null && !documentsUsingLOV.isEmpty();
     }
 
     private boolean isLovUsedInPartMasterTemplate(ListOfValuesKey lovKey) {
-        PartMasterTemplateDAO partMasterTemplateDAO = new PartMasterTemplateDAO(em);
         List<PartMasterTemplate> partsUsingLOV = partMasterTemplateDAO.findAllPartMTemplatesFromLOV(lovKey);
         return partsUsingLOV != null && !partsUsingLOV.isEmpty();
     }
 
     private boolean isLovUsedInPartIterationInstanceAttributeTemplates(ListOfValuesKey lovKey) {
-        PartIterationDAO partIterationDAO = new PartIterationDAO(em);
         List<PartIteration> partsUsingLOV = partIterationDAO.findAllPartIterationFromLOV(lovKey);
         return partsUsingLOV != null && !partsUsingLOV.isEmpty();
     }

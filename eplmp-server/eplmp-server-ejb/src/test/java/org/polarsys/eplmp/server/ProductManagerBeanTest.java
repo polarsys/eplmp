@@ -53,6 +53,10 @@ public class ProductManagerBeanTest {
     @Mock
     private EntityManager em;
     @Mock
+    private PartUsageLinkDAO partUsageLinkDAO;
+    @Mock
+    private PathToPathLinkDAO pathToPathLinkDAO;
+    @Mock
     private IUserManagerLocal userManager;
     @Mock
     private IContextManagerLocal contextManager;
@@ -72,12 +76,6 @@ public class ProductManagerBeanTest {
 
     @Mock
     private TypedQuery<ConfigurationItem> configurationItemTypedQuery;
-
-    @Spy
-    private PathToPathLinkDAO pathToPathLinkDAO = new PathToPathLinkDAO(Locale.getDefault(),em);
-
-    @Spy
-    private PartUsageLinkDAO partUsageLinkDAO = new PartUsageLinkDAO(Locale.getDefault(),em);
 
     @Rule
     public ExpectedException thrown = ExpectedException.none();

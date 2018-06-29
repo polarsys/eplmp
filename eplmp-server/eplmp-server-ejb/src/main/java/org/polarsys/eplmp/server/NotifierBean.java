@@ -594,9 +594,9 @@ public class NotifierBean implements INotifierLocal {
 
     // User in workspace message
     private void sendMessage(User user, String subjectKey, String contentKey, Object[] contentArgs) throws MessagingException {
-        Locale locale = new Locale(user.getLanguage());
-        String subject = getSubject(subjectKey, locale);
-        String content = format(contentKey, contentArgs, locale);
+        Locale userLocale = user.getLocale();
+        String subject = getSubject(subjectKey, userLocale);
+        String content = format(contentKey, contentArgs, userLocale);
         String name = user.getName();
         String login = user.getLogin();
         String email = user.getEmail();
@@ -611,7 +611,7 @@ public class NotifierBean implements INotifierLocal {
         }
 
         if (workspaceBackOptions.isSendEmails()) {
-            sendEmail(email, name, subject, getHTMLBody(content, locale));
+            sendEmail(email, name, subject, getHTMLBody(content, userLocale));
         }
 
         List<Webhook> activeWebHooks;
