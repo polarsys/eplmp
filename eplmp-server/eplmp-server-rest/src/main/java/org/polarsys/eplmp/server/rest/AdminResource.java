@@ -1,13 +1,13 @@
 /*******************************************************************************
- * Copyright (c) 2017 DocDoku.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
- *
- * Contributors:
- *    DocDoku - initial API and implementation
- *******************************************************************************/
+  * Copyright (c) 2017 DocDoku.
+  * All rights reserved. This program and the accompanying materials
+  * are made available under the terms of the Eclipse Public License v1.0
+  * which accompanies this distribution, and is available at
+  * http://www.eclipse.org/legal/epl-v10.html
+  *
+  * Contributors:
+  *    DocDoku - initial API and implementation
+  *******************************************************************************/
 
 package org.polarsys.eplmp.server.rest;
 
@@ -224,7 +224,7 @@ public class AdminResource implements Serializable {
 
 
     @PUT
-    @ApiOperation(value = "Synchronize index for workspace",
+    @ApiOperation(value = "Synchronize index for given workspace",
             response = Response.class)
     @ApiResponses(value = {
             @ApiResponse(code = 202, message = "Accepted delete operation (asynchronous method)"),
@@ -325,7 +325,7 @@ public class AdminResource implements Serializable {
 
     @GET
     @Path("accounts")
-    @ApiOperation(value = "Get accounts ",
+    @ApiOperation(value = "Get all registered accounts",
             response = AccountDTO.class,
             responseContainer = "List")
     @ApiResponses(value = {
@@ -414,7 +414,7 @@ public class AdminResource implements Serializable {
             @ApiResponse(code = 401, message = "Unauthorized"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
-    @ApiOperation(value = "Create provider",
+    @ApiOperation(value = "Create a new OAuth provider",
             response = OAuthProviderDTO.class)
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
@@ -435,7 +435,7 @@ public class AdminResource implements Serializable {
             @ApiResponse(code = 401, message = "Unauthorized"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
-    @ApiOperation(value = "Update provider",
+    @ApiOperation(value = "Update OAuth provider",
             response = OAuthProviderDTO.class)
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
@@ -458,7 +458,7 @@ public class AdminResource implements Serializable {
             @ApiResponse(code = 401, message = "Unauthorized"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
-    @ApiOperation(value = "Remove provider",
+    @ApiOperation(value = "Delete OAuth provider",
             response = Response.class)
     @Produces(MediaType.APPLICATION_JSON)
     public Response removeProvider(

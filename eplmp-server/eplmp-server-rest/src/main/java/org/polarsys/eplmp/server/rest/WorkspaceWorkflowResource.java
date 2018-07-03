@@ -56,7 +56,7 @@ public class WorkspaceWorkflowResource {
     }
 
     @GET
-    @ApiOperation(value = "Get workspace workflow list",
+    @ApiOperation(value = "Get workspace workflow list in given workspace",
             response = WorkspaceWorkflowDTO.class,
             responseContainer = "List")
     @ApiResponses(value = {
@@ -82,7 +82,7 @@ public class WorkspaceWorkflowResource {
     }
 
     @GET
-    @ApiOperation(value = "Get workspace workflow",
+    @ApiOperation(value = "Get a workspace workflow by id",
             response = WorkspaceWorkflowDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of WorkspaceWorkflowDTO"),
@@ -103,7 +103,7 @@ public class WorkspaceWorkflowResource {
 
 
     @POST
-    @ApiOperation(value = "Instantiate workspace workflow from workflow model",
+    @ApiOperation(value = "Instantiate a workspace workflow from given workflow model",
             response = WorkspaceWorkflowDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of WorkspaceWorkflowDTO"),
@@ -136,7 +136,7 @@ public class WorkspaceWorkflowResource {
 
     @DELETE
     @Path("{workspaceWorkflowId}")
-    @ApiOperation(value = "Delete a workspace workflow ",
+    @ApiOperation(value = "Delete a workspace workflow",
             response = Response.class)
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful deletion operation"),

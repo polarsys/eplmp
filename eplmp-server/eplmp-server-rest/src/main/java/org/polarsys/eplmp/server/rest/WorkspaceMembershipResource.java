@@ -84,7 +84,7 @@ public class WorkspaceMembershipResource {
     }
 
     @GET
-    @ApiOperation(value = "Get workspace's user membership for current user",
+    @ApiOperation(value = "Get workspace's user membership for authenticated user",
             response = WorkspaceUserMemberShipDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of WorkspaceUserMemberShipDTO"),
@@ -101,7 +101,7 @@ public class WorkspaceMembershipResource {
     }
 
     @GET
-    @ApiOperation(value = "Get workspace's group membership for current user",
+    @ApiOperation(value = "Get workspace's group membership for authenticated user",
             response = WorkspaceUserGroupMemberShipDTO.class,
             responseContainer = "List")
     @ApiResponses(value = {
@@ -124,7 +124,7 @@ public class WorkspaceMembershipResource {
     }
 
     @GET
-    @ApiOperation(value = "Get workspace's group membership for current user",
+    @ApiOperation(value = "Get workspace's group membership for authenticated user",
             response = WorkspaceUserGroupMemberShipDTO.class,
             responseContainer = "List")
     @ApiResponses(value = {

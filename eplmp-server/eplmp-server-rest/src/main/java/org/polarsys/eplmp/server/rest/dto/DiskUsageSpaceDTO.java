@@ -21,7 +21,7 @@ import java.io.Serializable;
  * @author Morgan Guimard
  */
 @XmlRootElement
-@ApiModel(value="DiskUsageSpaceDTO", description="This class provides storage information")
+@ApiModel(value = "DiskUsageSpaceDTO", description = "This class provides storage information for a given workspace or for the entire platform")
 public class DiskUsageSpaceDTO implements Serializable {
 
     @ApiModelProperty(value = "Storage size for document files")

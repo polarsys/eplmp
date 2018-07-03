@@ -68,7 +68,7 @@ public class UserGroupResource {
 
 
     @GET
-    @ApiOperation(value = "Get groups",
+    @ApiOperation(value = "Get user groups in given workspace",
             response = UserGroupDTO.class,
             responseContainer = "List")
     @ApiResponses(value = {
@@ -91,7 +91,7 @@ public class UserGroupResource {
     }
 
     @GET
-    @ApiOperation(value = "Get tag subscriptions of group",
+    @ApiOperation(value = "Get tag subscriptions of given user group",
             response = TagSubscriptionDTO.class,
             responseContainer = "List")
     @ApiResponses(value = {
@@ -117,7 +117,7 @@ public class UserGroupResource {
     }
 
     @GET
-    @ApiOperation(value = "Get users of group",
+    @ApiOperation(value = "Get users of given user group",
             response = UserDTO.class,
             responseContainer = "List")
     @ApiResponses(value = {
@@ -146,7 +146,7 @@ public class UserGroupResource {
 
 
     @PUT
-    @ApiOperation(value = "Update or create tag subscription of group",
+    @ApiOperation(value = "Update or create tag subscription of given user group",
             response = TagSubscriptionDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 201, message = "Successful retrieval of TagSubscriptionDTO"),
@@ -178,7 +178,7 @@ public class UserGroupResource {
     }
 
     @DELETE
-    @ApiOperation(value = "Delete tag subscription of group",
+    @ApiOperation(value = "Delete tag subscription of given user group",
             response = Response.class)
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful deletion of TagSubscriptionDTO"),

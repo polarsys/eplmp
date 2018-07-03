@@ -59,7 +59,7 @@ public class ChangeIssuesResource {
     }
 
     @GET
-    @ApiOperation(value = "Get issues for given parameters",
+    @ApiOperation(value = "Get change issues for given parameters",
             response = ChangeIssueDTO.class,
             responseContainer = "List")
     @ApiResponses(value = {
@@ -83,7 +83,7 @@ public class ChangeIssuesResource {
     }
 
     @POST
-    @ApiOperation(value = "Create issue",
+    @ApiOperation(value = "Create a new change issue",
             response = ChangeIssueDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of created ChangeIssueDTO"),
@@ -109,7 +109,7 @@ public class ChangeIssuesResource {
     }
 
     @GET
-    @ApiOperation(value = "Search issue with given reference",
+    @ApiOperation(value = "Search change issue with given name",
             response = ChangeIssueDTO.class,
             responseContainer = "List")
     @ApiResponses(value = {
@@ -119,12 +119,12 @@ public class ChangeIssuesResource {
     })
     @Path("link")
     @Produces(MediaType.APPLICATION_JSON)
-    public ChangeIssueDTO[] searchIssuesToLink(
+    public ChangeIssueDTO[] searchIssuesByName(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
-            @ApiParam(required = true, value = "Query") @QueryParam("q") String q)
+            @ApiParam(required = true, value = "Query") @QueryParam("q") String name)
             throws EntityNotFoundException, UserNotActiveException {
         int maxResults = 8;
-        List<ChangeIssue> issues = changeManager.getIssuesWithReference(workspaceId, q, maxResults);
+        List<ChangeIssue> issues = changeManager.getIssuesWithName(workspaceId, name, maxResults);
         List<ChangeIssueDTO> issueDTOs = new ArrayList<>();
         for (ChangeIssue issue : issues) {
             ChangeIssueDTO changeIssueDTO = mapper.map(issue, ChangeIssueDTO.class);
@@ -135,7 +135,7 @@ public class ChangeIssuesResource {
     }
 
     @GET
-    @ApiOperation(value = "Get one issue",
+    @ApiOperation(value = "Get change issue with given id",
             response = ChangeIssueDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of ChangeIssueDTO"),
@@ -155,7 +155,7 @@ public class ChangeIssuesResource {
     }
 
     @PUT
-    @ApiOperation(value = "Update issue",
+    @ApiOperation(value = "Update change issue",
             response = ChangeIssueDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of updated ChangeIssueDTO"),
@@ -182,7 +182,7 @@ public class ChangeIssuesResource {
     }
 
     @DELETE
-    @ApiOperation(value = "Delete issue",
+    @ApiOperation(value = "Delete change issue",
             response = ChangeIssueDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful deletion"),
@@ -200,7 +200,7 @@ public class ChangeIssuesResource {
     }
 
     @PUT
-    @ApiOperation(value = "Update tags attached to an issue",
+    @ApiOperation(value = "Update tags attached to a change issue",
             response = ChangeIssueDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of updated ChangeIssueDTO"),
@@ -229,7 +229,7 @@ public class ChangeIssuesResource {
     }
 
     @POST
-    @ApiOperation(value = "Attached a new tag to an issue",
+    @ApiOperation(value = "Attached a new tag to a change issue",
             response = ChangeIssueDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of updated ChangeIssueDTO"),
@@ -263,7 +263,7 @@ public class ChangeIssuesResource {
     }
 
     @DELETE
-    @ApiOperation(value = "Delete a tag attached to an issue",
+    @ApiOperation(value = "Delete a tag attached to a change issue",
             response = ChangeIssueDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful retrieval of updated ChangeIssueDTO"),
@@ -281,7 +281,7 @@ public class ChangeIssuesResource {
     }
 
     @PUT
-    @ApiOperation(value = "Attach a document to an issue",
+    @ApiOperation(value = "Attach a document to a change issue",
             response = ChangeIssueDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of updated ChangeIssueDTO"),
@@ -307,7 +307,7 @@ public class ChangeIssuesResource {
     }
 
     @PUT
-    @ApiOperation(value = "Attach a part to an issue",
+    @ApiOperation(value = "Attach a part to a change issue",
             response = ChangeIssueDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of updated ChangeIssueDTO"),
@@ -333,7 +333,7 @@ public class ChangeIssuesResource {
     }
 
     @PUT
-    @ApiOperation(value = "Update ACL of an issue",
+    @ApiOperation(value = "Update ACL of a change issue",
             response = ChangeIssueDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of updated ChangeIssueDTO"),

@@ -1,13 +1,13 @@
 /*******************************************************************************
- * Copyright (c) 2017 DocDoku.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
- *
- * Contributors:
- *    DocDoku - initial API and implementation
- *******************************************************************************/
+  * Copyright (c) 2017 DocDoku.
+  * All rights reserved. This program and the accompanying materials
+  * are made available under the terms of the Eclipse Public License v1.0
+  * which accompanies this distribution, and is available at
+  * http://www.eclipse.org/legal/epl-v10.html
+  *
+  * Contributors:
+  *    DocDoku - initial API and implementation
+  *******************************************************************************/
 package org.polarsys.eplmp.server.rest.file;
 
 import io.swagger.annotations.*;
@@ -181,7 +181,7 @@ public class PartBinaryResource {
     }
 
     @GET
-    @ApiOperation(value = "Download part file",
+    @ApiOperation(value = "Download part file without a sub type",
             response = File.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Download success"),
@@ -210,7 +210,7 @@ public class PartBinaryResource {
     }
 
     @GET
-    @ApiOperation(value = "Download part file",
+    @ApiOperation(value = "Download part file with a sub type",
             response = File.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Download success"),

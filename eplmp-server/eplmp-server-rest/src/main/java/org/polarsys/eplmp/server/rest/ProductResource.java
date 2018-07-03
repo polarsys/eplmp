@@ -1,15 +1,18 @@
 /*******************************************************************************
-  * Copyright (c) 2017 DocDoku.
-  * All rights reserved. This program and the accompanying materials
-  * are made available under the terms of the Eclipse Public License v1.0
-  * which accompanies this distribution, and is available at
-  * http://www.eclipse.org/legal/epl-v10.html
-  *
-  * Contributors:
-  *    DocDoku - initial API and implementation
-  *******************************************************************************/
+ * Copyright (c) 2017 DocDoku.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ * <p>
+ * Contributors:
+ * DocDoku - initial API and implementation
+ *******************************************************************************/
 package org.polarsys.eplmp.server.rest;
 
+import io.swagger.annotations.*;
+import org.dozer.DozerBeanMapperSingletonWrapper;
+import org.dozer.Mapper;
 import org.polarsys.eplmp.core.change.ModificationNotification;
 import org.polarsys.eplmp.core.common.BinaryResource;
 import org.polarsys.eplmp.core.common.User;
@@ -32,9 +35,6 @@ import org.polarsys.eplmp.server.rest.dto.baseline.PathChoiceDTO;
 import org.polarsys.eplmp.server.rest.interceptors.Compress;
 import org.polarsys.eplmp.server.rest.util.FileDownloadTools;
 import org.polarsys.eplmp.server.rest.util.ProductFileExport;
-import io.swagger.annotations.*;
-import org.dozer.DozerBeanMapperSingletonWrapper;
-import org.dozer.Mapper;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.security.DeclareRoles;
@@ -88,7 +88,7 @@ public class ProductResource {
     }
 
     @GET
-    @ApiOperation(value = "Get configuration items",
+    @ApiOperation(value = "Get configuration items in given workspace",
             response = ConfigurationItemDTO.class,
             responseContainer = "List")
     @ApiResponses(value = {
@@ -117,7 +117,7 @@ public class ProductResource {
     }
 
     @GET
-    @ApiOperation(value = "Search configuration items",
+    @ApiOperation(value = "Search configuration items by reference",
             response = ConfigurationItemDTO.class,
             responseContainer = "List")
     @Path("numbers")
@@ -140,7 +140,7 @@ public class ProductResource {
     }
 
     @POST
-    @ApiOperation(value = "Create configuration item",
+    @ApiOperation(value = "Create a new configuration item",
             response = ConfigurationItemDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 201, message = "Successful retrieval of ConfigurationItemDTO"),
@@ -169,7 +169,7 @@ public class ProductResource {
 
 
     @GET
-    @ApiOperation(value = "Filter part",
+    @ApiOperation(value = "Filter part with given config spec and path",
             response = PartRevisionDTO.class,
             responseContainer = "List")
     @ApiResponses(value = {
@@ -182,9 +182,9 @@ public class ProductResource {
     public PartRevisionDTO[] filterPart(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Configuration item id") @PathParam("ciId") String ciId,
-            @ApiParam(required = false, value = "Config spec") @QueryParam("configSpec") String configSpecType,
+            @ApiParam(required = false, value = "Config spec", defaultValue = "wip") @QueryParam("configSpec") String configSpecType,
             @ApiParam(required = false, value = "Complete path of part") @QueryParam("path") String path,
-            @ApiParam(required = false, value = "Discover substitute links") @QueryParam("diverge") boolean diverge)
+            @ApiParam(required = false, value = "Discover substitute links", defaultValue = "false") @QueryParam("diverge") boolean diverge)
             throws EntityNotFoundException, UserNotActiveException, AccessRightException, NotAllowedException,
             EntityConstraintException {
 
@@ -268,7 +268,7 @@ public class ProductResource {
     }
 
     @GET
-    @ApiOperation(value = "Get configuration item",
+    @ApiOperation(value = "Get configuration item by id",
             response = ConfigurationItemDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of ConfigurationItemDTO"),
@@ -313,7 +313,7 @@ public class ProductResource {
     }
 
     @GET
-    @ApiOperation(value = "Search paths",
+    @ApiOperation(value = "Search paths with part reference or name",
             response = PathDTO.class,
             responseContainer = "List")
     @ApiResponses(value = {
@@ -441,7 +441,7 @@ public class ProductResource {
 
 
     @GET
-    @ApiOperation(value = "Get instances under given path, and config spec",
+    @ApiOperation(value = "Get instances under given path and config spec",
             response = LeafDTO.class,
             responseContainer = "List")
     @ApiResponses(value = {
@@ -559,7 +559,7 @@ public class ProductResource {
 
     // TODO : set the appropriate response class for generated API usage
     @GET
-    @ApiOperation(value = "Export files",
+    @ApiOperation(value = "Export files from configuration item with given config spec",
             response = Response.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful export"),
@@ -628,7 +628,7 @@ public class ProductResource {
     }
 
     @POST
-    @ApiOperation(value = "Create path to path link",
+    @ApiOperation(value = "Create a new path-to-path link",
             response = LightPathToPathLinkDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of created LightPathToPathLinkDTO"),
@@ -652,7 +652,7 @@ public class ProductResource {
     }
 
     @PUT
-    @ApiOperation(value = "Update path to path link",
+    @ApiOperation(value = "Update path-to-path link",
             response = LightPathToPathLinkDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of updated LightPathToPathLinkDTO"),
@@ -678,7 +678,7 @@ public class ProductResource {
     }
 
     @DELETE
-    @ApiOperation(value = "Delete path to path link",
+    @ApiOperation(value = "Delete path-to-path link",
             response = Response.class)
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful deletion of PathToPathLink"),
@@ -699,7 +699,7 @@ public class ProductResource {
     }
 
     @GET
-    @ApiOperation(value = "Get path to path links from source and target",
+    @ApiOperation(value = "Get path-to-path links from source and target",
             response = PathToPathLinkDTO.class,
             responseContainer = "List")
     @ApiResponses(value = {
@@ -749,7 +749,7 @@ public class ProductResource {
     }
 
     @GET
-    @ApiOperation(value = "Get path to path links types",
+    @ApiOperation(value = "Get path-to-path links types",
             response = LightPathToPathLinkDTO.class,
             responseContainer = "List")
     @ApiResponses(value = {
@@ -778,7 +778,7 @@ public class ProductResource {
     }
 
     @GET
-    @ApiOperation(value = "Decode string path",
+    @ApiOperation(value = "Decode given path as string",
             response = LightPartLinkDTO.class,
             responseContainer = "List")
     @ApiResponses(value = {
@@ -808,7 +808,7 @@ public class ProductResource {
     }
 
     @GET
-    @ApiOperation(value = "Get document links for given part operation",
+    @ApiOperation(value = "Get document links for given part iteration",
             response = DocumentIterationLinkDTO.class,
             responseContainer = "List")
     @ApiResponses(value = {
@@ -854,7 +854,7 @@ public class ProductResource {
     }
 
     @PUT
-    @ApiOperation(value = "Cascade check out",
+    @ApiOperation(value = "Cascade part revision check out with given config spec and path",
             response = CascadeResult.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of CascadeResult"),
@@ -878,7 +878,7 @@ public class ProductResource {
     }
 
     @PUT
-    @ApiOperation(value = "Cascade check in",
+    @ApiOperation(value = "Cascade part revision check in with given config spec and path",
             response = CascadeResult.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of CascadeResult"),
@@ -904,7 +904,7 @@ public class ProductResource {
     }
 
     @PUT
-    @ApiOperation(value = "Cascade undo check out",
+    @ApiOperation(value = "Cascade part revision undo check out with given config spec and path",
             response = CascadeResult.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of CascadeResult"),

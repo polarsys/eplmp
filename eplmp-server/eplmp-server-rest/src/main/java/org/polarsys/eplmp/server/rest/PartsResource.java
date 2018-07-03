@@ -1,13 +1,13 @@
 /*******************************************************************************
- * Copyright (c) 2017 DocDoku.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
- *
- * Contributors:
- *    DocDoku - initial API and implementation
- *******************************************************************************/
+  * Copyright (c) 2017 DocDoku.
+  * All rights reserved. This program and the accompanying materials
+  * are made available under the terms of the Eclipse Public License v1.0
+  * which accompanies this distribution, and is available at
+  * http://www.eclipse.org/legal/epl-v10.html
+  *
+  * Contributors:
+  *    DocDoku - initial API and implementation
+  *******************************************************************************/
 
 package org.polarsys.eplmp.server.rest;
 
@@ -100,7 +100,7 @@ public class PartsResource {
     }
 
     @GET
-    @ApiOperation(value = "Get part revisions",
+    @ApiOperation(value = "Get part revisions in workspace",
             response = PartRevisionDTO.class,
             responseContainer = "List")
     @ApiResponses(value = {
@@ -114,7 +114,7 @@ public class PartsResource {
             @ApiParam(required = false, value = "Start offset", defaultValue = "0") @QueryParam("start") int start,
             @ApiParam(required = false, value = "Max results", defaultValue = "20") @QueryParam("length") int length)
             throws EntityNotFoundException, AccessRightException, UserNotActiveException {
-
+        // potential OOM => should restrict length
         List<PartRevision> partRevisions = productService.getPartRevisions(Tools.stripTrailingSlash(workspaceId), start, length);
         List<PartRevisionDTO> partRevisionDTOs = new ArrayList<>();
 
@@ -131,7 +131,7 @@ public class PartsResource {
     }
 
     @GET
-    @ApiOperation(value = "Count part revisions",
+    @ApiOperation(value = "Count part revisions in workspace",
             response = CountDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of PartRevisionDTO count"),
@@ -148,7 +148,7 @@ public class PartsResource {
     }
 
     @GET
-    @ApiOperation(value = "Get part revisions",
+    @ApiOperation(value = "Get part revisions in workspace",
             response = PartRevisionDTO.class,
             responseContainer = "List")
     @ApiResponses(value = {
@@ -179,7 +179,7 @@ public class PartsResource {
     }
 
     @GET
-    @ApiOperation(value = "Search part revisions",
+    @ApiOperation(value = "Search part revisions in workspace",
             response = PartRevisionDTO.class,
             responseContainer = "List")
     @ApiResponses(value = {
@@ -232,7 +232,7 @@ public class PartsResource {
     }
 
     @GET
-    @ApiOperation(value = "Get custom queries",
+    @ApiOperation(value = "Get custom queries in workspace",
             response = QueryDTO.class,
             responseContainer = "List")
     @ApiResponses(value = {
@@ -258,7 +258,7 @@ public class PartsResource {
     }
 
     @POST
-    @ApiOperation(value = "Run custom queries",
+    @ApiOperation(value = "Run custom query in workspace",
             response = String.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of QueryDTOs. It can be an empty list."),
@@ -289,7 +289,7 @@ public class PartsResource {
 
 
     @GET
-    @ApiOperation(value = "Filter part master with config spec",
+    @ApiOperation(value = "Filter part master with in baseline : resolve part iteration",
             response = PartIterationDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of PartIterationDTO"),
@@ -317,7 +317,7 @@ public class PartsResource {
 
     @GET
     @Path("{partNumber}/latest-revision")
-    @ApiOperation(value = "Get part latest revision",
+    @ApiOperation(value = "Get part master latest available revision",
             response = PartRevisionDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of PartRevisionDTO"),
@@ -345,7 +345,7 @@ public class PartsResource {
 
     // TODO : set the right response class, and use it from generated API
     @POST
-    @ApiOperation(value = "Export custom query",
+    @ApiOperation(value = "Run and export a custom query",
             response = Response.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of PartIterationDTO"),
@@ -372,7 +372,7 @@ public class PartsResource {
 
     // TODO : set the right response class, and use it from generated API
     @GET
-    @ApiOperation(value = "Export existing query",
+    @ApiOperation(value = "Run and export an existing query",
             response = Response.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful export"),
@@ -465,7 +465,7 @@ public class PartsResource {
     }
 
     @GET
-    @ApiOperation(value = "Search part numbers",
+    @ApiOperation(value = "Search for available part numbers in given workspace",
             response = LightPartMasterDTO.class,
             responseContainer = "List")
     @ApiResponses(value = {
@@ -494,7 +494,7 @@ public class PartsResource {
 
 
     @POST
-    @ApiOperation(value = "Create new part",
+    @ApiOperation(value = "Create a new part master and its first revision",
             response = PartRevisionDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of PartRevisionDTO"),
@@ -540,7 +540,7 @@ public class PartsResource {
     })
     @Path("parts_last_iter")
     @Produces(MediaType.APPLICATION_JSON)
-    public PartIterationDTO[] searchPartsLastIterationToLink(
+    public PartIterationDTO[] searchPartsLastIterationWithReferenceOrName(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Query") @QueryParam("q") String q,
             @ApiParam(required = false, value = "Max results", defaultValue = "15") @QueryParam("l") int limit)
@@ -561,7 +561,7 @@ public class PartsResource {
     }
 
     @POST
-    @ApiOperation(value = "Import part attributes from file",
+    @ApiOperation(value = "Import part iteration attributes from file",
             response = Response.class)
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful import"),
@@ -609,7 +609,7 @@ public class PartsResource {
     }
 
     @GET
-    @ApiOperation(value = "Get current imports",
+    @ApiOperation(value = "Get imports currently running for given file",
             response = ImportDTO.class,
             responseContainer = "List")
     @ApiResponses(value = {
@@ -637,7 +637,7 @@ public class PartsResource {
     }
 
     @GET
-    @ApiOperation(value = "Get import",
+    @ApiOperation(value = "Get import by id",
             response = ImportDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of ImportDTO"),

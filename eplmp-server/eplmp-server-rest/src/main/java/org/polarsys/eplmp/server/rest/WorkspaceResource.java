@@ -204,7 +204,7 @@ public class WorkspaceResource {
     }
 
     @GET
-    @ApiOperation(value = "Get online users visible by current user",
+    @ApiOperation(value = "Get online users visible by authenticated user",
             response = UserDTO.class,
             responseContainer = "List")
     @ApiResponses(value = {
@@ -228,7 +228,7 @@ public class WorkspaceResource {
     }
 
     @PUT
-    @ApiOperation(value = "Update workspace",
+    @ApiOperation(value = "Update a workspace",
             response = WorkspaceDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of updated WorkspaceDTO"),
@@ -249,7 +249,7 @@ public class WorkspaceResource {
 
     @PUT
     @Path("/{workspaceId}/index")
-    @ApiOperation(value = "Index the workspace",
+    @ApiOperation(value = "Re-Index a workspace",
             response = Response.class)
     @ApiResponses(value = {
             @ApiResponse(code = 202, message = "Accepted indexation (asynchronous method)"),
@@ -266,7 +266,7 @@ public class WorkspaceResource {
     }
 
     @DELETE
-    @ApiOperation(value = "Delete workspace",
+    @ApiOperation(value = "Delete a workspace",
             response = Response.class)
     @ApiResponses(value = {
             @ApiResponse(code = 202, message = "Accepted deletion (asynchronous method)"),
@@ -281,7 +281,7 @@ public class WorkspaceResource {
     }
 
     @GET
-    @ApiOperation(value = "Get user groups",
+    @ApiOperation(value = "Get user groups in given workspace",
             response = UserGroupDTO.class,
             responseContainer = "List")
     @ApiResponses(value = {
@@ -305,7 +305,7 @@ public class WorkspaceResource {
     }
 
     @POST
-    @ApiOperation(value = "Create user group",
+    @ApiOperation(value = "Create a new user group",
             response = UserGroupDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of created UserGroupDTO"),
@@ -326,7 +326,7 @@ public class WorkspaceResource {
     }
 
     @DELETE
-    @ApiOperation(value = "Remove user group",
+    @ApiOperation(value = "Remove a user group",
             response = UserGroupDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful removal of user from UserGroupDTO"),
@@ -346,7 +346,7 @@ public class WorkspaceResource {
     }
 
     @PUT
-    @ApiOperation(value = "Add user to workspace",
+    @ApiOperation(value = "Add a user to workspace",
             response = Response.class)
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful addition of user in UserGroupDTO"),
@@ -375,7 +375,7 @@ public class WorkspaceResource {
     }
 
     @PUT
-    @ApiOperation(value = "Set a new admin",
+    @ApiOperation(value = "Set a new admin for given workspace",
             response = WorkspaceDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of updated Workspace"),
@@ -395,7 +395,7 @@ public class WorkspaceResource {
     }
 
     @POST
-    @ApiOperation(value = "Create workspace",
+    @ApiOperation(value = "Create a new workspace",
             response = WorkspaceDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of created Workspace"),
@@ -442,7 +442,7 @@ public class WorkspaceResource {
     }
 
     @PUT
-    @ApiOperation(value = "Set group access in workspace",
+    @ApiOperation(value = "Set user group access in workspace",
             response = WorkspaceUserGroupMemberShipDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of updated WorkspaceUserGroupMemberShipDTO"),
@@ -462,7 +462,7 @@ public class WorkspaceResource {
     }
 
     @PUT
-    @ApiOperation(value = "Remove user from group",
+    @ApiOperation(value = "Remove user from user group",
             response = UserGroupDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of updated UserGroupDTO"),
@@ -502,7 +502,7 @@ public class WorkspaceResource {
     }
 
     @PUT
-    @ApiOperation(value = "Enable user",
+    @ApiOperation(value = "Enable user in workspace",
             response = Response.class)
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful enable operation"),
@@ -521,7 +521,7 @@ public class WorkspaceResource {
     }
 
     @PUT
-    @ApiOperation(value = "Disable user",
+    @ApiOperation(value = "Disable user in workspace",
             response = Response.class)
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful disable operation"),
@@ -540,7 +540,7 @@ public class WorkspaceResource {
     }
 
     @PUT
-    @ApiOperation(value = "Enable group",
+    @ApiOperation(value = "Enable user group in workspace",
             response = Response.class)
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful enable operation"),
@@ -559,7 +559,7 @@ public class WorkspaceResource {
     }
 
     @PUT
-    @ApiOperation(value = "Disable group",
+    @ApiOperation(value = "Disable user group in workspace",
             response = Response.class)
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful disable operation"),
@@ -737,7 +737,7 @@ public class WorkspaceResource {
     }
 
     @GET
-    @ApiOperation(value = "Get workspace front options",
+    @ApiOperation(value = "Get workspace front-end options",
             response = WorkspaceFrontOptionsDTO.class)
     @Path("/{workspaceId}/front-options")
     @ApiResponses(value = {
@@ -755,7 +755,7 @@ public class WorkspaceResource {
     }
 
     @PUT
-    @ApiOperation(value = "Update workspace front options",
+    @ApiOperation(value = "Update workspace front-end options",
             response = Response.class)
     @Path("/{workspaceId}/front-options")
     @ApiResponses(value = {
@@ -779,7 +779,7 @@ public class WorkspaceResource {
 
 
     @GET
-    @ApiOperation(value = "Get workspace back options",
+    @ApiOperation(value = "Get workspace back-end options",
             response = WorkspaceBackOptionsDTO.class
     )
     @ApiResponses(value = {
@@ -797,7 +797,7 @@ public class WorkspaceResource {
     }
 
     @PUT
-    @ApiOperation(value = "Update workspace back options",
+    @ApiOperation(value = "Update workspace back-end options",
             response = Response.class
     )
     @ApiResponses(value = {

@@ -102,7 +102,7 @@ public class PartResource {
     }
 
     @GET
-    @ApiOperation(value = "Get product instance where part is in use",
+    @ApiOperation(value = "Get product instance where part revision is in use",
             response = ProductInstanceMasterDTO.class,
             responseContainer = "List")
     @ApiResponses(value = {
@@ -135,7 +135,7 @@ public class PartResource {
     }
 
     @GET
-    @ApiOperation(value = "Get part revisions where use as component",
+    @ApiOperation(value = "Get part revisions where given part revision is used as a component",
             response = PartRevisionDTO.class,
             responseContainer = "List")
     @ApiResponses(value = {
@@ -166,7 +166,7 @@ public class PartResource {
     }
 
     @GET
-    @ApiOperation(value = "Get part revisions where use as substitute",
+    @ApiOperation(value = "Get part revisions where given part revision is used as a substitute",
             response = PartRevisionDTO.class,
             responseContainer = "List")
     @ApiResponses(value = {
@@ -278,7 +278,7 @@ public class PartResource {
     }
 
     @GET
-    @ApiOperation(value = "Get conversion status",
+    @ApiOperation(value = "Get part iteration conversion status",
             response = ConversionDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of ConversionDTO"),
@@ -304,7 +304,7 @@ public class PartResource {
     }
 
     @PUT
-    @ApiOperation(value = "Retry conversion",
+    @ApiOperation(value = "Retry part iteration conversion",
             response = Response.class)
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful conversion retry"),
@@ -332,7 +332,7 @@ public class PartResource {
     }
 
     @PUT
-    @ApiOperation(value = "Checkin part",
+    @ApiOperation(value = "Checkin part revision",
             response = PartRevisionDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of checked in PartRevisionDTO"),
@@ -355,7 +355,7 @@ public class PartResource {
     }
 
     @PUT
-    @ApiOperation(value = "Checkout part",
+    @ApiOperation(value = "Checkout part revision",
             response = PartRevisionDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of checked out PartRevisionDTO"),
@@ -378,7 +378,7 @@ public class PartResource {
     }
 
     @PUT
-    @ApiOperation(value = "Undo checkout part",
+    @ApiOperation(value = "Undo checkout part revision",
             response = PartRevisionDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of undo checked out PartRevisionDTO"),
@@ -400,7 +400,7 @@ public class PartResource {
     }
 
     @PUT
-    @ApiOperation(value = "Update part ACL",
+    @ApiOperation(value = "Update part revision ACL",
             response = Response.class)
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful ACL removal of PartRevisionDTO"),
@@ -470,7 +470,7 @@ public class PartResource {
     }
 
     @PUT
-    @ApiOperation(value = "Release part",
+    @ApiOperation(value = "Release part revision",
             response = PartRevisionDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of released PartRevisionDTO"),
@@ -492,7 +492,7 @@ public class PartResource {
     }
 
     @PUT
-    @ApiOperation(value = "Set part as obsolete",
+    @ApiOperation(value = "Set part revision as obsolete",
             response = PartRevisionDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of obsolete PartRevisionDTO"),
@@ -514,7 +514,7 @@ public class PartResource {
     }
 
     @DELETE
-    @ApiOperation(value = "Delete part",
+    @ApiOperation(value = "Delete part revision",
             response = Response.class)
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful deletion of PartRevisionDTO"),
@@ -586,7 +586,7 @@ public class PartResource {
     }
 
     @POST
-    @ApiOperation(value = "Create a new shared part",
+    @ApiOperation(value = "Create a new shared part from part revision",
             response = SharedPartDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of created SharedPartDTO"),
@@ -654,7 +654,7 @@ public class PartResource {
     }
 
     @GET
-    @ApiOperation(value = "Get part's aborted workflow list",
+    @ApiOperation(value = "Get part revision's aborted workflow list",
             response = WorkflowDTO.class,
             responseContainer = "List")
     @ApiResponses(value = {
@@ -685,7 +685,7 @@ public class PartResource {
     }
 
     @PUT
-    @ApiOperation(value = "Save part's tags",
+    @ApiOperation(value = "Save part revision tags",
             response = PartRevisionDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of updated PartRevisionDTO"),
@@ -715,7 +715,7 @@ public class PartResource {
     }
 
     @POST
-    @ApiOperation(value = "Add tags to part",
+    @ApiOperation(value = "Add tags to part revision",
             response = PartRevisionDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of updated PartRevisionDTO"),
@@ -750,7 +750,7 @@ public class PartResource {
     }
 
     @DELETE
-    @ApiOperation(value = "Delete tags from part",
+    @ApiOperation(value = "Delete tags from part revision",
             response = PartRevisionDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of updated PartRevisionDTO"),
@@ -771,7 +771,7 @@ public class PartResource {
 
 
     @GET
-    @ApiOperation(value = "Get instances under given part, head view",
+    @ApiOperation(value = "Get instances under given part revision (latest checked-in view)",
             response = LeafDTO.class,
             responseContainer = "List")
     @ApiResponses(value = {
@@ -793,7 +793,7 @@ public class PartResource {
     }
 
     @GET
-    @ApiOperation(value = "Get baselines where part revision is involved",
+    @ApiOperation(value = "Get product baselines where part revision is involved",
             response = ProductBaselineDTO.class,
             responseContainer = "List")
     @ApiResponses(value = {

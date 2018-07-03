@@ -75,7 +75,7 @@ public class DocumentBaselinesResource {
      * @return The list of baselines
      */
     @GET
-    @ApiOperation(value = "Get baselines",
+    @ApiOperation(value = "Get document baselines",
             response = DocumentBaselineDTO.class,
             responseContainer = "List")
     @ApiResponses(value = {
@@ -105,7 +105,7 @@ public class DocumentBaselinesResource {
      * @return the created baseline
      */
     @POST
-    @ApiOperation(value = "Create baseline",
+    @ApiOperation(value = "Create a new document baseline",
             response = DocumentBaselineDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 201, message = "Successful retrieval of created DocumentBaselineDTO"),
@@ -138,7 +138,7 @@ public class DocumentBaselinesResource {
      * @return A response if the baseline was deleted
      */
     @DELETE
-    @ApiOperation(value = "Delete a baseline",
+    @ApiOperation(value = "Delete a document baseline",
             response = Response.class)
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful deletion of DocumentBaselineDTO"),
@@ -164,7 +164,7 @@ public class DocumentBaselinesResource {
      * @return The specif baseline
      */
     @GET
-    @ApiOperation(value = "Get baseline",
+    @ApiOperation(value = "Get document baseline by id",
             response = DocumentBaselineDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of DocumentBaselineDTO"),
@@ -212,7 +212,7 @@ public class DocumentBaselinesResource {
     }
 
     @GET
-    @ApiOperation(value = "Export files",
+    @ApiOperation(value = "Export document baseline's files",
             response = File.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful files export, download a zipped file containing requested files."),

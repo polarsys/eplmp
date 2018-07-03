@@ -23,10 +23,10 @@ import java.util.List;
 @ApiModel(value="ChangeOrderDTO", description="This class is the representation of a {@link org.polarsys.eplmp.core.change.ChangeOrder} entity")
 public class ChangeOrderDTO extends ChangeItemDTO implements Serializable {
 
-    @ApiModelProperty(value = "Change order addressed request")
+    @ApiModelProperty(value = "Change order addressed requests")
     private List<ChangeRequestDTO> addressedChangeRequests;
 
-    @ApiModelProperty(value = "Change order due milestone")
+    @ApiModelProperty(value = "Change order due milestone id")
     @XmlElement(nillable = true)
     private int milestoneId;
 

@@ -26,7 +26,7 @@ public class ChangeRequestDTO extends ChangeItemDTO implements Serializable {
     @ApiModelProperty(value = "Change request addressed issues")
     private List<ChangeIssueDTO> addressedChangeIssues;
 
-    @ApiModelProperty(value = "Change request due milestone")
+    @ApiModelProperty(value = "Change request due milestone id")
     @XmlElement(nillable = true)
     private int milestoneId;
 

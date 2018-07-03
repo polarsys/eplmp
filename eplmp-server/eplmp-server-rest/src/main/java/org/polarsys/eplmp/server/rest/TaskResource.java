@@ -100,7 +100,7 @@ public class TaskResource {
     }
 
     @GET
-    @ApiOperation(value = "Get task",
+    @ApiOperation(value = "Get task by id",
             response = TaskDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of TaskDTO"),
@@ -134,7 +134,7 @@ public class TaskResource {
     }
 
     @GET
-    @ApiOperation(value = "Get documents where user has assigned tasks",
+    @ApiOperation(value = "Get document revisions where user has assigned tasks",
             response = DocumentRevisionDTO.class,
             responseContainer = "List")
     @ApiResponses(value = {
@@ -175,7 +175,7 @@ public class TaskResource {
     }
 
     @GET
-    @ApiOperation(value = "Get parts where user has assigned tasks",
+    @ApiOperation(value = "Get part revisions where user has assigned tasks",
             response = PartRevisionDTO.class,
             responseContainer = "List")
     @ApiResponses(value = {
@@ -218,7 +218,7 @@ public class TaskResource {
 
 
     @PUT
-    @ApiOperation(value = "Approve or reject task on document",
+    @ApiOperation(value = "Approve or reject task on a document or part revision",
             response = Response.class)
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful task process"),

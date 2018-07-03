@@ -59,7 +59,7 @@ public class WorkflowModelResource {
     }
 
     @GET
-    @ApiOperation(value = "Get workflow models",
+    @ApiOperation(value = "Get workflow models in given workspace",
             response = WorkflowModelDTO.class,
             responseContainer = "List")
     @ApiResponses(value = {
@@ -83,7 +83,7 @@ public class WorkflowModelResource {
     }
 
     @GET
-    @ApiOperation(value = "Get workflow model",
+    @ApiOperation(value = "Get workflow model by id",
             response = WorkflowModelDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of WorkflowModelDTO"),
@@ -102,7 +102,7 @@ public class WorkflowModelResource {
     }
 
     @DELETE
-    @ApiOperation(value = "Delete workflow model",
+    @ApiOperation(value = "Delete a workflow model",
             response = Response.class)
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful deletion of WorkflowModelDTO"),
@@ -119,7 +119,7 @@ public class WorkflowModelResource {
     }
 
     @PUT
-    @ApiOperation(value = "Update workflow model",
+    @ApiOperation(value = "Update a workflow model",
             response = WorkflowModelDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of updated WorkflowModelDTO"),
@@ -168,7 +168,7 @@ public class WorkflowModelResource {
     }
 
     @POST
-    @ApiOperation(value = "Create workflow model",
+    @ApiOperation(value = "Create a new workflow model",
             response = WorkflowModelDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of created WorkflowModelDTO"),
