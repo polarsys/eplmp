@@ -117,7 +117,7 @@ public class AuthResource {
 
         Account account = accountManager.authenticateAccount(login, password);
 
-        if (oAuthManager.isProvidedAccount(account)) {
+        if (null != account && oAuthManager.isProvidedAccount(account)) {
             return Response.status(403).build();
         }
 
