@@ -15,6 +15,15 @@
         }
       },
       {
+        "version_code_string": {
+          "match": "version",
+          "match_mapping_type": "string",
+          "mapping": {
+            "type": "keyword"
+          }
+        }
+      },
+      {
         "default_string": {
           "match": "*",
           "match_mapping_type": "string",
