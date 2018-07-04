@@ -353,6 +353,7 @@ public class QueryResultMessageBodyWriter implements MessageBodyWriter<QueryResu
         }
 
         jg.writeEnd();
+        jg.flush();
     }
 
 

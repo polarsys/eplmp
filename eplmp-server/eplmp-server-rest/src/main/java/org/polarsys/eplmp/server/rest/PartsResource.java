@@ -259,7 +259,7 @@ public class PartsResource {
 
     @POST
     @ApiOperation(value = "Run custom queries",
-            response = String.class)
+            response = File.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of QueryDTOs. It can be an empty list."),
             @ApiResponse(code = 401, message = "Unauthorized"),
@@ -267,7 +267,7 @@ public class PartsResource {
     })
     @Path("queries")
     @Consumes(MediaType.APPLICATION_JSON)
-    @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_OCTET_STREAM})
+    @Produces(MediaType.APPLICATION_OCTET_STREAM)
     public Response runCustomQuery(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = false, value = "Save the query flag", defaultValue = "false") @QueryParam("save") boolean save,
