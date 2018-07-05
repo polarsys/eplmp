@@ -39,7 +39,8 @@ import java.util.Collections;
 import java.util.List;
 
 @RequestScoped
-@Api(value = "organizations", description = "Operations about organizations")
+@Api(value = "organizations", description = "Operations about organizations",
+        authorizations = {@Authorization(value = "authorization")})
 @Path("organizations")
 @DeclareRoles(UserGroupMapping.REGULAR_USER_ROLE_ID)
 @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)

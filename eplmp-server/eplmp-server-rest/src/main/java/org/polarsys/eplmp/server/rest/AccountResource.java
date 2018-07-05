@@ -78,7 +78,8 @@ public class AccountResource {
     @GET
     @Path("/me")
     @ApiOperation(value = "Get authenticated user's account",
-            response = AccountDTO.class)
+            response = AccountDTO.class,
+            authorizations = {@Authorization(value = "authorization")})
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of AccountDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
@@ -97,7 +98,8 @@ public class AccountResource {
     @PUT
     @Path("/me")
     @ApiOperation(value = "Update user's account",
-            response = AccountDTO.class)
+            response = AccountDTO.class,
+            authorizations = {@Authorization(value = "authorization")})
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of updated AccountDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
@@ -131,7 +133,8 @@ public class AccountResource {
     @POST
     @Path("/create")
     @ApiOperation(value = "Create a new account",
-            response = AccountDTO.class)
+            response = AccountDTO.class,
+            authorizations = {})
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of created AccountDTO. Response will contain authentication token."),
             @ApiResponse(code = 202, message = "Account creation successful, but not yet enabled"),
@@ -185,7 +188,8 @@ public class AccountResource {
     @Path("/workspaces")
     @ApiOperation(value = "Get workspaces where authenticated user is active",
             response = WorkspaceDTO.class,
-            responseContainer = "List")
+            responseContainer = "List",
+            authorizations = {@Authorization(value = "authorization")})
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of Workspaces. It can be an empty list."),
             @ApiResponse(code = 401, message = "Unauthorized"),
@@ -207,7 +211,8 @@ public class AccountResource {
     @PUT
     @Path("gcm")
     @ApiOperation(value = "Update GCM account for authenticated user",
-            response = Response.class)
+            response = Response.class,
+            authorizations = {@Authorization(value = "authorization")})
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful retrieval of created GCMAccount."),
             @ApiResponse(code = 401, message = "Unauthorized"),
@@ -225,7 +230,8 @@ public class AccountResource {
     @DELETE
     @Path("gcm")
     @ApiOperation(value = "Update GCM account for authenticated user",
-            response = Response.class)
+            response = Response.class,
+            authorizations = {@Authorization(value = "authorization")})
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful delete of GCMAccount"),
             @ApiResponse(code = 401, message = "Unauthorized"),

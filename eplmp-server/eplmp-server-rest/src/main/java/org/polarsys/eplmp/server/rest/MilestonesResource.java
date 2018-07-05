@@ -37,7 +37,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 @RequestScoped
-@Api(hidden = true, value = "milestones", description = "Operations about milestones")
+@Api(hidden = true, value = "milestones", description = "Operations about milestones",
+        authorizations = {@Authorization(value = "authorization")})
 @DeclareRoles(UserGroupMapping.REGULAR_USER_ROLE_ID)
 @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
 public class MilestonesResource {

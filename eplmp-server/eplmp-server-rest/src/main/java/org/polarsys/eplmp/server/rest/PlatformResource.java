@@ -11,10 +11,7 @@
 
 package org.polarsys.eplmp.server.rest;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import io.swagger.annotations.*;
 import org.polarsys.eplmp.core.exceptions.PlatformHealthException;
 import org.polarsys.eplmp.core.services.IPlatformHealthManagerLocal;
 
@@ -47,7 +44,8 @@ public class PlatformResource {
     @GET
     @Path("health")
     @ApiOperation(value = "Get platform health status",
-            response = Response.class)
+            response = Response.class,
+            authorizations = {})
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Server health is ok"),
             @ApiResponse(code = 500, message = "Server health is ko or partial")

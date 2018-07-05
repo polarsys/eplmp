@@ -40,7 +40,8 @@ import javax.ws.rs.core.Response;
 import java.util.*;
 
 @RequestScoped
-@Api(hidden = true, value = "requests", description = "Operations about requests")
+@Api(hidden = true, value = "requests", description = "Operations about requests",
+        authorizations = {@Authorization(value = "authorization")})
 @DeclareRoles(UserGroupMapping.REGULAR_USER_ROLE_ID)
 @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
 public class ChangeRequestsResource {

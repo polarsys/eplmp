@@ -37,7 +37,8 @@ import java.util.Set;
  */
 
 @RequestScoped
-@Api(hidden = true, value = "layers", description = "Operations about layers")
+@Api(hidden = true, value = "layers", description = "Operations about layers",
+        authorizations = {@Authorization(value = "authorization")})
 @DeclareRoles(UserGroupMapping.REGULAR_USER_ROLE_ID)
 @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
 public class LayerResource {
@@ -71,7 +72,6 @@ public class LayerResource {
         }
         return layerDTOs;
     }
-
 
     @POST
     @ApiOperation(value = "Create a new layer for given product",

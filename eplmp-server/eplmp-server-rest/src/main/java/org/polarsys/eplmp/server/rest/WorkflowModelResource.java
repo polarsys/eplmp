@@ -40,7 +40,8 @@ import java.util.Map;
  * @author Morgan Guimard
  */
 @RequestScoped
-@Api(hidden = true, value = "workflowModels", description = "Operations about workflow models")
+@Api(hidden = true, value = "workflowModels", description = "Operations about workflow models",
+        authorizations = {@Authorization(value = "authorization")})
 @DeclareRoles(UserGroupMapping.REGULAR_USER_ROLE_ID)
 @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
 public class WorkflowModelResource {

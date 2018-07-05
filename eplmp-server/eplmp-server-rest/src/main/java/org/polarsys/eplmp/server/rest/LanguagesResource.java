@@ -10,10 +10,7 @@
   *******************************************************************************/
 package org.polarsys.eplmp.server.rest;
 
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import io.swagger.annotations.*;
 import org.polarsys.eplmp.i18n.PropertiesLoader;
 
 import javax.enterprise.context.RequestScoped;
@@ -27,9 +24,8 @@ import javax.ws.rs.core.Response;
 
 @RequestScoped
 @Path("languages")
-@Api(value = "languages", description = "Operations about languages")
+@Api(value = "languages", description = "Operations about languages", authorizations = {})
 public class LanguagesResource {
-
 
     public LanguagesResource() {
     }

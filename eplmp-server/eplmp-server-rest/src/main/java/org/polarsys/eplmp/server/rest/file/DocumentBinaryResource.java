@@ -84,7 +84,8 @@ public class DocumentBinaryResource {
 
     @POST
     @ApiOperation(value = "Upload document file",
-            response = Response.class)
+            response = Response.class,
+            authorizations = {@Authorization(value = "authorization")})
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Upload success"),
             @ApiResponse(code = 401, message = "Unauthorized"),

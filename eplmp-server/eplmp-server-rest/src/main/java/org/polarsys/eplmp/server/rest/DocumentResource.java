@@ -49,7 +49,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @RequestScoped
-@Api(hidden = true, value = "document", description = "Operations about document")
+@Api(hidden = true, value = "document", description = "Operations about document",
+        authorizations = {@Authorization(value = "authorization")})
 @DeclareRoles(UserGroupMapping.REGULAR_USER_ROLE_ID)
 @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
 public class DocumentResource {

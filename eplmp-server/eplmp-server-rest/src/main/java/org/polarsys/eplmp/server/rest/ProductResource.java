@@ -55,7 +55,8 @@ import java.util.stream.Collectors;
  * @author Florent Garin
  */
 @RequestScoped
-@Api(hidden = true, value = "products", description = "Operations about products")
+@Api(hidden = true, value = "products", description = "Operations about products",
+        authorizations = {@Authorization(value = "authorization")})
 @DeclareRoles(UserGroupMapping.REGULAR_USER_ROLE_ID)
 @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
 public class ProductResource {

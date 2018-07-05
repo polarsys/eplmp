@@ -44,7 +44,8 @@ import java.util.logging.Logger;
  * @author Morgan Guimard
  */
 @RequestScoped
-@Api(hidden = true, value = "roles", description = "Operations about roles")
+@Api(hidden = true, value = "roles", description = "Operations about roles",
+        authorizations = {@Authorization(value = "authorization")})
 @DeclareRoles(UserGroupMapping.REGULAR_USER_ROLE_ID)
 @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
 public class RoleResource {

@@ -44,7 +44,8 @@ import java.util.Set;
  */
 
 @RequestScoped
-@Api(hidden = true, value = "attributes", description = "Operations about attributes")
+@Api(hidden = true, value = "attributes", description = "Operations about attributes",
+        authorizations = {@Authorization(value = "authorization")})
 @DeclareRoles(UserGroupMapping.REGULAR_USER_ROLE_ID)
 @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
 public class AttributesResource {

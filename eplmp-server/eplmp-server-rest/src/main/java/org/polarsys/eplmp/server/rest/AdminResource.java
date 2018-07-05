@@ -47,7 +47,8 @@ import java.util.List;
  * @author Morgan Guimard
  */
 @RequestScoped
-@Api(value = "admin", description = "Admin resources")
+@Api(value = "admin", description = "Admin resources",
+        authorizations = {@Authorization(value = "authorization")})
 @Path("admin")
 @DeclareRoles(UserGroupMapping.ADMIN_ROLE_ID)
 @RolesAllowed(UserGroupMapping.ADMIN_ROLE_ID)

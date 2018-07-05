@@ -41,7 +41,8 @@ import java.util.logging.Logger;
  * @author Yassine Belouad
  */
 @RequestScoped
-@Api(hidden = true, value = "tags", description = "Operations about tags")
+@Api(hidden = true, value = "tags", description = "Operations about tags",
+        authorizations = {@Authorization(value = "authorization")})
 @DeclareRoles(UserGroupMapping.REGULAR_USER_ROLE_ID)
 @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
 public class TagResource {

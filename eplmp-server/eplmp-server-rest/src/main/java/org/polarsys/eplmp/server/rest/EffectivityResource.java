@@ -31,7 +31,8 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 @RequestScoped
-@Api(hidden = true, value = "effectivity", description = "Operations about effectivities")
+@Api(hidden = true, value = "effectivity", description = "Operations about effectivities",
+        authorizations = {@Authorization(value = "authorization")})
 @DeclareRoles(UserGroupMapping.REGULAR_USER_ROLE_ID)
 @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
 public class EffectivityResource {

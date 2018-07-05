@@ -40,7 +40,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 @RequestScoped
-@Api(hidden = true, value = "folders", description = "Operations about folders")
+@Api(hidden = true, value = "folders", description = "Operations about folders",
+        authorizations = {@Authorization(value = "authorization")})
 @DeclareRoles(UserGroupMapping.REGULAR_USER_ROLE_ID)
 @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
 public class FolderResource {

@@ -35,7 +35,8 @@ import java.util.List;
 import java.util.Set;
 
 @RequestScoped
-@Api(hidden = true, value = "partEffectivities", description = "Operation about parts effectivities")
+@Api(hidden = true, value = "partEffectivities", description = "Operation about parts effectivities",
+        authorizations = {@Authorization(value = "authorization")})
 @DeclareRoles(UserGroupMapping.REGULAR_USER_ROLE_ID)
 @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
 public class PartEffectivityResource {

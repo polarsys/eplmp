@@ -48,7 +48,8 @@ import java.util.List;
  * @author Taylor LABEJOF
  */
 @RequestScoped
-@Api(hidden = true, value = "productBaseline", description = "Operations about product-baseline")
+@Api(hidden = true, value = "productBaseline", description = "Operations about product-baseline",
+        authorizations = {@Authorization(value = "authorization")})
 @DeclareRoles(UserGroupMapping.REGULAR_USER_ROLE_ID)
 @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
 public class ProductBaselinesResource {

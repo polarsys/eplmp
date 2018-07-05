@@ -157,7 +157,8 @@ public class WorkspaceResource {
 
     @GET
     @ApiOperation(value = "Get workspace list for authenticated user",
-            response = WorkspaceListDTO.class)
+            response = WorkspaceListDTO.class,
+            authorizations = {@Authorization(value = "authorization")})
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of WorkspaceListDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
@@ -184,7 +185,8 @@ public class WorkspaceResource {
     @GET
     @ApiOperation(value = "Get detailed workspace list for authenticated user",
             response = WorkspaceDetailsDTO.class,
-            responseContainer = "List")
+            responseContainer = "List",
+            authorizations = {@Authorization(value = "authorization")})
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of WorkspaceDetailsDTOs. It can be an empty list."),
             @ApiResponse(code = 401, message = "Unauthorized"),
@@ -206,7 +208,8 @@ public class WorkspaceResource {
     @GET
     @ApiOperation(value = "Get online users visible by authenticated user",
             response = UserDTO.class,
-            responseContainer = "List")
+            responseContainer = "List",
+            authorizations = {@Authorization(value = "authorization")})
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of UserDTOs. It can be an empty list."),
             @ApiResponse(code = 401, message = "Unauthorized"),
@@ -229,7 +232,8 @@ public class WorkspaceResource {
 
     @PUT
     @ApiOperation(value = "Update a workspace",
-            response = WorkspaceDTO.class)
+            response = WorkspaceDTO.class,
+            authorizations = {@Authorization(value = "authorization")})
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of updated WorkspaceDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
@@ -250,7 +254,8 @@ public class WorkspaceResource {
     @PUT
     @Path("/{workspaceId}/index")
     @ApiOperation(value = "Re-Index a workspace",
-            response = Response.class)
+            response = Response.class,
+            authorizations = {@Authorization(value = "authorization")})
     @ApiResponses(value = {
             @ApiResponse(code = 202, message = "Accepted indexation (asynchronous method)"),
             @ApiResponse(code = 401, message = "Unauthorized"),
@@ -267,7 +272,8 @@ public class WorkspaceResource {
 
     @DELETE
     @ApiOperation(value = "Delete a workspace",
-            response = Response.class)
+            response = Response.class,
+            authorizations = {@Authorization(value = "authorization")})
     @ApiResponses(value = {
             @ApiResponse(code = 202, message = "Accepted deletion (asynchronous method)"),
             @ApiResponse(code = 401, message = "Unauthorized"),
@@ -283,7 +289,8 @@ public class WorkspaceResource {
     @GET
     @ApiOperation(value = "Get user groups in given workspace",
             response = UserGroupDTO.class,
-            responseContainer = "List")
+            responseContainer = "List",
+            authorizations = {@Authorization(value = "authorization")})
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of UserGroupDTOs. It can be an empty list."),
             @ApiResponse(code = 401, message = "Unauthorized"),
@@ -306,7 +313,8 @@ public class WorkspaceResource {
 
     @POST
     @ApiOperation(value = "Create a new user group",
-            response = UserGroupDTO.class)
+            response = UserGroupDTO.class,
+            authorizations = {@Authorization(value = "authorization")})
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of created UserGroupDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
@@ -327,7 +335,8 @@ public class WorkspaceResource {
 
     @DELETE
     @ApiOperation(value = "Remove a user group",
-            response = UserGroupDTO.class)
+            response = UserGroupDTO.class,
+            authorizations = {@Authorization(value = "authorization")})
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful removal of user from UserGroupDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
@@ -347,7 +356,8 @@ public class WorkspaceResource {
 
     @PUT
     @ApiOperation(value = "Add a user to workspace",
-            response = Response.class)
+            response = Response.class,
+            authorizations = {@Authorization(value = "authorization")})
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful addition of user in UserGroupDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
@@ -376,7 +386,8 @@ public class WorkspaceResource {
 
     @PUT
     @ApiOperation(value = "Set a new admin for given workspace",
-            response = WorkspaceDTO.class)
+            response = WorkspaceDTO.class,
+            authorizations = {@Authorization(value = "authorization")})
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of updated Workspace"),
             @ApiResponse(code = 401, message = "Unauthorized"),
@@ -396,7 +407,8 @@ public class WorkspaceResource {
 
     @POST
     @ApiOperation(value = "Create a new workspace",
-            response = WorkspaceDTO.class)
+            response = WorkspaceDTO.class,
+            authorizations = {@Authorization(value = "authorization")})
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of created Workspace"),
             @ApiResponse(code = 401, message = "Unauthorized"),
@@ -421,7 +433,8 @@ public class WorkspaceResource {
 
     @PUT
     @ApiOperation(value = "Set user access in workspace",
-            response = UserDTO.class)
+            response = UserDTO.class,
+            authorizations = {@Authorization(value = "authorization")})
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of updated UserDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
@@ -443,7 +456,8 @@ public class WorkspaceResource {
 
     @PUT
     @ApiOperation(value = "Set user group access in workspace",
-            response = WorkspaceUserGroupMemberShipDTO.class)
+            response = WorkspaceUserGroupMemberShipDTO.class,
+            authorizations = {@Authorization(value = "authorization")})
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of updated WorkspaceUserGroupMemberShipDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
@@ -463,7 +477,8 @@ public class WorkspaceResource {
 
     @PUT
     @ApiOperation(value = "Remove user from user group",
-            response = UserGroupDTO.class)
+            response = UserGroupDTO.class,
+            authorizations = {@Authorization(value = "authorization")})
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of updated UserGroupDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
@@ -484,7 +499,8 @@ public class WorkspaceResource {
 
     @PUT
     @ApiOperation(value = "Remove user from workspace",
-            response = WorkspaceDTO.class)
+            response = WorkspaceDTO.class,
+            authorizations = {@Authorization(value = "authorization")})
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of updated WorkspaceDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
@@ -503,7 +519,8 @@ public class WorkspaceResource {
 
     @PUT
     @ApiOperation(value = "Enable user in workspace",
-            response = Response.class)
+            response = Response.class,
+            authorizations = {@Authorization(value = "authorization")})
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful enable operation"),
             @ApiResponse(code = 401, message = "Unauthorized"),
@@ -522,7 +539,8 @@ public class WorkspaceResource {
 
     @PUT
     @ApiOperation(value = "Disable user in workspace",
-            response = Response.class)
+            response = Response.class,
+            authorizations = {@Authorization(value = "authorization")})
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful disable operation"),
             @ApiResponse(code = 401, message = "Unauthorized"),
@@ -541,7 +559,8 @@ public class WorkspaceResource {
 
     @PUT
     @ApiOperation(value = "Enable user group in workspace",
-            response = Response.class)
+            response = Response.class,
+            authorizations = {@Authorization(value = "authorization")})
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful enable operation"),
             @ApiResponse(code = 401, message = "Unauthorized"),
@@ -560,7 +579,8 @@ public class WorkspaceResource {
 
     @PUT
     @ApiOperation(value = "Disable user group in workspace",
-            response = Response.class)
+            response = Response.class,
+            authorizations = {@Authorization(value = "authorization")})
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful disable operation"),
             @ApiResponse(code = 401, message = "Unauthorized"),
@@ -579,7 +599,8 @@ public class WorkspaceResource {
 
     @GET
     @ApiOperation(value = "Get stats overview for workspace",
-            response = StatsOverviewDTO.class)
+            response = StatsOverviewDTO.class,
+            authorizations = {@Authorization(value = "authorization")})
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of StatsOverviewDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
@@ -605,7 +626,8 @@ public class WorkspaceResource {
 
     @GET
     @ApiOperation(value = "Get disk usage stats for workspace",
-            response = DiskUsageSpaceDTO.class)
+            response = DiskUsageSpaceDTO.class,
+            authorizations = {@Authorization(value = "authorization")})
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of DiskUsageSpaceDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
@@ -628,7 +650,8 @@ public class WorkspaceResource {
     // TODO add DTO mapping. (quite tricky as keys are dynamic) find a way to be usable from generated API
     @GET
     @ApiOperation(value = "Get checked out documents stats for workspace",
-            response = String.class)
+            response = String.class,
+            authorizations = {@Authorization(value = "authorization")})
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of documents stats"),
             @ApiResponse(code = 401, message = "Unauthorized"),
@@ -666,7 +689,8 @@ public class WorkspaceResource {
     // TODO add DTO mapping. (quite tricky as keys are dynamic) find a way to be usable from generated API
     @GET
     @ApiOperation(value = "Get checked out parts stats for workspace",
-            response = String.class)
+            response = String.class,
+            authorizations = {@Authorization(value = "authorization")})
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of parts stats"),
             @ApiResponse(code = 401, message = "Unauthorized"),
@@ -703,7 +727,8 @@ public class WorkspaceResource {
 
     @GET
     @ApiOperation(value = "Get user stats for workspace",
-            response = String.class)
+            response = String.class,
+            authorizations = {@Authorization(value = "authorization")})
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of users stats"),
             @ApiResponse(code = 401, message = "Unauthorized"),
@@ -738,7 +763,8 @@ public class WorkspaceResource {
 
     @GET
     @ApiOperation(value = "Get workspace front-end options",
-            response = WorkspaceFrontOptionsDTO.class)
+            response = WorkspaceFrontOptionsDTO.class,
+            authorizations = {@Authorization(value = "authorization")})
     @Path("/{workspaceId}/front-options")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieve of workspace front options"),
@@ -756,7 +782,8 @@ public class WorkspaceResource {
 
     @PUT
     @ApiOperation(value = "Update workspace front-end options",
-            response = Response.class)
+            response = Response.class,
+            authorizations = {@Authorization(value = "authorization")})
     @Path("/{workspaceId}/front-options")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful update of workspace front options"),
@@ -780,7 +807,8 @@ public class WorkspaceResource {
 
     @GET
     @ApiOperation(value = "Get workspace back-end options",
-            response = WorkspaceBackOptionsDTO.class
+            response = WorkspaceBackOptionsDTO.class,
+            authorizations = {@Authorization(value = "authorization")}
     )
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of workspace back options"),
@@ -798,7 +826,8 @@ public class WorkspaceResource {
 
     @PUT
     @ApiOperation(value = "Update workspace back-end options",
-            response = Response.class
+            response = Response.class,
+            authorizations = {@Authorization(value = "authorization")}
     )
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful update of workspace back options"),

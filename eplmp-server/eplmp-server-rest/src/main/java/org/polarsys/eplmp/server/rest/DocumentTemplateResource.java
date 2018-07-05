@@ -39,7 +39,8 @@ import java.util.List;
  */
 
 @RequestScoped
-@Api(hidden = true, value = "documentTemplates", description = "Operations about document templates")
+@Api(hidden = true, value = "documentTemplates", description = "Operations about document templates",
+        authorizations = {@Authorization(value = "authorization")})
 @DeclareRoles(UserGroupMapping.REGULAR_USER_ROLE_ID)
 @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
 public class DocumentTemplateResource {

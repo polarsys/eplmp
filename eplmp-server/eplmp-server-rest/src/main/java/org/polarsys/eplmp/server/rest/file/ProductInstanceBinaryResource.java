@@ -56,7 +56,8 @@ import java.util.List;
  **/
 
 @RequestScoped
-@Api(hidden = true, value = "productInstanceBinary", description = "Operations about product instances files")
+@Api(hidden = true, value = "productInstanceBinary", description = "Operations about product instances files",
+        authorizations = {@Authorization(value = "authorization")})
 @DeclareRoles({UserGroupMapping.REGULAR_USER_ROLE_ID})
 @RolesAllowed({UserGroupMapping.REGULAR_USER_ROLE_ID})
 public class ProductInstanceBinaryResource {

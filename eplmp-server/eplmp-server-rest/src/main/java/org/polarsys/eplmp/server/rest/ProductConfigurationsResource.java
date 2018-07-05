@@ -43,7 +43,8 @@ import java.util.Map;
  * @author Morgan Guimard
  */
 @RequestScoped
-@Api(hidden = true, value = "productConfigurations", description = "Operations about product configurations")
+@Api(hidden = true, value = "productConfigurations", description = "Operations about product configurations",
+        authorizations = {@Authorization(value = "authorization")})
 @DeclareRoles(UserGroupMapping.REGULAR_USER_ROLE_ID)
 @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
 public class ProductConfigurationsResource {

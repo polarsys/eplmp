@@ -58,7 +58,8 @@ import java.util.logging.Logger;
  * @author Taylor LABEJOF
  */
 @RequestScoped
-@Api(hidden = true, value = "productInstances", description = "Operations about product-instances")
+@Api(hidden = true, value = "productInstances", description = "Operations about product-instances",
+        authorizations = {@Authorization(value = "authorization")})
 @DeclareRoles(UserGroupMapping.REGULAR_USER_ROLE_ID)
 @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
 public class ProductInstancesResource {

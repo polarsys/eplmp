@@ -40,7 +40,8 @@ import java.util.List;
  */
 
 @RequestScoped
-@Api(hidden = true, value = "listOfValues", description = "Operations about ListOfValues")
+@Api(hidden = true, value = "listOfValues", description = "Operations about ListOfValues",
+        authorizations = {@Authorization(value = "authorization")})
 @DeclareRoles(UserGroupMapping.REGULAR_USER_ROLE_ID)
 @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
 public class LOVResource {

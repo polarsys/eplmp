@@ -37,7 +37,8 @@ import java.util.*;
  * @author Morgan Guimard
  */
 @RequestScoped
-@Api(hidden = true, value = "workspaceWorkflows", description = "Operations about workspace workflows")
+@Api(hidden = true, value = "workspaceWorkflows", description = "Operations about workspace workflows",
+        authorizations = {@Authorization(value = "authorization")})
 @DeclareRoles(UserGroupMapping.REGULAR_USER_ROLE_ID)
 @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
 public class WorkspaceWorkflowResource {

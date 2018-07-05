@@ -45,7 +45,8 @@ import java.util.List;
  */
 
 @RequestScoped
-@Api(hidden = true, value = "tasks", description = "Operations about tasks")
+@Api(hidden = true, value = "tasks", description = "Operations about tasks",
+        authorizations = {@Authorization(value = "authorization")})
 @DeclareRoles(UserGroupMapping.REGULAR_USER_ROLE_ID)
 @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
 public class TaskResource {

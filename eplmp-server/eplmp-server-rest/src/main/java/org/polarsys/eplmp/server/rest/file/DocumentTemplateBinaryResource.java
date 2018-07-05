@@ -51,7 +51,8 @@ import java.util.Collection;
 import java.util.logging.Logger;
 
 @RequestScoped
-@Api(hidden = true, value = "documentTemplateBinary", description = "Operations about document templates files")
+@Api(hidden = true, value = "documentTemplateBinary", description = "Operations about document templates files",
+        authorizations = {@Authorization(value = "authorization")})
 @DeclareRoles({UserGroupMapping.REGULAR_USER_ROLE_ID})
 @RolesAllowed({UserGroupMapping.REGULAR_USER_ROLE_ID})
 public class DocumentTemplateBinaryResource {

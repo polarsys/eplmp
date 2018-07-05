@@ -53,7 +53,8 @@ import java.nio.file.Files;
 import java.util.*;
 
 @RequestScoped
-@Api(hidden = true, value = "parts", description = "Operation about parts")
+@Api(hidden = true, value = "parts", description = "Operation about parts",
+        authorizations = {@Authorization(value = "authorization")})
 @DeclareRoles(UserGroupMapping.REGULAR_USER_ROLE_ID)
 @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
 public class PartsResource {

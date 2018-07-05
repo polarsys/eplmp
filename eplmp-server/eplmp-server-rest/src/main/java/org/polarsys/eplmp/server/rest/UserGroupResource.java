@@ -42,7 +42,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 @RequestScoped
-@Api(hidden = true, value = "groups", description = "Operations about user groups")
+@Api(hidden = true, value = "groups", description = "Operations about user groups",
+        authorizations = {@Authorization(value = "authorization")})
 @DeclareRoles(UserGroupMapping.REGULAR_USER_ROLE_ID)
 @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
 public class UserGroupResource {

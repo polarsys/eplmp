@@ -36,7 +36,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 @RequestScoped
-@Api(hidden = true, value = "webhook", description = "Operations about webhooks")
+@Api(hidden = true, value = "webhook", description = "Operations about webhooks",
+        authorizations = {@Authorization(value = "authorization")})
 @DeclareRoles(UserGroupMapping.REGULAR_USER_ROLE_ID)
 @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
 public class WebhookResource {

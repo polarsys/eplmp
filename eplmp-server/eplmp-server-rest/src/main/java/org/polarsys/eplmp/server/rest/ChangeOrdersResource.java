@@ -41,7 +41,8 @@ import java.util.*;
 
 
 @RequestScoped
-@Api(hidden = true, value = "orders", description = "Operations about orders")
+@Api(hidden = true, value = "orders", description = "Operations about orders",
+        authorizations = {@Authorization(value = "authorization")})
 @DeclareRoles(UserGroupMapping.REGULAR_USER_ROLE_ID)
 @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
 public class ChangeOrdersResource {

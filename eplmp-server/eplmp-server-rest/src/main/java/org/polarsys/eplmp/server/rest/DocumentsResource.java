@@ -40,7 +40,8 @@ import java.util.List;
 import java.util.logging.Logger;
 
 @RequestScoped
-@Api(hidden = true, value = "documents", description = "Operations about documents")
+@Api(hidden = true, value = "documents", description = "Operations about documents",
+        authorizations = {@Authorization(value = "authorization")})
 @DeclareRoles(UserGroupMapping.REGULAR_USER_ROLE_ID)
 @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
 public class DocumentsResource {

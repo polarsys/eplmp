@@ -27,7 +27,8 @@ import java.util.TimeZone;
 
 @RequestScoped
 @Path("timezones")
-@Api(value = "timezone", description = "Operations about timezones")
+@Api(value = "timezone", description = "Operations about timezones",
+        authorizations = {})
 public class TimeZoneResource {
 
     public TimeZoneResource() {

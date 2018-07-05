@@ -48,7 +48,8 @@ import java.text.Normalizer;
 import java.util.Collection;
 
 @RequestScoped
-@Api(hidden = true, value = "partTemplateBinary", description = "Operations about part templates files")
+@Api(hidden = true, value = "partTemplateBinary", description = "Operations about part templates files",
+        authorizations = {@Authorization(value = "authorization")})
 @DeclareRoles({UserGroupMapping.REGULAR_USER_ROLE_ID})
 @RolesAllowed({UserGroupMapping.REGULAR_USER_ROLE_ID})
 public class PartTemplateBinaryResource {
