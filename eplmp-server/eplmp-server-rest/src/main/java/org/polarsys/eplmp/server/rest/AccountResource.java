@@ -130,7 +130,7 @@ public class AccountResource {
 
     @POST
     @Path("/create")
-    @ApiOperation(value = "Create user's account",
+    @ApiOperation(value = "Create a new account",
             response = AccountDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of created AccountDTO. Response will contain authentication token."),

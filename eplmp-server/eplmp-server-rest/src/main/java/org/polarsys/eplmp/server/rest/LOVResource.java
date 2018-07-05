@@ -59,7 +59,7 @@ public class LOVResource {
     }
 
     @GET
-    @ApiOperation(value = "Get a list of  ListOfValues for given parameters",
+    @ApiOperation(value = "Get a list of ListOfValues for given parameters",
             response = ListOfValuesDTO.class,
             responseContainer = "List")
     @ApiResponses(value = {
@@ -85,7 +85,7 @@ public class LOVResource {
     }
 
     @POST
-    @ApiOperation(value = "Create ListOfValues",
+    @ApiOperation(value = "Create a new ListOfValues",
             response = ListOfValuesDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 201, message = "Successful retrieval of created ListOfValuesDTO"),
@@ -107,7 +107,7 @@ public class LOVResource {
     }
 
     @GET
-    @ApiOperation(value = "Get the ListOfValues from the given parameters",
+    @ApiOperation(value = "Get a ListOfValues from the given parameters",
             response = ListOfValuesDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 201, message = "Successful retrieval of ListOfValuesDTOs. It can be an empty list."),
@@ -129,7 +129,7 @@ public class LOVResource {
 
     @PUT
     @Path("/{name}")
-    @ApiOperation(value = "Update the ListOfValues",
+    @ApiOperation(value = "Update a ListOfValues",
             response = ListOfValuesDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 201, message = "Successful retrieval of updated ListOfValuesDTO"),
@@ -153,7 +153,7 @@ public class LOVResource {
 
     @DELETE
     @Path("/{name}")
-    @ApiOperation(value = "Delete the ListOfValues",
+    @ApiOperation(value = "Delete a ListOfValues",
             response = Response.class)
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful deletion of ListOfValuesDTO"),

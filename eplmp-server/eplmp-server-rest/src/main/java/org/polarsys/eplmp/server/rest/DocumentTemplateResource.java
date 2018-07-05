@@ -82,7 +82,7 @@ public class DocumentTemplateResource {
     }
 
     @GET
-    @ApiOperation(value = "Get document template",
+    @ApiOperation(value = "Get document template by id",
             response = DocumentMasterTemplateDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of DocumentMasterTemplateDTO"),
@@ -120,7 +120,7 @@ public class DocumentTemplateResource {
     }
 
     @POST
-    @ApiOperation(value = "Create document template",
+    @ApiOperation(value = "Create a new document template",
             response = DocumentMasterTemplateDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of created DocumentMasterTemplateDTO"),

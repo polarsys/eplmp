@@ -81,10 +81,10 @@ public class ChangeManagerBean implements IChangeManagerLocal {
 
     @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
     @Override
-    public List<ChangeIssue> getIssuesWithReference(String pWorkspaceId, String q, int maxResults) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, WorkspaceNotEnabledException {
+    public List<ChangeIssue> getIssuesWithName(String pWorkspaceId, String q, int maxResults) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, WorkspaceNotEnabledException {
         User user = userManager.checkWorkspaceReadAccess(pWorkspaceId);
         List<ChangeIssue> allChangeIssues = new ChangeItemDAO(new Locale(user.getLanguage()),
-                em).findAllChangeIssuesWithReferenceLike(pWorkspaceId, q, maxResults);
+                em).findAllChangeIssuesWithNameLike(pWorkspaceId, q, maxResults);
         List<ChangeIssue> visibleChangeIssues = new ArrayList<>();
         for (ChangeIssue changeIssue : allChangeIssues) {
             try {
@@ -252,10 +252,10 @@ public class ChangeManagerBean implements IChangeManagerLocal {
 
     @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
     @Override
-    public List<ChangeRequest> getRequestsWithReference(String pWorkspaceId, String q, int maxResults) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, WorkspaceNotEnabledException {
+    public List<ChangeRequest> getRequestsWithName(String pWorkspaceId, String name, int maxResults) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, WorkspaceNotEnabledException {
         User user = userManager.checkWorkspaceReadAccess(pWorkspaceId);
         List<ChangeRequest> allChangeRequests = new ChangeItemDAO(new Locale(user.getLanguage()),
-                em).findAllChangeRequestsWithReferenceLike(pWorkspaceId, q, maxResults);
+                em).findAllChangeRequestsWithNameLike(pWorkspaceId, name, maxResults);
         List<ChangeRequest> visibleChangeRequests = new ArrayList<>();
         for (ChangeRequest changeRequest : allChangeRequests) {
             try {

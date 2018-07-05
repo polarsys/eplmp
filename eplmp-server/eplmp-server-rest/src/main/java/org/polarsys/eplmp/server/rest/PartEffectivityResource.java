@@ -58,7 +58,7 @@ public class PartEffectivityResource {
     }
 
     @POST
-    @ApiOperation(value = "Create an Effectivity for a PartRevision",
+    @ApiOperation(value = "Create an Effectivity for a given PartRevision",
             response = EffectivityDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of created effectivity"),
@@ -101,7 +101,7 @@ public class PartEffectivityResource {
     }
 
     @GET
-    @ApiOperation(value = "Get effectivities of a PartRevision",
+    @ApiOperation(value = "Get effectivities of a given PartRevision",
             response = EffectivityDTO.class,
             responseContainer = "List")
     @ApiResponses(value = {
@@ -143,7 +143,7 @@ public class PartEffectivityResource {
     }
 
     @DELETE
-    @ApiOperation(value = "Delete effectivity from part revision",
+    @ApiOperation(value = "Delete effectivity from given part revision",
             response = Response.class)
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful deletion of effectivity"),

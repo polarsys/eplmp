@@ -61,7 +61,7 @@ public class TagResource {
     }
 
     @GET
-    @ApiOperation(value = "Get tags in workspace",
+    @ApiOperation(value = "Get tags in given workspace",
             response = TagDTO.class,
             responseContainer = "List")
     @ApiResponses(value = {
@@ -84,7 +84,7 @@ public class TagResource {
     }
 
     @POST
-    @ApiOperation(value = "Create tag in workspace",
+    @ApiOperation(value = "Create a new tag in workspace",
             response = TagDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of TagDTO"),
@@ -103,7 +103,7 @@ public class TagResource {
     }
 
     @POST
-    @ApiOperation(value = "Create tags in workspace",
+    @ApiOperation(value = "Create new tags in workspace",
             response = Response.class)
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful creation of TagDTO"),
@@ -125,7 +125,7 @@ public class TagResource {
     }
 
     @DELETE
-    @ApiOperation(value = "Delete tag in workspace",
+    @ApiOperation(value = "Delete a tag in workspace",
             response = Response.class)
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful deletion of TagDTO"),
@@ -143,7 +143,7 @@ public class TagResource {
     }
 
     @GET
-    @ApiOperation(value = "Get documents from given tag id",
+    @ApiOperation(value = "Get document revisions from given tag id",
             response = DocumentRevisionDTO.class,
             responseContainer = "List")
     @ApiResponses(value = {
@@ -176,7 +176,7 @@ public class TagResource {
 
     @POST
     @Path("{tagId}/documents/")
-    @ApiOperation(value = "Create document",
+    @ApiOperation(value = "Create a new document master and its first revision with given tag",
             response = DocumentRevisionDTO.class,
             responseContainer = "List")
     @ApiResponses(value = {

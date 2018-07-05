@@ -71,7 +71,7 @@ public class SharedResource {
 
     @GET
     @Path("{workspaceId}/documents/{documentId}-{documentVersion}")
-    @ApiOperation(value = "Get document revision",
+    @ApiOperation(value = "Get public shared document revision",
             response = DocumentRevisionDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of DocumentRevisionDTO"),
@@ -108,7 +108,7 @@ public class SharedResource {
 
     @GET
     @Path("{workspaceId}/parts/{partNumber}-{partVersion}")
-    @ApiOperation(value = "Get part revision",
+    @ApiOperation(value = "Get public shared part revision",
             response = PartRevisionDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of DocumentRevisionDTO"),
@@ -142,7 +142,7 @@ public class SharedResource {
 
     @GET
     @Path("{uuid}/documents")
-    @ApiOperation(value = "Get shared document",
+    @ApiOperation(value = "Get shared document from resource token",
             response = DocumentRevisionDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of DocumentRevisionDTO"),
@@ -174,7 +174,7 @@ public class SharedResource {
 
     @GET
     @Path("{uuid}/parts")
-    @ApiOperation(value = "Get shared part",
+    @ApiOperation(value = "Get shared part from resource token",
             response = PartRevisionDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of PartRevisionDTO"),

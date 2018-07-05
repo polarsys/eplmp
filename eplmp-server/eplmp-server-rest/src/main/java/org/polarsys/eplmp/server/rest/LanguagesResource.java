@@ -35,7 +35,7 @@ public class LanguagesResource {
     }
 
     @GET
-    @ApiOperation(value = "Get languages",
+    @ApiOperation(value = "Get supported languages",
             response = String.class,
             responseContainer = "List")
     @ApiResponses(value = {

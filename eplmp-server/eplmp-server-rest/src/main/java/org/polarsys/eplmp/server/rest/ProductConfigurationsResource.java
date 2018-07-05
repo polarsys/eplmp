@@ -108,7 +108,7 @@ public class ProductConfigurationsResource {
 
 
     @GET
-    @ApiOperation(value = "Get product configuration",
+    @ApiOperation(value = "Get product configuration by id",
             response = ProductConfigurationDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of ProductConfigurationDTO"),
@@ -157,7 +157,7 @@ public class ProductConfigurationsResource {
     }
 
     @POST
-    @ApiOperation(value = "Create product configuration",
+    @ApiOperation(value = "Create a new product configuration",
             response = ProductConfigurationDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of created ProductConfigurationDTO"),

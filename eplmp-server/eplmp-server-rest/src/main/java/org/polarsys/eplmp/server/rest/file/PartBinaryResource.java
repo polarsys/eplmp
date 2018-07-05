@@ -181,7 +181,7 @@ public class PartBinaryResource {
     }
 
     @GET
-    @ApiOperation(value = "Download part file",
+    @ApiOperation(value = "Download part file without a sub type",
             response = File.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Download success"),
@@ -210,7 +210,7 @@ public class PartBinaryResource {
     }
 
     @GET
-    @ApiOperation(value = "Download part file",
+    @ApiOperation(value = "Download part file with a sub type",
             response = File.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Download success"),

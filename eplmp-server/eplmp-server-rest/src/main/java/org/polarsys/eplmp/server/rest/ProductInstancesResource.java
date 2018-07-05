@@ -120,7 +120,7 @@ public class ProductInstancesResource {
     }
 
     @POST
-    @ApiOperation(value = "Create product-instance",
+    @ApiOperation(value = "Create a new product-instance",
             response = ProductInstanceMasterDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of ProductInstanceMasterDTO"),
@@ -227,7 +227,7 @@ public class ProductInstancesResource {
     }
 
     @GET
-    @ApiOperation(value = "Get product-instance",
+    @ApiOperation(value = "Get product-instance by serial number",
             response = ProductInstanceMasterDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of ProductInstanceMasterDTO"),
@@ -412,7 +412,7 @@ public class ProductInstancesResource {
     }
 
     @PUT
-    @ApiOperation(value = "Rebase product-instance",
+    @ApiOperation(value = "Rebase product-instance with given baseline",
             response = Response.class)
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful rebase of ProductInstanceIterationDTO"),
@@ -437,7 +437,7 @@ public class ProductInstancesResource {
     }
 
     @PUT
-    @ApiOperation(value = "Rename attached file in product instance",
+    @ApiOperation(value = "Rename attached file in product instance iteration",
             response = FileDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of renamed FileDTO"),
@@ -464,7 +464,7 @@ public class ProductInstancesResource {
     }
 
     @GET
-    @ApiOperation(value = "Get product-instance's path-data",
+    @ApiOperation(value = "Get product-instance's last iteration path-data",
             response = PathDataMasterDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of PathDataMasterDTO"),
@@ -671,7 +671,7 @@ public class ProductInstancesResource {
     }
 
     @POST
-    @ApiOperation(value = "Create new path-data",
+    @ApiOperation(value = "Create a new path-data in product-instance last iteration",
             response = PathDataMasterDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of created PathDataMaster"),

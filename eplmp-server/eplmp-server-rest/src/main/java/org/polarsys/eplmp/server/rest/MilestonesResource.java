@@ -84,7 +84,7 @@ public class MilestonesResource {
     }
 
     @POST
-    @ApiOperation(value = "Create milestone",
+    @ApiOperation(value = "Create a new milestone",
             response = MilestoneDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of created MilestoneDTO"),
@@ -105,7 +105,7 @@ public class MilestonesResource {
     }
 
     @GET
-    @ApiOperation(value = "Get milestone",
+    @ApiOperation(value = "Get a milestone by id",
             response = MilestoneDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of MilestoneDTO"),
@@ -171,7 +171,7 @@ public class MilestonesResource {
     }
 
     @GET
-    @ApiOperation(value = "Get requests for the given milestone",
+    @ApiOperation(value = "Get change requests for a given milestone",
             response = ChangeRequestDTO.class,
             responseContainer = "List")
     @ApiResponses(value = {
@@ -196,7 +196,7 @@ public class MilestonesResource {
     }
 
     @GET
-    @ApiOperation(value = "Get orders for the given milestone",
+    @ApiOperation(value = "Get change orders for a given milestone",
             response = ChangeOrderDTO.class,
             responseContainer = "List")
     @ApiResponses(value = {
@@ -221,7 +221,7 @@ public class MilestonesResource {
     }
 
     @PUT
-    @ApiOperation(value = "Update ACL of the milestone",
+    @ApiOperation(value = "Update ACL of a milestone",
             response = Response.class)
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful ACL update of MilestoneDTO"),

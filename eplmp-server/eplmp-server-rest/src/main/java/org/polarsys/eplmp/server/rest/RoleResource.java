@@ -65,7 +65,7 @@ public class RoleResource {
     }
 
     @GET
-    @ApiOperation(value = "Get roles",
+    @ApiOperation(value = "Get roles in given workspace",
             response = RoleDTO.class,
             responseContainer = "List")
     @ApiResponses(value = {
@@ -90,7 +90,7 @@ public class RoleResource {
     }
 
     @GET
-    @ApiOperation(value = "Get roles in use",
+    @ApiOperation(value = "Get roles in use in given workspace",
             response = RoleDTO.class,
             responseContainer = "List")
     @ApiResponses(value = {
@@ -118,7 +118,7 @@ public class RoleResource {
 
 
     @POST
-    @ApiOperation(value = "Create role",
+    @ApiOperation(value = "Create a new role",
             response = RoleDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of created RoleDTO"),
@@ -159,7 +159,7 @@ public class RoleResource {
     }
 
     @PUT
-    @ApiOperation(value = "Update role",
+    @ApiOperation(value = "Update a role",
             response = RoleDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of updated RoleDTO"),
@@ -201,7 +201,7 @@ public class RoleResource {
     }
 
     @DELETE
-    @ApiOperation(value = "Delete role",
+    @ApiOperation(value = "Delete a role",
             response = Response.class)
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful deletion of RoleDTO"),

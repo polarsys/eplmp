@@ -44,7 +44,7 @@ public class ModificationNotificationResource {
     }
 
     @PUT
-    @ApiOperation(value = "Acknowledge modification notification",
+    @ApiOperation(value = "Acknowledge a modification notification",
             response = Response.class)
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful acknowledge of ModificationNotification"),
