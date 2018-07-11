@@ -556,6 +556,10 @@ public class DocumentRevision implements Serializable, Comparable<DocumentRevisi
         return releaseStatusChange == null ? null : releaseStatusChange.getStatusModificationDate();
     }
 
+    public boolean isLastRevision() {
+        return documentMaster.getLastRevision().equals(this);
+    }
+
     @Override
     public String toString() {
         return documentMaster.getId() + "-" + version;
