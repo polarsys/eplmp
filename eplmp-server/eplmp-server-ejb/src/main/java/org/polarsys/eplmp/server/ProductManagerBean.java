@@ -404,6 +404,10 @@ public class ProductManagerBean implements IProductManagerLocal {
             throw new AccessRightException(locale, user);
         }
 
+        if(!partR.isLastRevision()) {
+            throw new NotAllowedException(locale, "NotAllowedException72");
+        }
+
         if (partR.isCheckedOut()) {
             throw new NotAllowedException(locale, "NotAllowedException37");
         }

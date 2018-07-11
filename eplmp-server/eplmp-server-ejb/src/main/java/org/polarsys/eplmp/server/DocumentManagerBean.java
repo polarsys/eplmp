@@ -882,7 +882,10 @@ public class DocumentManagerBean implements IDocumentManagerLocal {
         Locale locale = new Locale(user.getLanguage());
         DocumentRevisionDAO docRDAO = new DocumentRevisionDAO(locale, em);
         DocumentRevision docR = docRDAO.loadDocR(pDocRPK);
-        //Check access rights on docR
+
+        if (!docR.isLastRevision()) {
+            throw new NotAllowedException(locale, "NotAllowedException72");
+        }
 
         if (docR.isCheckedOut()) {
             throw new NotAllowedException(locale, "NotAllowedException37");
