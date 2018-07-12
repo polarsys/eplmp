@@ -28,6 +28,7 @@ import org.polarsys.eplmp.core.util.NamingConvention;
 import org.polarsys.eplmp.core.util.Tools;
 import org.polarsys.eplmp.server.LogDocument;
 import org.polarsys.eplmp.server.configuration.PSFilterVisitor;
+import org.polarsys.eplmp.server.configuration.PSFilterVisitorCallbacks;
 import org.polarsys.eplmp.server.configuration.spec.ProductBaselineConfigSpec;
 import org.polarsys.eplmp.server.dao.*;
 import org.polarsys.eplmp.server.factory.ACLFactory;
@@ -104,6 +105,9 @@ public class ProductInstanceManagerBean implements IProductInstanceManagerLocal 
 
     @Inject
     private IBinaryStorageManagerLocal storageManager;
+
+    @Inject
+    private PSFilterVisitor psFilterVisitor;
 
     private static final Logger LOGGER = Logger.getLogger(ProductInstanceManagerBean.class.getName());
 
@@ -390,7 +394,7 @@ public class ProductInstanceManagerBean implements IProductInstanceManagerLocal 
 
         ProductStructureFilter filter = new ProductBaselineConfigSpec(productBaseline);
 
-        PSFilterVisitor psFilterVisitor = new PSFilterVisitor(em, user, filter) {
+        PSFilterVisitorCallbacks callbacks = new PSFilterVisitorCallbacks() {
             @Override
             public void onIndeterminateVersion(PartMaster partMaster, List<PartIteration> partIterations) throws NotAllowedException {
                 // Unused here
@@ -503,7 +507,7 @@ public class ProductInstanceManagerBean implements IProductInstanceManagerLocal 
             }
         };
 
-        psFilterVisitor.visit(partMaster, -1);
+        psFilterVisitor.visit(user, filter, partMaster, -1, callbacks);
 
         nextIteration.setPathDataMasterList(pathDataMasterList);
 

@@ -570,14 +570,12 @@ public class UserManagerBean implements IUserManagerLocal {
 
     @RolesAllowed({UserGroupMapping.REGULAR_USER_ROLE_ID, UserGroupMapping.ADMIN_ROLE_ID})
     @Override
-    public boolean isUserEnabled(String login, String pWorkspaceId) throws AccountNotFoundException, WorkspaceNotFoundException, UserNotFoundException {
+    public boolean isUserEnabled(String login, String pWorkspaceId) throws AccountNotFoundException, UserNotFoundException {
         String callerLogin = contextManager.getCallerPrincipalLogin();
-        Account account = new AccountDAO(em).loadAccount(callerLogin);
-        Locale locale = new Locale(account.getLanguage());
-        UserDAO userDAO = new UserDAO(locale, em);
+        accountDAO.loadAccount(callerLogin);
         WorkspaceUserMembership userMS = userDAO.loadUserMembership(new WorkspaceUserMembershipKey(pWorkspaceId, pWorkspaceId, login));
         User user = userDAO.loadUser(new UserKey(pWorkspaceId, login));
-        WorkspaceUserGroupMembership[] groupMS = new UserGroupDAO(em).getUserGroupMemberships(pWorkspaceId, user);
+        WorkspaceUserGroupMembership[] groupMS = userGroupDAO.getUserGroupMemberships(pWorkspaceId, user);
         return userMS != null || groupMS.length > 0;
     }
 }

@@ -278,7 +278,7 @@ public class ChangeManagerBean implements IChangeManagerLocal {
     @Override
     public List<ChangeRequest> getRequestsWithName(String pWorkspaceId, String name, int maxResults) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, WorkspaceNotEnabledException {
         User user = userManager.checkWorkspaceReadAccess(pWorkspaceId);
-        List<ChangeRequest> allChangeRequests = changeItemDAO.findAllChangeRequestsWithReferenceLike(pWorkspaceId, q, maxResults);
+        List<ChangeRequest> allChangeRequests = changeItemDAO.findAllChangeRequestsWithReferenceLike(pWorkspaceId, name, maxResults);
         List<ChangeRequest> visibleChangeRequests = new ArrayList<>();
         for (ChangeRequest changeRequest : allChangeRequests) {
             try {

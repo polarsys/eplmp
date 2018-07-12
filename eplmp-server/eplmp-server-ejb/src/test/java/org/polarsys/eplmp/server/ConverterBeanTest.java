@@ -11,7 +11,6 @@
 package org.polarsys.eplmp.server;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -26,7 +25,6 @@ import org.polarsys.eplmp.core.services.IProductManagerLocal;
 import org.polarsys.eplmp.server.converters.CADConverter;
 import org.polarsys.eplmp.server.converters.ConversionResult;
 
-import javax.persistence.EntityManager;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.net.URI;
@@ -44,45 +42,41 @@ import static org.mockito.Mockito.*;
 public class ConverterBeanTest {
 
     @Mock
-    BeanLocator locator;
+    private BeanLocator locator;
 
     @Mock
-    EntityManager em;
+    private IProductManagerLocal product;
 
     @Mock
-    IProductManagerLocal product;
-
-    @Mock
-    IBinaryStorageManagerLocal storage;
+    private IBinaryStorageManagerLocal storage;
 
     @InjectMocks
-    ConverterBean bean;
+    private ConverterBean bean;
 
     @Mock
-    PartIterationKey ipk;
+    private PartIterationKey ipk;
 
     @Mock
-    PartIteration partIter;
+    private PartIteration partIter;
 
     @Mock
-    BinaryResource cadBinRes;
+    private BinaryResource cadBinRes;
 
     @Mock
-    CADConverter conv;
+    private CADConverter conv;
 
     @Mock
-    ConversionResult result;
+    private ConversionResult result;
 
     @Mock
-    Geometry lod;
+    private Geometry lod;
 
     @Mock
-    BinaryResource attachedFile;
+    private BinaryResource attachedFile;
 
     @Before
     public void setup() throws Exception {
         when(cadBinRes.getName()).thenReturn("foo.dae");
-        when(em.find(PartIteration.class, ipk)).thenReturn(partIter);
         when(storage.getBinaryResourceInputStream(cadBinRes))
                 .thenReturn(new ByteArrayInputStream("fake content".getBytes()));
 

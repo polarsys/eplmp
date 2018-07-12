@@ -25,6 +25,7 @@ import org.polarsys.eplmp.core.services.IProductManagerLocal;
 import org.polarsys.eplmp.core.services.IUserManagerLocal;
 import org.polarsys.eplmp.core.util.Tools;
 import org.polarsys.eplmp.server.configuration.PSFilterVisitor;
+import org.polarsys.eplmp.server.configuration.PSFilterVisitorCallbacks;
 import org.polarsys.eplmp.server.configuration.filter.LatestPSFilter;
 import org.polarsys.eplmp.server.configuration.filter.ReleasedPSFilter;
 import org.polarsys.eplmp.server.configuration.spec.ProductBaselineCreationConfigSpec;
@@ -81,9 +82,12 @@ public class ProductBaselineManagerBean implements IProductBaselineManagerLocal 
     @Inject
     private IProductManagerLocal productManager;
 
+    @Inject
+    private PSFilterVisitor psFilterVisitor;
+
     @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
     @Override
-    public ProductBaseline createBaseline(ConfigurationItemKey ciKey, String name, ProductBaselineType pType, String description, List<PartIterationKey> partIterationKeys, List<String> substituteLinks, List<String> optionalUsageLinks) throws UserNotFoundException, AccessRightException, WorkspaceNotFoundException, ConfigurationItemNotFoundException, PartRevisionNotReleasedException, PartIterationNotFoundException, UserNotActiveException, NotAllowedException, EntityConstraintException, PartMasterNotFoundException, CreationException, BaselineNotFoundException, PathToPathLinkAlreadyExistsException, WorkspaceNotEnabledException {
+    public ProductBaseline createBaseline(ConfigurationItemKey ciKey, String name, ProductBaselineType pType, String description, List<PartIterationKey> partIterationKeys, List<String> substituteLinks, List<String> optionalUsageLinks) throws UserNotFoundException, AccessRightException, WorkspaceNotFoundException, ConfigurationItemNotFoundException, NotAllowedException, EntityConstraintException, PartMasterNotFoundException, CreationException, BaselineNotFoundException, PathToPathLinkAlreadyExistsException, WorkspaceNotEnabledException {
 
         User user = userManager.checkWorkspaceWriteAccess(ciKey.getWorkspace());
         Locale userLocale = user.getLocale();
@@ -103,7 +107,7 @@ public class ProductBaselineManagerBean implements IProductBaselineManagerLocal 
 
         List<String> visitedPaths = new ArrayList<>();
 
-        PSFilterVisitor psFilterVisitor = new PSFilterVisitor(em, user, filter) {
+        psFilterVisitor.visit(user, filter, configurationItem.getDesignItem(), -1, new PSFilterVisitorCallbacks() {
             @Override
             public void onIndeterminateVersion(PartMaster partMaster, List<PartIteration> partIterations) throws NotAllowedException {
                 throw new NotAllowedException(userLocale, "NotAllowedException48");
@@ -141,10 +145,7 @@ public class ProductBaselineManagerBean implements IProductBaselineManagerLocal 
                 visitedPaths.add(encodedPath);
                 return true;
             }
-
-        };
-
-        psFilterVisitor.visit(configurationItem.getDesignItem(), -1);
+        });
 
         // Visitor has finished, and should have thrown an exception if errors
         ProductBaseline baseline = new ProductBaseline(user, configurationItem, name, pType, description);
@@ -240,7 +241,7 @@ public class ProductBaselineManagerBean implements IProductBaselineManagerLocal 
     @Override
     public List<BaselinedPart> getBaselinedPartWithReference(int baselineId, String q, int maxResults) throws BaselineNotFoundException, UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, WorkspaceNotEnabledException {
         ProductBaseline productBaseline = productBaselineDAO.loadBaseline(baselineId);
-        User user = userManager.checkWorkspaceReadAccess(productBaseline.getConfigurationItem().getWorkspaceId());
+        userManager.checkWorkspaceReadAccess(productBaseline.getConfigurationItem().getWorkspaceId());
         return productBaselineDAO.findBaselinedPartWithReferenceLike(productBaseline.getPartCollection().getId(), q, maxResults);
     }
 
@@ -262,8 +263,7 @@ public class ProductBaselineManagerBean implements IProductBaselineManagerLocal 
 
         List<PathChoice> choices = new ArrayList<>();
 
-        PSFilterVisitor psFilterVisitor = new PSFilterVisitor(em, user, filter) {
-
+        psFilterVisitor.visit(user, filter, configurationItem.getDesignItem(), -1, new PSFilterVisitorCallbacks() {
             @Override
             public void onIndeterminateVersion(PartMaster partMaster, List<PartIteration> partIterations) throws NotAllowedException {
                 // Unused here
@@ -307,10 +307,7 @@ public class ProductBaselineManagerBean implements IProductBaselineManagerLocal 
                 }
                 choices.add(new PathChoice(resolvedPath, pCurrentPath.get(pCurrentPath.size() - 1)));
             }
-
-        };
-
-        psFilterVisitor.visit(configurationItem.getDesignItem(), -1);
+        });
 
         return choices;
     }
@@ -328,7 +325,7 @@ public class ProductBaselineManagerBean implements IProductBaselineManagerLocal 
 
         ProductStructureFilter filter = new ReleasedPSFilter(user, true);
 
-        PSFilterVisitor psFilterVisitor = new PSFilterVisitor(em, user, filter) {
+        psFilterVisitor.visit(user, filter, configurationItem.getDesignItem(), -1, new PSFilterVisitorCallbacks() {
             @Override
             public void onIndeterminateVersion(PartMaster partMaster, List<PartIteration> partIterations) throws NotAllowedException {
                 parts.addAll(partIterations);
@@ -364,9 +361,7 @@ public class ProductBaselineManagerBean implements IProductBaselineManagerLocal 
             public void onUnresolvedVersion(PartMaster partMaster) {
                 // Unused here
             }
-        };
-
-        psFilterVisitor.visit(configurationItem.getDesignItem(), -1);
+        });
 
         return new ArrayList<>(parts);
     }

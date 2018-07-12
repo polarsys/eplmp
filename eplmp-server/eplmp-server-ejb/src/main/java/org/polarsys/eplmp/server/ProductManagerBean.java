@@ -29,6 +29,7 @@ import org.polarsys.eplmp.core.util.NamingConvention;
 import org.polarsys.eplmp.core.util.Tools;
 import org.polarsys.eplmp.core.workflow.*;
 import org.polarsys.eplmp.server.configuration.PSFilterVisitor;
+import org.polarsys.eplmp.server.configuration.PSFilterVisitorCallbacks;
 import org.polarsys.eplmp.server.configuration.filter.LatestPSFilter;
 import org.polarsys.eplmp.server.configuration.filter.UpdatePartIterationPSFilter;
 import org.polarsys.eplmp.server.configuration.filter.WIPPSFilter;
@@ -198,6 +199,9 @@ public class ProductManagerBean implements IProductManagerLocal {
     @Inject
     private Event<PartRevisionEvent> partRevisionEvent;
 
+    @Inject
+    private PSFilterVisitor psFilterVisitor;
+
     private static final Logger LOGGER = Logger.getLogger(ProductManagerBean.class.getName());
 
     @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
@@ -210,7 +214,7 @@ public class ProductManagerBean implements IProductManagerLocal {
 
         ConfigurationItem ci = configurationItemDAO.loadConfigurationItem(user.getLocale(), pKey);
 
-        PSFilterVisitor psFilterVisitor = new PSFilterVisitor(em, user, filter) {
+        psFilterVisitor.visit(user, filter, ci.getDesignItem(), -1, new PSFilterVisitorCallbacks() {
             @Override
             public void onIndeterminateVersion(PartMaster partMaster, List<PartIteration> partIterations) throws NotAllowedException {
                 // Unused here
@@ -251,10 +255,7 @@ public class ProductManagerBean implements IProductManagerLocal {
                 }
                 return true;
             }
-
-        };
-
-        psFilterVisitor.visit(ci.getDesignItem(), -1);
+        });
 
         return usagePaths;
     }
@@ -2458,7 +2459,7 @@ public class ProductManagerBean implements IProductManagerLocal {
 
         User user = userManager.checkWorkspaceReadAccess(ciKey.getWorkspace());
 
-        PSFilterVisitor psFilterVisitor = new PSFilterVisitor(em, user, filter) {
+        PSFilterVisitorCallbacks callbacks = new PSFilterVisitorCallbacks() {
             @Override
             public void onIndeterminateVersion(PartMaster partMaster, List<PartIteration> partIterations) throws NotAllowedException {
                 // Unused here
@@ -2498,9 +2499,9 @@ public class ProductManagerBean implements IProductManagerLocal {
 
         if (path == null) {
             ConfigurationItem ci = configurationItemDAO.loadConfigurationItem(user.getLocale(), ciKey);
-            psFilterVisitor.visit(ci.getDesignItem(), pDepth);
+            psFilterVisitor.visit(user, filter, ci.getDesignItem(), pDepth, callbacks);
         } else {
-            psFilterVisitor.visit(path, pDepth);
+            psFilterVisitor.visit(user, filter, path, pDepth, callbacks);
         }
 
         return psFilterVisitor.getComponent();
@@ -2513,7 +2514,8 @@ public class ProductManagerBean implements IProductManagerLocal {
     public Set<PartRevision> getWritablePartRevisionsFromPath(ConfigurationItemKey configurationItemKey, String path) throws EntityConstraintException, PartMasterNotFoundException, NotAllowedException, UserNotFoundException, WorkspaceNotFoundException, UserNotActiveException, ConfigurationItemNotFoundException, PartUsageLinkNotFoundException, WorkspaceNotEnabledException {
         User user = userManager.checkWorkspaceReadAccess(configurationItemKey.getWorkspace());
         Set<PartRevision> partRevisions = new HashSet<>();
-        PSFilterVisitor psFilterVisitor = new PSFilterVisitor(em, user, new WIPPSFilter(user)) {
+
+        psFilterVisitor.visit(user, new WIPPSFilter(user), decodePath(configurationItemKey, path), null, new PSFilterVisitorCallbacks() {
             @Override
             public void onIndeterminateVersion(PartMaster partMaster, List<PartIteration> partIterations) throws NotAllowedException {
 
@@ -2563,9 +2565,7 @@ public class ProductManagerBean implements IProductManagerLocal {
                 }
                 return true;
             }
-        };
-
-        psFilterVisitor.visit(decodePath(configurationItemKey, path), null);
+        });
         return partRevisions;
     }
 
@@ -2959,8 +2959,7 @@ public class ProductManagerBean implements IProductManagerLocal {
 
         User user = userManager.checkWorkspaceReadAccess(workspace.getId());
 
-        // Navigate the WIP
-        PSFilterVisitor psFilterVisitor = new PSFilterVisitor(em, user, new UpdatePartIterationPSFilter(user, partIteration)) {
+        psFilterVisitor.visit(user, new UpdatePartIterationPSFilter(user, partIteration), partMaster, -1, new PSFilterVisitorCallbacks() {
             @Override
             public void onIndeterminateVersion(PartMaster partMaster, List<PartIteration> partIterations) throws NotAllowedException {
                 // Unused here
@@ -2996,9 +2995,7 @@ public class ProductManagerBean implements IProductManagerLocal {
             public void onUnresolvedVersion(PartMaster partMaster) {
                 // Unused here
             }
-        };
-
-        psFilterVisitor.visit(partMaster, -1);
+        });
 
     }
 
@@ -3021,7 +3018,7 @@ public class ProductManagerBean implements IProductManagerLocal {
         LatestPSFilter latestPSFilter = new LatestPSFilter(user, true);
         final boolean[] hasModificationNotification = {false};
 
-        PSFilterVisitor psFilterVisitor = new PSFilterVisitor(em, user, latestPSFilter) {
+        psFilterVisitor.visit(user, latestPSFilter, configurationItem.getDesignItem(), -1, new PSFilterVisitorCallbacks() {
             @Override
             public void onIndeterminateVersion(PartMaster partMaster, List<PartIteration> partIterations) throws NotAllowedException {
                 // Unused here
@@ -3068,9 +3065,7 @@ public class ProductManagerBean implements IProductManagerLocal {
             public void onUnresolvedVersion(PartMaster partMaster) {
                 // Unused here
             }
-        };
-
-        psFilterVisitor.visit(configurationItem.getDesignItem(), -1);
+        });
 
         return hasModificationNotification[0];
     }
@@ -3125,8 +3120,7 @@ public class ProductManagerBean implements IProductManagerLocal {
         ConfigurationItem ci = configurationItemDAO.loadConfigurationItem(user.getLocale(), ciKey);
         PartMaster root = ci.getDesignItem();
 
-
-        PSFilterVisitor psFilterVisitor = new PSFilterVisitor(em, user, psFilter) {
+        psFilterVisitor.visit(user, psFilter, root, -1, new PSFilterVisitorCallbacks() {
             @Override
             public void onIndeterminateVersion(PartMaster partMaster, List<PartIteration> partIterations) throws NotAllowedException {
                 // Unused here
@@ -3221,9 +3215,7 @@ public class ProductManagerBean implements IProductManagerLocal {
             public void onUnresolvedVersion(PartMaster partMaster) {
                 // Unused here
             }
-        };
-
-        psFilterVisitor.visit(root, -1);
+        });
 
         return result;
     }
@@ -3285,8 +3277,7 @@ public class ProductManagerBean implements IProductManagerLocal {
 
         final List<String> finalFilteredPathsFromQuery = filteredPathsFromQuery;
 
-
-        PSFilterVisitor psFilterVisitor = new PSFilterVisitor(em, user, filter) {
+        psFilterVisitor.visit(user, filter, root, -1, new PSFilterVisitorCallbacks() {
             @Override
             public void onIndeterminateVersion(PartMaster partMaster, List<PartIteration> partIterations) throws NotAllowedException {
                 // Unused here
@@ -3366,9 +3357,7 @@ public class ProductManagerBean implements IProductManagerLocal {
             public void onUnresolvedVersion(PartMaster partMaster) {
                 // Unused here
             }
-        };
-
-        psFilterVisitor.visit(root, -1);
+        });
         return rows;
     }
 

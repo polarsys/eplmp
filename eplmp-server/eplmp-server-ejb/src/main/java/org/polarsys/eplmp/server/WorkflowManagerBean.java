@@ -297,12 +297,11 @@ public class WorkflowManagerBean implements IWorkflowManagerLocal {
             ACL acl = aclFactory.createACL(pWorkspaceId, userEntries, groupEntries);
             workflowModel.setAcl(acl);
         }else{
-            aclFactory.updateACL(pWorkspaceId,workflowModel.getAcl(),userEntries, groupEntries);
+            ACL acl = aclFactory.updateACL(pWorkspaceId,workflowModel.getAcl(),userEntries, groupEntries);
+            workflowModel.setAcl(acl);
         }
 
         return workflowModel;
-
-
     }
 
     @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
