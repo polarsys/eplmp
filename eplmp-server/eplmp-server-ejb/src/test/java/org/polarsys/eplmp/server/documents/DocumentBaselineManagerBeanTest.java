@@ -11,6 +11,13 @@
 
 package org.polarsys.eplmp.server.documents;
 
+import org.junit.Assert;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.runners.MockitoJUnitRunner;
 import org.polarsys.eplmp.core.common.Account;
 import org.polarsys.eplmp.core.common.User;
 import org.polarsys.eplmp.core.common.Workspace;
@@ -19,46 +26,45 @@ import org.polarsys.eplmp.core.configuration.DocumentBaselineType;
 import org.polarsys.eplmp.core.document.DocumentMaster;
 import org.polarsys.eplmp.core.document.DocumentRevision;
 import org.polarsys.eplmp.core.document.DocumentRevisionKey;
-import org.polarsys.eplmp.core.meta.Folder;
 import org.polarsys.eplmp.core.exceptions.NotAllowedException;
+import org.polarsys.eplmp.core.meta.Folder;
 import org.polarsys.eplmp.core.services.IDocumentManagerLocal;
 import org.polarsys.eplmp.core.services.IUserManagerLocal;
 import org.polarsys.eplmp.i18n.PropertiesLoader;
-import org.polarsys.eplmp.server.BinaryStorageManagerBean;
+import org.polarsys.eplmp.server.dao.DocumentBaselineDAO;
+import org.polarsys.eplmp.server.dao.DocumentRevisionDAO;
 import org.polarsys.eplmp.server.dao.WorkspaceDAO;
 import org.polarsys.eplmp.server.util.DocumentUtil;
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.runners.MockitoJUnitRunner;
 
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Properties;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DocumentBaselineManagerBeanTest {
 
     private final static String PROPERTIES_BASE_NAME = "/org/polarsys/eplmp/core/i18n/LocalStrings";
 
-    @InjectMocks
-    DocumentBaselineManagerBean docBaselineManagerBean = new DocumentBaselineManagerBean();
     @Mock
-    IDocumentManagerLocal documentManagerLocal;
+    private WorkspaceDAO workspaceDAO;
     @Mock
-    IUserManagerLocal userManager;
+    private IUserManagerLocal userManager;
     @Mock
-    EntityManager em;
+    private EntityManager em;
     @Mock
-    BinaryStorageManagerBean dataManager;
+    private TypedQuery<Folder> folderTypedQuery;
     @Mock
-    TypedQuery<Folder> folderTypedQuery;
+    private IDocumentManagerLocal documentService;
     @Mock
-    IDocumentManagerLocal documentService;
+    private DocumentRevisionDAO documentRevisionDAO;
+    @Mock
+    private DocumentBaselineDAO documentBaselineDAO;
 
+    @InjectMocks
+    private DocumentBaselineManagerBean docBaselineManagerBean = new DocumentBaselineManagerBean();
 
     private Account account = new Account(DocumentUtil.USER_2_LOGIN, DocumentUtil.USER_2_NAME, DocumentUtil.USER2_MAIL, DocumentUtil.LANGUAGE, new Date(), null);
     private Workspace workspace = new Workspace("workspace01", account, DocumentUtil.WORKSPACE_DESCRIPTION, false);
@@ -78,7 +84,7 @@ public class DocumentBaselineManagerBeanTest {
         Mockito.when(em.find(Workspace.class, workspace.getId())).thenReturn(workspace);
         Mockito.when(em.createQuery("SELECT DISTINCT f FROM Folder f WHERE f.parentFolder.completePath = :completePath", Folder.class)).thenReturn(folderTypedQuery);
         Mockito.when(folderTypedQuery.getResultList()).thenReturn(new ArrayList<>(0));
-        Mockito.when(new WorkspaceDAO(new Locale("en"), em).loadWorkspace(workspace.getId())).thenReturn(workspace);
+        Mockito.when(workspaceDAO.loadWorkspace(workspace.getId())).thenReturn(workspace);
         Mockito.when(em.find(Folder.class, workspace.getId())).thenReturn(folder);
         Mockito.when(documentService.getAllDocumentsInWorkspace(workspace.getId())).thenReturn(new DocumentRevision[0]);
 
@@ -86,13 +92,12 @@ public class DocumentBaselineManagerBeanTest {
         try {
             docBaselineManagerBean.createBaseline(workspace.getId(), "name", DocumentBaselineType.RELEASED, "description", new ArrayList<>());
         } catch (NotAllowedException e) {
-            Properties properties = PropertiesLoader.loadLocalizedProperties(new Locale(user.getLanguage()), PROPERTIES_BASE_NAME, getClass());
+            Properties properties = PropertiesLoader.loadLocalizedProperties(user.getLocale(), PROPERTIES_BASE_NAME, getClass());
             String expected = properties.getProperty("NotAllowedException66");
             Assert.assertEquals(expected, e.getMessage());
         }
 
     }
-
 
     /**
      * test that we can baseline documents
@@ -106,7 +111,7 @@ public class DocumentBaselineManagerBeanTest {
         Mockito.when(em.find(Workspace.class, workspace.getId())).thenReturn(workspace);
         Mockito.when(em.createQuery("SELECT DISTINCT f FROM Folder f WHERE f.parentFolder.completePath = :completePath", Folder.class)).thenReturn(folderTypedQuery);
         Mockito.when(folderTypedQuery.getResultList()).thenReturn(new ArrayList<>(0));
-        Mockito.when(new WorkspaceDAO(new Locale("en"), em).loadWorkspace(workspace.getId())).thenReturn(workspace);
+        Mockito.when(workspaceDAO.loadWorkspace(workspace.getId())).thenReturn(workspace);
         Mockito.when(em.find(Folder.class, workspace.getId())).thenReturn(folder);
         DocumentRevision[] revisions = new DocumentRevision[2];
 
@@ -129,7 +134,8 @@ public class DocumentBaselineManagerBeanTest {
 
         Mockito.when(documentService.getAllDocumentsInWorkspace(workspace.getId())).thenReturn(revisions);
         Mockito.when(userManager.checkWorkspaceReadAccess(workspace.getId())).thenReturn(user);
-
+        Mockito.when(documentRevisionDAO.loadDocR(documentRevision1.getKey())).thenReturn(documentRevision1);
+        Mockito.when(documentRevisionDAO.loadDocR(documentRevision2.getKey())).thenReturn(documentRevision2);
 
         //when
         List<DocumentRevisionKey> documentRevisionKeys = new ArrayList<>();
@@ -138,7 +144,7 @@ public class DocumentBaselineManagerBeanTest {
         DocumentBaseline documentBaseline = docBaselineManagerBean.createBaseline(workspace.getId(), "name", DocumentBaselineType.LATEST, "description", documentRevisionKeys);
 
         //Then
-        Assert.assertTrue(documentBaseline != null);
+        Assert.assertNotNull(documentBaseline);
         Assert.assertTrue(documentBaseline.hasBaselinedDocument(documentRevision1.getKey()));
         Assert.assertTrue(documentBaseline.hasBaselinedDocument(documentRevision2.getKey()));
         Assert.assertNotNull(documentBaseline.getBaselinedDocument(documentRevision1.getKey()));

@@ -13,6 +13,7 @@ package org.polarsys.eplmp.core.common;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.Locale;
 
 /**
  * This class represents a user in the context of a specific workspace.
@@ -101,6 +102,10 @@ public class User implements Serializable, Cloneable {
 
     public String getWorkspaceId() {
         return workspaceId;
+    }
+
+    public Locale getLocale() {
+        return new Locale(this.getLanguage());
     }
 
     @Override

@@ -14,21 +14,20 @@ package org.polarsys.eplmp.server.dao;
 import org.polarsys.eplmp.core.exceptions.PasswordRecoveryRequestNotFoundException;
 import org.polarsys.eplmp.core.security.PasswordRecoveryRequest;
 
+import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import java.util.Locale;
 
+@Stateless(name = "PasswordRecoveryRequestDAO")
 public class PasswordRecoveryRequestDAO {
 
+    @PersistenceContext
     private EntityManager em;
+
     private Locale mLocale;
 
-    public PasswordRecoveryRequestDAO(Locale pLocale, EntityManager pEM) {
-        em = pEM;
-        mLocale = pLocale;
-    }
-
-    public PasswordRecoveryRequestDAO(EntityManager pEM) {
-        em = pEM;
+    public PasswordRecoveryRequestDAO() {
         mLocale = Locale.getDefault();
     }
 
@@ -41,6 +40,10 @@ public class PasswordRecoveryRequestDAO {
         }
     }
 
+    public PasswordRecoveryRequest loadPasswordRecoveryRequest(Locale pLocale, String recoveryRequestUUID) throws PasswordRecoveryRequestNotFoundException {
+        this.mLocale = pLocale;
+        return loadPasswordRecoveryRequest(recoveryRequestUUID);
+    }
 
     public void removePasswordRecoveryRequest(PasswordRecoveryRequest pPasswdRRUuid) {
         em.remove(pPasswdRRUuid);

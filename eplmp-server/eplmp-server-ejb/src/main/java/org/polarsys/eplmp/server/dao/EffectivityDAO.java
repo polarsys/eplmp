@@ -17,22 +17,21 @@ import org.polarsys.eplmp.core.exceptions.EffectivityNotFoundException;
 import org.polarsys.eplmp.core.product.Effectivity;
 import org.polarsys.eplmp.core.product.PartRevision;
 
+import javax.ejb.Stateless;
 import javax.persistence.*;
 import java.util.List;
 import java.util.Locale;
 
+@Stateless(name = "EffectivityDAO")
 public class EffectivityDAO {
+
+    @PersistenceContext
     private EntityManager em;
+
     private Locale mLocale;
 
-    public EffectivityDAO(EntityManager pEM) {
-        em = pEM;
+    public EffectivityDAO() {
         mLocale = Locale.getDefault();
-    }
-
-    public EffectivityDAO(Locale locale, EntityManager pEM) {
-        em = pEM;
-        mLocale = locale;
     }
 
     public Effectivity loadEffectivity(int pId) throws EffectivityNotFoundException {
@@ -42,6 +41,11 @@ public class EffectivityDAO {
         } else {
             return effectivity;
         }
+    }
+
+    public Effectivity loadEffectivity(Locale pLocale, int pId) throws EffectivityNotFoundException {
+        mLocale = pLocale;
+        return loadEffectivity(pId);
     }
 
     public void updateEffectivity(Effectivity effectivity) {
@@ -67,6 +71,11 @@ public class EffectivityDAO {
             //thrown instead of EntityExistsException
             throw new CreationException(mLocale);
         }
+    }
+
+    public void createEffectivity(Locale pLocale, Effectivity pEffectivity) throws EffectivityAlreadyExistsException, CreationException {
+        mLocale = pLocale;
+        createEffectivity(pEffectivity);
     }
 
     public PartRevision getPartRevisionHolder(int pId) {

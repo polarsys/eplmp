@@ -16,32 +16,36 @@ import org.polarsys.eplmp.core.change.Milestone;
 import org.polarsys.eplmp.core.exceptions.MilestoneAlreadyExistsException;
 import org.polarsys.eplmp.core.exceptions.MilestoneNotFoundException;
 
+import javax.ejb.Stateless;
+import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
+import javax.persistence.PersistenceContext;
 import java.util.List;
 import java.util.Locale;
 
+@Stateless(name = "MilestoneDAO")
 public class MilestoneDAO {
 
+    public static final String WORKSPACE_ID = "workspaceId";
+    public static final String MILESTONE_ID = "milestoneId";
+    @PersistenceContext
     private EntityManager em;
+
+    @Inject
+    private ACLDAO aclDAO;
+
     private Locale mLocale;
 
-    public MilestoneDAO(Locale pLocale, EntityManager pEM) {
-        em = pEM;
-        mLocale = pLocale;
-    }
-
-    public MilestoneDAO(EntityManager pEM) {
-        em = pEM;
+    public MilestoneDAO() {
         mLocale = Locale.getDefault();
     }
 
 
     public List<Milestone> findAllMilestone(String pWorkspaceId) {
-        List<Milestone> milestones = em.createNamedQuery("Milestone.findMilestonesByWorkspace", Milestone.class)
-                                        .setParameter("workspaceId", pWorkspaceId)
+        return em.createNamedQuery("Milestone.findMilestonesByWorkspace", Milestone.class)
+                                        .setParameter(WORKSPACE_ID, pWorkspaceId)
                                         .getResultList();
-        return milestones;
     }
     
     public Milestone loadMilestone(int pId) throws MilestoneNotFoundException {
@@ -53,10 +57,15 @@ public class MilestoneDAO {
         }
     }
 
+    public Milestone loadMilestone(Locale pLocale, int pId) throws MilestoneNotFoundException {
+        mLocale = pLocale;
+        return loadMilestone(pId);
+    }
+
     public Milestone loadMilestone(String pTitle, String pWorkspace) throws MilestoneNotFoundException {
         Milestone milestone = em.createNamedQuery("Milestone.findMilestonesByTitleAndWorkspace", Milestone.class)
                 .setParameter("title", pTitle)
-                .setParameter("workspaceId", pWorkspace)
+                .setParameter(WORKSPACE_ID, pWorkspace)
                 .getSingleResult();
         if (milestone == null) {
             throw new MilestoneNotFoundException(mLocale, pTitle);
@@ -65,17 +74,26 @@ public class MilestoneDAO {
         }
     }
 
+    public Milestone loadMilestone(Locale pLocale, String pTitle, String pWorkspace) throws MilestoneNotFoundException {
+        mLocale = pLocale;
+        return loadMilestone(pTitle, pWorkspace);
+    }
+
     public void createMilestone(Milestone pMilestone) throws MilestoneAlreadyExistsException {
         if(!this.checkTitleUniqueness(pMilestone.getTitle(),pMilestone.getWorkspace().getId()))
             throw new MilestoneAlreadyExistsException(mLocale,pMilestone.getTitle());
 
-        if(pMilestone.getACL()!=null){
-            ACLDAO aclDAO = new ACLDAO(em);
+        if(pMilestone.getACL()!=null) {
             aclDAO.createACL(pMilestone.getACL());
         }
 
         em.persist(pMilestone);
         em.flush();
+    }
+
+    public void createMilestone(Locale pLocale, Milestone pMilestone) throws MilestoneAlreadyExistsException {
+        mLocale = pLocale;
+        createMilestone(pMilestone);
     }
 
     public void deleteMilestone(Milestone pMilestone) {
@@ -86,8 +104,8 @@ public class MilestoneDAO {
     public List<ChangeRequest> getAllRequests(int pId,String pWorkspace){
         try{
             return em.createNamedQuery("ChangeRequest.getRequestByMilestonesAndWorkspace",ChangeRequest.class)
-                    .setParameter("milestoneId", pId)
-                    .setParameter("workspaceId", pWorkspace)
+                    .setParameter(MILESTONE_ID, pId)
+                    .setParameter(WORKSPACE_ID, pWorkspace)
                     .getResultList();
         }catch(Exception e){
             return null;
@@ -97,8 +115,8 @@ public class MilestoneDAO {
     public List<ChangeOrder> getAllOrders(int pId,String pWorkspace){
         try{
             return em.createNamedQuery("ChangeOrder.getOrderByMilestonesAndWorkspace",ChangeOrder.class)
-                    .setParameter("milestoneId", pId)
-                    .setParameter("workspaceId", pWorkspace)
+                    .setParameter(MILESTONE_ID, pId)
+                    .setParameter(WORKSPACE_ID, pWorkspace)
                     .getResultList();
         }catch(Exception e){
             return null;
@@ -108,8 +126,8 @@ public class MilestoneDAO {
     public int getNumberOfRequests(int pId,String pWorkspace){
         try{
             return ((Number)em.createNamedQuery("ChangeRequest.countRequestByMilestonesAndWorkspace")
-                    .setParameter("milestoneId", pId)
-                    .setParameter("workspaceId", pWorkspace)
+                    .setParameter(MILESTONE_ID, pId)
+                    .setParameter(WORKSPACE_ID, pWorkspace)
                     .getSingleResult()).intValue();
         }catch(Exception e){
             return 0;
@@ -119,8 +137,8 @@ public class MilestoneDAO {
     public int getNumberOfOrders(int pId,String pWorkspace){
         try{
             return ((Number)em.createNamedQuery("ChangeOrder.countOrderByMilestonesAndWorkspace")
-                    .setParameter("milestoneId", pId)
-                    .setParameter("workspaceId", pWorkspace)
+                    .setParameter(MILESTONE_ID, pId)
+                    .setParameter(WORKSPACE_ID, pWorkspace)
                     .getSingleResult()).intValue();
         }catch(Exception e){
             return 0;
@@ -131,7 +149,7 @@ public class MilestoneDAO {
         try{
             return em.createNamedQuery("Milestone.findMilestonesByTitleAndWorkspace")
                     .setParameter("title", pTitle)
-                    .setParameter("workspaceId", pWorkspace)
+                    .setParameter(WORKSPACE_ID, pWorkspace)
                     .getResultList().isEmpty();
         }catch (NoResultException e){
             return true;

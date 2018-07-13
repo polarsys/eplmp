@@ -46,6 +46,12 @@ public class WebhookManagerBean implements IWebhookManagerLocal {
     private EntityManager em;
 
     @Inject
+    private WebhookDAO webhookDAO;
+
+    @Inject
+    private WorkspaceDAO workspaceDAO;
+
+    @Inject
     private IContextManagerLocal contextManager;
 
     @Inject
@@ -57,10 +63,10 @@ public class WebhookManagerBean implements IWebhookManagerLocal {
     public Webhook createWebhook(String workspaceId, String name, boolean active)
             throws UserNotFoundException, WorkspaceNotFoundException, UserNotActiveException, WorkspaceNotEnabledException, AccessRightException, AccountNotFoundException {
         Account account = userManager.checkAdmin(workspaceId);
-        WorkspaceDAO workspaceDAO = new WorkspaceDAO(new Locale(account.getLanguage()), em);
-        Workspace workspace = workspaceDAO.loadWorkspace(workspaceId);
+        Locale locale = new Locale(account.getLanguage());
+        Workspace workspace = workspaceDAO.loadWorkspace(locale, workspaceId);
         Webhook webhook = new Webhook(new SimpleWebhookApp(), name, active, workspace);
-        new WebhookDAO(new Locale(account.getLanguage()), em).createWebhook(webhook);
+        webhookDAO.createWebhook(webhook);
         return webhook;
     }
 
@@ -68,7 +74,6 @@ public class WebhookManagerBean implements IWebhookManagerLocal {
     @RolesAllowed({UserGroupMapping.REGULAR_USER_ROLE_ID})
     public List<Webhook> getWebHooks(String workspaceId) throws WorkspaceNotFoundException, AccountNotFoundException, AccessRightException {
         Account account = userManager.checkAdmin(workspaceId);
-        WebhookDAO webhookDAO = new WebhookDAO(new Locale(account.getLanguage()), em);
         return webhookDAO.loadWebhooks(workspaceId);
     }
 
@@ -77,7 +82,7 @@ public class WebhookManagerBean implements IWebhookManagerLocal {
     public Webhook getWebHook(String workspaceId, int id) throws WorkspaceNotFoundException, AccountNotFoundException, AccessRightException, WebhookNotFoundException {
         Account account = userManager.checkAdmin(workspaceId);
         Locale locale = new Locale(account.getLanguage());
-        Webhook webhook = new WebhookDAO(locale, em).loadWebhook(id);
+        Webhook webhook = webhookDAO.loadWebhook(locale, id);
         if (!webhook.getWorkspace().getId().equals(workspaceId)) {
             throw new WebhookNotFoundException(locale, id);
         }
@@ -98,8 +103,7 @@ public class WebhookManagerBean implements IWebhookManagerLocal {
     public void deleteWebhook(String workspaceId, int id) throws WorkspaceNotFoundException, AccountNotFoundException, AccessRightException, WebhookNotFoundException {
         Account account = userManager.checkAdmin(workspaceId);
         Locale locale = new Locale(account.getLanguage());
-        WebhookDAO webhookDAO = new WebhookDAO(locale, em);
-        Webhook webhook = webhookDAO.loadWebhook(id);
+        Webhook webhook = webhookDAO.loadWebhook(locale, id);
         if (!webhook.getWorkspace().getId().equals(workspaceId)) {
             throw new WebhookNotFoundException(locale, id);
         }
@@ -128,7 +132,6 @@ public class WebhookManagerBean implements IWebhookManagerLocal {
     @RolesAllowed({UserGroupMapping.REGULAR_USER_ROLE_ID})
     public List<Webhook> getActiveWebHooks(String workspaceId) throws UserNotFoundException, WorkspaceNotFoundException, UserNotActiveException, WorkspaceNotEnabledException {
         User user = userManager.checkWorkspaceReadAccess(workspaceId);
-        WebhookDAO webhookDAO = new WebhookDAO(new Locale(user.getLanguage()), em);
         return webhookDAO.loadActiveWebhooks(workspaceId);
     }
 

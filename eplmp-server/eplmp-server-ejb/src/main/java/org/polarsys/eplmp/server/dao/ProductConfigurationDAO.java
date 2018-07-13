@@ -16,32 +16,31 @@ import org.polarsys.eplmp.core.exceptions.CreationException;
 import org.polarsys.eplmp.core.exceptions.ProductConfigurationNotFoundException;
 import org.polarsys.eplmp.core.product.ConfigurationItemKey;
 
+import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceException;
 import java.util.List;
 import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+@Stateless(name = "ProductConfigurationDAO")
 public class ProductConfigurationDAO {
 
-    private final EntityManager em;
-    private final Locale mLocale;
+    @PersistenceContext
+    private EntityManager em;
+
+    private Locale mLocale;
     private static final Logger LOGGER = Logger.getLogger(ProductConfigurationDAO.class.getName());
 
-    public ProductConfigurationDAO(EntityManager pEM) {
-        em = pEM;
+    public ProductConfigurationDAO() {
         mLocale = Locale.getDefault();
     }
 
-    public ProductConfigurationDAO(Locale pLocale, EntityManager pEM) {
-        em = pEM;
-        mLocale = pLocale;
-    }
-
-    public void createProductConfiguration(ProductConfiguration productConfiguration) throws CreationException {
+    public void createProductConfiguration(ProductConfiguration pProductConfiguration) throws CreationException {
         try {
-            em.persist(productConfiguration);
+            em.persist(pProductConfiguration);
             em.flush();
         } catch (PersistenceException pPEx) {
             LOGGER.log(Level.FINEST,null,pPEx);
@@ -49,13 +48,23 @@ public class ProductConfigurationDAO {
         }
     }
 
-    public ProductConfiguration getProductConfiguration(int productConfigurationId) throws ProductConfigurationNotFoundException {
-        ProductConfiguration productConfiguration = em.find(ProductConfiguration.class, productConfigurationId);
+    public void createProductConfiguration(Locale pLocale, ProductConfiguration pProductConfiguration) throws CreationException {
+        mLocale = pLocale;
+        createProductConfiguration(pProductConfiguration);
+    }
+
+    public ProductConfiguration getProductConfiguration(int pProductConfigurationId) throws ProductConfigurationNotFoundException {
+        ProductConfiguration productConfiguration = em.find(ProductConfiguration.class, pProductConfigurationId);
         if(productConfiguration != null){
             return productConfiguration;
         }else{
-            throw new ProductConfigurationNotFoundException(mLocale,productConfigurationId);
+            throw new ProductConfigurationNotFoundException(mLocale,pProductConfigurationId);
         }
+    }
+
+    public ProductConfiguration getProductConfiguration(Locale pLocale, int pProductConfigurationId) throws ProductConfigurationNotFoundException {
+        mLocale = pLocale;
+        return getProductConfiguration(pProductConfigurationId);
     }
 
     public List<ProductConfiguration> getAllProductConfigurations(String workspaceId) {

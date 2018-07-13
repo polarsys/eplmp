@@ -19,23 +19,21 @@ import org.polarsys.eplmp.core.exceptions.CreationException;
 import org.polarsys.eplmp.core.security.Credential;
 import org.polarsys.eplmp.core.security.UserGroupMapping;
 
+import javax.ejb.Stateless;
 import javax.persistence.*;
 import java.util.List;
 import java.util.Locale;
 
+@Stateless
 public class AccountDAO {
-    
+
+    @PersistenceContext
     private EntityManager em;
+
     private Locale mLocale;
-    
-    public AccountDAO(Locale pLocale, EntityManager pEM) {
-        mLocale=pLocale;
-        em=pEM;
-    }
-    
-    public AccountDAO(EntityManager pEM) {
+
+    public AccountDAO() {
         mLocale=Locale.getDefault();
-        em=pEM;
     }
 
     public void createAccount(Account pAccount, String pPassword, String pAlgorithm) throws AccountAlreadyExistsException, CreationException {
@@ -54,6 +52,11 @@ public class AccountDAO {
             //thrown instead of EntityExistsException
             throw new CreationException(mLocale);
         }
+    }
+
+    public void createAccount(Locale pLocale, Account pAccount, String pPassword, String pAlgorithm) throws AccountAlreadyExistsException, CreationException {
+        mLocale = pLocale;
+        createAccount(pAccount, pPassword, pAlgorithm);
     }
     
     public void updateAccount(Account pAccount, String pPassword, String pAlgorithm){
@@ -75,6 +78,11 @@ public class AccountDAO {
         } else {
             return account;
         }
+    }
+
+    public Account loadAccount(Locale pLocale, String pLogin) throws AccountNotFoundException {
+        mLocale = pLocale;
+        return loadAccount(pLogin);
     }
     
     public Workspace[] getAdministratedWorkspaces(Account pAdmin) {

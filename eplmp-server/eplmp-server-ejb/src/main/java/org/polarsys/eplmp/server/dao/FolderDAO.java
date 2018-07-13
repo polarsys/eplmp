@@ -18,29 +18,28 @@ import org.polarsys.eplmp.core.exceptions.EntityConstraintException;
 import org.polarsys.eplmp.core.exceptions.FolderAlreadyExistsException;
 import org.polarsys.eplmp.core.exceptions.FolderNotFoundException;
 
-import javax.persistence.EntityExistsException;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceException;
-import javax.persistence.TypedQuery;
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import javax.persistence.*;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+@Stateless(name = "FolderDAO")
 public class FolderDAO {
-    
+
+    @PersistenceContext
     private EntityManager em;
+
+    @Inject
+    private DocumentRevisionDAO documentRevisionDAO;
+
     private Locale mLocale;
     private static final Logger LOGGER = Logger.getLogger(FolderDAO.class.getName());
     
-    public FolderDAO(Locale pLocale, EntityManager pEM) {
-        em = pEM;
-        mLocale=pLocale;
-    }
-    
-    public FolderDAO(EntityManager pEM) {
-        em = pEM;
+    public FolderDAO() {
         mLocale=Locale.getDefault();
     }
     
@@ -51,6 +50,11 @@ public class FolderDAO {
         } else {
             return folder;
         }
+    }
+
+    public Folder loadFolder(Locale pLocale, String pCompletePath) throws FolderNotFoundException {
+        mLocale = pLocale;
+        return loadFolder(pCompletePath);
     }
     
     public void createFolder(Folder pFolder) throws FolderAlreadyExistsException, CreationException{
@@ -68,6 +72,11 @@ public class FolderDAO {
             LOGGER.log(Level.FINEST,null,pPEx);
             throw new CreationException(mLocale);
         }
+    }
+
+    public void createFolder(Locale pLocale, Folder pFolder) throws FolderAlreadyExistsException, CreationException{
+        mLocale = pLocale;
+        createFolder(pFolder);
     }
     
     public Folder[] getSubFolders(String pCompletePath){
@@ -95,6 +104,11 @@ public class FolderDAO {
         
         removeFolder(folder);
     }
+
+    public void removeFolder(Locale pLocale, String pCompletePath) throws FolderNotFoundException, EntityConstraintException {
+        mLocale = pLocale;
+        removeFolder(pCompletePath);
+    }
     
     public void removeFolder(Folder pFolder) throws EntityConstraintException {
         Folder[] subFolders = getSubFolders(pFolder);
@@ -109,9 +123,8 @@ public class FolderDAO {
     }
 
     public List<DocumentRevision> moveFolder(Folder pFolder, Folder pNewFolder) throws FolderAlreadyExistsException, CreationException{
-        DocumentRevisionDAO docRDAO=new DocumentRevisionDAO(mLocale,em);
         List<DocumentRevision> allDocRs = new LinkedList<>();
-        List<DocumentRevision> docRs = docRDAO.findDocRsByFolder(pFolder.getCompletePath());
+        List<DocumentRevision> docRs = documentRevisionDAO.findDocRsByFolder(pFolder.getCompletePath());
         allDocRs.addAll(docRs);
 
         for(DocumentRevision docR:allDocRs){
@@ -132,10 +145,14 @@ public class FolderDAO {
         return allDocRs;
     }
 
+    public List<DocumentRevision> moveFolder(Locale pLocale, Folder pFolder, Folder pNewFolder) throws FolderAlreadyExistsException, CreationException{
+        mLocale = pLocale;
+        return moveFolder(pFolder, pNewFolder);
+    }
+
     public List<DocumentRevision> findDocumentRevisionsInFolder(Folder pFolder) {
-        DocumentRevisionDAO docRDAO = new DocumentRevisionDAO(mLocale, em);
         List<DocumentRevision> allDocRs = new LinkedList<>();
-        List<DocumentRevision> docRs = docRDAO.findDocRsByFolder(pFolder.getCompletePath());
+        List<DocumentRevision> docRs = documentRevisionDAO.findDocRsByFolder(pFolder.getCompletePath());
         allDocRs.addAll(docRs);
 
         Folder[] subFolders = getSubFolders(pFolder);
@@ -144,6 +161,11 @@ public class FolderDAO {
         }
 
         return allDocRs;
+    }
+
+    public List<DocumentRevision> findDocumentRevisionsInFolder(Locale pLocale, Folder pFolder) {
+        mLocale = pLocale;
+        return findDocumentRevisionsInFolder(pFolder);
     }
 
 }

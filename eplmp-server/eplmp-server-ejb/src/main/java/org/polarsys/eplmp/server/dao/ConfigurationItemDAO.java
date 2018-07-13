@@ -14,28 +14,23 @@ package org.polarsys.eplmp.server.dao;
 import org.polarsys.eplmp.core.exceptions.ConfigurationItemAlreadyExistsException;
 import org.polarsys.eplmp.core.exceptions.ConfigurationItemNotFoundException;
 import org.polarsys.eplmp.core.exceptions.CreationException;
-import org.polarsys.eplmp.core.exceptions.LayerNotFoundException;
 import org.polarsys.eplmp.core.product.*;
 
-import javax.persistence.EntityExistsException;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceException;
-import javax.persistence.TypedQuery;
+import javax.ejb.Stateless;
+import javax.persistence.*;
 import java.util.List;
 import java.util.Locale;
 
+@Stateless(name = "ConfigurationItemDAO")
 public class ConfigurationItemDAO {
 
+    public static final String WORKSPACE_ID = "workspaceId";
+    @PersistenceContext
     private EntityManager em;
+
     private Locale mLocale;
 
-    public ConfigurationItemDAO(Locale pLocale, EntityManager pEM) {
-        em = pEM;
-        mLocale = pLocale;
-    }
-
-    public ConfigurationItemDAO(EntityManager pEM) {
-        em = pEM;
+    public ConfigurationItemDAO() {
         mLocale = Locale.getDefault();
     }
 
@@ -43,7 +38,7 @@ public class ConfigurationItemDAO {
         em.merge(pCI);
     }
 
-    public ConfigurationItem removeConfigurationItem(ConfigurationItemKey pKey) throws ConfigurationItemNotFoundException, LayerNotFoundException {
+    public ConfigurationItem removeConfigurationItem(ConfigurationItemKey pKey) throws ConfigurationItemNotFoundException {
         ConfigurationItem ci = loadConfigurationItem(pKey);
 
         removeLayersFromConfigurationItem(pKey);
@@ -55,21 +50,21 @@ public class ConfigurationItemDAO {
 
     public void removeLayersFromConfigurationItem(ConfigurationItemKey pKey){
         TypedQuery<Layer> query = em.createNamedQuery("Layer.removeLayersFromConfigurationItem", Layer.class);
-        query.setParameter("workspaceId", pKey.getWorkspace());
+        query.setParameter(WORKSPACE_ID, pKey.getWorkspace());
         query.setParameter("configurationItemId", pKey.getId());
         query.executeUpdate();
     }
 
     public void removeEffectivitiesFromConfigurationItem(ConfigurationItemKey pKey){
         TypedQuery<Effectivity> query = em.createNamedQuery("Effectivity.removeEffectivitiesFromConfigurationItem", Effectivity.class);
-        query.setParameter("workspaceId", pKey.getWorkspace());
+        query.setParameter(WORKSPACE_ID, pKey.getWorkspace());
         query.setParameter("configurationItemId", pKey.getId());
         query.executeUpdate();
     }
 
     public List<ConfigurationItem> findAllConfigurationItems(String pWorkspaceId) {
         TypedQuery<ConfigurationItem> query = em.createNamedQuery("ConfigurationItem.getConfigurationItemsInWorkspace", ConfigurationItem.class);
-        query.setParameter("workspaceId", pWorkspaceId);
+        query.setParameter(WORKSPACE_ID, pWorkspaceId);
         return query.getResultList();
     }
 
@@ -81,6 +76,11 @@ public class ConfigurationItemDAO {
         } else {
             return ci;
         }
+    }
+
+    public ConfigurationItem loadConfigurationItem(Locale pLocale, ConfigurationItemKey pKey) throws ConfigurationItemNotFoundException {
+        mLocale = pLocale;
+        return loadConfigurationItem(pKey);
     }
 
     public void createConfigurationItem(ConfigurationItem pCI) throws ConfigurationItemAlreadyExistsException, CreationException {
@@ -96,6 +96,11 @@ public class ConfigurationItemDAO {
             //thrown instead of EntityExistsException
             throw new CreationException(mLocale);
         }
+    }
+
+    public void createConfigurationItem(Locale pLocale, ConfigurationItem pCI) throws ConfigurationItemAlreadyExistsException, CreationException {
+        mLocale = pLocale;
+        createConfigurationItem(pCI);
     }
 
     public List<ConfigurationItem> findConfigurationItemsByDesignItem(PartMaster partMaster) {
