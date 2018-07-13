@@ -11,19 +11,6 @@
 
 package org.polarsys.eplmp.server.products;
 
-import org.polarsys.eplmp.core.common.User;
-import org.polarsys.eplmp.core.configuration.ProductBaseline;
-import org.polarsys.eplmp.core.configuration.ProductBaselineType;
-import org.polarsys.eplmp.core.exceptions.*;
-import org.polarsys.eplmp.core.product.ConfigurationItem;
-import org.polarsys.eplmp.core.product.PartIteration;
-import org.polarsys.eplmp.core.product.PathToPathLink;
-import org.polarsys.eplmp.server.BinaryStorageManagerBean;
-import org.polarsys.eplmp.server.ProductManagerBean;
-import org.polarsys.eplmp.server.UserManagerBean;
-import org.polarsys.eplmp.server.dao.ConfigurationItemDAO;
-import org.polarsys.eplmp.server.dao.PartIterationDAO;
-import org.polarsys.eplmp.server.util.BaselineRule;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
@@ -35,14 +22,27 @@ import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.polarsys.eplmp.core.common.User;
+import org.polarsys.eplmp.core.configuration.ProductBaseline;
+import org.polarsys.eplmp.core.configuration.ProductBaselineType;
+import org.polarsys.eplmp.core.exceptions.*;
+import org.polarsys.eplmp.core.product.ConfigurationItem;
+import org.polarsys.eplmp.core.product.PartMaster;
+import org.polarsys.eplmp.core.product.PathToPathLink;
+import org.polarsys.eplmp.server.ProductManagerBean;
+import org.polarsys.eplmp.server.UserManagerBean;
+import org.polarsys.eplmp.server.configuration.PSFilterVisitor;
+import org.polarsys.eplmp.server.dao.*;
+import org.polarsys.eplmp.server.util.BaselineRule;
 
 import javax.ejb.SessionContext;
-import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Locale;
 
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyInt;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.MockitoAnnotations.initMocks;
 
@@ -50,19 +50,30 @@ import static org.mockito.MockitoAnnotations.initMocks;
 public class ProductBaselineManagerBeanTest {
 
     @InjectMocks
-    ProductBaselineManagerBean productBaselineService = new ProductBaselineManagerBean();
+    private ProductBaselineManagerBean productBaselineService = new ProductBaselineManagerBean();
     @Mock
-    SessionContext ctx;
+    private SessionContext ctx;
     @Mock
-    Principal principal;
+    private Principal principal;
     @Mock
-    UserManagerBean userManager;
+    private UserManagerBean userManager;
     @Mock
-    EntityManager em;
+    private ConfigurationItemDAO configurationItemDAO;
     @Mock
-    BinaryStorageManagerBean dataManager;
+    private PartIterationDAO partIterationDAO;
     @Mock
-    ProductManagerBean productService;
+    private ProductManagerBean productService;
+    @Mock
+    private PartCollectionDAO partCollectionDAO;
+    @Mock
+    private DocumentCollectionDAO documentCollectionDAO;
+    @Mock
+    private ProductBaselineDAO productBaselineDAO;
+    @Mock
+    private PathToPathLinkDAO pathToPathLinkDAO;
+
+    @Mock
+    private PSFilterVisitor psFilterVisitor;
 
     @Rule
     public BaselineRule baselineRuleNotReleased;
@@ -77,12 +88,11 @@ public class ProductBaselineManagerBeanTest {
     public ExpectedException thrown = ExpectedException.none();
 
     @Before
-    public void setup() throws Exception {
+    public void setup() {
         initMocks(this);
         Mockito.when(ctx.getCallerPrincipal()).thenReturn(principal);
         Mockito.when(principal.getName()).thenReturn("user1");
     }
-
 
     /**
      * test the creation of Released baseline
@@ -94,21 +104,23 @@ public class ProductBaselineManagerBeanTest {
         baselineRuleReleased = new BaselineRule("myBaseline", ProductBaselineType.RELEASED, "description", "workspace01", "user1", "part01", "product01", true);
         doReturn(new User()).when(userManager).checkWorkspaceWriteAccess(Matchers.anyString());
         Mockito.when(userManager.checkWorkspaceWriteAccess(Matchers.anyString())).thenReturn(baselineRuleReleased.getUser());
-        Mockito.when(em.find(ConfigurationItem.class, baselineRuleReleased.getConfigurationItemKey())).thenReturn(baselineRuleReleased.getConfigurationItem());
-        Mockito.when(new ConfigurationItemDAO(new Locale("en"), em).loadConfigurationItem(baselineRuleReleased.getConfigurationItemKey())).thenReturn(baselineRuleReleased.getConfigurationItem());
 
         Mockito.when(productService.getRootPartUsageLink(Matchers.any())).thenReturn(baselineRuleReleased.getRootPartUsageLink());
         Mockito.when(mockedQuery.setParameter(Matchers.anyString(), Matchers.any())).thenReturn(mockedQuery);
-        Mockito.when(em.createNamedQuery("PathToPathLink.findPathToPathLinkByPathListInProduct", PathToPathLink.class)).thenReturn(mockedQuery);
+
+        // Create Mock ConfigurationItem
+        ConfigurationItem configurationItem = new ConfigurationItem(baselineRuleReleased.getUser(), baselineRuleReleased.getWorkspace(), baselineRuleReleased.getConfigurationItemKey().getId(), "description");
+        configurationItem.setDesignItem(baselineRuleReleased.getPartMaster());
+        Mockito.when(configurationItemDAO.loadConfigurationItem(new Locale("en"), baselineRuleReleased.getConfigurationItemKey())).thenReturn(configurationItem);
 
         //When
         ProductBaseline baseline = productBaselineService.createBaseline(baselineRuleReleased.getConfigurationItemKey(), baselineRuleReleased.getName(), baselineRuleReleased.getType(), baselineRuleReleased.getDescription(), new ArrayList<>(), baselineRuleReleased.getSubstituteLinks(), baselineRuleReleased.getOptionalUsageLinks());
 
         //Then
-        Assert.assertTrue(baseline != null);
-        Assert.assertTrue(baseline.getDescription().equals(baselineRuleReleased.getDescription()));
-        Assert.assertTrue(baseline.getType().equals(baselineRuleReleased.getType()));
-        Assert.assertTrue(baseline.getConfigurationItem().getWorkspaceId().equals(baselineRuleReleased.getWorkspace().getId()));
+        Assert.assertNotNull(baseline);
+        Assert.assertEquals(baseline.getDescription(), baselineRuleReleased.getDescription());
+        Assert.assertEquals(baseline.getType(), baselineRuleReleased.getType());
+        Assert.assertEquals(baseline.getConfigurationItem().getWorkspaceId(), baselineRuleReleased.getWorkspace().getId());
 
     }
 
@@ -117,7 +129,7 @@ public class ProductBaselineManagerBeanTest {
      *
      * @throws Exception PartRevisionNotReleasedException
      */
-    @Test
+    @Test(expected = NotAllowedException.class)
     public void createReleasedBaselineUsingPartNotReleased() throws Exception{
 
         //Given
@@ -125,9 +137,13 @@ public class ProductBaselineManagerBeanTest {
 
         doReturn(new User()).when(userManager).checkWorkspaceWriteAccess(Matchers.anyString());
         Mockito.when(userManager.checkWorkspaceWriteAccess(Matchers.anyString())).thenReturn(baselineRuleNotReleased.getUser());
-        Mockito.when(em.find(ConfigurationItem.class, baselineRuleNotReleased.getConfigurationItemKey())).thenReturn(baselineRuleNotReleased.getConfigurationItem());
-        Mockito.when(new ConfigurationItemDAO(new Locale("en"), em).loadConfigurationItem(baselineRuleNotReleased.getConfigurationItemKey())).thenReturn(baselineRuleNotReleased.getConfigurationItem());
-        thrown.expect(NotAllowedException.class);
+
+        // Create Mock ConfigurationItem
+        ConfigurationItem configurationItem = new ConfigurationItem(baselineRuleNotReleased.getUser(), baselineRuleNotReleased.getWorkspace(), baselineRuleNotReleased.getConfigurationItemKey().getId(), "description");
+        configurationItem.setDesignItem(baselineRuleNotReleased.getPartMaster());
+        Mockito.doThrow(NotAllowedException.class).when(psFilterVisitor).visit(any(), any(), any(PartMaster.class), anyInt(), any());
+        Mockito.when(configurationItemDAO.loadConfigurationItem(new Locale("en"), baselineRuleNotReleased.getConfigurationItemKey())).thenReturn(configurationItem);
+
         //When
         productBaselineService.createBaseline(baselineRuleNotReleased.getConfigurationItemKey(), baselineRuleNotReleased.getName(), baselineRuleNotReleased.getType(), baselineRuleNotReleased.getDescription(),new ArrayList<>(), baselineRuleNotReleased.getSubstituteLinks(), baselineRuleNotReleased.getOptionalUsageLinks());
 
@@ -142,21 +158,23 @@ public class ProductBaselineManagerBeanTest {
         baselineRuleLatest = new BaselineRule("myBaseline", ProductBaselineType.LATEST, "description", "workspace01", "user1", "part01", "product01", true);
         doReturn(new User()).when(userManager).checkWorkspaceWriteAccess(Matchers.anyString());
         Mockito.when(userManager.checkWorkspaceWriteAccess(Matchers.anyString())).thenReturn(baselineRuleLatest.getUser());
-        Mockito.when(em.find(ConfigurationItem.class, baselineRuleLatest.getConfigurationItemKey())).thenReturn(baselineRuleLatest.getConfigurationItem());
-        Mockito.when(new ConfigurationItemDAO(new Locale("en"), em).loadConfigurationItem(baselineRuleLatest.getConfigurationItemKey())).thenReturn(baselineRuleLatest.getConfigurationItem());
 
         Mockito.when(productService.getRootPartUsageLink(Matchers.any())).thenReturn(baselineRuleLatest.getRootPartUsageLink());
         Mockito.when(mockedQuery.setParameter(Matchers.anyString(), Matchers.any())).thenReturn(mockedQuery);
-        Mockito.when(em.createNamedQuery("PathToPathLink.findPathToPathLinkByPathListInProduct", PathToPathLink.class)).thenReturn(mockedQuery);
+
+        // Create Mock ConfigurationItem
+        ConfigurationItem configurationItem = new ConfigurationItem(baselineRuleLatest.getUser(), baselineRuleLatest.getWorkspace(), baselineRuleLatest.getConfigurationItemKey().getId(), "description");
+        configurationItem.setDesignItem(baselineRuleLatest.getPartMaster());
+        Mockito.when(configurationItemDAO.loadConfigurationItem(new Locale("en"), baselineRuleLatest.getConfigurationItemKey())).thenReturn(configurationItem);
 
         //When
         ProductBaseline baseline = productBaselineService.createBaseline(baselineRuleLatest.getConfigurationItemKey(), baselineRuleLatest.getName(), baselineRuleLatest.getType(), baselineRuleLatest.getDescription(), new ArrayList<>(), baselineRuleLatest.getSubstituteLinks(), baselineRuleLatest.getOptionalUsageLinks());
 
         //Then
-        Assert.assertTrue(baseline != null);
-        Assert.assertTrue(baseline.getDescription().equals(baselineRuleLatest.getDescription()));
-        Assert.assertTrue(baseline.getType().equals(baselineRuleLatest.getType()));
-        Assert.assertTrue(baseline.getConfigurationItem().getWorkspaceId().equals(baselineRuleLatest.getWorkspace().getId()));
+        Assert.assertNotNull(baseline);
+        Assert.assertEquals(baseline.getDescription(), baselineRuleLatest.getDescription());
+        Assert.assertEquals(baseline.getType(), baselineRuleLatest.getType());
+        Assert.assertEquals(baseline.getConfigurationItem().getWorkspaceId(), baselineRuleLatest.getWorkspace().getId());
 
     }
 
@@ -177,23 +195,23 @@ public class ProductBaselineManagerBeanTest {
         baselineRuleReleased = new BaselineRule("myBaseline", ProductBaselineType.LATEST , "description", "workspace01", "user1", "part01", "product01", true, false);
         doReturn(new User()).when(userManager).checkWorkspaceWriteAccess(Matchers.anyString());
         Mockito.when(userManager.checkWorkspaceWriteAccess(Matchers.anyString())).thenReturn(baselineRuleReleased.getUser());
-        Mockito.when(em.find(ConfigurationItem.class, baselineRuleReleased.getConfigurationItemKey())).thenReturn(baselineRuleReleased.getConfigurationItem()
-        );
-        Mockito.when(new ConfigurationItemDAO(new Locale("en"), em).loadConfigurationItem(baselineRuleReleased.getConfigurationItemKey())).thenReturn(baselineRuleReleased.getConfigurationItem());
-        Mockito.when(em.find(PartIteration.class, baselineRuleReleased.getPartMaster().getLastReleasedRevision().getIteration(1).getKey())).thenReturn(baselineRuleReleased.getPartMaster().getLastReleasedRevision().getIteration(1));
-        Mockito.when(new PartIterationDAO(new Locale("en"), em).loadPartI(baselineRuleReleased.getPartMaster().getLastReleasedRevision().getIteration(1).getKey())).thenReturn(baselineRuleReleased.getPartMaster().getLastReleasedRevision().getIteration(1));
+        Mockito.when(partIterationDAO.loadPartI(baselineRuleReleased.getPartMaster().getLastReleasedRevision().getIteration(1).getKey())).thenReturn(baselineRuleReleased.getPartMaster().getLastReleasedRevision().getIteration(1));
         Mockito.when(productService.getRootPartUsageLink(Matchers.any())).thenReturn(baselineRuleReleased.getRootPartUsageLink());
         Mockito.when(mockedQuery.setParameter(Matchers.anyString(), Matchers.any())).thenReturn(mockedQuery);
-        Mockito.when(em.createNamedQuery("PathToPathLink.findPathToPathLinkByPathListInProduct", PathToPathLink.class)).thenReturn(mockedQuery);
+
+        // Create Mock ConfigurationItem
+        ConfigurationItem configurationItem = new ConfigurationItem(baselineRuleReleased.getUser(), baselineRuleReleased.getWorkspace(), baselineRuleReleased.getConfigurationItemKey().getId(), "description");
+        configurationItem.setDesignItem(baselineRuleReleased.getPartMaster());
+        Mockito.when(configurationItemDAO.loadConfigurationItem(new Locale("en"), baselineRuleReleased.getConfigurationItemKey())).thenReturn(configurationItem);
 
         //When
         ProductBaseline baseline = productBaselineService.createBaseline(baselineRuleReleased.getConfigurationItemKey(), baselineRuleReleased.getName(), baselineRuleReleased.getType(), baselineRuleReleased.getDescription(), new ArrayList<>(), baselineRuleReleased.getSubstituteLinks(), baselineRuleReleased.getOptionalUsageLinks());
 
         //Then
-        Assert.assertTrue(baseline != null);
-        Assert.assertTrue(baseline.getDescription().equals(baselineRuleReleased.getDescription()));
-        Assert.assertTrue(baseline.getType().equals(ProductBaselineType.LATEST));
-        Assert.assertTrue(baseline.getConfigurationItem().getWorkspaceId().equals(baselineRuleReleased.getWorkspace().getId()));
+        Assert.assertNotNull(baseline);
+        Assert.assertEquals(baselineRuleReleased.getDescription(), baseline.getDescription());
+        Assert.assertEquals(ProductBaselineType.LATEST, baseline.getType());
+        Assert.assertEquals(baselineRuleReleased.getWorkspace().getId(), baseline.getConfigurationItem().getWorkspaceId());
 
     }
 

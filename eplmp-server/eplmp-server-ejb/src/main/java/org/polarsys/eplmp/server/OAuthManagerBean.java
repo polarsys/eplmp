@@ -48,6 +48,9 @@ public class OAuthManagerBean implements IOAuthManagerLocal {
     private EntityManager em;
 
     @Inject
+    private OAuthProviderDAO oAuthProviderDAO;
+
+    @Inject
     private IAccountManagerLocal accountManager;
 
     @Inject
@@ -56,13 +59,13 @@ public class OAuthManagerBean implements IOAuthManagerLocal {
     @Override
     public List<OAuthProvider> getProviders() {
         // todo use language if authenticated
-        return new OAuthProviderDAO(em).getProviders();
+        return oAuthProviderDAO.getProviders();
     }
 
     @Override
     public OAuthProvider getProvider(int id) throws OAuthProviderNotFoundException {
         // todo use language if authenticated
-        return new OAuthProviderDAO(em).findProvider(id);
+        return oAuthProviderDAO.findProvider(id);
     }
 
     @Override
@@ -72,9 +75,9 @@ public class OAuthManagerBean implements IOAuthManagerLocal {
                                         String secret, String scope, String responseType, String authorizationEndpoint)
             throws AccountNotFoundException {
 
-        Account adminAccount = accountManager.getMyAccount();
+        accountManager.getMyAccount();
         OAuthProvider oAuthProvider = new OAuthProvider(name, enabled, authority, issuer, clientID, jwsAlgorithm, jwkSetURL, redirectUri, secret, scope, responseType, authorizationEndpoint);
-        new OAuthProviderDAO(new Locale(adminAccount.getLanguage()), em).createProvider(oAuthProvider);
+        oAuthProviderDAO.createProvider(oAuthProvider);
         return oAuthProvider;
     }
 
@@ -86,7 +89,7 @@ public class OAuthManagerBean implements IOAuthManagerLocal {
             throws AccountNotFoundException, OAuthProviderNotFoundException {
 
         Account adminAccount = accountManager.getMyAccount();
-        OAuthProvider oAuthProvider = new OAuthProviderDAO(new Locale(adminAccount.getLanguage()), em).findProvider(id);
+        OAuthProvider oAuthProvider = oAuthProviderDAO.findProvider(adminAccount.getLocale(), id);
         oAuthProvider.setName(name);
         oAuthProvider.setAuthority(authority);
         oAuthProvider.setEnabled(enabled);
@@ -106,14 +109,13 @@ public class OAuthManagerBean implements IOAuthManagerLocal {
     @Override
     @RolesAllowed(UserGroupMapping.ADMIN_ROLE_ID)
     public void deleteProvider(int id) throws AccountNotFoundException, OAuthProviderNotFoundException {
-        Account adminAccount = accountManager.getMyAccount();
-        new OAuthProviderDAO(new Locale(adminAccount.getLanguage()), em).removeProvider(id);
-
+        accountManager.getMyAccount();
+        oAuthProviderDAO.removeProvider(id);
     }
 
     @Override
     public ProvidedAccount getProvidedAccount(int providerId, String sub) throws ProvidedAccountNotFoundException {
-        return new OAuthProviderDAO(em).findProvidedAccount(providerId, sub);
+        return oAuthProviderDAO.findProvidedAccount(providerId, sub);
     }
 
     @Override
@@ -125,14 +127,14 @@ public class OAuthManagerBean implements IOAuthManagerLocal {
 
     @Override
     public boolean isProvidedAccount(Account account) {
-        return new OAuthProviderDAO(em).hasProvidedAccount(account);
+        return oAuthProviderDAO.hasProvidedAccount(account);
     }
 
     @Override
     @RolesAllowed({UserGroupMapping.ADMIN_ROLE_ID, UserGroupMapping.REGULAR_USER_ROLE_ID})
     public Integer getProviderId(Account account) {
         try {
-            return new OAuthProviderDAO(em).findProvidedAccount(account).getProvider().getId();
+            return oAuthProviderDAO.findProvidedAccount(account).getProvider().getId();
         } catch (ProvidedAccountNotFoundException e) {
             return null;
         }
@@ -152,8 +154,6 @@ public class OAuthManagerBean implements IOAuthManagerLocal {
     public void loadProvidersFromProperties() {
         LOGGER.log(Level.INFO, "Configuring oauth providers");
         List<OAuthProvider> providers = oauthConfig.getProviders();
-
-        OAuthProviderDAO oAuthProviderDAO = new OAuthProviderDAO(em);
 
         for (OAuthProvider provider : providers) {
             try {

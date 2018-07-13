@@ -17,6 +17,7 @@ import org.polarsys.eplmp.server.dao.SharedEntityDAO;
 
 import javax.ejb.Local;
 import javax.ejb.Stateless;
+import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import java.util.Date;
@@ -32,9 +33,11 @@ public class ShareManagerBean implements IShareManagerLocal {
     @PersistenceContext
     private EntityManager em;
 
+    @Inject
+    private SharedEntityDAO sharedEntityDAO;
+
     @Override
     public SharedEntity findSharedEntityForGivenUUID(String pUuid) throws SharedEntityNotFoundException {
-        SharedEntityDAO sharedEntityDAO = new SharedEntityDAO(em);
         return sharedEntityDAO.loadSharedEntity(pUuid);
     }
 
@@ -45,7 +48,6 @@ public class ShareManagerBean implements IShareManagerLocal {
         if(pSharedEntity.getExpireDate() != null){
             Date now = new Date();
             if(pSharedEntity.getExpireDate().getTime() < now.getTime()){
-                SharedEntityDAO sharedEntityDAO = new SharedEntityDAO(em);
                 sharedEntityDAO.deleteSharedEntity(pSharedEntity);
             }
 

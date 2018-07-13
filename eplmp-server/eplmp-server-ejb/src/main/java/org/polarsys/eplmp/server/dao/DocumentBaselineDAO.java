@@ -14,7 +14,9 @@ package org.polarsys.eplmp.server.dao;
 import org.polarsys.eplmp.core.configuration.DocumentBaseline;
 import org.polarsys.eplmp.core.exceptions.BaselineNotFoundException;
 
+import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import java.util.List;
 import java.util.Locale;
 
@@ -25,18 +27,16 @@ import java.util.Locale;
  * @version 2.0, 28/08/14
  * @since   V2.0
  */
+@Stateless(name = "DocumentBaselineDAO")
 public class DocumentBaselineDAO {
+
+    @PersistenceContext
     private EntityManager em;
+
     private Locale mLocale;
 
-    public DocumentBaselineDAO(EntityManager em) {
-        this.em = em;
+    public DocumentBaselineDAO() {
         this.mLocale = Locale.getDefault();
-    }
-
-    public DocumentBaselineDAO(EntityManager em, Locale mLocale) {
-        this.em = em;
-        this.mLocale = mLocale;
     }
 
     public void createBaseline(DocumentBaseline documentBaseline) {
@@ -50,13 +50,18 @@ public class DocumentBaselineDAO {
                 .getResultList();
     }
 
-    public DocumentBaseline loadBaseline(int baselineId) throws BaselineNotFoundException {
-        DocumentBaseline documentBaseline = em.find(DocumentBaseline.class,baselineId);
+    public DocumentBaseline loadBaseline(int pBaselineId) throws BaselineNotFoundException {
+        DocumentBaseline documentBaseline = em.find(DocumentBaseline.class, pBaselineId);
         if(documentBaseline == null){
-            throw new BaselineNotFoundException(mLocale,baselineId);
+            throw new BaselineNotFoundException(mLocale, pBaselineId);
         }else{
             return documentBaseline;
         }
+    }
+
+    public DocumentBaseline loadBaseline(Locale pLocale, int pBaselineId) throws BaselineNotFoundException {
+        mLocale = pLocale;
+        return loadBaseline(pBaselineId);
     }
 
     public void deleteBaseline(DocumentBaseline documentBaseline) {

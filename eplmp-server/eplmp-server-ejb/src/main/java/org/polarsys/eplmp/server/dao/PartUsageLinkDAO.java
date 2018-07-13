@@ -16,23 +16,26 @@ import org.polarsys.eplmp.core.product.PartMasterKey;
 import org.polarsys.eplmp.core.product.PartSubstituteLink;
 import org.polarsys.eplmp.core.product.PartUsageLink;
 
+import javax.ejb.Stateless;
+import javax.inject.Inject;
 import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+@Stateless(name = "PartUsageLinkDAO")
 public class PartUsageLinkDAO {
 
+    @PersistenceContext
     private EntityManager em;
-    private Locale mLocale;
 
-    public PartUsageLinkDAO(Locale pLocale, EntityManager pEM) {
-        em = pEM;
-        mLocale = pLocale;
-    }
+    @Inject
+    private PathToPathLinkDAO pathToPathLinkDAO;
+
+    private Locale mLocale;
     
-    public PartUsageLinkDAO(EntityManager pEM) {
-        em = pEM;
+    public PartUsageLinkDAO() {
         mLocale = Locale.getDefault();
     }
 
@@ -98,6 +101,11 @@ public class PartUsageLinkDAO {
         }
     }
 
+    public PartUsageLink loadPartUsageLink(Locale pLocale, int pId) throws PartUsageLinkNotFoundException {
+        mLocale = pLocale;
+        return loadPartUsageLink(pId);
+    }
+
     public PartSubstituteLink loadPartSubstituteLink(int pId) throws PartUsageLinkNotFoundException {
         PartSubstituteLink link = em.find(PartSubstituteLink.class, pId);
         if (link == null) {
@@ -107,10 +115,13 @@ public class PartUsageLinkDAO {
         }
     }
 
+    public PartSubstituteLink loadPartSubstituteLink(Locale pLocale, int pId) throws PartUsageLinkNotFoundException {
+        mLocale = pLocale;
+        return loadPartSubstituteLink(pId);
+    }
+
     public void removeOrphanPartLinks() {
         List<PartUsageLink> partUsageLinks = em.createNamedQuery("PartUsageLink.findOrphans", PartUsageLink.class).getResultList();
-
-        PathToPathLinkDAO pathToPathLinkDAO = new PathToPathLinkDAO(mLocale, em);
 
         for(PartUsageLink partUsageLink:partUsageLinks){
             pathToPathLinkDAO.removePathToPathLinks(partUsageLink.getFullId());
@@ -119,5 +130,10 @@ public class PartUsageLinkDAO {
             }
             em.remove(partUsageLink);
         }
+    }
+
+    public void removeOrphanPartLinks(Locale pLocale) {
+        mLocale = pLocale;
+        removeOrphanPartLinks();
     }
 }

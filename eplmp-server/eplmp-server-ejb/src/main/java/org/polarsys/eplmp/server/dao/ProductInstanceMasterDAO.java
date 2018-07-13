@@ -20,24 +20,24 @@ import org.polarsys.eplmp.core.exceptions.ProductInstanceAlreadyExistsException;
 import org.polarsys.eplmp.core.exceptions.ProductInstanceMasterNotFoundException;
 import org.polarsys.eplmp.core.product.PartRevision;
 
+import javax.ejb.Stateless;
 import javax.persistence.EntityExistsException;
 import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceException;
 import java.util.List;
 import java.util.Locale;
 
+@Stateless(name = "ProductInstanceMasterDAO")
 public class ProductInstanceMasterDAO {
 
+    @PersistenceContext
     private EntityManager em;
+
     private Locale mLocale;
 
-    public ProductInstanceMasterDAO(EntityManager pEM) {
-        em = pEM;
-    }
-
-    public ProductInstanceMasterDAO(Locale pLocale, EntityManager pEM) {
-        em = pEM;
-        mLocale = pLocale;
+    public ProductInstanceMasterDAO() {
+        mLocale = Locale.getDefault();
     }
 
     public List<ProductInstanceMaster> findProductInstanceMasters(String workspaceId) {
@@ -59,16 +59,21 @@ public class ProductInstanceMasterDAO {
                 .getResultList();
     }
 
-    public void createProductInstanceMaster(ProductInstanceMaster productInstanceMaster) throws ProductInstanceAlreadyExistsException, CreationException {
+    public void createProductInstanceMaster(ProductInstanceMaster pProductInstanceMaster) throws ProductInstanceAlreadyExistsException, CreationException {
         try{
-            em.persist(productInstanceMaster);
+            em.persist(pProductInstanceMaster);
             em.flush();
         }catch (EntityExistsException e){
-            throw new ProductInstanceAlreadyExistsException(mLocale, productInstanceMaster);
+            throw new ProductInstanceAlreadyExistsException(mLocale, pProductInstanceMaster);
         }catch (PersistenceException e){
             throw new CreationException(mLocale);
         }
 
+    }
+
+    public void createProductInstanceMaster(Locale pLocale, ProductInstanceMaster pProductInstanceMaster) throws ProductInstanceAlreadyExistsException, CreationException {
+        mLocale = pLocale;
+        createProductInstanceMaster(pProductInstanceMaster);
     }
 
     public ProductInstanceMaster loadProductInstanceMaster(ProductInstanceMasterKey pId) throws ProductInstanceMasterNotFoundException {
@@ -78,6 +83,11 @@ public class ProductInstanceMasterDAO {
         } else {
             return productInstanceMaster;
         }
+    }
+
+    public ProductInstanceMaster loadProductInstanceMaster(Locale pLocale, ProductInstanceMasterKey pId) throws ProductInstanceMasterNotFoundException {
+        mLocale = pLocale;
+        return loadProductInstanceMaster(pId);
     }
 
     public void deleteProductInstanceMaster(ProductInstanceMaster productInstanceMaster) {

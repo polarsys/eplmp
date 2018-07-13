@@ -31,7 +31,7 @@ public interface IAccountManagerLocal {
 
     Account updateAccount(String pName, String pEmail, String pLanguage, String pPassword, String pTimeZone) throws AccountNotFoundException;
 
-    Account updateAccount(String pLogin, String pName, String pEmail, String pLanguage, String pPassword, String pTimeZone) throws AccountNotFoundException, NotAllowedException;
+    Account updateAccount(String pLogin, String pName, String pEmail, String pLanguage, String pPassword, String pTimeZone) throws AccountNotFoundException;
 
     Account getMyAccount() throws AccountNotFoundException;
 

@@ -17,16 +17,20 @@ import org.polarsys.eplmp.core.security.ACL;
 import org.polarsys.eplmp.core.security.ACLUserEntry;
 import org.polarsys.eplmp.core.security.ACLUserGroupEntry;
 
+import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import java.util.Map;
 
+@Stateless(name = "ACLDAO")
 public class ACLDAO {
 
-    private final EntityManager em;
+    @PersistenceContext
+    private EntityManager em;
 
-    public ACLDAO(EntityManager pEM) {
-        em = pEM;
+    public ACLDAO() {
+
     }
 
     public void createACL(ACL acl) {

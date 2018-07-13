@@ -16,18 +16,21 @@ import org.polarsys.eplmp.core.exceptions.TagNotFoundException;
 import org.polarsys.eplmp.core.meta.Tag;
 import org.polarsys.eplmp.core.meta.TagKey;
 
+import javax.ejb.Stateless;
 import javax.persistence.*;
 import java.util.List;
 import java.util.Locale;
 
+@Stateless(name = "TagDAO")
 public class TagDAO {
 
+    @PersistenceContext
     private EntityManager em;
+
     private Locale mLocale;
 
-    public TagDAO(Locale pLocale, EntityManager pEM) {
-        em = pEM;
-        mLocale = pLocale;
+    public TagDAO() {
+        mLocale = Locale.getDefault();
     }
 
     public Tag[] findAllTags(String pWorkspaceId) {
@@ -59,6 +62,11 @@ public class TagDAO {
         }
     }
 
+    public void removeTag(Locale pLocale, TagKey pTagKey) throws TagNotFoundException {
+        mLocale = pLocale;
+        removeTag(pTagKey);
+    }
+
     public Tag loadTag(TagKey pTagKey) throws TagNotFoundException {
         Tag tag = em.find(Tag.class,pTagKey);
         if (tag == null) {
@@ -66,6 +74,11 @@ public class TagDAO {
         } else {
             return tag;
         }
+    }
+
+    public Tag loadTag(Locale pLocale, TagKey pTagKey) throws TagNotFoundException {
+        mLocale = pLocale;
+        return loadTag(pTagKey);
     }
 
     public void createTag(Tag pTag) throws CreationException, TagAlreadyExistsException {
@@ -81,5 +94,10 @@ public class TagDAO {
             //thrown instead of EntityExistsException
             throw new CreationException(mLocale);
         }
+    }
+
+    public void createTag(Locale pLocale, Tag pTag) throws CreationException, TagAlreadyExistsException {
+        mLocale = pLocale;
+        createTag(pTag);
     }
 }

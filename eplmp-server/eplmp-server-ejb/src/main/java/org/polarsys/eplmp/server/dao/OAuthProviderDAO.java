@@ -17,32 +17,36 @@ import org.polarsys.eplmp.core.common.ProvidedAccount;
 import org.polarsys.eplmp.core.exceptions.OAuthProviderNotFoundException;
 import org.polarsys.eplmp.core.exceptions.ProvidedAccountNotFoundException;
 
+import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
+import javax.persistence.PersistenceContext;
 import java.util.List;
 import java.util.Locale;
 
+@Stateless(name = "OAuthProviderDAO")
 public class OAuthProviderDAO {
 
+    @PersistenceContext
     private EntityManager em;
+
     private Locale mLocale;
 
-    public OAuthProviderDAO(Locale pLocale, EntityManager pEM) {
-        em = pEM;
-        mLocale = pLocale;
-    }
-
-    public OAuthProviderDAO(EntityManager pEM) {
-        em = pEM;
+    public OAuthProviderDAO() {
         mLocale = Locale.getDefault();
     }
 
-    public OAuthProvider findProvider(int id) throws OAuthProviderNotFoundException {
-        OAuthProvider oAuthProvider = em.find(OAuthProvider.class, id);
+    public OAuthProvider findProvider(int pId) throws OAuthProviderNotFoundException {
+        OAuthProvider oAuthProvider = em.find(OAuthProvider.class, pId);
         if (oAuthProvider == null) {
-            throw new OAuthProviderNotFoundException(mLocale, id);
+            throw new OAuthProviderNotFoundException(mLocale, pId);
         }
         return oAuthProvider;
+    }
+
+    public OAuthProvider findProvider(Locale pLocale, int pId) throws OAuthProviderNotFoundException{
+        mLocale = pLocale;
+        return findProvider(pId);
     }
 
     public void createProvider(OAuthProvider oAuthProvider) {

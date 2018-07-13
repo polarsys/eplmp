@@ -15,8 +15,11 @@ import org.polarsys.eplmp.core.document.DocumentRevision;
 import org.polarsys.eplmp.core.exceptions.CreationException;
 import org.polarsys.eplmp.core.exceptions.DocumentMasterAlreadyExistsException;
 
+import javax.ejb.Stateless;
+import javax.inject.Inject;
 import javax.persistence.EntityExistsException;
 import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceException;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -26,19 +29,19 @@ import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+@Stateless(name = "DocumentMasterDAO")
 public class DocumentMasterDAO {
     private static final Logger LOGGER = Logger.getLogger(DocumentMasterDAO.class.getName());
 
+    @PersistenceContext
     private EntityManager em;
+
+    @Inject
+    private DocumentRevisionDAO documentRevisionDAO;
+
     private Locale mLocale;
 
-    public DocumentMasterDAO(Locale pLocale, EntityManager pEM) {
-        em = pEM;
-        mLocale = pLocale;
-    }
-
-    public DocumentMasterDAO(EntityManager pEM) {
-        em = pEM;
+    public DocumentMasterDAO() {
         mLocale = Locale.getDefault();
     }
 
@@ -59,13 +62,22 @@ public class DocumentMasterDAO {
         }
     }
 
+    public void createDocM(Locale pLocale, DocumentMaster pDocumentMaster) throws DocumentMasterAlreadyExistsException, CreationException {
+        mLocale = pLocale;
+        createDocM(pDocumentMaster);
+    }
+
     public void removeDocM(DocumentMaster pDocM) {
-        DocumentRevisionDAO documentRevisionDAO = new DocumentRevisionDAO(mLocale, em);
         List<DocumentRevision> docRs = new ArrayList<>(pDocM.getDocumentRevisions());
         for(DocumentRevision documentRevision:docRs){
             documentRevisionDAO.removeRevision(documentRevision);
         }
         em.remove(pDocM);
+    }
+
+    public void removeDocM(Locale pLocale, DocumentMaster pDocM) {
+        mLocale = pLocale;
+        removeDocM(pDocM);
     }
 
     public List<DocumentMaster> getPaginatedByWorkspace(String workspaceId, int limit, int offset) {

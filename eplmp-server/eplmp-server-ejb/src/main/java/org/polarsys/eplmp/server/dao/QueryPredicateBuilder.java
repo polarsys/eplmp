@@ -24,6 +24,11 @@ import java.util.List;
 
 public class QueryPredicateBuilder {
 
+    public static final String AND_OPERATOR = " and operator ";
+    public static final String DOUBLE = "double";
+
+    private QueryPredicateBuilder() {}
+
     // Rule parsing
     // Safe casts for expressions
     @SuppressWarnings("unchecked")
@@ -43,10 +48,10 @@ public class QueryPredicateBuilder {
                     }
                     operands = temp;
                 } catch (ParseException e) {
-                    throw new IllegalArgumentException("Parsing exception for dates " + values + " and operator " + operator);
+                    throw new IllegalArgumentException("Parsing exception for dates " + values + AND_OPERATOR + operator);
                 }
                 break;
-            case "double":
+            case DOUBLE:
                 try {
                     List<Double> operandValues = new ArrayList<>();
                     for(String value:values){
@@ -54,7 +59,7 @@ public class QueryPredicateBuilder {
                     }
                     operands = operandValues;
                 } catch (NumberFormatException e) {
-                    throw new IllegalArgumentException("Parsing exception for double " + values + " and operator " + operator);
+                    throw new IllegalArgumentException("Parsing exception for double " + values + AND_OPERATOR + operator);
                 }
                 break;
             case "status":
@@ -75,7 +80,7 @@ public class QueryPredicateBuilder {
                     if ("date".equals(type)) {
                         return cb.between(fieldExp, (Date) operands.get(0), (Date) operands.get(1));
 
-                    } else if ("double".equals(type)) {
+                    } else if (DOUBLE.equals(type)) {
                         return cb.between(fieldExp, (Double) operands.get(0), (Double) operands.get(1));
                     }
                 }
@@ -114,28 +119,28 @@ public class QueryPredicateBuilder {
             case "less":
                 if ("date".equals(type)) {
                     return cb.lessThan(fieldExp, (Date) operands.get(0));
-                } else if ("double".equals(type)) {
+                } else if (DOUBLE.equals(type)) {
                     return cb.lessThan(fieldExp, (Double) operands.get(0));
                 }
                 break;
             case "less_or_equal":
                 if ("date".equals(type)) {
                     return cb.lessThanOrEqualTo(fieldExp, (Date) operands.get(0));
-                } else if ("double".equals(type)) {
+                } else if (DOUBLE.equals(type)) {
                     return cb.lessThanOrEqualTo(fieldExp, (Double) operands.get(0));
                 }
                 break;
             case "greater":
                 if ("date".equals(type)) {
                     return cb.greaterThan(fieldExp, (Date) operands.get(0));
-                } else if ("double".equals(type)) {
+                } else if (DOUBLE.equals(type)) {
                     return cb.greaterThan(fieldExp, (Double) operands.get(0));
                 }
                 break;
             case "greater_or_equal":
                 if ("date".equals(type)) {
                     return cb.greaterThanOrEqualTo(fieldExp, (Date) operands.get(0));
-                } else if ("double".equals(type)) {
+                } else if (DOUBLE.equals(type)) {
                     return cb.greaterThanOrEqualTo(fieldExp, (Double) operands.get(0));
                 }
                 break;
@@ -144,6 +149,6 @@ public class QueryPredicateBuilder {
         }
 
         // Should have return a value
-        throw new IllegalArgumentException("Parsing exception " + type + " with values" + values + " and operator " + operator);
+        throw new IllegalArgumentException("Parsing exception " + type + " with values" + values + AND_OPERATOR + operator);
     }
 }

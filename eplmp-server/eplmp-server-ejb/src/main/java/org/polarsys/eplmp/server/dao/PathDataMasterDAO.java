@@ -16,26 +16,26 @@ import org.polarsys.eplmp.core.configuration.ProductInstanceIteration;
 import org.polarsys.eplmp.core.configuration.ProductInstanceMaster;
 import org.polarsys.eplmp.core.exceptions.PathDataMasterNotFoundException;
 
+import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
+import javax.persistence.PersistenceContext;
 import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+@Stateless(name = "PathDataMasterDAO")
 public class PathDataMasterDAO {
 
+    @PersistenceContext
     private EntityManager em;
+
     private Locale mLocale;
 
     private static final Logger LOGGER = Logger.getLogger(PathDataMasterDAO.class.getName());
 
-    public PathDataMasterDAO(EntityManager pEM) {
-        em = pEM;
-    }
-
-    public PathDataMasterDAO(Locale pLocale, EntityManager pEM) {
-        em = pEM;
-        mLocale = pLocale;
+    public PathDataMasterDAO() {
+        mLocale = Locale.getDefault();
     }
 
     public void createPathData(PathDataMaster pathDataMaster){
@@ -48,26 +48,36 @@ public class PathDataMasterDAO {
     }
 
 
-    public PathDataMaster findByPathAndProductInstanceIteration(String pathAsString, ProductInstanceIteration productInstanceIteration) throws PathDataMasterNotFoundException {
+    public PathDataMaster findByPathAndProductInstanceIteration(String pPathAsString, ProductInstanceIteration pProductInstanceIteration) throws PathDataMasterNotFoundException {
         try {
             return em.createNamedQuery("PathDataMaster.findByPathAndProductInstanceIteration", PathDataMaster.class)
-                    .setParameter("path", pathAsString)
-                    .setParameter("productInstanceIteration", productInstanceIteration)
+                    .setParameter("path", pPathAsString)
+                    .setParameter("productInstanceIteration", pProductInstanceIteration)
                     .getSingleResult();
         } catch (NoResultException e) {
-            throw new PathDataMasterNotFoundException(mLocale,pathAsString);
+            throw new PathDataMasterNotFoundException(mLocale,pPathAsString);
         }
     }
 
-    public PathDataMaster findByPathIdAndProductInstanceIteration(int pathId, ProductInstanceIteration productInstanceIteration) throws PathDataMasterNotFoundException {
+    public PathDataMaster findByPathAndProductInstanceIteration(Locale pLocale, String pPathAsString, ProductInstanceIteration pProductInstanceIteration) throws PathDataMasterNotFoundException {
+        mLocale = pLocale;
+        return findByPathAndProductInstanceIteration(pPathAsString, pProductInstanceIteration);
+    }
+
+    public PathDataMaster findByPathIdAndProductInstanceIteration(int pPathId, ProductInstanceIteration pProductInstanceIteration) throws PathDataMasterNotFoundException {
         try {
             return em.createNamedQuery("PathDataMaster.findByPathIdAndProductInstanceIteration", PathDataMaster.class)
-                    .setParameter("pathId", pathId)
-                    .setParameter("productInstanceIteration", productInstanceIteration)
+                    .setParameter("pathId", pPathId)
+                    .setParameter("productInstanceIteration", pProductInstanceIteration)
                     .getSingleResult();
         } catch (NoResultException e) {
-            throw new PathDataMasterNotFoundException(mLocale,pathId);
+            throw new PathDataMasterNotFoundException(mLocale,pPathId);
         }
+    }
+
+    public PathDataMaster findByPathIdAndProductInstanceIteration(Locale pLocale, int pPathId, ProductInstanceIteration pProductInstanceIteration) throws PathDataMasterNotFoundException {
+        mLocale = pLocale;
+        return findByPathIdAndProductInstanceIteration(pPathId, pProductInstanceIteration);
     }
 
     public ProductInstanceMaster findByPathData(PathDataMaster pathDataMaster){
