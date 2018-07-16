@@ -27,9 +27,19 @@
         "default_string": {
           "match": "*",
           "match_mapping_type": "string",
+          "unmatch": "attr_*",
           "mapping": {
             "type": "string",
             "analyzer": "analyzer_case_insensitive"
+          }
+        }
+      },
+      {
+        "attributes": {
+          "match": "attr_*",
+          "match_mapping_type": "string",
+          "mapping": {
+            "type": "keyword"
           }
         }
       }
