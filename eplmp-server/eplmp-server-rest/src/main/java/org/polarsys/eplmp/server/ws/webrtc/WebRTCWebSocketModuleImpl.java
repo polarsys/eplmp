@@ -23,6 +23,7 @@ import javax.json.JsonObjectBuilder;
 import javax.websocket.Session;
 import java.util.Arrays;
 import java.util.List;
+import java.util.logging.Logger;
 
 /**
  * WebRTC module plugin implementation
@@ -31,6 +32,8 @@ import java.util.List;
  */
 @WebRTCWebSocketModule
 public class WebRTCWebSocketModuleImpl implements WebSocketModule {
+
+    private static final Logger LOGGER = Logger.getLogger(WebRTCWebSocketModuleImpl.class.getName());
 
     private static final String WEBRTC_INVITE = "WEBRTC_INVITE";
     private static final String WEBRTC_ACCEPT = "WEBRTC_ACCEPT";
@@ -62,34 +65,37 @@ public class WebRTCWebSocketModuleImpl implements WebSocketModule {
     public void process(Session session, WebSocketMessage webSocketMessage) {
 
         String sender = webSocketSessionsManager.getHolder(session);
+        if(sender != null) {
+            switch (webSocketMessage.getType()) {
 
-        switch (webSocketMessage.getType()) {
+                case WEBRTC_INVITE:
+                    onWebRTCInviteMessage(sender, session, webSocketMessage);
+                    break;
 
-            case WEBRTC_INVITE:
-                onWebRTCInviteMessage(sender, session, webSocketMessage);
-                break;
+                case WEBRTC_ACCEPT:
+                    onWebRTCAcceptMessage(sender, session, webSocketMessage);
+                    break;
 
-            case WEBRTC_ACCEPT:
-                onWebRTCAcceptMessage(sender, session, webSocketMessage);
-                break;
+                case WEBRTC_REJECT:
+                    onWebRTCRejectMessage(sender, session, webSocketMessage);
+                    break;
 
-            case WEBRTC_REJECT:
-                onWebRTCRejectMessage(sender, session, webSocketMessage);
-                break;
+                case WEBRTC_HANGUP:
+                    onWebRTCHangupMessage(sender, session, webSocketMessage);
+                    break;
 
-            case WEBRTC_HANGUP:
-                onWebRTCHangupMessage(sender, session, webSocketMessage);
-                break;
+                case WEBRTC_ANSWER:
+                case WEBRTC_OFFER:
+                case WEBRTC_CANDIDATE:
+                case WEBRTC_BYE:
+                    processP2P(sender, session, webSocketMessage);
+                    break;
 
-            case WEBRTC_ANSWER:
-            case WEBRTC_OFFER:
-            case WEBRTC_CANDIDATE:
-            case WEBRTC_BYE:
-                processP2P(sender, session, webSocketMessage);
-                break;
-
-            default:
-                break;
+                default:
+                    break;
+            }
+        } else {
+            LOGGER.info("Request with unregistered session");
         }
     }
 
