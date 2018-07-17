@@ -13,10 +13,12 @@ package org.polarsys.eplmp.server.ws.chat;
 
 import javax.websocket.Session;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.stream.Collectors;
 
 
 public class Room {
@@ -48,6 +50,13 @@ public class Room {
             return null;
         }
         return DB.get(roomKey);
+    }
+
+    public static List<Room> getUserRooms(String user) {
+        return  DB.entrySet().stream()
+                .filter(entry -> entry.getValue().hasUser(user))
+                .map(Map.Entry::getValue)
+                .collect(Collectors.toList());
     }
 
     /**

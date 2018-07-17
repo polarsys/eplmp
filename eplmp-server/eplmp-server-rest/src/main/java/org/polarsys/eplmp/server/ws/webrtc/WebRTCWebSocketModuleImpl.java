@@ -18,12 +18,11 @@ import org.polarsys.eplmp.server.ws.WebSocketSessionsManager;
 import org.polarsys.eplmp.server.ws.chat.Room;
 
 import javax.inject.Inject;
-import javax.json.Json;
-import javax.json.JsonObjectBuilder;
 import javax.websocket.Session;
 import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Logger;
+import static org.polarsys.eplmp.server.ws.webrtc.WebSocketUtils.*;
 
 /**
  * WebRTC module plugin implementation
@@ -35,30 +34,12 @@ public class WebRTCWebSocketModuleImpl implements WebSocketModule {
 
     private static final Logger LOGGER = Logger.getLogger(WebRTCWebSocketModuleImpl.class.getName());
 
-    private static final String WEBRTC_INVITE = "WEBRTC_INVITE";
-    private static final String WEBRTC_ACCEPT = "WEBRTC_ACCEPT";
-    private static final String WEBRTC_REJECT = "WEBRTC_REJECT";
-    private static final String WEBRTC_HANGUP = "WEBRTC_HANGUP";
-    private static final String WEBRTC_ROOM_JOIN_EVENT = "WEBRTC_ROOM_JOIN_EVENT";
-    private static final String WEBRTC_ROOM_REJECT_EVENT = "WEBRTC_ROOM_REJECT_EVENT";
-    private static final String WEBRTC_OFFLINE = "OFFLINE";
-
-    private static final String WEBRTC_OFFER = "offer";
-    private static final String WEBRTC_ANSWER = "answer";
-    private static final String WEBRTC_BYE = "bye";
-    private static final String WEBRTC_CANDIDATE = "candidate";
-
-    private final static List<String> SUPPORTED_TYPES = Arrays.asList(
-            WEBRTC_INVITE, WEBRTC_ACCEPT, WEBRTC_REJECT, WEBRTC_HANGUP,
-            WEBRTC_OFFER, WEBRTC_ANSWER, WEBRTC_BYE, WEBRTC_CANDIDATE
-    );
-
     @Inject
     private WebSocketSessionsManager webSocketSessionsManager;
 
     @Override
     public boolean canDecode(WebSocketMessage webSocketMessage) {
-        return SUPPORTED_TYPES.contains(webSocketMessage.getType());
+        return WebSocketUtils.getAllTypes().contains(webSocketMessage.getType());
     }
 
     @Override
@@ -131,7 +112,7 @@ public class WebRTCWebSocketModuleImpl implements WebSocketModule {
             Session otherSession = room.getOtherUserSession(session);
             room.removeSession(session);
 
-            WebSocketMessage message = createMessage(WEBRTC_HANGUP, sender, roomKey, null, null, 0, null, null, null, null, null);
+            WebSocketMessage message = WebSocketUtils.createMessage(WEBRTC_HANGUP, sender, roomKey, null, null, 0, null, null, null, null, null);
             webSocketSessionsManager.send(otherSession, message);
 
         }
@@ -146,12 +127,12 @@ public class WebRTCWebSocketModuleImpl implements WebSocketModule {
         if (room != null) {
             // send "room reject event" to caller, to remove invitations in other tabs if any
 
-            WebSocketMessage message = createMessage(WEBRTC_ROOM_REJECT_EVENT, null, roomKey, reason, null, room.getOccupancy(), sender, null, null, null, null);
+            WebSocketMessage message = WebSocketUtils.createMessage(WEBRTC_ROOM_REJECT_EVENT, null, roomKey, reason, null, room.getOccupancy(), sender, null, null, null, null);
             webSocketSessionsManager.broadcast(sender, message);
 
             Session otherSession = room.getUserSession(remoteUser);
             if (otherSession != null) {
-                WebSocketMessage otherMessage = createMessage(WEBRTC_REJECT, sender, roomKey, reason, null, 0, null, null, null, null, null);
+                WebSocketMessage otherMessage = WebSocketUtils.createMessage(WEBRTC_REJECT, sender, roomKey, reason, null, 0, null, null, null, null, null);
                 webSocketSessionsManager.send(otherSession, otherMessage);
             }
         }
@@ -165,14 +146,14 @@ public class WebRTCWebSocketModuleImpl implements WebSocketModule {
 
             room.addUserSession(session, sender);
             // send room join event to caller (all channels to remove invitations if any)
-            WebSocketMessage message = createMessage(WEBRTC_ROOM_JOIN_EVENT, sender, roomKey, null, null, room.getOccupancy(), sender, null, null, null, null);
+            WebSocketMessage message = WebSocketUtils.createMessage(WEBRTC_ROOM_JOIN_EVENT, sender, roomKey, null, null, room.getOccupancy(), sender, null, null, null, null);
             webSocketSessionsManager.broadcast(sender, message);
 
             // send room join event to the other user in room
             Session otherSession = room.getOtherUserSession(session);
 
             if (otherSession != null) {
-                WebSocketMessage otherMessage = createMessage(WEBRTC_ACCEPT, sender, roomKey, null, null, 0, null, null, null, null, null);
+                WebSocketMessage otherMessage = WebSocketUtils.createMessage(WEBRTC_ACCEPT, sender, roomKey, null, null, 0, null, null, null, null, null);
                 webSocketSessionsManager.send(otherSession, otherMessage);
             }
         }
@@ -185,7 +166,7 @@ public class WebRTCWebSocketModuleImpl implements WebSocketModule {
         String roomKey = sender + "-" + remoteUser;
 
         if (!webSocketSessionsManager.hasSessions(remoteUser)) {
-            WebSocketMessage message = createMessage(WEBRTC_REJECT, null, roomKey, WEBRTC_OFFLINE, null, 0, remoteUser, null, null, null, null);
+            WebSocketMessage message = WebSocketUtils.createMessage(WEBRTC_REJECT, null, roomKey, WebSocketUtils.WEBRTC_OFFLINE, null, 0, remoteUser, null, null, null, null);
             webSocketSessionsManager.send(session, message);
             return;
         }
@@ -202,54 +183,12 @@ public class WebRTCWebSocketModuleImpl implements WebSocketModule {
         room.addUserSession(session, sender);
 
         // send room join event to caller session (single channel)
-        WebSocketMessage message = createMessage(WEBRTC_ROOM_JOIN_EVENT, null, roomKey, null, null, room.getOccupancy(), sender, null, null, null, null);
+        WebSocketMessage message = WebSocketUtils.createMessage(WEBRTC_ROOM_JOIN_EVENT, null, roomKey, null, null, room.getOccupancy(), sender, null, null, null, null);
         webSocketSessionsManager.send(session, message);
 
         // send invitation to the remote user sessions (all channels)
-        WebSocketMessage remoteUserMessage = createMessage(WEBRTC_INVITE, sender, roomKey, null, webSocketMessage.getString("context"), room.getOccupancy(), null, null, null, null, null);
+        WebSocketMessage remoteUserMessage = WebSocketUtils.createMessage(WEBRTC_INVITE, sender, roomKey, null, webSocketMessage.getString("context"), room.getOccupancy(), null, null, null, null, null);
         webSocketSessionsManager.broadcast(remoteUser, remoteUserMessage);
-    }
-
-    private WebSocketMessage createMessage(String type, String remoteUser, String roomKey, String reason, String context, Integer roomOccupancy, String userLogin, String sdp, Integer label, String id, String candidate) {
-
-        JsonObjectBuilder jsonObject = Json.createObjectBuilder();
-        jsonObject.add("type", type);
-
-        if (remoteUser != null) {
-            jsonObject.add("remoteUser", remoteUser);
-        }
-        if (roomKey != null) {
-            jsonObject.add("roomKey", roomKey);
-        }
-        if (reason != null) {
-            jsonObject.add("reason", reason);
-        }
-        if (context != null) {
-            jsonObject.add("context", context);
-        }
-        if (roomOccupancy != null) {
-            jsonObject.add("roomOccupancy", roomOccupancy);
-        }
-        if (userLogin != null) {
-            jsonObject.add("userLogin", userLogin);
-        }
-
-        // Signals
-        if (sdp != null) {
-            jsonObject.add("sdp", sdp);
-        }
-        if (id != null) {
-            jsonObject.add("id", id);
-        }
-        if (candidate != null) {
-            jsonObject.add("candidate", candidate);
-        }
-        if (label != null) {
-            jsonObject.add("label", label);
-        }
-
-        return new WebSocketMessage(jsonObject.build());
-
     }
 
 }
