@@ -85,9 +85,9 @@ public class Room {
      */
     public Session getOtherUserSession(Session userSession) {
         if (isUser1Session(userSession)) {
-            return userSession2.getUserSession();
+            return userSession2 != null ? userSession2.getUserSession() : null;
         } else if (isUser2Session(userSession)) {
-            return userSession1.getUserSession();
+            return userSession1 != null ? userSession1.getUserSession() : null;
         } else {
             return null;
         }
@@ -133,23 +133,23 @@ public class Room {
      * @return if participant is found
      */
     public boolean addUserSession(Session userSession, String login) {
-        boolean success = true;
-
         // avoid a user to be added in the room many times.
-        if (userSession != null && (isUser1Session(userSession) || isUser2Session(userSession))) {
+        if ((isUser1Session(userSession) || isUser2Session(userSession))) {
             return true;
         }
-
+        if (userSession1 != null && userSession1.getLogin().equals(login)) {
+            userSession1 = new RoomSession(login, userSession);
+            return true;
+        } else if (userSession2 != null && userSession2.getLogin().equals(login)) {
+            userSession2 = new RoomSession(login, userSession);
+            return true;
+        }
         if (userSession1 == null) {
             userSession1 = new RoomSession(login, userSession);
         } else if (userSession2 == null) {
             userSession2 = new RoomSession(login, userSession);
-        } else {
-            // room is full, shouldn't happen
-            success = false;
         }
-
-        return success;
+        return false;
     }
 
     private boolean isUser1Session(Session userSession) {
