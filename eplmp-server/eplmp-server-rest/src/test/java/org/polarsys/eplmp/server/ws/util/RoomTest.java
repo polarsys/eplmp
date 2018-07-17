@@ -86,12 +86,12 @@ public class RoomTest {
 
     @Test
     public void testGetByKeyName() {
-        Assert.assertTrue("plm".equals(DB.get(" ").key()));
+        Assert.assertEquals("plm", DB.get(" ").key());
     }
 
     @Test
     public void testGetRoom() {
-        Assert.assertTrue(DB.get("null").equals(room));
+        Assert.assertEquals(DB.get("null"), room);
     }
 
     @Test
@@ -116,7 +116,7 @@ public class RoomTest {
     @Test
     public void testGetSessionForUserLogin() {
         Assert.assertEquals(room.getSessionForUserLogin("user1"), userSession1);
-        Assert.assertEquals(room.getSessionForUserLogin("user4"), null);
+        Assert.assertNull(room.getSessionForUserLogin("user4"));
     }
 
     @Test
@@ -129,7 +129,7 @@ public class RoomTest {
         Session userSession3 = Mockito.mock(Session.class);
         Assert.assertEquals(DB.get("plm").getOtherUserSession(userSession1), userSession2);
         Assert.assertEquals(DB.get("plm").getOtherUserSession(userSession2), userSession1);
-        Assert.assertEquals(DB.get("plm").getOtherUserSession(userSession3), null);
+        Assert.assertNull(DB.get("plm").getOtherUserSession(userSession3));
     }
 
     @Test
@@ -168,7 +168,7 @@ public class RoomTest {
         secondRoom.removeSession(userSession1);
         thirdRoom.removeSession(userSession2);
         //Then
-        Assert.assertTrue(!secondRoom.hasUser("user1"));
+        Assert.assertFalse(secondRoom.hasUser("user1"));
         Assert.assertTrue(room.hasUser("user1"));
 
         Assert.assertTrue(secondRoom.hasUser("user2"));

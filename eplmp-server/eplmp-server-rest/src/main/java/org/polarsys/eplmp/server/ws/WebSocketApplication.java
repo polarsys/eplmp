@@ -16,6 +16,7 @@ import org.polarsys.eplmp.core.services.IUserManagerLocal;
 import org.polarsys.eplmp.server.auth.AuthConfig;
 import org.polarsys.eplmp.server.auth.jwt.JWTokenFactory;
 import org.polarsys.eplmp.server.auth.jwt.JWTokenUserGroupMapping;
+import org.polarsys.eplmp.server.ws.chat.Room;
 
 import javax.ejb.Stateless;
 import javax.enterprise.inject.Any;
