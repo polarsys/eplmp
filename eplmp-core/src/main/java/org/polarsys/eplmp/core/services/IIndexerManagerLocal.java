@@ -13,8 +13,10 @@ package org.polarsys.eplmp.core.services;
 
 import org.polarsys.eplmp.core.document.DocumentIteration;
 import org.polarsys.eplmp.core.document.DocumentRevision;
+import org.polarsys.eplmp.core.exceptions.AccessRightException;
 import org.polarsys.eplmp.core.exceptions.AccountNotFoundException;
 import org.polarsys.eplmp.core.exceptions.NotAllowedException;
+import org.polarsys.eplmp.core.exceptions.WorkspaceNotFoundException;
 import org.polarsys.eplmp.core.product.PartIteration;
 import org.polarsys.eplmp.core.product.PartRevision;
 import org.polarsys.eplmp.core.query.DocumentSearchQuery;
@@ -46,7 +48,7 @@ public interface IIndexerManagerLocal {
 
     void indexAllWorkspacesData() throws AccountNotFoundException;
 
-    void indexWorkspaceData(String workspaceId) throws AccountNotFoundException;
+    void indexWorkspaceData(String workspaceId) throws WorkspaceNotFoundException, AccountNotFoundException, AccessRightException;
 
     boolean ping();
 }

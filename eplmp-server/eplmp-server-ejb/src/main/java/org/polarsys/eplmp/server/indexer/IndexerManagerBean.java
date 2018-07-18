@@ -32,10 +32,7 @@ import org.polarsys.eplmp.core.product.*;
 import org.polarsys.eplmp.core.query.DocumentSearchQuery;
 import org.polarsys.eplmp.core.query.PartSearchQuery;
 import org.polarsys.eplmp.core.security.UserGroupMapping;
-import org.polarsys.eplmp.core.services.IAccountManagerLocal;
-import org.polarsys.eplmp.core.services.IBinaryStorageManagerLocal;
-import org.polarsys.eplmp.core.services.IIndexerManagerLocal;
-import org.polarsys.eplmp.core.services.INotifierLocal;
+import org.polarsys.eplmp.core.services.*;
 import org.polarsys.eplmp.i18n.PropertiesLoader;
 import org.polarsys.eplmp.server.dao.*;
 
@@ -94,12 +91,17 @@ public class IndexerManagerBean implements IIndexerManagerLocal {
     @Inject
     private IBinaryStorageManagerLocal storageManager;
 
+    @Inject
+    private IContextManagerLocal contextManager;
+
+    @Inject
+    private IUserManagerLocal userManager;
+
     private static final String I18N_CONF = "/org/polarsys/eplmp/core/i18n/LocalStrings";
 
     private static final String ANALYZER_SETTING_RESOURCE = "/org/polarsys/eplmp/server/indexer/analyzer-setting.json";
 
     private static final Logger LOGGER = Logger.getLogger(IndexerManagerBean.class.getName());
-
 
     @Override
     @RolesAllowed({UserGroupMapping.ADMIN_ROLE_ID, UserGroupMapping.REGULAR_USER_ROLE_ID})
@@ -107,20 +109,15 @@ public class IndexerManagerBean implements IIndexerManagerLocal {
         try {
             createIndex(IndexerUtils.formatIndexName(workspaceId));
         } catch (IOException e) {
-            //Throw an application exception?
             LOGGER.log(Level.WARNING, "Cannot create index for workspace [" + workspaceId + "]", e);
         }
     }
 
     @Override
-    @Asynchronous
     @RolesAllowed({UserGroupMapping.ADMIN_ROLE_ID, UserGroupMapping.REGULAR_USER_ROLE_ID})
-    public void deleteWorkspaceIndex(String workspaceId) {
-        try {
-            doDeleteWorkspaceIndex(workspaceId);
-        } catch (AccountNotFoundException e) {
-            LOGGER.log(Level.SEVERE, "An error occurred while deleting workspace [" + workspaceId + "]", e);
-        }
+    public void deleteWorkspaceIndex(String workspaceId) throws AccountNotFoundException {
+        Account account = accountManager.getMyAccount();
+        doDeleteWorkspaceIndex(account, workspaceId);
     }
 
     @Override
@@ -270,24 +267,35 @@ public class IndexerManagerBean implements IIndexerManagerLocal {
     }
 
     @Override
-    @Asynchronous
     @RolesAllowed({UserGroupMapping.ADMIN_ROLE_ID})
     public void indexAllWorkspacesData() throws AccountNotFoundException {
+        Account account = accountManager.getMyAccount();
+        doIndexAllWorkspacesData(account);
+    }
 
+    @Asynchronous
+    private void doIndexAllWorkspacesData(Account account) {
         for (Workspace workspace : workspaceDAO.getAll()) {
-            indexWorkspaceData(workspace.getId());
+            doIndexWorkspaceData(account, workspace.getId());
         }
     }
 
     @Override
-    @Asynchronous
     @RolesAllowed({UserGroupMapping.ADMIN_ROLE_ID, UserGroupMapping.REGULAR_USER_ROLE_ID})
-    public void indexWorkspaceData(String workspaceId) throws AccountNotFoundException {
+    public void indexWorkspaceData(String workspaceId)
+            throws WorkspaceNotFoundException, AccountNotFoundException, AccessRightException {
         Account account = accountManager.getMyAccount();
+        if (!contextManager.isCallerInRole(UserGroupMapping.ADMIN_ROLE_ID)) {
+            userManager.checkAdmin(workspaceId);
+        }
+        doIndexWorkspaceData(account, workspaceId);
+    }
 
+    @Asynchronous
+    private void doIndexWorkspaceData(Account account, String workspaceId) {
         try {
             // Clear workspace if exists, or recreate
-            doDeleteWorkspaceIndex(workspaceId);
+            doDeleteWorkspaceIndex(account, workspaceId);
             Bulk.Builder bb = new Bulk.Builder().defaultIndex(workspaceId);
             bulkWorkspaceRequestBuilder(bb, workspaceId);
 
@@ -304,6 +312,7 @@ public class IndexerManagerBean implements IIndexerManagerLocal {
             LOGGER.log(Level.WARNING, "Cannot index the whole workspace: The Elasticsearch server does not seem to respond");
             mailer.sendBulkIndexationFailure(account, getString("IndexerNotAvailableForRequest", new Locale(account.getLanguage())));
         }
+
     }
 
     @Override
@@ -345,9 +354,7 @@ public class IndexerManagerBean implements IIndexerManagerLocal {
 
     }
 
-
-    private void doDeleteWorkspaceIndex(String workspaceId) throws AccountNotFoundException {
-        Account account = accountManager.getMyAccount();
+    private void doDeleteWorkspaceIndex(Account account, String workspaceId) {
         try {
             DocumentResult result = esClient.execute(new Delete.Builder(IndexerUtils.formatIndexName(workspaceId))
                     .build());

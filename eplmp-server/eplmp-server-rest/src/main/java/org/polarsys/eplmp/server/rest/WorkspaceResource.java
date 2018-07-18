@@ -264,8 +264,7 @@ public class WorkspaceResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response synchronizeIndexer(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId)
-            throws AccessRightException, UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, AccountNotFoundException {
-
+            throws WorkspaceNotFoundException, AccountNotFoundException, AccessRightException {
         indexerManager.indexWorkspaceData(workspaceId);
         return Response.accepted().build();
     }
