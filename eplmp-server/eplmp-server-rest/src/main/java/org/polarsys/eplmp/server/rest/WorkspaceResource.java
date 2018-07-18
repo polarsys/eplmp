@@ -281,7 +281,8 @@ public class WorkspaceResource {
     })
     @Path("/{workspaceId}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response deleteWorkspace(@ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId) {
+    public Response deleteWorkspace(@ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId)
+            throws WorkspaceNotFoundException, AccountNotFoundException, AccessRightException {
         workspaceManager.deleteWorkspace(workspaceId);
         return Response.accepted().build();
     }

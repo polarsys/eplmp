@@ -115,8 +115,12 @@ public class IndexerManagerBean implements IIndexerManagerLocal {
     @Override
     @Asynchronous
     @RolesAllowed({UserGroupMapping.ADMIN_ROLE_ID, UserGroupMapping.REGULAR_USER_ROLE_ID})
-    public void deleteWorkspaceIndex(String workspaceId) throws AccountNotFoundException {
-        doDeleteWorkspaceIndex(workspaceId);
+    public void deleteWorkspaceIndex(String workspaceId) {
+        try {
+            doDeleteWorkspaceIndex(workspaceId);
+        } catch (AccountNotFoundException e) {
+            LOGGER.log(Level.SEVERE, "An error occurred while deleting workspace [" + workspaceId + "]", e);
+        }
     }
 
     @Override
@@ -184,15 +188,15 @@ public class IndexerManagerBean implements IIndexerManagerLocal {
 
         try {
             searchResult = esClient.execute(new Search.Builder(
-                    new SearchSourceBuilder()
-                            .query(query)
-                            .from(from)
-                            .size(size)
-                            .toString())
-                    .addIndex(IndexerUtils.formatIndexName(workspaceId))
-                    .addType(IndexerMapping.DOCUMENT_TYPE)
-                    .setSearchType(SearchType.QUERY_THEN_FETCH)
-                    .build()
+                            new SearchSourceBuilder()
+                                    .query(query)
+                                    .from(from)
+                                    .size(size)
+                                    .toString())
+                            .addIndex(IndexerUtils.formatIndexName(workspaceId))
+                            .addType(IndexerMapping.DOCUMENT_TYPE)
+                            .setSearchType(SearchType.QUERY_THEN_FETCH)
+                            .build()
             );
 
         } catch (IOException e) {
@@ -231,15 +235,15 @@ public class IndexerManagerBean implements IIndexerManagerLocal {
 
         try {
             searchResult = esClient.execute(new Search.Builder(
-                    new SearchSourceBuilder()
-                            .query(query)
-                            .from(from)
-                            .size(size)
-                            .toString())
-                    .addIndex(IndexerUtils.formatIndexName(workspaceId))
-                    .addType(IndexerMapping.PART_TYPE)
-                    .setSearchType(SearchType.QUERY_THEN_FETCH)
-                    .build()
+                            new SearchSourceBuilder()
+                                    .query(query)
+                                    .from(from)
+                                    .size(size)
+                                    .toString())
+                            .addIndex(IndexerUtils.formatIndexName(workspaceId))
+                            .addType(IndexerMapping.PART_TYPE)
+                            .setSearchType(SearchType.QUERY_THEN_FETCH)
+                            .build()
             );
 
         } catch (IOException e) {
@@ -359,7 +363,7 @@ public class IndexerManagerBean implements IIndexerManagerLocal {
 
     private void createIndex(String pIndex) throws IOException {
 
-       Settings settings = Settings.builder()
+        Settings settings = Settings.builder()
                 .loadFromStream(ANALYZER_SETTING_RESOURCE, this.getClass().getResourceAsStream(ANALYZER_SETTING_RESOURCE))
                 .put("number_of_shards", indexerConfigManager.getNumberOfShards())
                 .put("number_of_replicas", indexerConfigManager.getNumberOfReplicas())
@@ -429,8 +433,8 @@ public class IndexerManagerBean implements IIndexerManagerLocal {
         Long countByWorkspace = documentMasterDAO.getCountByWorkspace(workspaceId);
         Integer limit = 1000;
         int numberOfPage = (int) Math.ceil(countByWorkspace.doubleValue() / limit.doubleValue());
-        
-        for(int pageIndex = 0 ; pageIndex < numberOfPage ; pageIndex++) {
+
+        for (int pageIndex = 0; pageIndex < numberOfPage; pageIndex++) {
             int offset = pageIndex * limit;
             for (DocumentMaster docM : documentMasterDAO.getPaginatedByWorkspace(workspaceId, limit, offset)) {
                 for (DocumentRevision docR : docM.getDocumentRevisions()) {
@@ -454,7 +458,7 @@ public class IndexerManagerBean implements IIndexerManagerLocal {
         Integer limit = 1000;
         int numberOfPage = (int) Math.ceil(countByWorkspace.doubleValue() / limit.doubleValue());
 
-        for(int pageIndex = 0 ; pageIndex < numberOfPage ; pageIndex++) {
+        for (int pageIndex = 0; pageIndex < numberOfPage; pageIndex++) {
             int offset = pageIndex * limit;
             for (PartMaster partMaster : partMasterDAO.getPaginatedByWorkspace(workspaceId, limit, offset)) {
                 for (PartRevision partRev : partMaster.getPartRevisions()) {

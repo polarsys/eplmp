@@ -30,6 +30,7 @@ import org.polarsys.eplmp.core.services.IBinaryStorageManagerLocal;
 import org.polarsys.eplmp.core.workflow.WorkflowModel;
 import org.polarsys.eplmp.core.workflow.WorkspaceWorkflow;
 
+import javax.ejb.Asynchronous;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.persistence.EntityExistsException;
@@ -137,7 +138,6 @@ public class WorkspaceDAO {
     }
 
     public void removeWorkspace(Workspace workspace) throws StorageException {
-
 
         String workspaceId = workspace.getId();
         String pathToMatch = workspaceId.replace("_", "\\_").replace("%", "\\%") + "/%";
