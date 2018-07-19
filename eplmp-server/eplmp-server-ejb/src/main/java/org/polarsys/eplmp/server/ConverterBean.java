@@ -306,12 +306,12 @@ public class ConverterBean implements IConverterManagerLocal {
         String decimater = CONF.getProperty("decimater");
         Path executable = Paths.get(decimater);
         if (!executable.toFile().exists()) {
-            LOGGER.log(Level.SEVERE, "Cannot decimate file \"{0}\", decimater \"{1}\" is not available",
+            LOGGER.log(Level.WARNING, "Cannot decimate file \"{0}\", decimater \"{1}\" is not available",
                     new Object[] {file.getFileName(), decimater});
             return false;
         }
         if (!Files.isExecutable(executable)) {
-            LOGGER.log(Level.SEVERE, "Cannot decimate file \"{0}\", decimater \"{1}\" has no execution rights",
+            LOGGER.log(Level.WARNING, "Cannot decimate file \"{0}\", decimater \"{1}\" has no execution rights",
                     new Object[] {file.getFileName(), decimater});
             return false;
         }
