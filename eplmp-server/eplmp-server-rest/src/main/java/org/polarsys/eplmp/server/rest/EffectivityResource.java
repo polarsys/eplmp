@@ -66,8 +66,7 @@ public class EffectivityResource {
     public EffectivityDTO getEffectivity(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Effectivity id") @PathParam("effectivityId") int effectivityId)
-            throws EffectivityNotFoundException, UserNotFoundException, WorkspaceNotFoundException,
-            UserNotActiveException, WorkspaceNotEnabledException {
+            throws EntityNotFoundException, UserNotActiveException, WorkspaceNotEnabledException {
 
         Effectivity effectivity = effectivityManager.getEffectivity(workspaceId, effectivityId);
         EffectivityDTO effectivityDTO = mapper.map(effectivity, EffectivityDTO.class);
@@ -102,8 +101,7 @@ public class EffectivityResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Effectivity id") @PathParam("effectivityId") int effectivityId,
             @ApiParam(required = true, value = "Effectivity values to update") EffectivityDTO effectivityDTO)
-            throws EffectivityNotFoundException, UpdateException, UserNotFoundException, WorkspaceNotFoundException,
-            WorkspaceNotEnabledException, AccessRightException, CreationException {
+            throws EntityNotFoundException, UpdateException, WorkspaceNotEnabledException, AccessRightException, CreationException {
 
         Effectivity effectivity;
         if (effectivityDTO.getTypeEffectivity().equals(TypeEffectivity.SERIALNUMBERBASEDEFFECTIVITY)) {

@@ -70,7 +70,7 @@ public class PartTemplateResource {
     @Produces(MediaType.APPLICATION_JSON)
     public PartMasterTemplateDTO[] getPartMasterTemplates(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId)
-            throws EntityNotFoundException, UserNotActiveException {
+            throws EntityNotFoundException, UserNotActiveException, WorkspaceNotEnabledException {
 
 
         PartMasterTemplate[] partMasterTemplates = productService.getPartMasterTemplates(workspaceId);
@@ -97,7 +97,7 @@ public class PartTemplateResource {
     public PartMasterTemplateDTO getPartMasterTemplate(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Template id") @PathParam("templateId") String templateId)
-            throws EntityNotFoundException, UserNotActiveException {
+            throws EntityNotFoundException, UserNotActiveException, WorkspaceNotEnabledException {
 
         PartMasterTemplate partMasterTemplate = productService.getPartMasterTemplate(new PartMasterTemplateKey(workspaceId, templateId));
         return mapper.map(partMasterTemplate, PartMasterTemplateDTO.class);
@@ -117,7 +117,7 @@ public class PartTemplateResource {
     public TemplateGeneratedIdDTO generatePartMasterTemplateId(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Template id") @PathParam("templateId") String templateId)
-            throws EntityNotFoundException, UserNotActiveException {
+            throws EntityNotFoundException, UserNotActiveException, WorkspaceNotEnabledException {
 
         String generatedId = productService.generateId(workspaceId, templateId);
         return new TemplateGeneratedIdDTO(generatedId);
@@ -138,7 +138,7 @@ public class PartTemplateResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Part master template to create") PartTemplateCreationDTO templateCreationDTO)
             throws EntityNotFoundException, EntityAlreadyExistsException, CreationException, AccessRightException,
-            NotAllowedException {
+            NotAllowedException, WorkspaceNotEnabledException {
 
         String id = templateCreationDTO.getReference();
         String partType = templateCreationDTO.getPartType();
@@ -190,7 +190,7 @@ public class PartTemplateResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Template id") @PathParam("templateId") String templateId,
             @ApiParam(required = true, value = "Part master template to update") PartMasterTemplateDTO partMasterTemplateDTO)
-            throws EntityNotFoundException, AccessRightException, UserNotActiveException, NotAllowedException {
+            throws EntityNotFoundException, AccessRightException, UserNotActiveException, NotAllowedException, WorkspaceNotEnabledException {
 
         String partType = partMasterTemplateDTO.getPartType();
         String mask = partMasterTemplateDTO.getMask();
@@ -240,7 +240,7 @@ public class PartTemplateResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Template id") @PathParam("templateId") String templateId,
             @ApiParam(required = true, value = "ACL rules to set") ACLDTO acl)
-            throws EntityNotFoundException, AccessRightException, UserNotActiveException, NotAllowedException {
+            throws EntityNotFoundException, AccessRightException, UserNotActiveException, NotAllowedException, WorkspaceNotEnabledException {
 
         if (acl.hasEntries()) {
             productService.updateACLForPartMasterTemplate(workspaceId, templateId, acl.getUserEntriesMap(), acl.getUserGroupEntriesMap());
@@ -264,7 +264,7 @@ public class PartTemplateResource {
     public Response deletePartMasterTemplate(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Template id") @PathParam("templateId") String templateId)
-            throws EntityNotFoundException, AccessRightException, UserNotActiveException {
+            throws EntityNotFoundException, AccessRightException, UserNotActiveException, WorkspaceNotEnabledException {
 
         productService.deletePartMasterTemplate(new PartMasterTemplateKey(workspaceId, templateId));
         return Response.noContent().build();
@@ -285,7 +285,7 @@ public class PartTemplateResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Template id") @PathParam("templateId") String templateId,
             @ApiParam(required = true, value = "File name") @PathParam("fileName") String fileName)
-            throws EntityNotFoundException, AccessRightException, UserNotActiveException {
+            throws EntityNotFoundException, AccessRightException, UserNotActiveException, WorkspaceNotEnabledException {
 
         String fileFullName = workspaceId + "/part-templates/" + templateId + "/" + fileName;
         productService.removeFileFromTemplate(fileFullName);
@@ -309,9 +309,8 @@ public class PartTemplateResource {
             @ApiParam(required = true, value = "Template id") @PathParam("templateId") String templateId,
             @ApiParam(required = true, value = "File name") @PathParam("fileName") String fileName,
             @ApiParam(required = true, value = "File to rename") FileDTO fileDTO)
-            throws UserNotActiveException, WorkspaceNotFoundException, CreationException, UserNotFoundException,
-            FileNotFoundException, AccessRightException, FileAlreadyExistsException, StorageException,
-            NotAllowedException, WorkspaceNotEnabledException {
+            throws UserNotActiveException, EntityNotFoundException, CreationException, AccessRightException,
+            EntityAlreadyExistsException, StorageException, NotAllowedException, WorkspaceNotEnabledException {
 
         String fileFullName = workspaceId + "/part-templates/" + templateId + "/" + fileName;
         BinaryResource binaryResource = productService.renameFileInTemplate(fileFullName, fileDTO.getShortName());

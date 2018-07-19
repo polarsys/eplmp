@@ -87,7 +87,7 @@ public class DocumentTemplateBinaryResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") final String workspaceId,
             @ApiParam(required = true, value = "Template id") @PathParam("templateId") final String templateId)
             throws EntityNotFoundException, EntityAlreadyExistsException, UserNotActiveException, AccessRightException,
-            NotAllowedException, CreationException {
+            NotAllowedException, CreationException, WorkspaceNotEnabledException {
 
         try {
             BinaryResource binaryResource;
@@ -137,7 +137,7 @@ public class DocumentTemplateBinaryResource {
             @ApiParam(required = false, value = "Type") @QueryParam("type") String type,
             @ApiParam(required = false, value = "Output") @QueryParam("output") String output)
             throws EntityNotFoundException, UserNotActiveException, AccessRightException, NotAllowedException,
-            PreconditionFailedException, NotModifiedException, RequestedRangeNotSatisfiableException {
+            PreconditionFailedException, NotModifiedException, RequestedRangeNotSatisfiableException, WorkspaceNotEnabledException {
 
 
         String fullName = workspaceId + "/document-templates/" + templateId + "/" + fileName;

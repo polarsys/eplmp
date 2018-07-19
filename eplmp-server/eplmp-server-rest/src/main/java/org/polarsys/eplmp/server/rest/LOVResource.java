@@ -72,7 +72,7 @@ public class LOVResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response getLOVs(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId)
-            throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, WorkspaceNotEnabledException {
+            throws EntityNotFoundException, UserNotActiveException, WorkspaceNotEnabledException {
 
         List<ListOfValuesDTO> LOVDTOs = new ArrayList<>();
         List<ListOfValues> LOVs = lovManager.findLOVFromWorkspace(workspaceId);
@@ -100,9 +100,8 @@ public class LOVResource {
     public Response createLOV(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "LOV to create") ListOfValuesDTO lovDTO)
-            throws ListOfValuesAlreadyExistsException, CreationException, UnsupportedEncodingException,
-            UserNotFoundException, AccessRightException, UserNotActiveException, WorkspaceNotFoundException,
-            WorkspaceNotEnabledException {
+            throws EntityAlreadyExistsException, EntityNotFoundException, CreationException, UnsupportedEncodingException,
+            AccessRightException, UserNotActiveException, WorkspaceNotEnabledException {
 
         ListOfValues lov = mapper.map(lovDTO, ListOfValues.class);
         lovManager.createLov(workspaceId, lov.getName(), lov.getValues());
@@ -124,7 +123,7 @@ public class LOVResource {
     public ListOfValuesDTO getLOV(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Name") @PathParam("name") String name)
-            throws ListOfValuesNotFoundException, UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, WorkspaceNotEnabledException {
+            throws EntityNotFoundException, UserNotActiveException, WorkspaceNotEnabledException {
 
         ListOfValuesKey lovKey = new ListOfValuesKey(workspaceId, name);
         ListOfValues lov = lovManager.findLov(lovKey);
@@ -147,7 +146,7 @@ public class LOVResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Name") @PathParam("name") String name,
             @ApiParam(required = true, value = "LOV to update") ListOfValuesDTO lovDTO)
-            throws ListOfValuesNotFoundException, ListOfValuesAlreadyExistsException, CreationException, UserNotFoundException, WorkspaceNotFoundException, UserNotActiveException, AccessRightException, WorkspaceNotEnabledException {
+            throws EntityNotFoundException, EntityAlreadyExistsException, CreationException, UserNotActiveException, AccessRightException, WorkspaceNotEnabledException {
 
         ListOfValuesKey lovKey = new ListOfValuesKey(workspaceId, name);
         ListOfValues lov = mapper.map(lovDTO, ListOfValues.class);
@@ -171,7 +170,7 @@ public class LOVResource {
     public Response deleteLOV(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Name") @PathParam("name") String name)
-            throws ListOfValuesNotFoundException, UserNotFoundException, WorkspaceNotFoundException, UserNotActiveException, AccessRightException, EntityConstraintException, WorkspaceNotEnabledException {
+            throws EntityNotFoundException, UserNotActiveException, AccessRightException, EntityConstraintException, WorkspaceNotEnabledException {
         ListOfValuesKey lovKey = new ListOfValuesKey(workspaceId, name);
         lovManager.deleteLov(lovKey);
         return Response.noContent().build();

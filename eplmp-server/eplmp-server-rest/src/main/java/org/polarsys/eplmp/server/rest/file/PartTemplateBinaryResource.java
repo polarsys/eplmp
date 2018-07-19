@@ -81,7 +81,7 @@ public class PartTemplateBinaryResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") final String workspaceId,
             @ApiParam(required = true, value = "Template id") @PathParam("templateId") final String templateId)
             throws EntityNotFoundException, EntityAlreadyExistsException, UserNotActiveException, AccessRightException,
-            NotAllowedException, CreationException {
+            NotAllowedException, CreationException, WorkspaceNotEnabledException {
 
         try {
             BinaryResource binaryResource;
@@ -128,7 +128,7 @@ public class PartTemplateBinaryResource {
             @ApiParam(required = true, value = "Template id") @PathParam("templateId") final String templateId,
             @ApiParam(required = true, value = "File name") @PathParam("fileName") final String fileName)
             throws EntityNotFoundException, UserNotActiveException, AccessRightException, NotAllowedException,
-            PreconditionFailedException, NotModifiedException, RequestedRangeNotSatisfiableException {
+            PreconditionFailedException, NotModifiedException, RequestedRangeNotSatisfiableException, WorkspaceNotEnabledException {
 
 
         String fullName = workspaceId + "/part-templates/" + templateId + "/" + fileName;

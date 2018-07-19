@@ -245,8 +245,7 @@ public class WorkspaceResource {
     public Response updateWorkspace(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Workspace values to update") WorkspaceDTO workspaceDTO)
-            throws WorkspaceNotFoundException, UserNotFoundException, UserNotActiveException,
-            AccountNotFoundException, AccessRightException {
+            throws EntityNotFoundException, UserNotActiveException, AccessRightException {
 
         Workspace workspace = workspaceManager.updateWorkspace(workspaceId, workspaceDTO.getDescription(), workspaceDTO.isFolderLocked());
         return Response.ok(mapper.map(workspace, WorkspaceDTO.class)).build();
@@ -266,7 +265,7 @@ public class WorkspaceResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response synchronizeIndexer(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId)
-            throws WorkspaceNotFoundException, AccountNotFoundException, AccessRightException {
+            throws EntityNotFoundException, AccessRightException {
         indexerManager.indexWorkspaceData(workspaceId);
         return Response.accepted().build();
     }
@@ -284,7 +283,7 @@ public class WorkspaceResource {
     @Path("/{workspaceId}")
     @Produces(MediaType.APPLICATION_JSON)
     public Response deleteWorkspace(@ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId)
-            throws WorkspaceNotFoundException, AccountNotFoundException, AccessRightException {
+            throws EntityNotFoundException, AccessRightException {
         workspaceManager.deleteWorkspace(workspaceId);
         return Response.accepted().build();
     }
@@ -304,8 +303,7 @@ public class WorkspaceResource {
     @Produces(MediaType.APPLICATION_JSON)
     public UserGroupDTO[] getUserGroups(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId)
-            throws UserNotFoundException, WorkspaceNotFoundException, UserNotActiveException,
-            AccountNotFoundException, WorkspaceNotEnabledException {
+            throws EntityNotFoundException, UserNotActiveException, WorkspaceNotEnabledException {
 
         UserGroup[] userGroups = userManager.getUserGroups(workspaceId);
         UserGroupDTO[] userGroupDTOs = new UserGroupDTO[userGroups.length];
@@ -331,8 +329,7 @@ public class WorkspaceResource {
     public UserGroupDTO createGroup(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "UserGroup to create") UserGroupDTO userGroupDTO)
-            throws UserGroupAlreadyExistsException, AccessRightException, AccountNotFoundException,
-            CreationException, WorkspaceNotFoundException {
+            throws EntityAlreadyExistsException, AccessRightException, EntityNotFoundException, CreationException {
 
         UserGroup userGroup = userManager.createUserGroup(userGroupDTO.getId(), workspaceId);
         return mapper.map(userGroup, UserGroupDTO.class);
@@ -353,8 +350,7 @@ public class WorkspaceResource {
     public Response removeGroup(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Group id") @PathParam("groupId") String groupId)
-            throws UserGroupNotFoundException, AccessRightException, EntityConstraintException,
-            AccountNotFoundException, WorkspaceNotFoundException {
+            throws EntityNotFoundException, AccessRightException, EntityConstraintException {
 
         userManager.removeUserGroups(workspaceId, new String[]{groupId});
         return Response.noContent().build();
@@ -377,10 +373,8 @@ public class WorkspaceResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = false, value = "Group id") @QueryParam("group") String groupId,
             @ApiParam(required = true, value = "User to add") UserDTO userDTO)
-            throws WorkspaceNotFoundException, UserNotFoundException, UserNotActiveException,
-            AccessRightException, UserGroupNotFoundException,
-            AccountNotFoundException, UserAlreadyExistsException,
-            FolderAlreadyExistsException, CreationException {
+            throws EntityNotFoundException, UserNotActiveException, AccessRightException,
+            EntityAlreadyExistsException, CreationException {
 
         if (groupId != null && !groupId.isEmpty()) {
             userManager.addUserInGroup(new UserGroupKey(workspaceId, groupId), userDTO.getLogin());
@@ -406,8 +400,7 @@ public class WorkspaceResource {
     public Response setNewAdmin(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "New admin user") UserDTO userDTO)
-            throws AccountNotFoundException, AccessRightException, WorkspaceNotFoundException,
-            UserNotFoundException, UserNotActiveException, WorkspaceNotEnabledException, NotAllowedException {
+            throws EntityNotFoundException, AccessRightException, UserNotActiveException, WorkspaceNotEnabledException, NotAllowedException {
 
         Workspace workspace = workspaceManager.changeAdmin(workspaceId, userDTO.getLogin());
         return Response.ok(mapper.map(workspace, WorkspaceDTO.class)).build();
@@ -427,8 +420,7 @@ public class WorkspaceResource {
     public WorkspaceDTO createWorkspace(
             @ApiParam(value = "Login for workspace admin", required = false) @QueryParam("userLogin") String userLogin,
             @ApiParam(value = "Workspace to create", required = true) WorkspaceDTO workspaceDTO)
-            throws FolderAlreadyExistsException, UserAlreadyExistsException, WorkspaceAlreadyExistsException,
-            CreationException, AccountNotFoundException, IOException, NotAllowedException {
+            throws EntityAlreadyExistsException, CreationException, EntityNotFoundException, IOException, NotAllowedException {
         Account account;
         if (contextManager.isCallerInRole(UserGroupMapping.ADMIN_ROLE_ID)) {
             account = accountManager.getAccount(userLogin);
@@ -455,7 +447,7 @@ public class WorkspaceResource {
     public Response setUserAccess(
             @ApiParam(value = "Workspace id", required = true) @PathParam("workspaceId") String workspaceId,
             @ApiParam(value = "User to grant access in workspace", required = true) UserDTO userDTO)
-            throws AccessRightException, AccountNotFoundException, WorkspaceNotFoundException {
+            throws AccessRightException, EntityNotFoundException {
 
         if (userDTO.getMembership() == null) {
             return Response.status(Response.Status.BAD_REQUEST).build();
@@ -479,8 +471,7 @@ public class WorkspaceResource {
     public Response setGroupAccess(
             @ApiParam(value = "Workspace id", required = true) @PathParam("workspaceId") String workspaceId,
             @ApiParam(value = "User to grant access in group", required = true) WorkspaceUserGroupMemberShipDTO workspaceUserGroupMemberShipDTO)
-            throws AccessRightException, AccountNotFoundException, WorkspaceNotFoundException,
-            UserGroupNotFoundException {
+            throws AccessRightException, EntityNotFoundException {
 
         WorkspaceUserGroupMembership membership = userManager.grantGroupAccess(workspaceId, workspaceUserGroupMemberShipDTO.getMemberId(), workspaceUserGroupMemberShipDTO.isReadOnly());
         return Response.ok(mapper.map(membership, WorkspaceUserGroupMemberShipDTO.class)).build();
@@ -502,8 +493,7 @@ public class WorkspaceResource {
             @ApiParam(value = "Workspace id", required = true) @PathParam("workspaceId") String workspaceId,
             @ApiParam(value = "Group id", required = true) @PathParam("groupId") String groupId,
             @ApiParam(value = "User to remove from group", required = true) UserDTO userDTO)
-            throws AccessRightException, UserGroupNotFoundException, AccountNotFoundException,
-            WorkspaceNotFoundException {
+            throws AccessRightException, EntityNotFoundException {
 
         UserGroup userGroup = userManager.removeUserFromGroup(new UserGroupKey(workspaceId, groupId), userDTO.getLogin());
         return Response.ok(mapper.map(userGroup, UserGroupDTO.class)).build();
@@ -523,9 +513,7 @@ public class WorkspaceResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response removeUserFromWorkspace(@ApiParam(value = "Workspace id", required = true) @PathParam("workspaceId") String workspaceId,
                                             @ApiParam(value = "User to remove from workspace", required = true) UserDTO userDTO)
-            throws UserGroupNotFoundException, AccessRightException, UserNotFoundException,
-            AccountNotFoundException, WorkspaceNotFoundException, FolderNotFoundException,
-            EntityConstraintException, DocumentRevisionNotFoundException, UserNotActiveException {
+            throws EntityNotFoundException, AccessRightException, EntityConstraintException, UserNotActiveException {
         Workspace workspace = userManager.removeUser(workspaceId, userDTO.getLogin());
         return Response.ok(mapper.map(workspace, WorkspaceDTO.class)).build();
     }
@@ -545,7 +533,7 @@ public class WorkspaceResource {
     public Response enableUser(
             @ApiParam(value = "Workspace id", required = true) @PathParam("workspaceId") String workspaceId,
             @ApiParam(value = "User to enable", required = true) UserDTO userDTO)
-            throws AccessRightException, AccountNotFoundException, WorkspaceNotFoundException {
+            throws AccessRightException, EntityNotFoundException {
 
         userManager.activateUser(workspaceId, userDTO.getLogin());
         return Response.noContent().build();
@@ -566,7 +554,7 @@ public class WorkspaceResource {
     public Response disableUser(
             @ApiParam(value = "Workspace id", required = true) @PathParam("workspaceId") String workspaceId,
             @ApiParam(value = "User to disable", required = true) UserDTO userDTO)
-            throws AccessRightException, AccountNotFoundException, WorkspaceNotFoundException {
+            throws AccessRightException, EntityNotFoundException {
 
         userManager.passivateUser(workspaceId, userDTO.getLogin());
         return Response.noContent().build();
@@ -587,7 +575,7 @@ public class WorkspaceResource {
     public Response enableGroup(
             @ApiParam(value = "Workspace id", required = true) @PathParam("workspaceId") String workspaceId,
             @ApiParam(value = "Group to enable", required = true) UserGroupDTO userGroupDTO)
-            throws AccessRightException, AccountNotFoundException, WorkspaceNotFoundException {
+            throws AccessRightException, EntityNotFoundException {
 
         userManager.activateUserGroup(workspaceId, userGroupDTO.getId());
         return Response.noContent().build();
@@ -608,7 +596,7 @@ public class WorkspaceResource {
     public Response disableGroup(
             @ApiParam(value = "Workspace id", required = true) @PathParam("workspaceId") String workspaceId,
             @ApiParam(value = "Group to disable", required = true) UserGroupDTO userGroupDTO)
-            throws AccessRightException, AccountNotFoundException, WorkspaceNotFoundException {
+            throws AccessRightException, EntityNotFoundException {
 
         userManager.passivateUserGroup(workspaceId, userGroupDTO.getId());
         return Response.noContent().build();
@@ -628,8 +616,7 @@ public class WorkspaceResource {
     @Produces(MediaType.APPLICATION_JSON)
     public StatsOverviewDTO getStatsOverview(
             @ApiParam(value = "Workspace id", required = true) @PathParam("workspaceId") String workspaceId)
-            throws WorkspaceNotFoundException, AccountNotFoundException, AccessRightException,
-            UserNotFoundException, UserNotActiveException, WorkspaceNotEnabledException {
+            throws EntityNotFoundException, AccessRightException, UserNotActiveException, WorkspaceNotEnabledException {
 
         StatsOverviewDTO statsOverviewDTO = new StatsOverviewDTO();
 
@@ -656,7 +643,7 @@ public class WorkspaceResource {
     @Produces(MediaType.APPLICATION_JSON)
     public DiskUsageSpaceDTO getDiskSpaceUsageStats(
             @ApiParam(value = "Workspace id", required = true) @PathParam("workspaceId") String workspaceId)
-            throws WorkspaceNotFoundException, AccountNotFoundException, AccessRightException {
+            throws EntityNotFoundException, AccessRightException {
 
         DiskUsageSpaceDTO diskUsageSpaceDTO = new DiskUsageSpaceDTO();
         diskUsageSpaceDTO.setDocuments(documentService.getDiskUsageForDocumentsInWorkspace(workspaceId));
@@ -681,7 +668,7 @@ public class WorkspaceResource {
     @Produces(MediaType.APPLICATION_JSON)
     public JsonObject getCheckedOutDocumentsStats(
             @ApiParam(value = "Workspace id", required = true) @PathParam("workspaceId") String workspaceId)
-            throws WorkspaceNotFoundException, AccountNotFoundException, AccessRightException {
+            throws EntityNotFoundException, AccessRightException {
 
         DocumentRevision[] checkedOutDocumentRevisions = documentService.getAllCheckedOutDocumentRevisions(workspaceId);
         JsonObjectBuilder statsByUserBuilder = Json.createObjectBuilder();
@@ -720,7 +707,7 @@ public class WorkspaceResource {
     @Produces(MediaType.APPLICATION_JSON)
     public JsonObject getCheckedOutPartsStats(
             @ApiParam(value = "Workspace id", required = true) @PathParam("workspaceId") String workspaceId)
-            throws WorkspaceNotFoundException, AccountNotFoundException, AccessRightException {
+            throws EntityNotFoundException, AccessRightException {
 
         PartRevision[] checkedOutPartRevisions = productService.getAllCheckedOutPartRevisions(workspaceId);
         JsonObjectBuilder statsByUserBuilder = Json.createObjectBuilder();
@@ -759,8 +746,7 @@ public class WorkspaceResource {
     @Produces(MediaType.APPLICATION_JSON)
     public JsonObject getUsersStats(
             @ApiParam(value = "Workspace id", required = true) @PathParam("workspaceId") String workspaceId)
-            throws UserNotFoundException, WorkspaceNotFoundException, UserNotActiveException,
-            AccountNotFoundException, AccessRightException, WorkspaceNotEnabledException {
+            throws EntityNotFoundException, UserNotActiveException, AccessRightException, WorkspaceNotEnabledException {
 
         WorkspaceUserMembership[] workspaceUserMemberships = userManager.getWorkspaceUserMemberships(workspaceId);
         WorkspaceUserGroupMembership[] workspaceUserGroupMemberships = userManager.getWorkspaceUserGroupMemberships(workspaceId);
@@ -797,7 +783,7 @@ public class WorkspaceResource {
     @Consumes(MediaType.APPLICATION_JSON)
     public WorkspaceFrontOptionsDTO getWorkspaceFrontOptions(
             @ApiParam(value = "Workspace id", required = true) @PathParam("workspaceId") String workspaceId)
-            throws EntityNotFoundException, UserNotActiveException {
+            throws EntityNotFoundException, UserNotActiveException, WorkspaceNotEnabledException {
 
         WorkspaceFrontOptions workspaceFrontOptions = Optional.ofNullable(workspaceManager.getWorkspaceFrontOptions(workspaceId)).orElse(new WorkspaceFrontOptions());
         return mapper.map(workspaceFrontOptions, WorkspaceFrontOptionsDTO.class);
@@ -819,7 +805,7 @@ public class WorkspaceResource {
     public Response updateWorkspaceFrontOptions(
             @ApiParam(value = "Workspace id", required = true) @PathParam("workspaceId") String workspaceId,
             @ApiParam(value = "Option values", required = true) WorkspaceFrontOptionsDTO workspaceFrontOptionsDTO)
-            throws AccessRightException, AccountNotFoundException, WorkspaceNotFoundException {
+            throws AccessRightException, EntityNotFoundException {
 
         List<String> partTableColumns = workspaceFrontOptionsDTO.getPartTableColumns();
         List<String> documentTableColumns = workspaceFrontOptionsDTO.getDocumentTableColumns();
@@ -845,7 +831,7 @@ public class WorkspaceResource {
     @Produces(MediaType.APPLICATION_JSON)
     public WorkspaceBackOptionsDTO getWorkspaceBackOptions(
             @ApiParam(value = "Workspace id", required = true) @PathParam("workspaceId") String workspaceId)
-            throws WorkspaceNotFoundException, AccountNotFoundException, AccessRightException {
+            throws EntityNotFoundException, AccessRightException {
         WorkspaceBackOptions workspaceBackOptions = workspaceManager.getWorkspaceBackOptions(workspaceId);
         return mapper.map(workspaceBackOptions, WorkspaceBackOptionsDTO.class);
     }
@@ -866,7 +852,7 @@ public class WorkspaceResource {
     public Response updateWorkspaceBackOptions(
             @ApiParam(value = "Workspace id", required = true) @PathParam("workspaceId") String workspaceId,
             @ApiParam(value = "Option values", required = true) WorkspaceBackOptionsDTO workspaceBackOptionsDTO
-    ) throws WorkspaceNotFoundException, AccountNotFoundException, AccessRightException {
+    ) throws EntityNotFoundException, AccessRightException {
         workspaceManager.updateWorkspaceBackOptions(new WorkspaceBackOptions(new Workspace(workspaceId), workspaceBackOptionsDTO.isSendEmails()));
         return Response.noContent().build();
     }

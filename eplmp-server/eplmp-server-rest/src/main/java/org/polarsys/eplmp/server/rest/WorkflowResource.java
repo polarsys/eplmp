@@ -72,7 +72,7 @@ public class WorkflowResource {
     public WorkflowDTO getWorkflowInstance(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Workflow id") @PathParam("workflowId") int workflowId)
-            throws EntityNotFoundException, UserNotActiveException, AccessRightException {
+            throws EntityNotFoundException, UserNotActiveException, AccessRightException, WorkspaceNotEnabledException {
 
         Workflow workflow = workflowService.getWorkflow(workspaceId, workflowId);
         return mapper.map(workflow, WorkflowDTO.class);
@@ -93,8 +93,7 @@ public class WorkflowResource {
     public Response getWorkflowAbortedWorkflowList(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Workflow id") @PathParam("workflowId") int workflowId)
-            throws UserNotFoundException, WorkspaceNotFoundException, UserNotActiveException,
-            WorkflowNotFoundException, AccessRightException, WorkspaceNotEnabledException {
+            throws EntityNotFoundException, UserNotActiveException, AccessRightException, WorkspaceNotEnabledException {
 
         Workflow[] abortedWorkflowList = workflowService.getWorkflowAbortedWorkflowList(workspaceId, workflowId);
 

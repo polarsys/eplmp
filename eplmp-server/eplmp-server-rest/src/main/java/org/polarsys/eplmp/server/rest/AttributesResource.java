@@ -10,10 +10,7 @@
   *******************************************************************************/
 package org.polarsys.eplmp.server.rest;
 
-import org.polarsys.eplmp.core.exceptions.UserNotActiveException;
-import org.polarsys.eplmp.core.exceptions.UserNotFoundException;
-import org.polarsys.eplmp.core.exceptions.WorkspaceNotEnabledException;
-import org.polarsys.eplmp.core.exceptions.WorkspaceNotFoundException;
+import org.polarsys.eplmp.core.exceptions.*;
 import org.polarsys.eplmp.core.meta.InstanceAttribute;
 import org.polarsys.eplmp.core.security.UserGroupMapping;
 import org.polarsys.eplmp.core.services.IProductManagerLocal;
@@ -77,7 +74,7 @@ public class AttributesResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response getPartIterationsAttributes(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId)
-            throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, WorkspaceNotEnabledException {
+            throws EntityNotFoundException, UserNotActiveException, WorkspaceNotEnabledException {
         List<InstanceAttribute> attributes = productManager.getPartIterationsInstanceAttributesInWorkspace(workspaceId);
         List<InstanceAttributeDTO> attributeDTOList = new ArrayList<>();
         Set<String> seen=new HashSet<>();
@@ -114,7 +111,7 @@ public class AttributesResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response getPathDataAttributes(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId)
-            throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, WorkspaceNotEnabledException {
+            throws EntityNotFoundException, UserNotActiveException, WorkspaceNotEnabledException {
         List<InstanceAttribute> attributes = productManager.getPathDataInstanceAttributesInWorkspace(workspaceId);
         List<InstanceAttributeDTO> attributeDTOList = new ArrayList<>();
         Set<String> seen=new HashSet<>();

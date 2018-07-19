@@ -74,7 +74,7 @@ public class TagResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response getTagsInWorkspace(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId)
-            throws EntityNotFoundException, UserNotActiveException {
+            throws EntityNotFoundException, UserNotActiveException, WorkspaceNotEnabledException {
 
         String[] tagsName = documentService.getTags(workspaceId);
         List<TagDTO> tagsDTO = new ArrayList<>();
@@ -99,7 +99,7 @@ public class TagResource {
     public TagDTO createTag(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(value = "Tag to create", required = true) TagDTO tag)
-            throws EntityNotFoundException, EntityAlreadyExistsException, UserNotActiveException, AccessRightException, CreationException {
+            throws EntityNotFoundException, EntityAlreadyExistsException, UserNotActiveException, AccessRightException, CreationException, WorkspaceNotEnabledException {
 
         documentService.createTag(workspaceId, tag.getLabel());
         return new TagDTO(tag.getLabel());
@@ -120,7 +120,7 @@ public class TagResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(value = "Tag list to create", required = true) TagListDTO tagList)
             throws EntityNotFoundException, EntityAlreadyExistsException, UserNotActiveException,
-            AccessRightException, CreationException {
+            AccessRightException, CreationException, WorkspaceNotEnabledException {
 
         for (TagDTO tagDTO : tagList.getTags()) {
             documentService.createTag(workspaceId, tagDTO.getLabel());
@@ -141,7 +141,7 @@ public class TagResource {
     public Response deleteTag(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Tag id") @PathParam("tagId") String tagId)
-            throws EntityNotFoundException, AccessRightException {
+            throws EntityNotFoundException, AccessRightException, WorkspaceNotEnabledException {
 
         documentService.deleteTag(new TagKey(workspaceId, tagId));
         return Response.noContent().build();
@@ -162,7 +162,7 @@ public class TagResource {
     public DocumentRevisionDTO[] getDocumentsWithGivenTagIdAndWorkspaceId(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Tag id") @PathParam("tagId") String tagId)
-            throws EntityNotFoundException, UserNotActiveException {
+            throws EntityNotFoundException, UserNotActiveException, WorkspaceNotEnabledException {
 
         TagKey tagKey = new TagKey(workspaceId, tagId);
         DocumentRevision[] docRs = documentService.findDocumentRevisionsByTag(tagKey);
@@ -197,7 +197,8 @@ public class TagResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Document to create") DocumentCreationDTO docCreationDTO,
             @ApiParam(required = true, value = "Tag id") @PathParam("tagId") String tagId)
-            throws CreationException, FileAlreadyExistsException, DocumentRevisionAlreadyExistsException, WorkspaceNotFoundException, UserNotFoundException, NotAllowedException, DocumentMasterAlreadyExistsException, RoleNotFoundException, FolderNotFoundException, WorkflowModelNotFoundException, AccessRightException, DocumentMasterTemplateNotFoundException, DocumentRevisionNotFoundException, UserNotActiveException, UserGroupNotFoundException, WorkspaceNotEnabledException {
+            throws CreationException, EntityAlreadyExistsException, EntityNotFoundException, NotAllowedException,
+            AccessRightException, UserNotActiveException, WorkspaceNotEnabledException {
 
         String pDocMID = docCreationDTO.getReference();
         String pTitle = docCreationDTO.getTitle();

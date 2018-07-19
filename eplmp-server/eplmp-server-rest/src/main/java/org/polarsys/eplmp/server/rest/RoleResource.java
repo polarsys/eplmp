@@ -78,7 +78,7 @@ public class RoleResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response getRolesInWorkspace(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId)
-            throws EntityNotFoundException, UserNotActiveException {
+            throws EntityNotFoundException, UserNotActiveException, WorkspaceNotEnabledException {
 
         Role[] roles = roleService.getRoles(workspaceId);
         List<RoleDTO> rolesDTO = new ArrayList<>();
@@ -105,7 +105,7 @@ public class RoleResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response getRolesInUseInWorkspace(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId)
-            throws EntityNotFoundException, UserNotActiveException {
+            throws EntityNotFoundException, UserNotActiveException, WorkspaceNotEnabledException {
 
         Role[] roles = roleService.getRolesInUse(workspaceId);
         List<RoleDTO> rolesDTO = new ArrayList<>();
@@ -134,7 +134,7 @@ public class RoleResource {
     public Response createRole(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Role to create") RoleDTO roleDTO)
-            throws EntityNotFoundException, EntityAlreadyExistsException, UserNotActiveException, AccessRightException, CreationException {
+            throws EntityNotFoundException, EntityAlreadyExistsException, UserNotActiveException, AccessRightException, CreationException, WorkspaceNotEnabledException {
 
         List<UserDTO> userDTOs = roleDTO.getDefaultAssignedUsers();
         List<UserGroupDTO> groupDTOs = roleDTO.getDefaultAssignedGroups();
@@ -178,7 +178,7 @@ public class RoleResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Role name") @PathParam("roleName") String roleName,
             @ApiParam(required = true, value = "Role to update") RoleDTO roleDTO)
-            throws EntityNotFoundException, AccessRightException, UserNotActiveException {
+            throws EntityNotFoundException, AccessRightException, UserNotActiveException, WorkspaceNotEnabledException {
 
         List<UserDTO> userDTOs = roleDTO.getDefaultAssignedUsers();
         List<UserGroupDTO> groupDTOs = roleDTO.getDefaultAssignedGroups();
@@ -219,7 +219,7 @@ public class RoleResource {
     public Response deleteRole(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Role name") @PathParam("roleName") String roleName)
-            throws EntityNotFoundException, UserNotActiveException, AccessRightException, EntityConstraintException {
+            throws EntityNotFoundException, UserNotActiveException, AccessRightException, EntityConstraintException, WorkspaceNotEnabledException {
 
         RoleKey roleKey = new RoleKey(workspaceId, roleName);
         roleService.deleteRole(roleKey);

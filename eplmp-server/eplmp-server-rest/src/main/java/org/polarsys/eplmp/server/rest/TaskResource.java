@@ -85,8 +85,7 @@ public class TaskResource {
     public TaskDTO[] getAssignedTasksForGivenUser(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Assigned user login") @PathParam("assignedUserLogin") String assignedUserLogin)
-            throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException,
-            WorkspaceNotEnabledException {
+            throws EntityNotFoundException, UserNotActiveException, WorkspaceNotEnabledException {
 
         TaskWrapper[] runningTasksForGivenUser = taskManager.getAssignedTasksForGivenUser(workspaceId, assignedUserLogin);
         List<TaskDTO> taskDTOs = new ArrayList<>();
@@ -115,8 +114,7 @@ public class TaskResource {
     public TaskDTO getTask(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Task id") @PathParam("taskId") String taskId)
-            throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException,
-            TaskNotFoundException, AccessRightException, WorkspaceNotEnabledException {
+            throws EntityNotFoundException, UserNotActiveException, AccessRightException, WorkspaceNotEnabledException {
 
         String[] split = taskId.split("-");
 
@@ -152,7 +150,7 @@ public class TaskResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Assigned user login") @PathParam("assignedUserLogin") String assignedUserLogin,
             @ApiParam(required = false, value = "Status filter") @QueryParam("filter") String filter)
-            throws EntityNotFoundException, UserNotActiveException {
+            throws EntityNotFoundException, UserNotActiveException, WorkspaceNotEnabledException {
 
         DocumentRevision[] docRs;
 
@@ -194,7 +192,7 @@ public class TaskResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Assigned user login") @PathParam("assignedUserLogin") String assignedUserLogin,
             @ApiParam(required = false, value = "Task status filter") @QueryParam("filter") String filter)
-            throws EntityNotFoundException, UserNotActiveException, AccessRightException {
+            throws EntityNotFoundException, UserNotActiveException, AccessRightException, WorkspaceNotEnabledException {
 
         PartRevision[] withTaskPartRevisions;
 
@@ -236,7 +234,7 @@ public class TaskResource {
     public Response processTask(@ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
                                 @ApiParam(required = true, value = "Task id") @PathParam("taskId") String taskId,
                                 @ApiParam(required = true, value = "Task process data") TaskProcessDTO taskProcessDTO)
-            throws EntityNotFoundException, NotAllowedException, UserNotActiveException, AccessRightException {
+            throws EntityNotFoundException, NotAllowedException, UserNotActiveException, AccessRightException, WorkspaceNotEnabledException {
 
         String[] split = taskId.split("-");
         int workflowId = Integer.parseInt(split[0]);

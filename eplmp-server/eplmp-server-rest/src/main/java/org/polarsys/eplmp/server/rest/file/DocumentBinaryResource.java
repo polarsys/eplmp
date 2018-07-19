@@ -105,7 +105,7 @@ public class DocumentBinaryResource {
             @ApiParam(required = true, value = "Workspace version") @PathParam("version") final String version,
             @ApiParam(required = true, value = "Document iteration") @PathParam("iteration") final int iteration)
             throws EntityNotFoundException, EntityAlreadyExistsException, UserNotActiveException, AccessRightException,
-            NotAllowedException, CreationException {
+            NotAllowedException, CreationException, WorkspaceNotEnabledException {
 
         try {
             String fileName = null;
@@ -155,7 +155,7 @@ public class DocumentBinaryResource {
             @ApiParam(required = false, value = "Shared entity token") @QueryParam("token") String accessToken)
             throws EntityNotFoundException, UserNotActiveException, AccessRightException, NotAllowedException,
             NotModifiedException, PreconditionFailedException, RequestedRangeNotSatisfiableException,
-            UnMatchingUuidException, SharedResourceAccessException {
+            UnMatchingUuidException, SharedResourceAccessException, WorkspaceNotEnabledException {
 
         BinaryResource binaryResource;
         String decodedFileName = fileName;
@@ -257,7 +257,7 @@ public class DocumentBinaryResource {
     }
 
     private String uploadAFile(Part formPart, DocumentIterationKey docPK)
-            throws EntityNotFoundException, EntityAlreadyExistsException, AccessRightException, NotAllowedException, CreationException, UserNotActiveException, StorageException, IOException {
+            throws EntityNotFoundException, EntityAlreadyExistsException, AccessRightException, NotAllowedException, CreationException, UserNotActiveException, StorageException, IOException, WorkspaceNotEnabledException {
 
         String fileName = Normalizer.normalize(formPart.getSubmittedFileName(), Normalizer.Form.NFC);
         // Init the binary resource with a null length
@@ -291,7 +291,7 @@ public class DocumentBinaryResource {
     }
 
     private BinaryResource getBinaryResource(String fullName)
-            throws NotAllowedException, AccessRightException, UserNotActiveException, EntityNotFoundException {
+            throws NotAllowedException, AccessRightException, UserNotActiveException, EntityNotFoundException, WorkspaceNotEnabledException {
         BinaryResource binaryResource = publicEntityManager.getPublicBinaryResourceForDocument(fullName);
         if (binaryResource != null) {
             return binaryResource;

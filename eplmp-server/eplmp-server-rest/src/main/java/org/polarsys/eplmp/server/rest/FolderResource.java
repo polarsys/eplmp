@@ -74,7 +74,7 @@ public class FolderResource {
     public DocumentRevisionDTO[] getDocumentsWithGivenFolderIdAndWorkspaceId(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Folder id") @PathParam("folderId") String folderId)
-            throws EntityNotFoundException, UserNotActiveException {
+            throws EntityNotFoundException, UserNotActiveException, WorkspaceNotEnabledException {
 
         String decodedCompletePath = getPathFromUrlParams(workspaceId, folderId);
         DocumentRevision[] docRs = documentService.findDocumentRevisionsByFolder(decodedCompletePath);
@@ -108,7 +108,7 @@ public class FolderResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Document to create") DocumentCreationDTO docCreationDTO,
             @ApiParam(required = true, value = "Folder id") @PathParam("folderId") String folderId)
-            throws EntityNotFoundException, EntityAlreadyExistsException, NotAllowedException, CreationException, AccessRightException {
+            throws EntityNotFoundException, EntityAlreadyExistsException, NotAllowedException, CreationException, AccessRightException, WorkspaceNotEnabledException {
 
         String pDocMID = docCreationDTO.getReference();
         String pTitle = docCreationDTO.getTitle();
@@ -172,7 +172,7 @@ public class FolderResource {
     @Produces(MediaType.APPLICATION_JSON)
     public FolderDTO[] getRootFolders(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId)
-            throws EntityNotFoundException, UserNotActiveException {
+            throws EntityNotFoundException, UserNotActiveException, WorkspaceNotEnabledException {
         String completePath = Tools.stripTrailingSlash(workspaceId);
         return getFolders(workspaceId, completePath, true);
     }
@@ -192,7 +192,7 @@ public class FolderResource {
     public FolderDTO[] getSubFolders(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Folder id") @PathParam("completePath") String folderId)
-            throws EntityNotFoundException, UserNotActiveException {
+            throws EntityNotFoundException, UserNotActiveException, WorkspaceNotEnabledException {
         String decodedCompletePath = FolderDTO.replaceColonWithSlash(folderId);
         String completePath = Tools.stripTrailingSlash(decodedCompletePath);
         return getFolders(workspaceId, completePath, false);
@@ -217,7 +217,7 @@ public class FolderResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Folder id") @PathParam("folderId") String folderPath,
             @ApiParam(value = "Folder with new name", required = true) FolderDTO folderDTO)
-            throws EntityNotFoundException, EntityAlreadyExistsException, NotAllowedException, AccessRightException, CreationException {
+            throws EntityNotFoundException, EntityAlreadyExistsException, NotAllowedException, AccessRightException, CreationException, WorkspaceNotEnabledException {
 
         String decodedCompletePath = FolderDTO.replaceColonWithSlash(folderPath);
         String completePath = Tools.stripTrailingSlash(decodedCompletePath);
@@ -256,7 +256,7 @@ public class FolderResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Folder id") @PathParam("folderId") String folderPath,
             @ApiParam(required = true, value = "Folder to move") FolderDTO folderDTO)
-            throws EntityNotFoundException, EntityAlreadyExistsException, NotAllowedException, AccessRightException, CreationException {
+            throws EntityNotFoundException, EntityAlreadyExistsException, NotAllowedException, AccessRightException, CreationException, WorkspaceNotEnabledException {
 
         String decodedCompletePath = FolderDTO.replaceColonWithSlash(folderPath);
         String completePath = Tools.stripTrailingSlash(decodedCompletePath);
@@ -294,7 +294,7 @@ public class FolderResource {
             @ApiParam(required = true, value = "Parent folder id") @PathParam("parentFolderPath") String parentFolderPath,
             @ApiParam(value = "Folder to create", required = true) FolderDTO folder)
             throws EntityNotFoundException, EntityAlreadyExistsException, NotAllowedException, AccessRightException,
-            UserNotActiveException, CreationException {
+            UserNotActiveException, CreationException, WorkspaceNotEnabledException {
 
         String decodedCompletePath = FolderDTO.replaceColonWithSlash(parentFolderPath);
 
@@ -317,7 +317,7 @@ public class FolderResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Folder to create") FolderDTO folder)
             throws EntityNotFoundException, EntityAlreadyExistsException, NotAllowedException, AccessRightException,
-            UserNotActiveException, CreationException {
+            UserNotActiveException, CreationException, WorkspaceNotEnabledException {
 
         String folderName = folder.getName();
         return createFolder(workspaceId, folderName);
@@ -344,7 +344,7 @@ public class FolderResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Folder id") @PathParam("folderId") String completePath)
             throws EntityNotFoundException, NotAllowedException, AccessRightException, UserNotActiveException,
-            EntityConstraintException {
+            EntityConstraintException, WorkspaceNotEnabledException {
 
         deleteFolder(completePath);
         return Response.noContent().build();
@@ -355,7 +355,7 @@ public class FolderResource {
     }
 
     private FolderDTO[] getFolders(String workspaceId, String completePath, boolean rootFolder)
-            throws EntityNotFoundException, UserNotActiveException {
+            throws EntityNotFoundException, UserNotActiveException, WorkspaceNotEnabledException {
         String[] folderNames = documentService.getFolders(completePath);
         FolderDTO[] folderDTOs = new FolderDTO[folderNames.length];
 
@@ -381,7 +381,7 @@ public class FolderResource {
 
     private DocumentRevisionKey[] deleteFolder(String pCompletePath)
             throws EntityNotFoundException, AccessRightException, NotAllowedException,
-            EntityConstraintException, UserNotActiveException {
+            EntityConstraintException, UserNotActiveException, WorkspaceNotEnabledException {
 
         String decodedCompletePath = FolderDTO.replaceColonWithSlash(pCompletePath);
         String completePath = Tools.stripTrailingSlash(decodedCompletePath);
@@ -389,7 +389,7 @@ public class FolderResource {
     }
 
     private FolderDTO createFolder(String pCompletePath, String pFolderName)
-            throws EntityNotFoundException, EntityAlreadyExistsException, CreationException, AccessRightException, NotAllowedException {
+            throws EntityNotFoundException, EntityAlreadyExistsException, CreationException, AccessRightException, NotAllowedException, WorkspaceNotEnabledException {
         Folder createdFolder = documentService.createFolder(pCompletePath, pFolderName);
 
         String completeCreatedFolderPath = createdFolder.getCompletePath() + '/' + createdFolder.getShortName();

@@ -18,7 +18,7 @@ import java.util.Locale;
  *
  * @author Morgan Guimard
  */
-public class WorkspaceNotEnabledException extends EntityNotFoundException {
+public class WorkspaceNotEnabledException extends ApplicationException {
     private final String mID;
 
     public WorkspaceNotEnabledException(String pMessage) {

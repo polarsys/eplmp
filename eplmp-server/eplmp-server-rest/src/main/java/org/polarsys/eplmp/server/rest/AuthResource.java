@@ -111,7 +111,7 @@ public class AuthResource {
             @Context HttpServletRequest request,
             @Context HttpServletResponse response,
             @ApiParam(required = true, value = "Login request") LoginRequestDTO loginRequestDTO)
-            throws AccountNotFoundException {
+            throws EntityNotFoundException {
 
         String login = loginRequestDTO.getLogin();
         String password = loginRequestDTO.getPassword();
@@ -172,7 +172,7 @@ public class AuthResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response sendPasswordRecovery(
             @ApiParam(required = true, value = "Password recovery request") PasswordRecoveryRequestDTO passwordRecoveryRequestDTO)
-            throws AccountNotFoundException {
+            throws EntityNotFoundException {
         String login = passwordRecoveryRequestDTO.getLogin();
         Account account = accountManager.getAccount(login);
 
@@ -196,7 +196,7 @@ public class AuthResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response sendPasswordRecover(
             @ApiParam(required = true, value = "Password recovery process") PasswordRecoverDTO passwordRecoverDTO)
-            throws PasswordRecoveryRequestNotFoundException {
+            throws EntityNotFoundException {
         userManager.recoverPassword(passwordRecoverDTO.getUuid(), passwordRecoverDTO.getNewPassword());
         return Response.noContent().build();
     }
@@ -268,7 +268,7 @@ public class AuthResource {
     @Produces(MediaType.APPLICATION_JSON)
     public OAuthProviderPublicDTO getProvider(
             @ApiParam(required = true, value = "Provider id") @PathParam("id") Integer providerId)
-            throws OAuthProviderNotFoundException {
+            throws EntityNotFoundException {
         OAuthProvider provider = oAuthManager.getProvider(providerId);
         OAuthProviderPublicDTO oAuthProviderPublicDTO = mapper.map(provider, OAuthProviderPublicDTO.class);
         oAuthProviderPublicDTO.setSigningKeys(getSigningKeys(provider.getJwkSetURL()));
@@ -313,7 +313,7 @@ public class AuthResource {
             @Context HttpServletRequest request,
             @Context HttpServletResponse response,
             @ApiParam(required = true, value = "OAuth login request") OAuthLoginRequestDTO oAuthLoginRequestDTO)
-            throws AccountNotFoundException, OAuthProviderNotFoundException {
+            throws EntityNotFoundException {
 
         // Get provider configuration to fill settings
         Integer providerId = oAuthLoginRequestDTO.getProviderId();

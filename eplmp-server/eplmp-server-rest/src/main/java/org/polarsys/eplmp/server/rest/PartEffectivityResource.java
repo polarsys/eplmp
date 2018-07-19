@@ -73,7 +73,7 @@ public class PartEffectivityResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Part revision number") @PathParam("partNumber") String partNumber,
             @ApiParam(required = true, value = "Part revision version") @PathParam("partVersion") String partVersion)
-            throws UserNotActiveException, PartRevisionNotFoundException, WorkspaceNotFoundException, UserNotFoundException, AccessRightException, WorkspaceNotEnabledException, EffectivityAlreadyExistsException, CreationException, ConfigurationItemNotFoundException {
+            throws UserNotActiveException, EntityNotFoundException, AccessRightException, WorkspaceNotEnabledException, EntityAlreadyExistsException, CreationException {
 
         TypeEffectivity typeEffectivity = effectivity.getTypeEffectivity();
         Effectivity createdEffectivity = null;
@@ -117,7 +117,7 @@ public class PartEffectivityResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Part revision number") @PathParam("partNumber") String partNumber,
             @ApiParam(required = true, value = "Part revision version") @PathParam("partVersion") String partVersion)
-            throws UserNotActiveException, PartRevisionNotFoundException, WorkspaceNotFoundException, UserNotFoundException, AccessRightException, WorkspaceNotEnabledException {
+            throws UserNotActiveException, EntityNotFoundException, AccessRightException, WorkspaceNotEnabledException {
 
         PartRevision partRevision = productManager.getPartRevision(new PartRevisionKey(workspaceId, partNumber, partVersion));
 
@@ -161,8 +161,7 @@ public class PartEffectivityResource {
             @ApiParam(required = true, value = "Part revision number") @PathParam("partNumber") String partNumber,
             @ApiParam(required = true, value = "Part revision version") @PathParam("partVersion") String partVersion,
             @ApiParam(required = true, value = "Effectivity id") @PathParam("effectivityId") int effectivityId)
-            throws EffectivityNotFoundException, UserNotActiveException, PartRevisionNotFoundException, WorkspaceNotFoundException, UserNotFoundException,
-            AccessRightException, WorkspaceNotEnabledException {
+            throws EntityNotFoundException, UserNotActiveException, AccessRightException, WorkspaceNotEnabledException {
         effectivityManager.deleteEffectivity(workspaceId, partNumber, partVersion, effectivityId);
         return Response.noContent().build();
     }

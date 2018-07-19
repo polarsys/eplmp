@@ -84,8 +84,8 @@ public class SharedResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Document master id") @PathParam("documentId") String documentId,
             @ApiParam(required = true, value = "Document version") @PathParam("documentVersion") String documentVersion)
-            throws AccessRightException, NotAllowedException, WorkspaceNotFoundException, UserNotFoundException,
-            DocumentRevisionNotFoundException, UserNotActiveException, WorkspaceNotEnabledException {
+            throws AccessRightException, NotAllowedException, EntityNotFoundException,
+            UserNotActiveException, WorkspaceNotEnabledException {
 
         // Try public shared
         DocumentRevisionKey docKey = new DocumentRevisionKey(workspaceId, documentId, documentVersion);
@@ -122,7 +122,7 @@ public class SharedResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Part number") @PathParam("partNumber") String partNumber,
             @ApiParam(required = true, value = "Part version") @PathParam("partVersion") String partVersion)
-            throws UserNotFoundException, WorkspaceNotFoundException, UserNotActiveException, PartRevisionNotFoundException, AccessRightException, WorkspaceNotEnabledException {
+            throws EntityNotFoundException, UserNotActiveException, AccessRightException, WorkspaceNotEnabledException {
 
         // Try public shared
         PartRevisionKey partKey = new PartRevisionKey(workspaceId, partNumber, partVersion);

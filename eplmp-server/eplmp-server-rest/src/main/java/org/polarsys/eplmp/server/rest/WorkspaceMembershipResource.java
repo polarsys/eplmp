@@ -13,6 +13,7 @@ package org.polarsys.eplmp.server.rest;
 
 import org.polarsys.eplmp.core.exceptions.EntityNotFoundException;
 import org.polarsys.eplmp.core.exceptions.UserNotActiveException;
+import org.polarsys.eplmp.core.exceptions.WorkspaceNotEnabledException;
 import org.polarsys.eplmp.core.security.UserGroupMapping;
 import org.polarsys.eplmp.core.security.WorkspaceUserGroupMembership;
 import org.polarsys.eplmp.core.security.WorkspaceUserMembership;
@@ -75,7 +76,7 @@ public class WorkspaceMembershipResource {
     @Produces(MediaType.APPLICATION_JSON)
     public WorkspaceUserMemberShipDTO[] getWorkspaceUserMemberShips(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId)
-            throws EntityNotFoundException, UserNotActiveException {
+            throws EntityNotFoundException, UserNotActiveException, WorkspaceNotEnabledException {
 
         WorkspaceUserMembership[] workspaceUserMemberships = userManager.getWorkspaceUserMemberships(workspaceId);
         WorkspaceUserMemberShipDTO[] workspaceUserMemberShipDTO = new WorkspaceUserMemberShipDTO[workspaceUserMemberships.length];
@@ -96,7 +97,7 @@ public class WorkspaceMembershipResource {
     @Path("users/me")
     @Produces(MediaType.APPLICATION_JSON)
     public WorkspaceUserMemberShipDTO getWorkspaceSpecificUserMemberShips(@ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId)
-            throws EntityNotFoundException, UserNotActiveException {
+            throws EntityNotFoundException, UserNotActiveException, WorkspaceNotEnabledException {
 
         WorkspaceUserMembership workspaceUserMemberships = userManager.getWorkspaceSpecificUserMemberships(workspaceId);
         return mapper.map(workspaceUserMemberships, WorkspaceUserMemberShipDTO.class);
@@ -116,7 +117,7 @@ public class WorkspaceMembershipResource {
     @Produces(MediaType.APPLICATION_JSON)
     public WorkspaceUserGroupMemberShipDTO[] getWorkspaceUserGroupMemberShips(
             @ApiParam(required = true, value = "Workspace id")  @PathParam("workspaceId") String workspaceId)
-            throws EntityNotFoundException, UserNotActiveException {
+            throws EntityNotFoundException, UserNotActiveException, WorkspaceNotEnabledException {
 
         WorkspaceUserGroupMembership[] workspaceUserGroupMemberships = userManager.getWorkspaceUserGroupMemberships(workspaceId);
         WorkspaceUserGroupMemberShipDTO[] workspaceUserGroupMemberShipDTO = new WorkspaceUserGroupMemberShipDTO[workspaceUserGroupMemberships.length];
@@ -140,7 +141,7 @@ public class WorkspaceMembershipResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response getWorkspaceSpecificUserGroupMemberShips(
             @ApiParam(required = true, value = "Workspace id")  @PathParam("workspaceId") String workspaceId)
-            throws EntityNotFoundException, UserNotActiveException {
+            throws EntityNotFoundException, UserNotActiveException, WorkspaceNotEnabledException {
 
         WorkspaceUserGroupMembership[] workspaceUserGroupMemberships = userManager.getWorkspaceSpecificUserGroupMemberships(workspaceId);
         List<WorkspaceUserGroupMemberShipDTO> workspaceUserGroupMemberShipDTO = new ArrayList<>();

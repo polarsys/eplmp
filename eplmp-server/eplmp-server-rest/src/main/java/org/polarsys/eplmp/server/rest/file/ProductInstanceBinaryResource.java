@@ -96,7 +96,7 @@ public class ProductInstanceBinaryResource {
             @ApiParam(required = true, value = "Serial number") @PathParam("serialNumber") String serialNumber,
             @ApiParam(required = true, value = "Product instance iteration") @PathParam("iteration") int iteration)
             throws EntityNotFoundException, UserNotActiveException, NotAllowedException,
-            AccessRightException, EntityAlreadyExistsException, CreationException {
+            AccessRightException, EntityAlreadyExistsException, CreationException, WorkspaceNotEnabledException {
 
 
         try {
@@ -143,7 +143,7 @@ public class ProductInstanceBinaryResource {
             @ApiParam(required = false, value = "Output") @QueryParam("output") String output)
             throws EntityNotFoundException, UserNotActiveException, AccessRightException,
             NotAllowedException, PreconditionFailedException, NotModifiedException,
-            RequestedRangeNotSatisfiableException, UnMatchingUuidException, SharedResourceAccessException {
+            RequestedRangeNotSatisfiableException, UnMatchingUuidException, SharedResourceAccessException, WorkspaceNotEnabledException {
 
 
         String fullName = workspaceId + "/product-instances/" + serialNumber + "/iterations/" + iteration + "/" + fileName;
@@ -196,7 +196,7 @@ public class ProductInstanceBinaryResource {
             @ApiParam(required = true, value = "Product instance iteration") @PathParam("iteration") int iteration,
             @ApiParam(required = true, value = "PathDataMaster Id") @PathParam("pathDataId") int pathDataId)
             throws EntityNotFoundException, UserNotActiveException, NotAllowedException, AccessRightException,
-            EntityAlreadyExistsException, CreationException {
+            EntityAlreadyExistsException, CreationException, WorkspaceNotEnabledException {
 
         try {
             String fileName = null;
@@ -240,7 +240,7 @@ public class ProductInstanceBinaryResource {
             @ApiParam(required = false, value = "Output") @QueryParam("output") String output)
             throws EntityNotFoundException, UserNotActiveException, AccessRightException,
             NotAllowedException, PreconditionFailedException, NotModifiedException,
-            RequestedRangeNotSatisfiableException, UnMatchingUuidException, SharedResourceAccessException {
+            RequestedRangeNotSatisfiableException, UnMatchingUuidException, SharedResourceAccessException, WorkspaceNotEnabledException {
 
 
         String fullName = workspaceId + "/product-instances/" + serialNumber + "/pathdata/" + pathDataId + "/" + fileName;
@@ -291,7 +291,7 @@ public class ProductInstanceBinaryResource {
             @ApiParam(required = false, value = "Output") @QueryParam("output") String output)
             throws EntityNotFoundException, UserNotActiveException, AccessRightException, NotAllowedException,
             PreconditionFailedException, NotModifiedException, RequestedRangeNotSatisfiableException,
-            UnMatchingUuidException, SharedResourceAccessException {
+            UnMatchingUuidException, SharedResourceAccessException, WorkspaceNotEnabledException {
 
 
         String fullName = workspaceId + "/product-instances/" + serialNumber + "/pathdata/" + pathDataId + "/iterations/" + iteration + '/' + fileName;
@@ -332,7 +332,7 @@ public class ProductInstanceBinaryResource {
     }
 
     private BinaryResource getBinaryResource(String fullName)
-            throws NotAllowedException, AccessRightException, UserNotActiveException, EntityNotFoundException {
+            throws NotAllowedException, AccessRightException, UserNotActiveException, EntityNotFoundException, WorkspaceNotEnabledException {
 
         if (contextManager.isCallerInRole(UserGroupMapping.REGULAR_USER_ROLE_ID)) {
             return productInstanceManagerLocal.getBinaryResource(fullName);
@@ -342,7 +342,7 @@ public class ProductInstanceBinaryResource {
     }
 
     private BinaryResource getPathDataBinaryResource(String fullName)
-            throws NotAllowedException, AccessRightException, UserNotActiveException, EntityNotFoundException {
+            throws NotAllowedException, AccessRightException, UserNotActiveException, EntityNotFoundException, WorkspaceNotEnabledException {
         if (contextManager.isCallerInRole(UserGroupMapping.REGULAR_USER_ROLE_ID)) {
             return productInstanceManagerLocal.getPathDataBinaryResource(fullName);
         } else {
@@ -352,7 +352,7 @@ public class ProductInstanceBinaryResource {
 
 
     private String uploadAFile(String workspaceId, Part formPart, ProductInstanceIterationKey pdtIterationKey)
-            throws EntityNotFoundException, EntityAlreadyExistsException, AccessRightException, NotAllowedException, CreationException, UserNotActiveException, StorageException, IOException {
+            throws EntityNotFoundException, EntityAlreadyExistsException, AccessRightException, NotAllowedException, CreationException, UserNotActiveException, StorageException, IOException, WorkspaceNotEnabledException {
 
         String fileName = Normalizer.normalize(formPart.getSubmittedFileName(), Normalizer.Form.NFC);
         // Init the binary resource with a null length
@@ -364,7 +364,7 @@ public class ProductInstanceBinaryResource {
     }
 
     private String uploadAFileToPathData(String workspaceId, Part formPart, String configurationItemId, String serialNumber, int pathDataId, int iteration)
-            throws EntityNotFoundException, EntityAlreadyExistsException, AccessRightException, NotAllowedException, CreationException, UserNotActiveException, StorageException, IOException {
+            throws EntityNotFoundException, EntityAlreadyExistsException, AccessRightException, NotAllowedException, CreationException, UserNotActiveException, StorageException, IOException, WorkspaceNotEnabledException {
 
         String fileName = Normalizer.normalize(formPart.getSubmittedFileName(), Normalizer.Form.NFC);
         // Init the binary resource with a null length
@@ -376,7 +376,7 @@ public class ProductInstanceBinaryResource {
     }
 
     private String uploadAFileToPathDataIteration(String workspaceId, Part formPart, String configurationItemId, String serialNumber, int pathDataId, int iteration)
-            throws EntityNotFoundException, EntityAlreadyExistsException, AccessRightException, NotAllowedException, CreationException, UserNotActiveException, StorageException, IOException {
+            throws EntityNotFoundException, EntityAlreadyExistsException, AccessRightException, NotAllowedException, CreationException, UserNotActiveException, StorageException, IOException, WorkspaceNotEnabledException {
 
         String fileName = Normalizer.normalize(formPart.getSubmittedFileName(), Normalizer.Form.NFC);
         // Init the binary resource with a null length

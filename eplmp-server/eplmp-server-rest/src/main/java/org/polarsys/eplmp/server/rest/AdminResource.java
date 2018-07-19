@@ -103,7 +103,7 @@ public class AdminResource implements Serializable {
     })
     @Produces(MediaType.APPLICATION_JSON)
     public JsonObject getDiskSpaceUsageStats()
-            throws AccountNotFoundException {
+            throws EntityNotFoundException {
 
         JsonObjectBuilder diskUsage = Json.createObjectBuilder();
 
@@ -130,8 +130,7 @@ public class AdminResource implements Serializable {
     })
     @Produces(MediaType.APPLICATION_JSON)
     public JsonObject getUsersStats()
-            throws AccountNotFoundException, WorkspaceNotFoundException, AccessRightException, UserNotFoundException,
-            UserNotActiveException, WorkspaceNotEnabledException {
+            throws EntityNotFoundException, AccessRightException, UserNotActiveException, WorkspaceNotEnabledException {
 
         JsonObjectBuilder userStats = Json.createObjectBuilder();
 
@@ -158,7 +157,7 @@ public class AdminResource implements Serializable {
     })
     @Produces(MediaType.APPLICATION_JSON)
     public JsonObject getDocumentsStats()
-            throws AccountNotFoundException, WorkspaceNotFoundException, AccessRightException, UserNotFoundException, UserNotActiveException, WorkspaceNotEnabledException {
+            throws EntityNotFoundException, AccessRightException, UserNotActiveException, WorkspaceNotEnabledException {
 
         JsonObjectBuilder docStats = Json.createObjectBuilder();
 
@@ -185,8 +184,7 @@ public class AdminResource implements Serializable {
     })
     @Produces(MediaType.APPLICATION_JSON)
     public JsonObject getProductsStats()
-            throws AccountNotFoundException, UserNotFoundException, UserNotActiveException,
-            WorkspaceNotFoundException, WorkspaceNotEnabledException {
+            throws EntityNotFoundException, UserNotActiveException, WorkspaceNotEnabledException {
 
         JsonObjectBuilder productsStats = Json.createObjectBuilder();
 
@@ -213,8 +211,7 @@ public class AdminResource implements Serializable {
     })
     @Produces(MediaType.APPLICATION_JSON)
     public JsonObject getPartsStats()
-            throws AccountNotFoundException, AccessRightException, WorkspaceNotFoundException, UserNotFoundException,
-            UserNotActiveException, WorkspaceNotEnabledException {
+            throws AccessRightException,EntityNotFoundException, UserNotActiveException, WorkspaceNotEnabledException {
 
         JsonObjectBuilder partsStats = Json.createObjectBuilder();
 
@@ -241,7 +238,7 @@ public class AdminResource implements Serializable {
     @Path("index/{workspaceId}")
     public Response indexWorkspaceData(
             @ApiParam(value = "Workspace id", required = true) @PathParam("workspaceId") String workspaceId)
-            throws WorkspaceNotFoundException, AccountNotFoundException, AccessRightException {
+            throws EntityNotFoundException, AccessRightException {
         indexManager.indexWorkspaceData(workspaceId);
         return Response.accepted().build();
 
@@ -310,7 +307,7 @@ public class AdminResource implements Serializable {
     public WorkspaceDTO enableWorkspace(
             @ApiParam(value = "Workspace id", required = true) @PathParam("workspaceId") String workspaceId,
             @ApiParam(value = "Enabled", required = true) @QueryParam("enabled") boolean enabled)
-            throws WorkspaceNotFoundException {
+            throws EntityNotFoundException {
         Workspace workspace = workspaceManager.enableWorkspace(workspaceId, enabled);
         return mapper.map(workspace, WorkspaceDTO.class);
     }
@@ -329,7 +326,7 @@ public class AdminResource implements Serializable {
     public AccountDTO enableAccount(
             @ApiParam(value = "Workspace id", required = true) @PathParam("login") String login,
             @ApiParam(value = "Enabled", required = true) @QueryParam("enabled") boolean enabled)
-            throws WorkspaceNotFoundException, AccountNotFoundException, NotAllowedException {
+            throws EntityNotFoundException, NotAllowedException {
         Account account = accountManager.enableAccount(login, enabled);
         return mapper.map(account, AccountDTO.class);
     }
@@ -370,7 +367,7 @@ public class AdminResource implements Serializable {
     @Consumes(MediaType.APPLICATION_JSON)
     public AccountDTO updateAccount(
             @ApiParam(required = true, value = "Updated account") AccountDTO accountDTO)
-            throws AccountNotFoundException, NotAllowedException {
+            throws EntityNotFoundException, NotAllowedException {
 
         Account account = accountManager.updateAccount(
                 accountDTO.getLogin(),
@@ -436,7 +433,7 @@ public class AdminResource implements Serializable {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     public Response createProvider(@ApiParam(required = true, value = "Updated account") OAuthProviderDTO providerDTO)
-            throws AccountNotFoundException {
+            throws EntityNotFoundException {
 
         OAuthProvider provider = oAuthManager.createProvider(providerDTO.getName(), providerDTO.isEnabled(), providerDTO.getAuthority(),
                 providerDTO.getIssuer(), providerDTO.getClientID(), providerDTO.getJwsAlgorithm(),
@@ -460,7 +457,7 @@ public class AdminResource implements Serializable {
     public Response updateProvider(
             @ApiParam(value = "OAuthProvider id", required = true) @PathParam("id") int id,
             @ApiParam(required = true, value = "Updated provider") OAuthProviderDTO providerDTO)
-            throws AccountNotFoundException, OAuthProviderNotFoundException {
+            throws EntityNotFoundException {
 
         OAuthProvider provider = oAuthManager.updateProvider(id, providerDTO.getName(), providerDTO.isEnabled(), providerDTO.getAuthority(),
                 providerDTO.getIssuer(), providerDTO.getClientID(), providerDTO.getJwsAlgorithm(),
@@ -482,7 +479,7 @@ public class AdminResource implements Serializable {
     @Produces(MediaType.APPLICATION_JSON)
     public Response removeProvider(
             @ApiParam(value = "OAuthProvider id", required = true) @PathParam("id") int id)
-            throws AccountNotFoundException, OAuthProviderNotFoundException {
+            throws EntityNotFoundException {
         oAuthManager.deleteProvider(id);
         return Response.noContent().build();
     }
