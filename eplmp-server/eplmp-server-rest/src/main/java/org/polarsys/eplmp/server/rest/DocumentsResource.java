@@ -84,8 +84,7 @@ public class DocumentsResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = false, value = "Start offset", defaultValue = "0") @QueryParam("start") int start,
             @ApiParam(required = false, value = "Max results", defaultValue = "20") @QueryParam("max") int max)
-            throws UserNotActiveException, WorkspaceNotFoundException, UserNotFoundException,
-            BaselineNotFoundException, DocumentRevisionNotFoundException, WorkspaceNotEnabledException {
+            throws UserNotActiveException, EntityNotFoundException, WorkspaceNotEnabledException {
 
         int maxResult = max != 0 ? max : 20;
         DocumentRevision[] docRs = documentService.getFilteredDocumentsInWorkspace(workspaceId, start, maxResult);
@@ -124,7 +123,7 @@ public class DocumentsResource {
             @ApiParam(required = false, value = "Start offset", defaultValue = "0") @QueryParam("from") int from,
             @ApiParam(required = false, value = "Max results", defaultValue = "10") @QueryParam("size") int size,
             @ApiParam(required = false, value = "Search mode (false for history/ true for head only)") @QueryParam("fetchHeadOnly") boolean fetchHeadOnly
-    ) throws EntityNotFoundException, UserNotActiveException, NotAllowedException {
+    ) throws EntityNotFoundException, UserNotActiveException, NotAllowedException, WorkspaceNotEnabledException {
         // Set default search size
         size = size == 0 ? 10 : size;
 
@@ -147,7 +146,7 @@ public class DocumentsResource {
     @Produces(MediaType.APPLICATION_JSON)
     public CountDTO getDocumentsInWorkspaceCount(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId)
-            throws EntityNotFoundException, UserNotActiveException {
+            throws EntityNotFoundException, UserNotActiveException, WorkspaceNotEnabledException {
 
         return new CountDTO(documentService.getDocumentsInWorkspaceCount(Tools.stripTrailingSlash(workspaceId)));
     }
@@ -167,7 +166,7 @@ public class DocumentsResource {
     @Produces(MediaType.APPLICATION_JSON)
     public DocumentRevisionDTO[] getCheckedOutDocuments(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId)
-            throws EntityNotFoundException, UserNotActiveException {
+            throws EntityNotFoundException, UserNotActiveException, WorkspaceNotEnabledException {
 
         DocumentRevision[] checkedOutDocumentRevisions = documentService.getCheckedOutDocumentRevisions(workspaceId);
         return mapToDTOs(checkedOutDocumentRevisions);
@@ -187,7 +186,7 @@ public class DocumentsResource {
     @Produces(MediaType.APPLICATION_JSON)
     public CountDTO countCheckedOutDocs(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId)
-            throws WorkspaceNotFoundException, UserNotActiveException, UserNotFoundException, WorkspaceNotEnabledException {
+            throws EntityNotFoundException, UserNotActiveException, WorkspaceNotEnabledException {
 
         return new CountDTO(documentService.getCheckedOutDocumentRevisions(workspaceId).length);
     }
@@ -209,7 +208,7 @@ public class DocumentsResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Query") @QueryParam("q") String q,
             @ApiParam(required = false, value = "Max results", defaultValue = "20") @QueryParam("l") int limit)
-            throws EntityNotFoundException, UserNotActiveException {
+            throws EntityNotFoundException, UserNotActiveException, WorkspaceNotEnabledException {
 
         int maxResults = limit == 0 ? 20 : limit;
         DocumentRevision[] docRs = documentService.getDocumentRevisionsWithReferenceOrTitle(workspaceId, q, maxResults);

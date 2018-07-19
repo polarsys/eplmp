@@ -69,7 +69,7 @@ public class WebhookResource {
     @Produces(MediaType.APPLICATION_JSON)
     public WebhookDTO[] getWebhooks(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId
-    ) throws WorkspaceNotFoundException, AccountNotFoundException, AccessRightException {
+    ) throws EntityNotFoundException, AccessRightException {
         List<Webhook> webHooks = webhookManager.getWebHooks(workspaceId);
         List<WebhookDTO> webHookDTOs = new ArrayList<>();
         for (Webhook webhook : webHooks) {
@@ -93,7 +93,7 @@ public class WebhookResource {
     public WebhookDTO getWebhook(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Webhook id") @PathParam("webhookId") int webhookId
-    ) throws WorkspaceNotFoundException, AccountNotFoundException, AccessRightException, WebhookNotFoundException {
+    ) throws EntityNotFoundException, AccessRightException, WebhookNotFoundException {
         Webhook webHook = webhookManager.getWebHook(workspaceId, webhookId);
         WebhookDTO dto = mapper.map(webHook, WebhookDTO.class);
         return dto;
@@ -112,8 +112,7 @@ public class WebhookResource {
     public WebhookDTO createWebhook(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Webhook definition") WebhookDTO webhookDTO
-    ) throws AccessRightException, UserNotActiveException, AccountNotFoundException, WorkspaceNotFoundException,
-            UserNotFoundException, WorkspaceNotEnabledException, WebhookNotFoundException {
+    ) throws AccessRightException, UserNotActiveException, EntityNotFoundException, WorkspaceNotEnabledException{
         Webhook webHook = webhookManager.createWebhook(workspaceId, webhookDTO.getName(), webhookDTO.isActive());
         WebhookApp webhookApp = configureWebhook(workspaceId, webHook.getId(), webhookDTO);
         webHook.setWebhookApp(webhookApp);
@@ -136,7 +135,7 @@ public class WebhookResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Webhook id") @PathParam("webhookId") Integer webhookId,
             @ApiParam(required = true, value = "Webhook definition") WebhookDTO webhookDTO
-    ) throws AccessRightException, AccountNotFoundException, WorkspaceNotFoundException, WebhookNotFoundException {
+    ) throws AccessRightException, EntityNotFoundException {
         Webhook webHook = webhookManager.updateWebHook(workspaceId, webhookId, webhookDTO.getName(), webhookDTO.isActive());
         WebhookApp webhookApp = configureWebhook(workspaceId, webhookId, webhookDTO);
         webHook.setWebhookApp(webhookApp);
@@ -158,7 +157,7 @@ public class WebhookResource {
     public Response deleteWebhook(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Webhook id") @PathParam("webhookId") int webhookId
-    ) throws WorkspaceNotFoundException, AccessRightException, WebhookNotFoundException, AccountNotFoundException {
+    ) throws AccessRightException, EntityNotFoundException {
         webhookManager.deleteWebhook(workspaceId, webhookId);
         return Response.noContent().build();
     }

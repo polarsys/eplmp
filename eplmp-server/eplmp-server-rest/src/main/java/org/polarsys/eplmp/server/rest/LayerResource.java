@@ -13,6 +13,7 @@ package org.polarsys.eplmp.server.rest;
 import org.polarsys.eplmp.core.exceptions.AccessRightException;
 import org.polarsys.eplmp.core.exceptions.EntityNotFoundException;
 import org.polarsys.eplmp.core.exceptions.UserNotActiveException;
+import org.polarsys.eplmp.core.exceptions.WorkspaceNotEnabledException;
 import org.polarsys.eplmp.core.product.ConfigurationItemKey;
 import org.polarsys.eplmp.core.product.Layer;
 import org.polarsys.eplmp.core.product.Marker;
@@ -63,7 +64,7 @@ public class LayerResource {
     public LayerDTO[] getLayersInProduct(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Configuration item id") @PathParam("ciId") String ciId)
-            throws EntityNotFoundException, UserNotActiveException {
+            throws EntityNotFoundException, UserNotActiveException, WorkspaceNotEnabledException {
 
         ConfigurationItemKey ciKey = new ConfigurationItemKey(workspaceId, ciId);
         List<Layer> layers = productService.getLayers(ciKey);
@@ -89,7 +90,7 @@ public class LayerResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Configuration item id") @PathParam("ciId") String ciId,
             @ApiParam(required = true, value = "Layer to create") LayerDTO layer)
-            throws EntityNotFoundException, AccessRightException {
+            throws EntityNotFoundException, AccessRightException, WorkspaceNotEnabledException {
 
         ConfigurationItemKey ciKey = new ConfigurationItemKey(workspaceId, ciId);
         Layer l = productService.createLayer(ciKey, layer.getName(), layer.getColor());
@@ -113,7 +114,7 @@ public class LayerResource {
             @ApiParam(required = true, value = "Configuration item id") @PathParam("ciId") String ciId,
             @ApiParam(required = true, value = "Layer id") @PathParam("layerId") int layerId,
             @ApiParam(required = true, value = "Layer to update") LayerDTO layer)
-            throws EntityNotFoundException, AccessRightException, UserNotActiveException {
+            throws EntityNotFoundException, AccessRightException, UserNotActiveException, WorkspaceNotEnabledException {
 
         ConfigurationItemKey ciKey = new ConfigurationItemKey(workspaceId, ciId);
         Layer l = productService.updateLayer(ciKey, layerId, layer.getName(), layer.getColor());
@@ -134,7 +135,7 @@ public class LayerResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Configuration item id") @PathParam("ciId") String ciId,
             @ApiParam(required = true, value = "Layer id") @PathParam("layerId") int layerId)
-            throws EntityNotFoundException, AccessRightException, UserNotActiveException {
+            throws EntityNotFoundException, AccessRightException, UserNotActiveException, WorkspaceNotEnabledException {
 
         productService.deleteLayer(workspaceId, layerId);
         return Response.noContent().build();
@@ -156,7 +157,7 @@ public class LayerResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Configuration item id") @PathParam("ciId") String ciId,
             @ApiParam(required = true, value = "Layer id") @PathParam("layerId") int layerId)
-            throws EntityNotFoundException, UserNotActiveException {
+            throws EntityNotFoundException, UserNotActiveException, WorkspaceNotEnabledException {
 
         Layer layer = productService.getLayer(layerId);
         Set<Marker> markers = layer.getMarkers();
@@ -185,7 +186,7 @@ public class LayerResource {
             @ApiParam(required = true, value = "Configuration item id") @PathParam("ciId") String ciId,
             @ApiParam(required = true, value = "Layer id") @PathParam("layerId") int layerId,
             @ApiParam(required = true, value = "Marker to create") MarkerDTO markerDTO)
-            throws EntityNotFoundException, AccessRightException {
+            throws EntityNotFoundException, AccessRightException, WorkspaceNotEnabledException {
 
         Marker marker = productService.createMarker(layerId, markerDTO.getTitle(), markerDTO.getDescription(), markerDTO.getX(), markerDTO.getY(), markerDTO.getZ());
         return new MarkerDTO(marker.getId(), marker.getTitle(), marker.getDescription(), marker.getX(), marker.getY(), marker.getZ());
@@ -208,7 +209,7 @@ public class LayerResource {
             @ApiParam(required = true, value = "Configuration item id") @PathParam("ciId") String ciId,
             @ApiParam(required = true, value = "Layer id") @PathParam("layerId") int layerId,
             @ApiParam(required = true, value = "Marker id") @PathParam("markerId") int markerId)
-            throws EntityNotFoundException, AccessRightException, UserNotActiveException {
+            throws EntityNotFoundException, AccessRightException, UserNotActiveException, WorkspaceNotEnabledException {
 
         productService.deleteMarker(layerId, markerId);
         return Response.noContent().build();

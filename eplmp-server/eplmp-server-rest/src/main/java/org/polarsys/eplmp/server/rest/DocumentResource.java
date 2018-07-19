@@ -88,7 +88,7 @@ public class DocumentResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Document master id") @PathParam("documentId") String documentId,
             @ApiParam(required = true, value = "Document version") @PathParam("documentVersion") String documentVersion)
-            throws EntityNotFoundException, AccessRightException, NotAllowedException, UserNotActiveException {
+            throws EntityNotFoundException, AccessRightException, NotAllowedException, UserNotActiveException, WorkspaceNotEnabledException {
 
         DocumentRevisionKey documentRevisionKey = new DocumentRevisionKey(workspaceId, documentId, documentVersion);
         DocumentRevision docR = documentService.getDocumentRevision(documentRevisionKey);
@@ -121,7 +121,7 @@ public class DocumentResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Document master id") @PathParam("documentId") String documentId,
             @ApiParam(required = true, value = "Document version") @PathParam("documentVersion") String documentVersion)
-            throws NotAllowedException, EntityNotFoundException, AccessRightException, UserNotActiveException {
+            throws NotAllowedException, EntityNotFoundException, AccessRightException, UserNotActiveException, WorkspaceNotEnabledException {
         DocumentRevision docR = documentService.checkInDocument(new DocumentRevisionKey(workspaceId, documentId, documentVersion));
         DocumentRevisionDTO docRsDTO = mapper.map(docR, DocumentRevisionDTO.class);
         docRsDTO.setPath(docR.getLocation().getCompletePath());
@@ -145,7 +145,7 @@ public class DocumentResource {
             @ApiParam(required = true, value = "Document master id") @PathParam("documentId") String documentId,
             @ApiParam(required = true, value = "Document version") @PathParam("documentVersion") String documentVersion)
             throws EntityNotFoundException, NotAllowedException, CreationException, AccessRightException,
-            UserNotActiveException, EntityAlreadyExistsException {
+            UserNotActiveException, EntityAlreadyExistsException, WorkspaceNotEnabledException {
 
         DocumentRevision docR = documentService.checkOutDocument(new DocumentRevisionKey(workspaceId, documentId, documentVersion));
         DocumentRevisionDTO docRsDTO = mapper.map(docR, DocumentRevisionDTO.class);
@@ -170,7 +170,7 @@ public class DocumentResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Document master id") @PathParam("documentId") String documentId,
             @ApiParam(required = true, value = "Document version") @PathParam("documentVersion") String documentVersion)
-            throws EntityNotFoundException, NotAllowedException, UserNotActiveException, AccessRightException {
+            throws EntityNotFoundException, NotAllowedException, UserNotActiveException, AccessRightException, WorkspaceNotEnabledException {
         DocumentRevision docR = documentService.undoCheckOutDocument(new DocumentRevisionKey(workspaceId, documentId, documentVersion));
         DocumentRevisionDTO docRsDTO = mapper.map(docR, DocumentRevisionDTO.class);
         docRsDTO.setPath(docR.getLocation().getCompletePath());
@@ -195,7 +195,7 @@ public class DocumentResource {
             @ApiParam(required = true, value = "Document master id") @PathParam("documentId") String documentId,
             @ApiParam(required = true, value = "Document version") @PathParam("documentVersion") String documentVersion,
             @ApiParam(required = true, value = "Document revision to move") DocumentCreationDTO docCreationDTO)
-            throws EntityNotFoundException, NotAllowedException, AccessRightException, UserNotActiveException {
+            throws EntityNotFoundException, NotAllowedException, AccessRightException, UserNotActiveException, WorkspaceNotEnabledException {
         String parentFolderPath = docCreationDTO.getPath();
         String newCompletePath = Tools.stripTrailingSlash(parentFolderPath);
         DocumentRevisionKey docRsKey = new DocumentRevisionKey(workspaceId, documentId, documentVersion);
@@ -220,7 +220,7 @@ public class DocumentResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Document master id") @PathParam("documentId") String documentId,
             @ApiParam(required = true, value = "Document version") @PathParam("documentVersion") String documentVersion)
-            throws EntityNotFoundException, AccessRightException, NotAllowedException, UserNotActiveException {
+            throws EntityNotFoundException, AccessRightException, NotAllowedException, UserNotActiveException, WorkspaceNotEnabledException {
         documentService.subscribeToIterationChangeEvent(new DocumentRevisionKey(workspaceId, documentId, documentVersion));
         return Response.noContent().build();
     }
@@ -239,7 +239,7 @@ public class DocumentResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Document master id") @PathParam("documentId") String documentId,
             @ApiParam(required = true, value = "Document version") @PathParam("documentVersion") String documentVersion)
-            throws EntityNotFoundException, UserNotActiveException, AccessRightException {
+            throws EntityNotFoundException, UserNotActiveException, AccessRightException, WorkspaceNotEnabledException {
         documentService.unsubscribeToIterationChangeEvent(new DocumentRevisionKey(workspaceId, documentId, documentVersion));
         return Response.noContent().build();
     }
@@ -258,7 +258,7 @@ public class DocumentResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Document master id") @PathParam("documentId") String documentId,
             @ApiParam(required = true, value = "Document version") @PathParam("documentVersion") String documentVersion)
-            throws EntityNotFoundException, AccessRightException, NotAllowedException, UserNotActiveException {
+            throws EntityNotFoundException, AccessRightException, NotAllowedException, UserNotActiveException, WorkspaceNotEnabledException {
         documentService.subscribeToStateChangeEvent(new DocumentRevisionKey(workspaceId, documentId, documentVersion));
         return Response.noContent().build();
     }
@@ -277,7 +277,7 @@ public class DocumentResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Document master id") @PathParam("documentId") String documentId,
             @ApiParam(required = true, value = "Document version") @PathParam("documentVersion") String documentVersion)
-            throws EntityNotFoundException, UserNotActiveException, AccessRightException {
+            throws EntityNotFoundException, UserNotActiveException, AccessRightException, WorkspaceNotEnabledException {
         documentService.unsubscribeToStateChangeEvent(new DocumentRevisionKey(workspaceId, documentId, documentVersion));
         return Response.noContent().build();
     }
@@ -300,7 +300,7 @@ public class DocumentResource {
             @ApiParam(required = true, value = "Document version") @PathParam("documentVersion") String documentVersion,
             @ApiParam(required = true, value = "Document iteration") @PathParam("docIteration") int docIteration,
             @ApiParam(required = true, value = "Document iteration to update") DocumentIterationDTO documentIterationDTO)
-            throws EntityNotFoundException, NotAllowedException, AccessRightException, UserNotActiveException {
+            throws EntityNotFoundException, NotAllowedException, AccessRightException, UserNotActiveException, WorkspaceNotEnabledException {
         String pRevisionNote = documentIterationDTO.getRevisionNote();
 
         List<DocumentRevisionDTO> linkedDocs = documentIterationDTO.getLinkedDocuments();
@@ -355,7 +355,7 @@ public class DocumentResource {
             @ApiParam(required = true, value = "Document version") @PathParam("documentVersion") String documentVersion,
             @ApiParam(required = true, value = "New version of document to create") DocumentCreationDTO docCreationDTO)
             throws EntityNotFoundException, EntityAlreadyExistsException, NotAllowedException, AccessRightException,
-            CreationException, UserNotActiveException {
+            CreationException, UserNotActiveException, WorkspaceNotEnabledException {
         String pTitle = docCreationDTO.getTitle();
         String pDescription = docCreationDTO.getDescription();
         String pWorkflowModelId = docCreationDTO.getWorkflowModelId();
@@ -409,7 +409,7 @@ public class DocumentResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Document master id") @PathParam("documentId") String documentId,
             @ApiParam(required = true, value = "Document version") @PathParam("documentVersion") String documentVersion)
-            throws EntityNotFoundException, UserNotActiveException, AccessRightException, NotAllowedException {
+            throws EntityNotFoundException, UserNotActiveException, AccessRightException, NotAllowedException, WorkspaceNotEnabledException {
 
         DocumentRevisionKey revisionKey = new DocumentRevisionKey(workspaceId, documentId, documentVersion);
         DocumentRevision docR = documentService.releaseDocumentRevision(revisionKey);
@@ -432,7 +432,7 @@ public class DocumentResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Document master id") @PathParam("documentId") String documentId,
             @ApiParam(required = true, value = "Document version") @PathParam("documentVersion") String documentVersion)
-            throws EntityNotFoundException, UserNotActiveException, AccessRightException, NotAllowedException {
+            throws EntityNotFoundException, UserNotActiveException, AccessRightException, NotAllowedException, WorkspaceNotEnabledException {
 
         DocumentRevisionKey revisionKey = new DocumentRevisionKey(workspaceId, documentId, documentVersion);
         DocumentRevision docR = documentService.markDocumentRevisionAsObsolete(revisionKey);
@@ -456,7 +456,7 @@ public class DocumentResource {
             @ApiParam(required = true, value = "Document master id") @PathParam("documentId") String documentId,
             @ApiParam(required = true, value = "Document version") @PathParam("documentVersion") String documentVersion,
             @ApiParam(required = true, value = "Tag list to save") TagListDTO tagListDTO)
-            throws EntityNotFoundException, NotAllowedException, AccessRightException, UserNotActiveException {
+            throws EntityNotFoundException, NotAllowedException, AccessRightException, UserNotActiveException, WorkspaceNotEnabledException {
 
         List<TagDTO> tagDTOs = tagListDTO.getTags();
         String[] tagsLabel = new String[tagDTOs.size()];
@@ -489,7 +489,7 @@ public class DocumentResource {
             @ApiParam(required = true, value = "Document master id") @PathParam("documentId") String documentId,
             @ApiParam(required = true, value = "Document version") @PathParam("documentVersion") String documentVersion,
             @ApiParam(required = true, value = "Tag list to add") TagListDTO tagListDTO)
-            throws EntityNotFoundException, UserNotActiveException, AccessRightException, NotAllowedException {
+            throws EntityNotFoundException, UserNotActiveException, AccessRightException, NotAllowedException, WorkspaceNotEnabledException {
 
         DocumentRevisionKey docRPK = new DocumentRevisionKey(workspaceId, documentId, documentVersion);
         DocumentRevision docR = documentService.getDocumentRevision(docRPK);
@@ -527,7 +527,7 @@ public class DocumentResource {
             @ApiParam(required = true, value = "Document master id") @PathParam("documentId") String documentId,
             @ApiParam(required = true, value = "Document version") @PathParam("documentVersion") String documentVersion,
             @ApiParam(required = true, value = "Tag name") @PathParam("tagName") String tagName)
-            throws EntityNotFoundException, NotAllowedException, AccessRightException, UserNotActiveException {
+            throws EntityNotFoundException, NotAllowedException, AccessRightException, UserNotActiveException, WorkspaceNotEnabledException {
         DocumentRevision documentRevision = documentService.removeTag(new DocumentRevisionKey(workspaceId, documentId, documentVersion), tagName);
         DocumentRevisionDTO documentRevisionDTO = mapper.map(documentRevision, DocumentRevisionDTO.class);
         documentRevisionDTO.setPath(documentRevision.getLocation().getCompletePath());
@@ -550,7 +550,7 @@ public class DocumentResource {
             @ApiParam(required = true, value = "Document master id") @PathParam("documentId") String documentId,
             @ApiParam(required = true, value = "Document version") @PathParam("documentVersion") String documentVersion)
             throws EntityNotFoundException, NotAllowedException, AccessRightException, UserNotActiveException,
-            EntityConstraintException {
+            EntityConstraintException, WorkspaceNotEnabledException {
 
         documentService.deleteDocumentRevision(new DocumentRevisionKey(workspaceId, documentId, documentVersion));
         return Response.noContent().build();
@@ -576,7 +576,7 @@ public class DocumentResource {
             @ApiParam(required = true, value = "File name") @PathParam("fileName") String fileName,
             @ApiParam(required = true, value = "File to rename") FileDTO fileDTO)
             throws EntityNotFoundException, NotAllowedException, AccessRightException, UserNotActiveException,
-            FileAlreadyExistsException, CreationException, StorageException {
+            EntityAlreadyExistsException, CreationException, StorageException, WorkspaceNotEnabledException {
 
         String fileFullName = workspaceId + "/documents/" + FileIO.encode(documentId) + "/" + documentVersion + "/" + docIteration + "/" + fileName;
         BinaryResource binaryResource = documentService.renameFileInDocument(fileFullName, fileDTO.getShortName());
@@ -599,7 +599,7 @@ public class DocumentResource {
             @ApiParam(required = true, value = "Document version") @PathParam("documentVersion") String documentVersion,
             @ApiParam(required = true, value = "Document iteration") @PathParam("docIteration") int docIteration,
             @ApiParam(required = true, value = "File name") @PathParam("fileName") String fileName)
-            throws EntityNotFoundException, NotAllowedException, AccessRightException, UserNotActiveException {
+            throws EntityNotFoundException, NotAllowedException, AccessRightException, UserNotActiveException, WorkspaceNotEnabledException {
         String fileFullName = workspaceId + "/documents/" + FileIO.encode(documentId) + "/" + documentVersion + "/" + docIteration + "/" + fileName;
         documentService.removeFileFromDocument(fileFullName);
         return Response.noContent().build();
@@ -622,7 +622,7 @@ public class DocumentResource {
             @ApiParam(required = true, value = "Document master id") @PathParam("documentId") String documentId,
             @ApiParam(required = true, value = "Document version") @PathParam("documentVersion") String documentVersion,
             @ApiParam(required = true, value = "Shared document to create") SharedDocumentDTO pSharedDocumentDTO)
-            throws EntityNotFoundException, UserNotActiveException, AccessRightException, NotAllowedException {
+            throws EntityNotFoundException, UserNotActiveException, AccessRightException, NotAllowedException, WorkspaceNotEnabledException {
 
         String password = pSharedDocumentDTO.getPassword();
         Date expireDate = pSharedDocumentDTO.getExpireDate();
@@ -650,7 +650,7 @@ public class DocumentResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Document master id") @PathParam("documentId") String documentId,
             @ApiParam(required = true, value = "Document version") @PathParam("documentVersion") String documentVersion)
-            throws EntityNotFoundException, UserNotActiveException, AccessRightException, NotAllowedException {
+            throws EntityNotFoundException, UserNotActiveException, AccessRightException, NotAllowedException, WorkspaceNotEnabledException {
         documentService.setDocumentPublicShared(new DocumentRevisionKey(workspaceId, documentId, documentVersion), true);
         return Response.noContent().build();
     }
@@ -670,7 +670,7 @@ public class DocumentResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Document master id") @PathParam("documentId") String documentId,
             @ApiParam(required = true, value = "Document version") @PathParam("documentVersion") String documentVersion)
-            throws EntityNotFoundException, UserNotActiveException, AccessRightException, NotAllowedException {
+            throws EntityNotFoundException, UserNotActiveException, AccessRightException, NotAllowedException, WorkspaceNotEnabledException {
         documentService.setDocumentPublicShared(new DocumentRevisionKey(workspaceId, documentId, documentVersion), false);
         return Response.noContent().build();
     }
@@ -691,7 +691,7 @@ public class DocumentResource {
             @ApiParam(required = true, value = "Document master id") @PathParam("documentId") String documentId,
             @ApiParam(required = true, value = "Document version") @PathParam("documentVersion") String documentVersion,
             @ApiParam(required = true, value = "ACL rules to set") ACLDTO acl)
-            throws EntityNotFoundException, AccessRightException, UserNotActiveException, NotAllowedException {
+            throws EntityNotFoundException, AccessRightException, UserNotActiveException, NotAllowedException, WorkspaceNotEnabledException {
         DocumentRevisionKey documentRevisionKey = new DocumentRevisionKey(workspaceId, documentId, documentVersion);
 
         if (acl.hasEntries()) {
@@ -718,7 +718,7 @@ public class DocumentResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Document master id") @PathParam("documentId") String documentId,
             @ApiParam(required = true, value = "Document version") @PathParam("documentVersion") String documentVersion)
-            throws EntityNotFoundException, AccessRightException, UserNotActiveException {
+            throws EntityNotFoundException, AccessRightException, UserNotActiveException, WorkspaceNotEnabledException {
         Workflow[] abortedWorkflowList = documentWorkflowService.getAbortedWorkflow(new DocumentRevisionKey(workspaceId, documentId, documentVersion));
         List<WorkflowDTO> abortedWorkflowDTOList = new ArrayList<>();
 
@@ -749,8 +749,7 @@ public class DocumentResource {
             @ApiParam(required = true, value = "Document master id") @PathParam("documentId") String documentId,
             @ApiParam(required = true, value = "Document version") @PathParam("documentVersion") String documentVersion,
             @ApiParam(required = true, value = "Document iteration") @PathParam("iteration") int iteration)
-            throws UserNotFoundException, WorkspaceNotFoundException, UserNotActiveException,
-            DocumentRevisionNotFoundException, DocumentIterationNotFoundException, WorkspaceNotEnabledException {
+            throws EntityNotFoundException, UserNotActiveException, WorkspaceNotEnabledException {
 
         DocumentRevisionKey docKey = new DocumentRevisionKey(workspaceId, documentId, documentVersion);
         List<DocumentIteration> documents = documentService.getInverseDocumentsLink(docKey);
@@ -778,9 +777,7 @@ public class DocumentResource {
             @ApiParam(required = true, value = "Document master id") @PathParam("documentId") String documentId,
             @ApiParam(required = true, value = "Document version") @PathParam("documentVersion") String documentVersion,
             @ApiParam(required = true, value = "Document iteration") @PathParam("iteration") int iteration)
-            throws UserNotFoundException, WorkspaceNotFoundException, UserNotActiveException,
-            PartRevisionNotFoundException, PartIterationNotFoundException,
-            DocumentRevisionNotFoundException, WorkspaceNotEnabledException {
+            throws EntityNotFoundException, UserNotActiveException, WorkspaceNotEnabledException {
 
         DocumentRevisionKey docKey = new DocumentRevisionKey(workspaceId, documentId, documentVersion);
         List<PartIteration> parts = productService.getInversePartsLink(docKey);
@@ -808,9 +805,7 @@ public class DocumentResource {
             @ApiParam(required = true, value = "Document master id") @PathParam("documentId") String documentId,
             @ApiParam(required = true, value = "Document version") @PathParam("documentVersion") String documentVersion,
             @ApiParam(required = true, value = "Document iteration") @PathParam("iteration") int iteration)
-            throws UserNotFoundException, WorkspaceNotFoundException, UserNotActiveException,
-            PartRevisionNotFoundException, PartIterationNotFoundException,
-            DocumentRevisionNotFoundException, WorkspaceNotEnabledException {
+            throws  UserNotActiveException, EntityNotFoundException, DocumentRevisionNotFoundException, WorkspaceNotEnabledException {
 
         DocumentRevisionKey docKey = new DocumentRevisionKey(workspaceId, documentId, documentVersion);
         Set<ProductInstanceMaster> productInstanceMasterList = productService.getInverseProductInstancesLink(docKey);
@@ -839,9 +834,7 @@ public class DocumentResource {
             @ApiParam(required = true, value = "Document master id") @PathParam("documentId") String documentId,
             @ApiParam(required = true, value = "Document version") @PathParam("documentVersion") String documentVersion,
             @ApiParam(required = true, value = "Document iteration") @PathParam("iteration") int iteration)
-            throws UserNotFoundException, WorkspaceNotFoundException, UserNotActiveException,
-            PartRevisionNotFoundException, PartIterationNotFoundException, DocumentRevisionNotFoundException,
-            ConfigurationItemNotFoundException, PartUsageLinkNotFoundException, WorkspaceNotEnabledException {
+            throws EntityNotFoundException, UserNotActiveException, WorkspaceNotEnabledException {
 
         DocumentRevisionKey docKey = new DocumentRevisionKey(workspaceId, documentId, documentVersion);
         Set<PathDataMaster> pathDataMasters = productService.getInversePathDataLink(docKey);
@@ -868,7 +861,7 @@ public class DocumentResource {
     }
 
     private void setDocumentRevisionDTOWorkflow(DocumentRevision documentRevision, DocumentRevisionDTO documentRevisionDTO)
-            throws EntityNotFoundException, UserNotActiveException, AccessRightException {
+            throws EntityNotFoundException, UserNotActiveException, AccessRightException, WorkspaceNotEnabledException {
         Workflow currentWorkflow = documentWorkflowService.getCurrentWorkflow(documentRevision.getKey());
         if (currentWorkflow != null) {
             documentRevisionDTO.setWorkflow(mapper.map(currentWorkflow, WorkflowDTO.class));

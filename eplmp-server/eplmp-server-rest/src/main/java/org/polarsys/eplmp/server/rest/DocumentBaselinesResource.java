@@ -88,7 +88,7 @@ public class DocumentBaselinesResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response getDocumentBaselines(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId)
-            throws EntityNotFoundException, UserNotActiveException {
+            throws EntityNotFoundException, UserNotActiveException, WorkspaceNotEnabledException {
         List<DocumentBaseline> documentBaselines = documentBaselineService.getBaselines(workspaceId);
         List<DocumentBaselineDTO> baselinesDTO = new ArrayList<>();
         for (DocumentBaseline documentBaseline : documentBaselines) {
@@ -119,7 +119,7 @@ public class DocumentBaselinesResource {
     public Response createDocumentBaseline(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Document baseline to create") DocumentBaselineDTO documentBaselineDTO)
-            throws EntityNotFoundException, UserNotActiveException, AccessRightException, NotAllowedException {
+            throws EntityNotFoundException, UserNotActiveException, AccessRightException, NotAllowedException, WorkspaceNotEnabledException {
 
         List<BaselinedDocumentDTO> baselinedDocumentsDTO = documentBaselineDTO.getBaselinedDocuments();
         List<DocumentRevisionKey> documentRevisionKeys = new ArrayList<>();
@@ -154,7 +154,7 @@ public class DocumentBaselinesResource {
     public Response deleteBaseline(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Baseline id") @PathParam("baselineId") int baselineId)
-            throws EntityNotFoundException, AccessRightException, UserNotActiveException {
+            throws EntityNotFoundException, AccessRightException, UserNotActiveException, WorkspaceNotEnabledException {
 
         documentBaselineService.deleteBaseline(workspaceId, baselineId);
         return Response.noContent().build();
@@ -181,7 +181,7 @@ public class DocumentBaselinesResource {
     public DocumentBaselineDTO getBaseline(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Baseline id") @PathParam("baselineId") int baselineId)
-            throws EntityNotFoundException, UserNotActiveException {
+            throws EntityNotFoundException, UserNotActiveException, WorkspaceNotEnabledException {
 
         DocumentBaseline documentBaseline = documentBaselineService.getBaselineLight(workspaceId, baselineId);
         DocumentCollection documentCollection = documentBaselineService.getACLFilteredDocumentCollection(workspaceId, baselineId);
@@ -212,7 +212,7 @@ public class DocumentBaselinesResource {
     public DocumentBaselineDTO getBaselineLight(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Baseline id") @PathParam("baselineId") int baselineId)
-            throws EntityNotFoundException, UserNotActiveException {
+            throws EntityNotFoundException, UserNotActiveException, WorkspaceNotEnabledException {
         DocumentBaseline documentBaseline = documentBaselineService.getBaselineLight(workspaceId, baselineId);
         return mapper.map(documentBaseline, DocumentBaselineDTO.class);
     }
@@ -230,7 +230,7 @@ public class DocumentBaselinesResource {
     public Response exportDocumentFiles(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Baseline id") @PathParam("baselineId") int baselineId)
-            throws BaselineNotFoundException, WorkspaceNotFoundException, UserNotActiveException, UserNotFoundException, WorkspaceNotEnabledException {
+            throws EntityNotFoundException, WorkspaceNotEnabledException, UserNotActiveException {
 
         DocumentBaselineFileExport documentBaselineFileExport = new DocumentBaselineFileExport(workspaceId, baselineId);
 

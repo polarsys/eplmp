@@ -59,7 +59,7 @@ public class ModificationNotificationResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Notification id") @PathParam("notificationId") int notificationId,
             @ApiParam(required = true, value = "Modification notification to acknowledge") ModificationNotificationDTO notificationDTO)
-            throws UserNotFoundException, AccessRightException, PartRevisionNotFoundException, WorkspaceNotFoundException, WorkspaceNotEnabledException {
+            throws EntityNotFoundException, AccessRightException, WorkspaceNotEnabledException {
 
         productService.updateModificationNotification(workspaceId, notificationId, notificationDTO.getAckComment());
         return Response.noContent().build();

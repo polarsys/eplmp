@@ -106,7 +106,7 @@ public class PartBinaryResource {
             @ApiParam(required = true, value = "Part version") @PathParam("version") final String version,
             @ApiParam(required = true, value = "Part iteration") @PathParam("iteration") final int iteration)
             throws EntityNotFoundException, EntityAlreadyExistsException, UserNotActiveException,
-            AccessRightException, NotAllowedException, CreationException {
+            AccessRightException, NotAllowedException, CreationException, WorkspaceNotEnabledException {
 
         try {
 
@@ -154,7 +154,7 @@ public class PartBinaryResource {
             @ApiParam(required = true, value = "Part version") @PathParam("version") final String version,
             @ApiParam(required = true, value = "Part iteration") @PathParam("iteration") final int iteration)
             throws EntityNotFoundException, EntityAlreadyExistsException, UserNotActiveException, AccessRightException,
-            NotAllowedException, CreationException {
+            NotAllowedException, CreationException, WorkspaceNotEnabledException {
 
         try {
 
@@ -208,7 +208,7 @@ public class PartBinaryResource {
             @ApiParam(required = false, value = "Shared entity token") @QueryParam("token") String accessToken)
             throws EntityNotFoundException, UserNotActiveException, AccessRightException, NotAllowedException,
             PreconditionFailedException, NotModifiedException, RequestedRangeNotSatisfiableException,
-            UnMatchingUuidException, SharedResourceAccessException {
+            UnMatchingUuidException, SharedResourceAccessException, WorkspaceNotEnabledException {
         return downloadPartFile(request, workspaceId, partNumber, version, iteration, null, fileName, type, output, range, uuid, password, accessToken);
     }
 
@@ -239,7 +239,7 @@ public class PartBinaryResource {
             @ApiParam(required = false, value = "Shared entity token") @QueryParam("token") String accessToken)
             throws EntityNotFoundException, UserNotActiveException, AccessRightException, NotAllowedException,
             PreconditionFailedException, NotModifiedException, RequestedRangeNotSatisfiableException,
-            UnMatchingUuidException, SharedResourceAccessException {
+            UnMatchingUuidException, SharedResourceAccessException, WorkspaceNotEnabledException {
 
         BinaryResource binaryResource;
         String decodedFileName = fileName;
@@ -353,12 +353,12 @@ public class PartBinaryResource {
         }
     }
 
-    private boolean canAccess(PartIterationKey partIKey) throws UserNotActiveException, EntityNotFoundException {
+    private boolean canAccess(PartIterationKey partIKey) throws UserNotActiveException, EntityNotFoundException, WorkspaceNotEnabledException {
         return publicEntityManager.canAccess(partIKey) || contextManager.isCallerInRole(UserGroupMapping.REGULAR_USER_ROLE_ID) && productService.canAccess(partIKey);
     }
 
     private BinaryResource getBinaryResource(String fullName)
-            throws NotAllowedException, AccessRightException, UserNotActiveException, EntityNotFoundException {
+            throws NotAllowedException, AccessRightException, UserNotActiveException, EntityNotFoundException, WorkspaceNotEnabledException {
         BinaryResource publicBinaryResourceForPart = publicEntityManager.getPublicBinaryResourceForPart(fullName);
         if (publicBinaryResourceForPart != null) {
             return publicBinaryResourceForPart;

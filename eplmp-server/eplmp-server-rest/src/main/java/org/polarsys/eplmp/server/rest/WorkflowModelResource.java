@@ -72,7 +72,7 @@ public class WorkflowModelResource {
     @Produces(MediaType.APPLICATION_JSON)
     public WorkflowModelDTO[] getWorkflowModelsInWorkspace(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId)
-            throws EntityNotFoundException, UserNotActiveException {
+            throws EntityNotFoundException, UserNotActiveException, WorkspaceNotEnabledException {
 
         WorkflowModel[] workflowModels = workflowService.getWorkflowModels(workspaceId);
         WorkflowModelDTO[] workflowModelDTOs = new WorkflowModelDTO[workflowModels.length];
@@ -98,7 +98,7 @@ public class WorkflowModelResource {
     public WorkflowModelDTO getWorkflowModelInWorkspace(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Workflow model id") @PathParam("workflowModelId") String workflowModelId)
-            throws EntityNotFoundException, UserNotActiveException {
+            throws EntityNotFoundException, UserNotActiveException, WorkspaceNotEnabledException {
 
         WorkflowModel workflowModel = workflowService.getWorkflowModel(new WorkflowModelKey(workspaceId, workflowModelId));
         return mapper.map(workflowModel, WorkflowModelDTO.class);
@@ -117,7 +117,7 @@ public class WorkflowModelResource {
     public Response delWorkflowModel(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Workflow model id") @PathParam("workflowModelId") String workflowModelId)
-            throws EntityNotFoundException, AccessRightException, UserNotActiveException, EntityConstraintException {
+            throws EntityNotFoundException, AccessRightException, UserNotActiveException, EntityConstraintException, WorkspaceNotEnabledException {
         workflowService.deleteWorkflowModel(new WorkflowModelKey(workspaceId, workflowModelId));
         return Response.noContent().build();
     }
@@ -137,8 +137,8 @@ public class WorkflowModelResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Workflow model id") @PathParam("workflowModelId") String workflowModelId,
             @ApiParam(required = true, value = "Workflow model to update") WorkflowModelDTO workflowModelDTOToPersist)
-            throws EntityNotFoundException, AccessRightException, EntityAlreadyExistsException, CreationException,
-            UserNotActiveException, NotAllowedException {
+            throws EntityNotFoundException, AccessRightException, EntityAlreadyExistsException,
+            CreationException, UserNotActiveException, NotAllowedException, WorkspaceNotEnabledException {
 
         WorkflowModelKey workflowModelKey = new WorkflowModelKey(workspaceId, workflowModelId);
         List<ActivityModelDTO> activityModelDTOsList = workflowModelDTOToPersist.getActivityModels();
@@ -163,7 +163,7 @@ public class WorkflowModelResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String pWorkspaceId,
             @ApiParam(required = true, value = "Workflow model id") @PathParam("workflowModelId") String workflowModelId,
             @ApiParam(required = true, value = "ACL rules to set") ACLDTO acl)
-            throws EntityNotFoundException, UserNotActiveException, AccessRightException {
+            throws EntityNotFoundException, UserNotActiveException, AccessRightException, WorkspaceNotEnabledException {
 
         if (acl.hasEntries()) {
             workflowService.updateACLForWorkflow(pWorkspaceId, workflowModelId, acl.getUserEntriesMap(), acl.getUserGroupEntriesMap());
@@ -188,7 +188,7 @@ public class WorkflowModelResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Workflow model to create rules to set") WorkflowModelDTO workflowModelDTOToPersist)
             throws EntityNotFoundException, EntityAlreadyExistsException, UserNotActiveException, NotAllowedException,
-            AccessRightException, CreationException {
+            AccessRightException, CreationException, WorkspaceNotEnabledException {
 
         List<ActivityModelDTO> activityModelDTOsList = workflowModelDTOToPersist.getActivityModels();
         ActivityModel[] activityModels = extractActivityModelFromDTO(activityModelDTOsList);

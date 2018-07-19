@@ -101,7 +101,7 @@ public class ProductResource {
     @Produces(MediaType.APPLICATION_JSON)
     public ConfigurationItemDTO[] getConfigurationItems(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId)
-            throws EntityNotFoundException, UserNotActiveException, EntityConstraintException, NotAllowedException {
+            throws EntityNotFoundException, UserNotActiveException, EntityConstraintException, NotAllowedException, WorkspaceNotEnabledException {
 
         List<ConfigurationItem> cis = productService.getConfigurationItems(workspaceId);
         ConfigurationItemDTO[] configurationItemDTOs = new ConfigurationItemDTO[cis.size()];
@@ -127,7 +127,7 @@ public class ProductResource {
     public Response searchConfigurationItemId(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Query") @QueryParam("q") String q)
-            throws UserNotActiveException, UserNotFoundException, WorkspaceNotEnabledException, WorkspaceNotFoundException {
+            throws UserNotActiveException, EntityNotFoundException, WorkspaceNotEnabledException {
 
         List<ConfigurationItem> configurationItems = productService.searchConfigurationItems(workspaceId, q);
 
@@ -155,7 +155,7 @@ public class ProductResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Product to create") ConfigurationItemDTO configurationItemDTO)
             throws EntityNotFoundException, EntityAlreadyExistsException, CreationException, AccessRightException,
-            NotAllowedException {
+            NotAllowedException, WorkspaceNotEnabledException {
 
         ConfigurationItem configurationItem = productService.createConfigurationItem(configurationItemDTO.getWorkspaceId(), configurationItemDTO.getId(), configurationItemDTO.getDescription(), configurationItemDTO.getDesignItemNumber());
         ConfigurationItemDTO configurationItemDTOCreated = mapper.map(configurationItem, ConfigurationItemDTO.class);
@@ -190,7 +190,7 @@ public class ProductResource {
             @ApiParam(required = false, value = "Complete path of part") @QueryParam("path") String path,
             @ApiParam(required = false, value = "Discover substitute links", defaultValue = "false") @QueryParam("diverge") boolean diverge)
             throws EntityNotFoundException, UserNotActiveException, AccessRightException, NotAllowedException,
-            EntityConstraintException {
+            EntityConstraintException, WorkspaceNotEnabledException {
 
         ConfigurationItemKey ciKey = new ConfigurationItemKey(workspaceId, ciId);
         ProductStructureFilter filter = psFilterService.getPSFilter(ciKey, configSpecType, diverge);
@@ -247,7 +247,7 @@ public class ProductResource {
             @ApiParam(required = false, value = "Type link to filter") @QueryParam("linkType") String linkType,
             @ApiParam(required = false, value = "Discover substitute links") @QueryParam("diverge") boolean diverge)
             throws EntityNotFoundException, UserNotActiveException, AccessRightException, NotAllowedException,
-            EntityConstraintException {
+            EntityConstraintException, WorkspaceNotEnabledException {
 
         ConfigurationItemKey ciKey = new ConfigurationItemKey(workspaceId, ciId);
         ProductStructureFilter filter = psFilterService.getPSFilter(ciKey, configSpecType, diverge);
@@ -286,7 +286,7 @@ public class ProductResource {
     public ConfigurationItemDTO getConfigurationItem(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Configuration item id") @PathParam("ciId") String ciId)
-            throws EntityNotFoundException, UserNotActiveException, AccessRightException, NotAllowedException, EntityConstraintException {
+            throws EntityNotFoundException, UserNotActiveException, AccessRightException, NotAllowedException, EntityConstraintException, WorkspaceNotEnabledException {
         ConfigurationItemKey ciKey = new ConfigurationItemKey(workspaceId, ciId);
         ConfigurationItem ci = productService.getConfigurationItem(ciKey);
 
@@ -312,7 +312,7 @@ public class ProductResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Configuration item id") @PathParam("ciId") String ciId)
             throws EntityNotFoundException, NotAllowedException, AccessRightException, UserNotActiveException,
-            EntityConstraintException {
+            EntityConstraintException, WorkspaceNotEnabledException {
 
         ConfigurationItemKey ciKey = new ConfigurationItemKey(workspaceId, ciId);
         productService.deleteConfigurationItem(ciKey);
@@ -337,7 +337,7 @@ public class ProductResource {
             @ApiParam(required = true, value = "Search value") @QueryParam("search") String search,
             @ApiParam(required = false, value = "Config spec") @QueryParam("configSpec") String configSpecType,
             @ApiParam(required = false, value = "Discover substitute links") @QueryParam("diverge") boolean diverge)
-            throws EntityNotFoundException, UserNotActiveException, EntityConstraintException, NotAllowedException {
+            throws EntityNotFoundException, UserNotActiveException, EntityConstraintException, NotAllowedException, WorkspaceNotEnabledException {
 
         ConfigurationItemKey ciKey = new ConfigurationItemKey(workspaceId, ciId);
         ProductStructureFilter filter = psFilterService.getPSFilter(ciKey, configSpecType, diverge);
@@ -376,8 +376,7 @@ public class ProductResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Configuration item id") @PathParam("ciId") String ciId,
             @ApiParam(required = false, value = "Baseline type") @QueryParam("type") String pType)
-            throws ConfigurationItemNotFoundException, WorkspaceNotFoundException, UserNotActiveException,
-            UserNotFoundException, PartMasterNotFoundException, NotAllowedException,
+            throws EntityNotFoundException, UserNotActiveException, NotAllowedException,
             EntityConstraintException, WorkspaceNotEnabledException {
 
         ConfigurationItemKey ciKey = new ConfigurationItemKey(workspaceId, ciId);
@@ -415,8 +414,7 @@ public class ProductResource {
     public Response getBaselineCreationVersionsChoices(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Configuration item id") @PathParam("ciId") String ciId)
-            throws ConfigurationItemNotFoundException, WorkspaceNotFoundException, UserNotActiveException,
-            UserNotFoundException, PartMasterNotFoundException, NotAllowedException,
+            throws EntityNotFoundException, UserNotActiveException, NotAllowedException,
             EntityConstraintException, WorkspaceNotEnabledException {
 
         ConfigurationItemKey ciKey = new ConfigurationItemKey(workspaceId, ciId);
@@ -469,7 +467,7 @@ public class ProductResource {
             @ApiParam(required = true, value = "Config spec") @QueryParam("configSpec") String configSpecType,
             @ApiParam(required = true, value = "Complete path to start from") @QueryParam("path") String path,
             @ApiParam(required = false, value = "Discover substitute links") @QueryParam("diverge") boolean diverge)
-            throws EntityNotFoundException, UserNotActiveException, AccessRightException, NotAllowedException {
+            throws EntityNotFoundException, UserNotActiveException, AccessRightException, NotAllowedException, WorkspaceNotEnabledException {
 
         Response.ResponseBuilder rb = fakeSimilarBehavior(request);
         if (rb != null) {
@@ -513,7 +511,7 @@ public class ProductResource {
             @ApiParam(required = true, value = "Configuration item id") @PathParam("ciId") String ciId,
             @ApiParam(required = false, value = "Discover substitute links") @QueryParam("diverge") boolean diverge,
             @ApiParam(required = true, value = "List of paths to start from") PathListDTO pathsDTO)
-            throws EntityNotFoundException, UserNotActiveException, AccessRightException, NotAllowedException {
+            throws EntityNotFoundException, UserNotActiveException, AccessRightException, NotAllowedException, WorkspaceNotEnabledException {
 
         Response.ResponseBuilder rb = fakeSimilarBehavior(request);
         if (rb != null) {
@@ -556,7 +554,7 @@ public class ProductResource {
     public Response getLastRelease(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Configuration item id") @PathParam("ciId") String ciId)
-            throws EntityNotFoundException, AccessRightException, UserNotActiveException {
+            throws EntityNotFoundException, AccessRightException, UserNotActiveException, WorkspaceNotEnabledException {
 
         ConfigurationItemKey ciKey = new ConfigurationItemKey(workspaceId, ciId);
 
@@ -588,8 +586,8 @@ public class ProductResource {
             @ApiParam(required = false, value = "Config spec") @QueryParam("configSpecType") String configSpecType,
             @ApiParam(required = false, value = "Export native cad files flag") @QueryParam("exportNativeCADFiles") boolean exportNativeCADFiles,
             @ApiParam(required = false, value = "Export linked documents attached files flag") @QueryParam("exportDocumentLinks") boolean exportDocumentLinks)
-            throws UserNotFoundException, WorkspaceNotFoundException, UserNotActiveException, BaselineNotFoundException,
-            ProductInstanceMasterNotFoundException, WorkspaceNotEnabledException, ConfigurationItemNotFoundException, NotAllowedException, PartMasterNotFoundException, EntityConstraintException {
+            throws EntityNotFoundException, UserNotActiveException, WorkspaceNotEnabledException, NotAllowedException,
+            EntityConstraintException {
 
         if (configSpecType == null) {
             configSpecType = "wip";
@@ -657,10 +655,9 @@ public class ProductResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Configuration item id") @PathParam("ciId") String ciId,
             @ApiParam(required = true, value = "Path to path link to create") LightPathToPathLinkDTO pathToPathLinkDTO)
-            throws PathToPathLinkAlreadyExistsException, UserNotActiveException, WorkspaceNotFoundException,
-            CreationException, UserNotFoundException, ProductInstanceMasterNotFoundException,
-            AccessRightException, PathToPathCyclicException, ConfigurationItemNotFoundException,
-            PartUsageLinkNotFoundException, NotAllowedException, WorkspaceNotEnabledException {
+            throws EntityAlreadyExistsException, UserNotActiveException, EntityNotFoundException,
+            CreationException, AccessRightException, PathToPathCyclicException,
+            NotAllowedException, WorkspaceNotEnabledException {
 
         PathToPathLink pathToPathLink = productService.createPathToPathLink(workspaceId, ciId, pathToPathLinkDTO.getType(), pathToPathLinkDTO.getSourcePath(), pathToPathLinkDTO.getTargetPath(), pathToPathLinkDTO.getDescription());
         return mapper.map(pathToPathLink, LightPathToPathLinkDTO.class);
@@ -683,11 +680,9 @@ public class ProductResource {
             @ApiParam(required = true, value = "Configuration item id") @PathParam("ciId") String ciId,
             @ApiParam(required = true, value = "Path to path link id") @PathParam("pathToPathLinkId") int pathToPathLinkId,
             @ApiParam(required = true, value = "Path to path link to update") LightPathToPathLinkDTO pathToPathLinkDTO)
-            throws PathToPathLinkAlreadyExistsException, UserNotActiveException, WorkspaceNotFoundException,
-            CreationException, UserNotFoundException, ProductInstanceMasterNotFoundException,
-            AccessRightException, PathToPathCyclicException, ConfigurationItemNotFoundException,
-            PartUsageLinkNotFoundException, NotAllowedException, PathToPathLinkNotFoundException,
-            WorkspaceNotEnabledException {
+            throws EntityAlreadyExistsException, UserNotActiveException, EntityNotFoundException,
+            CreationException, AccessRightException, PathToPathCyclicException,
+            NotAllowedException, WorkspaceNotEnabledException {
 
         PathToPathLink pathToPathLink = productService.updatePathToPathLink(workspaceId, ciId, pathToPathLinkId, pathToPathLinkDTO.getDescription());
         return mapper.map(pathToPathLink, LightPathToPathLinkDTO.class);
@@ -707,9 +702,7 @@ public class ProductResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Configuration item id") @PathParam("ciId") String ciId,
             @ApiParam(required = true, value = "Path to path link id") @PathParam("pathToPathLinkId") int pathToPathLinkId)
-            throws PathToPathLinkNotFoundException, UserNotActiveException, WorkspaceNotFoundException,
-            UserNotFoundException, ProductInstanceMasterNotFoundException, AccessRightException,
-            ConfigurationItemNotFoundException, WorkspaceNotEnabledException {
+            throws EntityNotFoundException, UserNotActiveException, AccessRightException, WorkspaceNotEnabledException {
 
         productService.deletePathToPathLink(workspaceId, ciId, pathToPathLinkId);
         return Response.noContent().build();
@@ -732,8 +725,7 @@ public class ProductResource {
             @ApiParam(required = true, value = "Configuration item id") @PathParam("ciId") String ciId,
             @ApiParam(required = true, value = "Complete source path") @PathParam("sourcePath") String sourcePathAsString,
             @ApiParam(required = true, value = "Complete target path") @PathParam("targetPath") String targetPathAsString)
-            throws UserNotFoundException, WorkspaceNotFoundException, UserNotActiveException,
-            ConfigurationItemNotFoundException, PartUsageLinkNotFoundException, WorkspaceNotEnabledException {
+            throws EntityNotFoundException, UserNotActiveException, WorkspaceNotEnabledException {
 
         List<PathToPathLink> pathToPathLinks = productService.getPathToPathLinkFromSourceAndTarget(workspaceId, ciId, sourcePathAsString, targetPathAsString);
         List<PathToPathLinkDTO> pathToPathLinkDTOs = new ArrayList<>();
@@ -781,9 +773,7 @@ public class ProductResource {
     public Response getPathToPathLinkTypesInProduct(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Configuration item id") @PathParam("ciId") String ciId)
-            throws UserNotFoundException, WorkspaceNotFoundException, UserNotActiveException,
-            AccessRightException, ProductInstanceMasterNotFoundException, ConfigurationItemNotFoundException,
-            WorkspaceNotEnabledException {
+            throws EntityNotFoundException, UserNotActiveException, AccessRightException, WorkspaceNotEnabledException {
 
         List<String> pathToPathLinkTypes = productService.getPathToPathLinkTypes(workspaceId, ciId);
         List<LightPathToPathLinkDTO> pathToPathLinkDTOs = new ArrayList<>();
@@ -812,9 +802,7 @@ public class ProductResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Configuration item id") @PathParam("ciId") String ciId,
             @ApiParam(required = true, value = "Complete path to decode") @PathParam("path") String pathAsString)
-            throws UserNotFoundException, WorkspaceNotFoundException, UserNotActiveException,
-            BaselineNotFoundException, ConfigurationItemNotFoundException, PartUsageLinkNotFoundException,
-            WorkspaceNotEnabledException {
+            throws EntityNotFoundException, UserNotActiveException, WorkspaceNotEnabledException {
 
         ConfigurationItemKey ciKey = new ConfigurationItemKey(workspaceId, ciId);
         List<PartLink> path = productService.decodePath(ciKey, pathAsString);
@@ -846,10 +834,7 @@ public class ProductResource {
             @ApiParam(required = true, value = "Part version") @PathParam("partVersion") String partVersion,
             @ApiParam(required = true, value = "Part iteration") @PathParam("partIteration") int partIteration,
             @ApiParam(required = false, value = "Config spec") @PathParam("configSpec") String configSpec)
-            throws UserNotFoundException, WorkspaceNotFoundException, UserNotActiveException,
-            AccessRightException, ProductInstanceMasterNotFoundException, BaselineNotFoundException,
-            ConfigurationItemNotFoundException, PartUsageLinkNotFoundException, PartIterationNotFoundException,
-            WorkspaceNotEnabledException {
+            throws EntityNotFoundException, UserNotActiveException, AccessRightException, WorkspaceNotEnabledException {
 
         List<DocumentIterationLinkDTO> documentIterationLinkDTOs = new ArrayList<>();
         PartIterationKey partIterationKey = new PartIterationKey(workspaceId, partNumber, partVersion, partIteration);
@@ -890,9 +875,8 @@ public class ProductResource {
             @ApiParam(required = true, value = "Configuration item id") @PathParam("ciId") String ciId,
             @ApiParam(required = false, value = "Config spec") @QueryParam("configSpec") String configSpecType,
             @ApiParam(required = true, value = "Complete path to checkout from") @QueryParam("path") String path)
-            throws UserNotFoundException, WorkspaceNotFoundException, UserNotActiveException,
-            ConfigurationItemNotFoundException, PartMasterNotFoundException, EntityConstraintException,
-            NotAllowedException, PartUsageLinkNotFoundException, WorkspaceNotEnabledException {
+            throws EntityNotFoundException, UserNotActiveException, EntityConstraintException,
+            NotAllowedException, WorkspaceNotEnabledException {
 
         ConfigurationItemKey ciKey = new ConfigurationItemKey(workspaceId, ciId);
         CascadeResult cascadeResult = cascadeActionService.cascadeCheckOut(ciKey, path);
@@ -917,9 +901,8 @@ public class ProductResource {
             @ApiParam(required = false, value = "Config spec") @QueryParam("configSpec") String configSpecType,
             @ApiParam(required = true, value = "Complete path to checkin from") @QueryParam("path") String path,
             @ApiParam(required = true, value = "Iteration note to add") IterationNoteDTO iterationNoteDTO)
-            throws UserNotFoundException, WorkspaceNotFoundException, UserNotActiveException,
-            ConfigurationItemNotFoundException, PartMasterNotFoundException, EntityConstraintException,
-            NotAllowedException, PartUsageLinkNotFoundException, WorkspaceNotEnabledException {
+            throws EntityNotFoundException, UserNotActiveException, EntityConstraintException,
+            NotAllowedException, WorkspaceNotEnabledException {
 
         ConfigurationItemKey ciKey = new ConfigurationItemKey(workspaceId, ciId);
         CascadeResult cascadeResult = cascadeActionService.cascadeCheckIn(ciKey, path, iterationNoteDTO.getIterationNote());
@@ -942,9 +925,8 @@ public class ProductResource {
             @ApiParam(required = true, value = "Configuration item id") @PathParam("ciId") String ciId,
             @ApiParam(required = false, value = "Config spec") @QueryParam("configSpec") String configSpecType,
             @ApiParam(required = true, value = "Complete path to undo checkout from") @QueryParam("path") String path)
-            throws UserNotFoundException, WorkspaceNotFoundException, UserNotActiveException,
-            ConfigurationItemNotFoundException, PartMasterNotFoundException, EntityConstraintException,
-            NotAllowedException, PartUsageLinkNotFoundException, WorkspaceNotEnabledException {
+            throws EntityNotFoundException, UserNotActiveException, EntityConstraintException,
+            NotAllowedException, WorkspaceNotEnabledException {
 
         ConfigurationItemKey ciKey = new ConfigurationItemKey(workspaceId, ciId);
         CascadeResult cascadeResult = cascadeActionService.cascadeUndoCheckOut(ciKey, path);
@@ -967,7 +949,7 @@ public class ProductResource {
     }
 
     private ComponentDTO createComponentDTO(Component component, String workspaceId, String configurationItemId, String serialNumber)
-            throws EntityNotFoundException, UserNotActiveException, AccessRightException {
+            throws EntityNotFoundException, UserNotActiveException, AccessRightException, WorkspaceNotEnabledException {
 
         PartMaster pm = component.getPartMaster();
         PartIteration retainedIteration = component.getRetainedIteration();
@@ -1077,7 +1059,7 @@ public class ProductResource {
      * @throws UserNotActiveException  If the user is disabled
      */
     private List<ModificationNotificationDTO> getModificationNotificationDTOs(PartRevision partRevision)
-            throws EntityNotFoundException, AccessRightException, UserNotActiveException {
+            throws EntityNotFoundException, AccessRightException, UserNotActiveException, WorkspaceNotEnabledException {
 
         PartIterationKey iterationKey = new PartIterationKey(partRevision.getKey(), partRevision.getLastIterationNumber());
         List<ModificationNotification> notifications = productService.getModificationNotifications(iterationKey);

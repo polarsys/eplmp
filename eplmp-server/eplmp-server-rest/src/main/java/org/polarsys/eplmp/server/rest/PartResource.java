@@ -89,7 +89,7 @@ public class PartResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Part number") @PathParam("partNumber") String partNumber,
             @ApiParam(required = true, value = "Part version") @PathParam("partVersion") String partVersion)
-            throws EntityNotFoundException, AccessRightException, UserNotActiveException {
+            throws EntityNotFoundException, AccessRightException, UserNotActiveException, WorkspaceNotEnabledException {
 
         PartRevisionKey revisionKey = new PartRevisionKey(workspaceId, partNumber, partVersion);
         PartRevision partRevision = productService.getPartRevision(revisionKey);
@@ -119,8 +119,7 @@ public class PartResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Part number") @PathParam("partNumber") String partNumber,
             @ApiParam(required = true, value = "Part version") @PathParam("partVersion") String partVersion)
-            throws UserNotFoundException, WorkspaceNotFoundException, UserNotActiveException,
-            PartRevisionNotFoundException, AccessRightException, WorkspaceNotEnabledException {
+            throws EntityNotFoundException, UserNotActiveException, AccessRightException, WorkspaceNotEnabledException {
 
         PartRevisionKey revisionKey = new PartRevisionKey(workspaceId, partNumber, partVersion);
         PartRevision partRevision = productService.getPartRevision(revisionKey);
@@ -153,8 +152,7 @@ public class PartResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Part number") @PathParam("partNumber") String partNumber,
             @ApiParam(required = true, value = "Part version") @PathParam("partVersion") String partVersion)
-            throws UserNotFoundException, WorkspaceNotFoundException, UserNotActiveException,
-            PartRevisionNotFoundException, AccessRightException, WorkspaceNotEnabledException {
+            throws EntityNotFoundException, UserNotActiveException, AccessRightException, WorkspaceNotEnabledException {
 
         List<PartIteration> partIterations = productService.getUsedByAsComponent(new PartRevisionKey(workspaceId, partNumber, partVersion));
 
@@ -185,8 +183,7 @@ public class PartResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Part number") @PathParam("partNumber") String partNumber,
             @ApiParam(required = true, value = "Part version") @PathParam("partVersion") String partVersion)
-            throws UserNotFoundException, WorkspaceNotFoundException, UserNotActiveException,
-            PartRevisionNotFoundException, AccessRightException, WorkspaceNotEnabledException {
+            throws EntityNotFoundException, UserNotActiveException, AccessRightException, WorkspaceNotEnabledException {
 
         List<PartIteration> partIterations = productService.getUsedByAsSubstitute(new PartRevisionKey(workspaceId, partNumber, partVersion));
 
@@ -220,7 +217,7 @@ public class PartResource {
             @ApiParam(required = true, value = "Part iteration") @PathParam("partIteration") int partIteration,
             @ApiParam(required = true, value = "Part iteration to update") PartIterationDTO data)
             throws EntityNotFoundException, EntityAlreadyExistsException, AccessRightException,
-            UserNotActiveException, NotAllowedException, CreationException, EntityConstraintException {
+            UserNotActiveException, NotAllowedException, CreationException, EntityConstraintException, WorkspaceNotEnabledException {
 
         PartRevisionKey revisionKey = new PartRevisionKey(workspaceId, partNumber, partVersion);
         PartRevision partRevision = productService.getPartRevision(revisionKey);
@@ -299,8 +296,7 @@ public class PartResource {
             @ApiParam(required = true, value = "Part number") @PathParam("partNumber") String partNumber,
             @ApiParam(required = true, value = "Part version") @PathParam("partVersion") String partVersion,
             @ApiParam(required = true, value = "Part iteration") @PathParam("partIteration") int partIteration)
-            throws UserNotActiveException, PartRevisionNotFoundException, WorkspaceNotFoundException,
-            UserNotFoundException, PartIterationNotFoundException, AccessRightException, WorkspaceNotEnabledException {
+            throws UserNotActiveException, EntityNotFoundException, AccessRightException, WorkspaceNotEnabledException {
 
         PartIterationKey partIPK = new PartIterationKey(workspaceId, partNumber, partVersion, partIteration);
         Conversion conversion = productService.getConversion(partIPK);
@@ -325,8 +321,7 @@ public class PartResource {
             @ApiParam(required = true, value = "Part number") @PathParam("partNumber") String partNumber,
             @ApiParam(required = true, value = "Part version") @PathParam("partVersion") String partVersion,
             @ApiParam(required = true, value = "Part iteration") @PathParam("partIteration") int iteration)
-            throws UserNotActiveException, PartRevisionNotFoundException, WorkspaceNotFoundException,
-            UserNotFoundException, PartIterationNotFoundException, AccessRightException,
+            throws UserNotActiveException, EntityNotFoundException, AccessRightException,
             NotAllowedException, WorkspaceNotEnabledException {
 
         PartIterationKey partIPK = new PartIterationKey(workspaceId, partNumber, partVersion, iteration);
@@ -356,7 +351,7 @@ public class PartResource {
             @ApiParam(required = true, value = "Part number") @PathParam("partNumber") String partNumber,
             @ApiParam(required = true, value = "Part version") @PathParam("partVersion") String partVersion)
             throws EntityNotFoundException, AccessRightException, NotAllowedException,
-            EntityConstraintException, UserNotActiveException {
+            EntityConstraintException, UserNotActiveException, WorkspaceNotEnabledException {
 
         PartRevisionKey revisionKey = new PartRevisionKey(workspaceId, partNumber, partVersion);
         PartRevision partRevision = productService.checkInPart(revisionKey);
@@ -380,7 +375,7 @@ public class PartResource {
             @ApiParam(required = true, value = "Part number") @PathParam("partNumber") String partNumber,
             @ApiParam(required = true, value = "Part version") @PathParam("partVersion") String partVersion)
             throws EntityNotFoundException, EntityAlreadyExistsException, CreationException, AccessRightException,
-            NotAllowedException, UserNotActiveException {
+            NotAllowedException, UserNotActiveException, WorkspaceNotEnabledException {
 
         PartRevisionKey revisionKey = new PartRevisionKey(workspaceId, partNumber, partVersion);
         PartRevision partRevision = productService.checkOutPart(revisionKey);
@@ -403,7 +398,7 @@ public class PartResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Part number") @PathParam("partNumber") String partNumber,
             @ApiParam(required = true, value = "Part version") @PathParam("partVersion") String partVersion)
-            throws EntityNotFoundException, UserNotActiveException, AccessRightException, NotAllowedException {
+            throws EntityNotFoundException, UserNotActiveException, AccessRightException, NotAllowedException, WorkspaceNotEnabledException {
 
         PartRevisionKey revisionKey = new PartRevisionKey(workspaceId, partNumber, partVersion);
         PartRevision partRevision = productService.undoCheckOutPart(revisionKey);
@@ -427,7 +422,7 @@ public class PartResource {
             @ApiParam(required = true, value = "Part number") @PathParam("partNumber") String partNumber,
             @ApiParam(required = true, value = "Part version") @PathParam("partVersion") String partVersion,
             @ApiParam(required = true, value = "ACL rules to set") ACLDTO acl)
-            throws EntityNotFoundException, AccessRightException, UserNotActiveException {
+            throws EntityNotFoundException, AccessRightException, UserNotActiveException, WorkspaceNotEnabledException {
 
         PartRevisionKey revisionKey = new PartRevisionKey(workspaceId, partNumber, partVersion);
 
@@ -456,7 +451,7 @@ public class PartResource {
             @ApiParam(required = true, value = "Part number") @PathParam("partNumber") String partNumber,
             @ApiParam(required = true, value = "Part version") @PathParam("partVersion") String partVersion,
             @ApiParam(required = true, value = "New version of part to create") PartCreationDTO partCreationDTO)
-            throws EntityNotFoundException, EntityAlreadyExistsException, CreationException, AccessRightException, NotAllowedException {
+            throws EntityNotFoundException, EntityAlreadyExistsException, CreationException, AccessRightException, NotAllowedException, WorkspaceNotEnabledException {
 
         RoleMappingDTO[] roleMappingDTOs = partCreationDTO.getRoleMapping();
         PartRevisionKey revisionKey = new PartRevisionKey(workspaceId, partNumber, partVersion);
@@ -498,7 +493,7 @@ public class PartResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Part number") @PathParam("partNumber") String partNumber,
             @ApiParam(required = true, value = "Part version") @PathParam("partVersion") String partVersion)
-            throws EntityNotFoundException, UserNotActiveException, AccessRightException, NotAllowedException {
+            throws EntityNotFoundException, UserNotActiveException, AccessRightException, NotAllowedException, WorkspaceNotEnabledException {
 
         PartRevisionKey revisionKey = new PartRevisionKey(workspaceId, partNumber, partVersion);
         PartRevision partRevision = productService.releasePartRevision(revisionKey);
@@ -521,7 +516,7 @@ public class PartResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Part number") @PathParam("partNumber") String partNumber,
             @ApiParam(required = true, value = "Part version") @PathParam("partVersion") String partVersion)
-            throws EntityNotFoundException, UserNotActiveException, AccessRightException, NotAllowedException {
+            throws EntityNotFoundException, UserNotActiveException, AccessRightException, NotAllowedException, WorkspaceNotEnabledException {
 
         PartRevisionKey revisionKey = new PartRevisionKey(workspaceId, partNumber, partVersion);
         PartRevision partRevision = productService.markPartRevisionAsObsolete(revisionKey);
@@ -542,7 +537,7 @@ public class PartResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Part number") @PathParam("partNumber") String partNumber,
             @ApiParam(required = true, value = "Part version") @PathParam("partVersion") String partVersion)
-            throws EntityNotFoundException, UserNotActiveException, EntityConstraintException, AccessRightException {
+            throws EntityNotFoundException, UserNotActiveException, EntityConstraintException, AccessRightException, WorkspaceNotEnabledException {
 
         PartRevisionKey revisionKey = new PartRevisionKey(workspaceId, partNumber, partVersion);
         productService.deletePartRevision(revisionKey);
@@ -567,7 +562,7 @@ public class PartResource {
             @ApiParam(required = true, value = "Part iteration") @PathParam("partIteration") int partIteration,
             @ApiParam(required = true, value = "Sub type") @PathParam("subType") String subType,
             @ApiParam(required = true, value = "File name") @PathParam("fileName") String fileName)
-            throws EntityNotFoundException, UserNotActiveException {
+            throws EntityNotFoundException, UserNotActiveException, WorkspaceNotEnabledException {
         PartIterationKey partIKey = new PartIterationKey(workspaceId, partNumber, partVersion, partIteration);
         String fileFullName = workspaceId + "/parts/" + FileIO.encode(partNumber) + "/" + partVersion + "/" + partIteration + "/" + subType + "/" + fileName;
         productService.removeFileInPartIteration(partIKey, subType, fileFullName);
@@ -594,9 +589,8 @@ public class PartResource {
             @ApiParam(required = true, value = "Sub type") @PathParam("subType") String subType,
             @ApiParam(required = true, value = "File name") @PathParam("fileName") String fileName,
             @ApiParam(required = true, value = "File to rename") FileDTO fileDTO)
-            throws UserNotActiveException, WorkspaceNotFoundException, CreationException, UserNotFoundException,
-            FileNotFoundException, NotAllowedException, FileAlreadyExistsException,
-            StorageException, WorkspaceNotEnabledException {
+            throws UserNotActiveException, CreationException, NotAllowedException, EntityAlreadyExistsException,
+            StorageException, WorkspaceNotEnabledException, EntityNotFoundException {
 
         String fileFullName = workspaceId + "/parts/" + FileIO.encode(partNumber) + "/" + partVersion + "/" + partIteration + "/" + subType + "/" + fileName;
         BinaryResource binaryResource = productService.renameFileInPartIteration(subType, fileFullName, fileDTO.getShortName());
@@ -620,7 +614,7 @@ public class PartResource {
             @ApiParam(required = true, value = "Part number") @PathParam("partNumber") String partNumber,
             @ApiParam(required = true, value = "Part version") @PathParam("partVersion") String partVersion,
             @ApiParam(required = true, value = "Shared part to create") SharedPartDTO pSharedPartDTO)
-            throws EntityNotFoundException, AccessRightException, UserNotActiveException {
+            throws EntityNotFoundException, AccessRightException, UserNotActiveException, WorkspaceNotEnabledException {
 
         String password = pSharedPartDTO.getPassword();
         Date expireDate = pSharedPartDTO.getExpireDate();
@@ -646,7 +640,7 @@ public class PartResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Part number") @PathParam("partNumber") String partNumber,
             @ApiParam(required = true, value = "Part version") @PathParam("partVersion") String partVersion)
-            throws EntityNotFoundException, AccessRightException, UserNotActiveException {
+            throws EntityNotFoundException, AccessRightException, UserNotActiveException, WorkspaceNotEnabledException {
 
         productService.setPublicSharedPart(new PartRevisionKey(workspaceId, partNumber, partVersion), true);
         return Response.noContent().build();
@@ -668,7 +662,7 @@ public class PartResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Part number") @PathParam("partNumber") String partNumber,
             @ApiParam(required = true, value = "Part version") @PathParam("partVersion") String partVersion)
-            throws EntityNotFoundException, AccessRightException, UserNotActiveException {
+            throws EntityNotFoundException, AccessRightException, UserNotActiveException, WorkspaceNotEnabledException {
 
         productService.setPublicSharedPart(new PartRevisionKey(workspaceId, partNumber, partVersion), false);
         return Response.noContent().build();
@@ -690,7 +684,7 @@ public class PartResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Part number") @PathParam("partNumber") String partNumber,
             @ApiParam(required = true, value = "Part version") @PathParam("partVersion") String partVersion)
-            throws EntityNotFoundException, AccessRightException, UserNotActiveException {
+            throws EntityNotFoundException, AccessRightException, UserNotActiveException, WorkspaceNotEnabledException {
 
         PartRevisionKey revisionKey = new PartRevisionKey(workspaceId, partNumber, partVersion);
         PartRevision partRevision = productService.getPartRevision(revisionKey);
@@ -723,7 +717,7 @@ public class PartResource {
             @ApiParam(required = true, value = "Part number") @PathParam("partNumber") String partNumber,
             @ApiParam(required = true, value = "Part version") @PathParam("partVersion") String partVersion,
             @ApiParam(required = true, value = "Tag list to add") TagListDTO tagListDTO)
-            throws EntityNotFoundException, NotAllowedException, AccessRightException, UserNotActiveException {
+            throws EntityNotFoundException, NotAllowedException, AccessRightException, UserNotActiveException, WorkspaceNotEnabledException {
 
         List<TagDTO> tagDTOs = tagListDTO.getTags();
         String[] tagLabels = new String[tagDTOs.size()];
@@ -754,7 +748,7 @@ public class PartResource {
             @ApiParam(required = true, value = "Part number") @PathParam("partNumber") String partNumber,
             @ApiParam(required = true, value = "Part version") @PathParam("partVersion") String partVersion,
             @ApiParam(required = true, value = "Tag list to add") TagListDTO tagListDTO)
-            throws EntityNotFoundException, UserNotActiveException, AccessRightException, NotAllowedException {
+            throws EntityNotFoundException, UserNotActiveException, AccessRightException, NotAllowedException, WorkspaceNotEnabledException {
 
         PartRevisionKey revisionKey = new PartRevisionKey(workspaceId, partNumber, partVersion);
         PartRevision partRevision = productService.getPartRevision(revisionKey);
@@ -788,7 +782,7 @@ public class PartResource {
             @ApiParam(required = true, value = "Part number") @PathParam("partNumber") String partNumber,
             @ApiParam(required = true, value = "Part version") @PathParam("partVersion") String partVersion,
             @ApiParam(required = true, value = "Tag name") @PathParam("tagName") String tagName)
-            throws EntityNotFoundException, NotAllowedException, AccessRightException, UserNotActiveException{
+            throws EntityNotFoundException, NotAllowedException, AccessRightException, UserNotActiveException, WorkspaceNotEnabledException {
 
         PartRevision partRevision = productService.removeTag(new PartRevisionKey(workspaceId, partNumber, partVersion), tagName);
         return mapper.map(partRevision, PartRevisionDTO.class);
@@ -811,7 +805,7 @@ public class PartResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Part number") @PathParam("partNumber") String partNumber,
             @ApiParam(required = true, value = "Part version") @PathParam("partVersion") String partVersion)
-            throws UserNotFoundException, WorkspaceNotFoundException, UserNotActiveException, PartRevisionNotFoundException, AccessRightException, WorkspaceNotEnabledException {
+            throws EntityNotFoundException, UserNotActiveException, AccessRightException, WorkspaceNotEnabledException {
         PartRevision partRevision = productService.getPartRevision(new PartRevisionKey(workspaceId, partNumber, partVersion));
         ProductStructureFilter filter = productService.getLatestCheckedInPSFilter(workspaceId);
         VirtualInstanceCollection virtualInstanceCollection = new VirtualInstanceCollection(partRevision, filter);
@@ -834,8 +828,7 @@ public class PartResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Part number") @PathParam("partNumber") String partNumber,
             @ApiParam(required = true, value = "Part version") @PathParam("partVersion") String partVersion)
-            throws UserNotFoundException, WorkspaceNotFoundException, UserNotActiveException,
-            PartRevisionNotFoundException, WorkspaceNotEnabledException {
+            throws EntityNotFoundException, UserNotActiveException, WorkspaceNotEnabledException {
 
         List<ProductBaseline> baselines = productService.findBaselinesWherePartRevisionHasIterations(new PartRevisionKey(workspaceId, partNumber, partVersion));
         List<ProductBaselineDTO> productBaselineDTOs = new ArrayList<>();
@@ -848,7 +841,7 @@ public class PartResource {
 
 
     public List<PartUsageLink> createComponents(String workspaceId, List<PartUsageLinkDTO> pComponents)
-            throws EntityNotFoundException, EntityAlreadyExistsException, AccessRightException, NotAllowedException, CreationException, UserNotActiveException {
+            throws EntityNotFoundException, EntityAlreadyExistsException, AccessRightException, NotAllowedException, CreationException, UserNotActiveException, WorkspaceNotEnabledException {
 
         List<PartUsageLink> components = new ArrayList<>();
         for (PartUsageLinkDTO partUsageLinkDTO : pComponents) {
@@ -931,7 +924,7 @@ public class PartResource {
     }
 
     public PartMaster findOrCreatePartMaster(String workspaceId, ComponentDTO componentDTO)
-            throws EntityNotFoundException, EntityAlreadyExistsException, NotAllowedException, UserNotActiveException, AccessRightException, CreationException {
+            throws EntityNotFoundException, EntityAlreadyExistsException, NotAllowedException, UserNotActiveException, AccessRightException, CreationException, WorkspaceNotEnabledException {
         String componentNumber = componentDTO.getNumber();
         PartMasterKey partMasterKey = new PartMasterKey(workspaceId, componentNumber);
         if (productService.partMasterExists(partMasterKey)) {

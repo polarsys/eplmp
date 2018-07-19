@@ -73,7 +73,7 @@ public class OrganizationResource {
     })
     @Produces(MediaType.APPLICATION_JSON)
     public OrganizationDTO getOrganization()
-            throws AccountNotFoundException {
+            throws EntityNotFoundException {
 
         try {
             Organization organization = organizationManager.getMyOrganization();
@@ -94,7 +94,7 @@ public class OrganizationResource {
     @Produces(MediaType.APPLICATION_JSON)
     public OrganizationDTO createOrganization(
             @ApiParam(required = true, value = "Organization to create") OrganizationDTO organizationDTO)
-            throws NotAllowedException, AccountNotFoundException, OrganizationAlreadyExistsException, CreationException {
+            throws NotAllowedException, EntityNotFoundException, EntityAlreadyExistsException, CreationException {
 
         Organization organization = organizationManager.createOrganization(organizationDTO.getName(), organizationDTO.getDescription());
         return mapper.map(organization, OrganizationDTO.class);
@@ -113,7 +113,7 @@ public class OrganizationResource {
     @Consumes(MediaType.APPLICATION_JSON)
     public OrganizationDTO updateOrganization(
             @ApiParam(required = true, value = "Updated organization") OrganizationDTO organizationDTO)
-            throws AccountNotFoundException, AccessRightException, OrganizationNotFoundException {
+            throws EntityNotFoundException, AccessRightException {
 
         Organization organization = organizationManager.getMyOrganization();
         organization.setDescription(organizationDTO.getDescription());
@@ -132,7 +132,7 @@ public class OrganizationResource {
     })
     @Produces(MediaType.APPLICATION_JSON)
     public Response deleteOrganization()
-            throws AccountNotFoundException, OrganizationNotFoundException, AccessRightException {
+            throws EntityNotFoundException, AccessRightException {
 
         Organization organization = organizationManager.getMyOrganization();
         organizationManager.deleteOrganization(organization.getName());
@@ -152,7 +152,7 @@ public class OrganizationResource {
     })
     @Produces(MediaType.APPLICATION_JSON)
     public Response getMembers()
-            throws AccountNotFoundException, OrganizationNotFoundException, AccessRightException {
+            throws EntityNotFoundException, AccessRightException {
 
         Organization organization = organizationManager.getMyOrganization();
         List<Account> accounts = organization.getMembers();
@@ -179,7 +179,7 @@ public class OrganizationResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response addMember(
             @ApiParam(required = true, value = "User to add") UserDTO userDTO)
-            throws AccountNotFoundException, OrganizationNotFoundException, AccessRightException {
+            throws EntityNotFoundException, AccessRightException {
 
         Organization organization = organizationManager.getMyOrganization();
         Account member = accountManager.getAccount(userDTO.getLogin());
@@ -201,7 +201,7 @@ public class OrganizationResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response removeMember(
             @ApiParam(required = true, value = "User to remove") UserDTO userDTO)
-            throws OrganizationNotFoundException, AccountNotFoundException, AccessRightException {
+            throws EntityNotFoundException, AccessRightException {
 
 
         Organization organization = organizationManager.getMyOrganization();
@@ -226,7 +226,7 @@ public class OrganizationResource {
     public Response moveMember(
             @ApiParam(required = true, value = "User to move up") UserDTO userDTO,
             @ApiParam(required = true, value = "Direction (up/down)") @QueryParam("direction") String direction)
-            throws AccountNotFoundException, OrganizationNotFoundException, AccessRightException {
+            throws EntityNotFoundException, AccessRightException {
 
         if ("up".equals(direction)) {
             moveMemberUp(userDTO.getLogin());

@@ -115,7 +115,7 @@ public class PartsResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = false, value = "Start offset", defaultValue = "0") @QueryParam("start") int start,
             @ApiParam(required = false, value = "Max results", defaultValue = "20") @QueryParam("length") int length)
-            throws EntityNotFoundException, AccessRightException, UserNotActiveException {
+            throws EntityNotFoundException, AccessRightException, UserNotActiveException, WorkspaceNotEnabledException {
         // potential OOM => should restrict length
         List<PartRevision> partRevisions = productService.getPartRevisions(Tools.stripTrailingSlash(workspaceId), start, length);
         List<PartRevisionDTO> partRevisionDTOs = new ArrayList<>();
@@ -145,7 +145,7 @@ public class PartsResource {
     @Produces(MediaType.APPLICATION_JSON)
     public CountDTO getTotalNumberOfParts(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId)
-            throws EntityNotFoundException, AccessRightException, UserNotActiveException {
+            throws EntityNotFoundException, AccessRightException, UserNotActiveException, WorkspaceNotEnabledException {
 
         return new CountDTO(productService.getPartsInWorkspaceCount(Tools.stripTrailingSlash(workspaceId)));
     }
@@ -165,7 +165,7 @@ public class PartsResource {
     public Response getPartRevisionsByTag(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Tag id") @PathParam("tagId") String tagId)
-            throws EntityNotFoundException, AccessRightException, UserNotActiveException {
+            throws EntityNotFoundException, AccessRightException, UserNotActiveException, WorkspaceNotEnabledException {
 
         PartRevision[] partRevisions = productService.findPartRevisionsByTag(Tools.stripTrailingSlash(workspaceId), tagId);
         List<PartRevisionDTO> partRevisionDTOs = new ArrayList<>();
@@ -213,7 +213,7 @@ public class PartsResource {
             @ApiParam(required = false, value = "Start offset", defaultValue = "0") @QueryParam("from") int from,
             @ApiParam(required = false, value = "Max results", defaultValue = "10") @QueryParam("size") int size,
             @ApiParam(required = false, value = "Search mode (false for history / true for head only)") @QueryParam("fetchHeadOnly") boolean fetchHeadOnly)
-            throws EntityNotFoundException, UserNotActiveException, AccessRightException, NotAllowedException {
+            throws EntityNotFoundException, UserNotActiveException, AccessRightException, NotAllowedException, WorkspaceNotEnabledException {
 
         PartSearchQuery partSearchQuery = SearchQueryParser.parsePartStringQuery(workspaceId, uri.getQueryParameters());
 
@@ -251,8 +251,7 @@ public class PartsResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response getCustomQueries(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId)
-            throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException,
-            WorkspaceNotEnabledException {
+            throws EntityNotFoundException, UserNotActiveException, WorkspaceNotEnabledException {
 
         List<Query> queries = productService.getQueries(workspaceId);
         List<QueryDTO> queryDTOs = new ArrayList<>();
@@ -281,7 +280,7 @@ public class PartsResource {
             @ApiParam(required = false, value = "Choose export type", defaultValue = "json") @QueryParam("export") String exportType,
             @ApiParam(required = true, value = "Query to run") QueryDTO queryDTO)
             throws EntityNotFoundException, UserNotActiveException, AccessRightException, CreationException,
-            QueryAlreadyExistsException, EntityConstraintException, NotAllowedException {
+            EntityAlreadyExistsException, EntityConstraintException, NotAllowedException, WorkspaceNotEnabledException {
 
         Query query = mapper.map(queryDTO, Query.class);
         QueryResult queryResult = getQueryResult(workspaceId, query, exportType);
@@ -310,8 +309,7 @@ public class PartsResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Part number") @PathParam("partNumber") String partNumber,
             @ApiParam(required = true, value = "Baseline id") @PathParam("baselineId") int baselineId)
-            throws UserNotFoundException, WorkspaceNotFoundException, UserNotActiveException,
-            BaselineNotFoundException, PartMasterNotFoundException, WorkspaceNotEnabledException {
+            throws EntityNotFoundException, UserNotActiveException, WorkspaceNotEnabledException {
 
         ProductStructureFilter filter = filterService.getBaselinePSFilter(baselineId);
         PartMaster partMaster = productService.getPartMaster(new PartMasterKey(workspaceId, partNumber));
@@ -337,7 +335,7 @@ public class PartsResource {
     public Response getLatestPartRevision(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Part number") @PathParam("partNumber") String partNumber)
-            throws EntityNotFoundException, AccessRightException, UserNotActiveException {
+            throws EntityNotFoundException, AccessRightException, UserNotActiveException, WorkspaceNotEnabledException {
 
         PartMasterKey masterKey = new PartMasterKey(workspaceId, partNumber);
         PartMaster partMaster = productService.getPartMaster(masterKey);
@@ -370,9 +368,8 @@ public class PartsResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = false, value = "Choose export type", defaultValue = "json") @QueryParam("export") String exportType,
             @ApiParam(required = true, value = "Query to export") QueryDTO queryDTO)
-            throws BaselineNotFoundException, ProductInstanceMasterNotFoundException, EntityConstraintException,
-            WorkspaceNotFoundException, UserNotFoundException, NotAllowedException, PartMasterNotFoundException,
-            ConfigurationItemNotFoundException, UserNotActiveException, WorkspaceNotEnabledException {
+            throws EntityNotFoundException, EntityConstraintException, NotAllowedException,
+            UserNotActiveException, WorkspaceNotEnabledException {
 
         Query query = mapper.map(queryDTO, Query.class);
         User user = userManager.whoAmI(workspaceId);
@@ -399,7 +396,7 @@ public class PartsResource {
             @ApiParam(required = true, value = "Query id") @PathParam("queryId") int queryId,
             @ApiParam(required = true, value = "Choose export type", defaultValue = "json") @PathParam("export") String exportType)
             throws EntityNotFoundException, UserNotActiveException, AccessRightException, CreationException,
-            QueryAlreadyExistsException, EntityConstraintException, NotAllowedException {
+            EntityAlreadyExistsException, EntityConstraintException, NotAllowedException, WorkspaceNotEnabledException {
 
         User user = userManager.checkWorkspaceReadAccess(workspaceId);
         Locale locale = new Locale(user != null ? user.getLanguage() : "en");
@@ -421,7 +418,7 @@ public class PartsResource {
     public Response deleteQuery(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Query id") @PathParam("queryId") int queryId)
-            throws EntityNotFoundException, UserNotActiveException, AccessRightException {
+            throws EntityNotFoundException, UserNotActiveException, AccessRightException, WorkspaceNotEnabledException {
 
         productService.deleteQuery(workspaceId, queryId);
         return Response.noContent().build();
@@ -441,7 +438,7 @@ public class PartsResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response getCheckedOutPartRevisions(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId)
-            throws EntityNotFoundException, UserNotActiveException, AccessRightException {
+            throws EntityNotFoundException, UserNotActiveException, AccessRightException, WorkspaceNotEnabledException {
 
         PartRevision[] checkedOutPartRevisions = productService.getCheckedOutPartRevisions(workspaceId);
         List<PartRevisionDTO> partRevisionDTOs = new ArrayList<>();
@@ -472,8 +469,7 @@ public class PartsResource {
     @Produces(MediaType.APPLICATION_JSON)
     public CountDTO getCheckedOutNumberOfItems(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId)
-            throws UserNotFoundException, WorkspaceNotFoundException, UserNotActiveException, AccessRightException,
-            AccountNotFoundException, WorkspaceNotEnabledException {
+            throws EntityNotFoundException, UserNotActiveException, AccessRightException, WorkspaceNotEnabledException {
 
         return new CountDTO(productService.getCheckedOutPartRevisions(workspaceId).length);
     }
@@ -493,7 +489,7 @@ public class PartsResource {
     public Response searchPartNumbers(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Query") @QueryParam("q") String q)
-            throws EntityNotFoundException, AccessRightException {
+            throws EntityNotFoundException, AccessRightException, WorkspaceNotEnabledException {
 
         String search = "%" + q + "%";
         List<PartMaster> partMasters = productService.findPartMasters(Tools.stripTrailingSlash(workspaceId), search, search, 8);
@@ -521,7 +517,7 @@ public class PartsResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Part to create") PartCreationDTO partCreationDTO)
             throws EntityNotFoundException, EntityAlreadyExistsException, CreationException, AccessRightException,
-            NotAllowedException {
+            NotAllowedException, WorkspaceNotEnabledException {
 
         String pWorkflowModelId = partCreationDTO.getWorkflowModelId();
         RoleMappingDTO[] roleMappingDTOs = partCreationDTO.getRoleMapping();
@@ -559,7 +555,7 @@ public class PartsResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Query") @QueryParam("q") String q,
             @ApiParam(required = false, value = "Max results", defaultValue = "15") @QueryParam("l") int limit)
-            throws EntityNotFoundException, UserNotActiveException {
+            throws EntityNotFoundException, UserNotActiveException, WorkspaceNotEnabledException {
 
         int maxResults = limit == 0 ? 15 : limit;
         PartRevision[] partRs = productService.getPartRevisionsWithReferenceOrName(workspaceId, q, maxResults);
@@ -640,8 +636,7 @@ public class PartsResource {
     public Response getImports(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "File name") @PathParam("filename") String filename)
-            throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException,
-            WorkspaceNotEnabledException {
+            throws EntityNotFoundException, UserNotActiveException, WorkspaceNotEnabledException {
 
         List<Import> imports = productService.getImports(workspaceId, filename);
         List<ImportDTO> importDTOs = new ArrayList<>();
@@ -668,8 +663,7 @@ public class PartsResource {
     public ImportDTO getImport(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Import id") @PathParam("importId") String importId)
-            throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException,
-            AccessRightException, WorkspaceNotEnabledException {
+            throws EntityNotFoundException, UserNotActiveException, AccessRightException, WorkspaceNotEnabledException {
 
         Import anImport = productService.getImport(workspaceId, importId);
         return mapper.map(anImport, ImportDTO.class);
@@ -690,8 +684,7 @@ public class PartsResource {
     public Response deleteImport(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Import id") @PathParam("importId") String importId)
-            throws UserNotFoundException, WorkspaceNotFoundException, UserNotActiveException,
-            AccessRightException, WorkspaceNotEnabledException {
+            throws EntityNotFoundException, UserNotActiveException, AccessRightException, WorkspaceNotEnabledException {
 
         productService.removeImport(workspaceId, importId);
         return Response.noContent().build();
@@ -791,7 +784,7 @@ public class PartsResource {
      * @throws UserNotActiveException  If the user is disabled
      */
     private List<ModificationNotificationDTO> getModificationNotificationDTOs(PartRevision partRevision)
-            throws EntityNotFoundException, AccessRightException, UserNotActiveException {
+            throws EntityNotFoundException, AccessRightException, UserNotActiveException, WorkspaceNotEnabledException {
 
         PartIterationKey iterationKey = new PartIterationKey(partRevision.getKey(), partRevision.getLastIterationNumber());
         List<ModificationNotification> notifications = productService.getModificationNotifications(iterationKey);

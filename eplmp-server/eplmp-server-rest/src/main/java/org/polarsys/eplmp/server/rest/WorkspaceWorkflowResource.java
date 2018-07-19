@@ -69,8 +69,7 @@ public class WorkspaceWorkflowResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response getWorkspaceWorkflowList(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId)
-            throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException,
-            WorkspaceNotEnabledException {
+            throws EntityNotFoundException, UserNotActiveException, WorkspaceNotEnabledException {
 
         WorkspaceWorkflow[] workspaceWorkflowList = workflowService.getWorkspaceWorkflowList(workspaceId);
         List<WorkspaceWorkflowDTO> workspaceWorkflowListDTO = new ArrayList<>();
@@ -97,8 +96,7 @@ public class WorkspaceWorkflowResource {
     public WorkspaceWorkflowDTO getWorkspaceWorkflow(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Workspace workflow id") @PathParam("workspaceWorkflowId") String workspaceWorkflowId)
-            throws UserNotFoundException, WorkspaceNotFoundException, UserNotActiveException,
-            WorkflowNotFoundException, WorkspaceNotEnabledException {
+            throws EntityNotFoundException, UserNotActiveException, WorkspaceNotEnabledException {
 
         WorkspaceWorkflow workspaceWorkflow = workflowService.getWorkspaceWorkflow(workspaceId, workspaceWorkflowId);
         return mapper.map(workspaceWorkflow, WorkspaceWorkflowDTO.class);
@@ -118,9 +116,7 @@ public class WorkspaceWorkflowResource {
     public WorkspaceWorkflowDTO createWorkspaceWorkflow(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Workspace workflow to create") WorkspaceWorkflowCreationDTO workflowCreationDTO)
-            throws RoleNotFoundException, WorkspaceNotFoundException, UserNotFoundException, AccessRightException,
-            WorkflowModelNotFoundException, NotAllowedException, UserGroupNotFoundException,
-            WorkspaceNotEnabledException {
+            throws EntityNotFoundException, AccessRightException, NotAllowedException, WorkspaceNotEnabledException {
 
         Map<String, Collection<String>> userRoleMapping = new HashMap<>();
         Map<String, Collection<String>> groupRoleMapping = new HashMap<>();
@@ -152,7 +148,7 @@ public class WorkspaceWorkflowResource {
     public Response deleteWorkspaceWorkflow(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Workspace workflow id") @PathParam("workspaceWorkflowId") String workspaceWorkflowId)
-            throws UserNotFoundException, WorkspaceNotFoundException, AccessRightException, WorkspaceNotEnabledException {
+            throws EntityNotFoundException, AccessRightException, WorkspaceNotEnabledException {
 
         workflowService.deleteWorkspaceWorkflow(workspaceId, workspaceWorkflowId);
         return Response.noContent().build();

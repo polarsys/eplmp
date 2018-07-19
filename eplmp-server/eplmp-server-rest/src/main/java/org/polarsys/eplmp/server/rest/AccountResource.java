@@ -87,7 +87,7 @@ public class AccountResource {
     })
     @Produces(MediaType.APPLICATION_JSON)
     public AccountDTO getAccount()
-            throws AccountNotFoundException {
+            throws EntityNotFoundException {
         Account account = accountManager.getMyAccount();
         AccountDTO accountDTO = mapper.map(account, AccountDTO.class);
         accountDTO.setAdmin(contextManager.isCallerInRole(UserGroupMapping.ADMIN_ROLE_ID));
@@ -111,7 +111,7 @@ public class AccountResource {
     public Response updateAccount(
             @ApiParam(hidden = true) @HeaderParam("Authorization") String authorizationString,
             @ApiParam(required = true, value = "Updated account") AccountDTO accountDTO)
-            throws AccountNotFoundException, NotAllowedException {
+            throws EntityNotFoundException, NotAllowedException {
 
         // If current password is specified, authenticate user with it
         String password = accountDTO.getPassword();
@@ -148,7 +148,7 @@ public class AccountResource {
             @Context HttpServletRequest request,
             @Context HttpServletResponse response,
             @ApiParam(required = true, value = "Account to create") AccountDTO accountDTO)
-            throws AccountAlreadyExistsException, CreationException {
+            throws EntityAlreadyExistsException, CreationException {
         Account account = accountManager.createAccount(accountDTO.getLogin(), accountDTO.getName(), accountDTO.getEmail(), accountDTO.getLanguage(), accountDTO.getNewPassword(), accountDTO.getTimeZone());
 
         HttpSession session = request.getSession();
@@ -223,7 +223,7 @@ public class AccountResource {
     @Consumes(MediaType.APPLICATION_JSON)
     public Response setGCMAccount(
             @ApiParam(required = true, value = "GCM account to set") GCMAccountDTO data)
-            throws EntityAlreadyExistsException, AccountNotFoundException, CreationException {
+            throws EntityAlreadyExistsException, EntityNotFoundException, CreationException {
         accountManager.setGCMAccount(data.getGcmId());
         return Response.noContent().build();
     }

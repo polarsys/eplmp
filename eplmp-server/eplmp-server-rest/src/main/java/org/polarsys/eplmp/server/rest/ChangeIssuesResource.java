@@ -70,7 +70,7 @@ public class ChangeIssuesResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response getIssues(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId)
-            throws EntityNotFoundException, UserNotActiveException {
+            throws EntityNotFoundException, UserNotActiveException, WorkspaceNotEnabledException {
         List<ChangeIssue> changeIssues = changeManager.getChangeIssues(workspaceId);
         List<ChangeIssueDTO> changeIssueDTOs = new ArrayList<>();
         for (ChangeIssue issue : changeIssues) {
@@ -96,7 +96,7 @@ public class ChangeIssuesResource {
     public ChangeIssueDTO createIssue(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Change issue to create") ChangeIssueDTO changeIssueDTO)
-            throws EntityNotFoundException, AccessRightException, org.polarsys.eplmp.core.exceptions.NotAllowedException {
+            throws EntityNotFoundException, AccessRightException, NotAllowedException, WorkspaceNotEnabledException {
         ChangeIssue changeIssue = changeManager.createChangeIssue(workspaceId,
                 changeIssueDTO.getName(),
                 changeIssueDTO.getDescription(),
@@ -124,7 +124,7 @@ public class ChangeIssuesResource {
     public ChangeIssueDTO[] searchIssuesByName(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Query") @QueryParam("q") String name)
-            throws EntityNotFoundException, UserNotActiveException {
+            throws EntityNotFoundException, UserNotActiveException, WorkspaceNotEnabledException {
         int maxResults = 8;
         List<ChangeIssue> issues = changeManager.getIssuesWithName(workspaceId, name, maxResults);
         List<ChangeIssueDTO> issueDTOs = new ArrayList<>();
@@ -150,7 +150,7 @@ public class ChangeIssuesResource {
     public ChangeIssueDTO getIssue(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Issue id") @PathParam("issueId") int issueId)
-            throws EntityNotFoundException, UserNotActiveException, AccessRightException {
+            throws EntityNotFoundException, UserNotActiveException, AccessRightException, WorkspaceNotEnabledException {
         ChangeIssue changeIssue = changeManager.getChangeIssue(workspaceId, issueId);
         ChangeIssueDTO changeIssueDTO = mapper.map(changeIssue, ChangeIssueDTO.class);
         changeIssueDTO.setWritable(changeManager.isChangeItemWritable(changeIssue));
@@ -173,7 +173,7 @@ public class ChangeIssuesResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Issue id") @PathParam("issueId") int issueId,
             @ApiParam(required = true, value = "Change issue to update") ChangeIssueDTO pChangeIssueDTO)
-            throws EntityNotFoundException, UserNotActiveException, AccessRightException, NotAllowedException {
+            throws EntityNotFoundException, UserNotActiveException, AccessRightException, NotAllowedException, WorkspaceNotEnabledException {
         ChangeIssue changeIssue = changeManager.updateChangeIssue(issueId,
                 workspaceId,
                 pChangeIssueDTO.getDescription(),
@@ -199,7 +199,7 @@ public class ChangeIssuesResource {
     public Response removeIssue(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Issue id") @PathParam("issueId") int issueId)
-            throws EntityNotFoundException, UserNotActiveException, AccessRightException, EntityConstraintException {
+            throws EntityNotFoundException, UserNotActiveException, AccessRightException, EntityConstraintException, WorkspaceNotEnabledException {
         changeManager.deleteChangeIssue(issueId);
         return Response.noContent().build();
     }
@@ -220,7 +220,7 @@ public class ChangeIssuesResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Issue id") @PathParam("issueId") int issueId,
             @ApiParam(required = true, value = "Tag list to add") TagListDTO tagListDTO)
-            throws EntityNotFoundException, UserNotActiveException, AccessRightException {
+            throws EntityNotFoundException, UserNotActiveException, AccessRightException, WorkspaceNotEnabledException {
 
         List<TagDTO> tagDTOs = tagListDTO.getTags();
         String[] tagsLabel = new String[tagDTOs.size()];
@@ -250,7 +250,7 @@ public class ChangeIssuesResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Issue id") @PathParam("issueId") int issueId,
             @ApiParam(required = true, value = "Tag list to add") TagListDTO tagListDTO)
-            throws EntityNotFoundException, UserNotActiveException, AccessRightException {
+            throws EntityNotFoundException, UserNotActiveException, AccessRightException, WorkspaceNotEnabledException {
         ChangeIssue changeIssue = changeManager.getChangeIssue(workspaceId, issueId);
         Set<Tag> tags = changeIssue.getTags();
         Set<String> tagLabels = new HashSet<>();
@@ -283,7 +283,7 @@ public class ChangeIssuesResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Issue id") @PathParam("issueId") int issueId,
             @ApiParam(required = true, value = "Tag name") @PathParam("tagName") String tagName)
-            throws EntityNotFoundException, UserNotActiveException, AccessRightException {
+            throws EntityNotFoundException, UserNotActiveException, AccessRightException, WorkspaceNotEnabledException {
         changeManager.removeChangeIssueTag(workspaceId, issueId, tagName);
         return Response.noContent().build();
     }
@@ -304,7 +304,7 @@ public class ChangeIssuesResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Issue id") @PathParam("issueId") int issueId,
             @ApiParam(required = true, value = "Document list to save as affected") DocumentIterationListDTO documentListDTO)
-            throws EntityNotFoundException, UserNotActiveException, AccessRightException {
+            throws EntityNotFoundException, UserNotActiveException, AccessRightException, WorkspaceNotEnabledException {
 
         List<DocumentIterationDTO> documentIterationDTOs = documentListDTO.getDocuments();
         DocumentIterationKey[] links = createDocumentIterationKeys(documentIterationDTOs);
@@ -331,7 +331,7 @@ public class ChangeIssuesResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Issue id") @PathParam("issueId") int issueId,
             @ApiParam(required = true, value = "Part list to save as affected") PartIterationListDTO partIterationListDTO)
-            throws EntityNotFoundException, UserNotActiveException, AccessRightException {
+            throws EntityNotFoundException, UserNotActiveException, AccessRightException, WorkspaceNotEnabledException {
 
         List<PartIterationDTO> partIterationDTOs = partIterationListDTO.getParts();
         PartIterationKey[] links = createPartIterationKeys(partIterationDTOs);
@@ -357,7 +357,7 @@ public class ChangeIssuesResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String pWorkspaceId,
             @ApiParam(required = true, value = "Issue id") @PathParam("issueId") int issueId,
             @ApiParam(required = true, value = "ACL rules to set") ACLDTO acl)
-            throws EntityNotFoundException, UserNotActiveException, AccessRightException {
+            throws EntityNotFoundException, UserNotActiveException, AccessRightException, WorkspaceNotEnabledException {
 
         ChangeIssue changeIssue;
 

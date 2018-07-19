@@ -81,8 +81,7 @@ public class UserGroupResource {
     @Produces(MediaType.APPLICATION_JSON)
     public UserGroupDTO[] getGroups(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId)
-            throws AccessRightException, AccountNotFoundException, WorkspaceNotFoundException, UserNotFoundException,
-            UserNotActiveException, WorkspaceNotEnabledException {
+            throws AccessRightException, EntityNotFoundException, UserNotActiveException, WorkspaceNotEnabledException {
 
         UserGroup[] userGroups = userManager.getUserGroups(workspaceId);
         UserGroupDTO[] userGroupDTOs = new UserGroupDTO[userGroups.length];
@@ -107,8 +106,7 @@ public class UserGroupResource {
     public TagSubscriptionDTO[] getTagSubscriptionsForGroup(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Group id") @PathParam("groupId") String groupId)
-            throws UserNotFoundException, WorkspaceNotFoundException, UserNotActiveException, AccessRightException,
-            UserGroupNotFoundException, WorkspaceNotEnabledException {
+            throws EntityNotFoundException, UserNotActiveException, AccessRightException, WorkspaceNotEnabledException {
 
         List<TagUserGroupSubscription> subs = notificationManager.getTagUserGroupSubscriptionsByGroup(workspaceId, groupId);
 
@@ -134,9 +132,7 @@ public class UserGroupResource {
     public UserDTO[] getUsersInGroup(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Group id") @PathParam("groupId") String groupId)
-            throws AccessRightException, AccountNotFoundException, WorkspaceNotFoundException,
-            UserNotFoundException, UserNotActiveException, UserGroupNotFoundException,
-            WorkspaceNotEnabledException {
+            throws AccessRightException, EntityNotFoundException, UserNotActiveException, WorkspaceNotEnabledException {
 
         UserGroup userGroup = userManager.getUserGroup(new UserGroupKey(workspaceId, groupId));
         Set<User> users = userGroup.getUsers();
@@ -166,7 +162,7 @@ public class UserGroupResource {
             @ApiParam(required = true, value = "Group id") @PathParam("groupId") String groupId,
             @ApiParam(required = true, value = "Tag name") @PathParam("tagName") String tagName,
             @ApiParam(required = true, value = "Tag subscription to update or create") TagSubscriptionDTO subDTO)
-            throws EntityNotFoundException, AccessRightException, UserNotActiveException {
+            throws EntityNotFoundException, AccessRightException, UserNotActiveException, WorkspaceNotEnabledException {
 
         notificationManager.createOrUpdateTagUserGroupSubscription(workspaceId,
                 groupId,
@@ -197,8 +193,7 @@ public class UserGroupResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Group id id") @PathParam("groupId") String groupId,
             @ApiParam(required = true, value = "Tag name") @PathParam("tagName") String tagName)
-            throws UserNotFoundException, WorkspaceNotFoundException, UserNotActiveException,
-            AccessRightException, WorkspaceNotEnabledException {
+            throws EntityNotFoundException, UserNotActiveException, AccessRightException, WorkspaceNotEnabledException {
 
         notificationManager.removeTagUserGroupSubscription(workspaceId, groupId, tagName);
         return Response.noContent().build();

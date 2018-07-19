@@ -70,7 +70,7 @@ public class MilestonesResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response getMilestones(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId)
-            throws EntityNotFoundException, UserNotActiveException {
+            throws EntityNotFoundException, UserNotActiveException, WorkspaceNotEnabledException {
 
         List<Milestone> milestones = changeManager.getMilestones(workspaceId);
         List<MilestoneDTO> milestoneDTOs = new ArrayList<>();
@@ -99,7 +99,7 @@ public class MilestonesResource {
     public MilestoneDTO createMilestone(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Milestone to create") MilestoneDTO milestoneDTO)
-            throws EntityNotFoundException, AccessRightException, EntityAlreadyExistsException {
+            throws EntityNotFoundException, AccessRightException, EntityAlreadyExistsException, WorkspaceNotEnabledException {
 
         Milestone milestone = changeManager.createMilestone(workspaceId, milestoneDTO.getTitle(), milestoneDTO.getDescription(), milestoneDTO.getDueDate());
         milestoneDTO = mapper.map(milestone, MilestoneDTO.class);
@@ -121,7 +121,7 @@ public class MilestonesResource {
     public MilestoneDTO getMilestone(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Milestone id") @PathParam("milestoneId") int milestoneId)
-            throws EntityNotFoundException, UserNotActiveException, AccessRightException {
+            throws EntityNotFoundException, UserNotActiveException, AccessRightException, WorkspaceNotEnabledException {
 
         Milestone milestone = changeManager.getMilestone(workspaceId, milestoneId);
         MilestoneDTO milestoneDTO = mapper.map(milestone, MilestoneDTO.class);
@@ -147,7 +147,7 @@ public class MilestonesResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Milestone id") @PathParam("milestoneId") int milestoneId,
             @ApiParam(required = true, value = "Milestone to update") MilestoneDTO pMilestoneDTO)
-            throws EntityNotFoundException, UserNotActiveException, AccessRightException {
+            throws EntityNotFoundException, UserNotActiveException, AccessRightException, WorkspaceNotEnabledException {
 
         Milestone milestone = changeManager.updateMilestone(milestoneId, workspaceId, pMilestoneDTO.getTitle(), pMilestoneDTO.getDescription(), pMilestoneDTO.getDueDate());
         MilestoneDTO milestoneDTO = mapper.map(milestone, MilestoneDTO.class);
@@ -171,7 +171,7 @@ public class MilestonesResource {
     public Response removeMilestone(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Milestone id") @PathParam("milestoneId") int milestoneId)
-            throws EntityNotFoundException, UserNotActiveException, AccessRightException, EntityConstraintException {
+            throws EntityNotFoundException, UserNotActiveException, AccessRightException, EntityConstraintException, WorkspaceNotEnabledException {
         changeManager.deleteMilestone(workspaceId, milestoneId);
         return Response.noContent().build();
     }
@@ -191,7 +191,7 @@ public class MilestonesResource {
     public Response getRequestsByMilestone(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Milestone id") @PathParam("milestoneId") int milestoneId)
-            throws EntityNotFoundException, UserNotActiveException, AccessRightException {
+            throws EntityNotFoundException, UserNotActiveException, AccessRightException, WorkspaceNotEnabledException {
 
         List<ChangeRequest> changeRequests = changeManager.getChangeRequestsByMilestone(workspaceId, milestoneId);
         List<ChangeRequestDTO> changeRequestDTOs = new ArrayList<>();
@@ -217,7 +217,7 @@ public class MilestonesResource {
     public Response getOrdersByMilestone(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Milestone id") @PathParam("milestoneId") int milestoneId)
-            throws EntityNotFoundException, UserNotActiveException, AccessRightException {
+            throws EntityNotFoundException, UserNotActiveException, AccessRightException, WorkspaceNotEnabledException {
 
         List<ChangeOrder> changeOrders = changeManager.getChangeOrdersByMilestone(workspaceId, milestoneId);
         List<ChangeOrderDTO> changeOrderDTOs = new ArrayList<>();
@@ -243,7 +243,7 @@ public class MilestonesResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Milestone id") @PathParam("milestoneId") int milestoneId,
             @ApiParam(required = true, value = "ACL rules to set") ACLDTO acl)
-            throws EntityNotFoundException, UserNotActiveException, AccessRightException {
+            throws EntityNotFoundException, UserNotActiveException, AccessRightException, WorkspaceNotEnabledException {
 
         if (acl.hasEntries()) {
             changeManager.updateACLForMilestone(workspaceId, milestoneId, acl.getUserEntriesMap(), acl.getUserGroupEntriesMap());
