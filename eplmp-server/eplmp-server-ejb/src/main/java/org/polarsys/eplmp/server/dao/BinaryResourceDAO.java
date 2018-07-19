@@ -22,24 +22,22 @@ import org.polarsys.eplmp.core.product.Geometry;
 import org.polarsys.eplmp.core.product.PartIteration;
 import org.polarsys.eplmp.core.product.PartMasterTemplate;
 
+import javax.ejb.Stateless;
 import javax.persistence.*;
 import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+@Stateless(name = "BinaryResourceDAO")
 public class BinaryResourceDAO {
     private static final Logger LOGGER = Logger.getLogger(BinaryResourceDAO.class.getName());
 
-    private final EntityManager em;
-    private final Locale mLocale;
+    @PersistenceContext
+    private EntityManager em;
 
-    public BinaryResourceDAO(Locale pLocale, EntityManager pEM) {
-        em = pEM;
-        mLocale = pLocale;
-    }
+    private Locale mLocale;
 
-    public BinaryResourceDAO(EntityManager pEM) {
-        em = pEM;
+    public BinaryResourceDAO() {
         mLocale = Locale.getDefault();
     }
 
@@ -60,6 +58,11 @@ public class BinaryResourceDAO {
         }
     }
 
+    public void createBinaryResource(Locale pLocale, BinaryResource pBinaryResource) throws FileAlreadyExistsException, CreationException {
+        mLocale = pLocale;
+        createBinaryResource(pBinaryResource);
+    }
+
     public void removeBinaryResource(String pFullName) throws FileNotFoundException {
         BinaryResource file = loadBinaryResource(pFullName);
         em.remove(file);
@@ -76,7 +79,11 @@ public class BinaryResourceDAO {
             throw new FileNotFoundException(mLocale,pFullName);
         }
         return file;
+    }
 
+    public BinaryResource loadBinaryResource(Locale pLocale, String pFullName) throws FileNotFoundException {
+        mLocale = pLocale;
+        return loadBinaryResource(pFullName);
     }
 
     public PartIteration getPartHolder(BinaryResource pBinaryResource) {

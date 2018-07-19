@@ -18,27 +18,27 @@ import org.polarsys.eplmp.core.sharing.SharedDocument;
 import org.polarsys.eplmp.core.sharing.SharedEntity;
 import org.polarsys.eplmp.core.sharing.SharedPart;
 
+import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
+import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
 import java.util.Locale;
 
 /**
  * @author Morgan Guimard
  */
+
+@Stateless(name = "SharedEntityDAO")
 public class SharedEntityDAO {
 
+    @PersistenceContext
     private EntityManager em;
+
     private Locale mLocale;
 
-    public SharedEntityDAO(Locale pLocale, EntityManager pEM) {
-        mLocale=pLocale;
-        em=pEM;
-    }
-
-    public SharedEntityDAO(EntityManager pEM) {
+    public SharedEntityDAO() {
         mLocale=Locale.getDefault();
-        em=pEM;
     }
 
     public boolean isSharedDocument(String pUuid){
@@ -60,6 +60,11 @@ public class SharedEntityDAO {
 
     }
 
+    public SharedDocument loadSharedDocument(Locale pLocale, String pUuid) throws SharedEntityNotFoundException {
+        this.mLocale = pLocale;
+        return loadSharedDocument(pUuid);
+    }
+
     public SharedPart loadSharedPart(String pUuid) throws SharedEntityNotFoundException {
 
         SharedPart sharedPart = em.find(SharedPart.class, pUuid);
@@ -68,7 +73,11 @@ public class SharedEntityDAO {
         } else {
             return sharedPart;
         }
+    }
 
+    public SharedPart loadSharedPart(Locale pLocale, String pUuid) throws SharedEntityNotFoundException {
+        this.mLocale = pLocale;
+        return loadSharedPart(pUuid);
     }
 
     public void createSharedDocument(SharedDocument pSharedDocument) {
@@ -109,6 +118,11 @@ public class SharedEntityDAO {
             throw new SharedEntityNotFoundException(mLocale, pUuid);
         }
 
+    }
+
+    public SharedEntity loadSharedEntity(Locale pLocale, String pUuid) throws SharedEntityNotFoundException {
+        this.mLocale = pLocale;
+        return loadSharedEntity(pUuid);
     }
 
     public void deleteSharedEntity(SharedEntity pSharedEntity) {

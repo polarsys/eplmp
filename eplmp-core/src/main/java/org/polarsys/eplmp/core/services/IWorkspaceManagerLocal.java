@@ -25,7 +25,7 @@ import org.polarsys.eplmp.core.admin.WorkspaceBackOptions;
 public interface IWorkspaceManagerLocal {
     long getDiskUsageInWorkspace(String workspaceId) throws AccountNotFoundException;
 
-    void deleteWorkspace(String workspaceId);
+    void deleteWorkspace(String workspaceId) throws WorkspaceNotFoundException, AccountNotFoundException, AccessRightException;
 
     Workspace changeAdmin(String workspaceId, String login) throws WorkspaceNotFoundException, AccountNotFoundException, UserNotFoundException, UserNotActiveException, AccessRightException, WorkspaceNotEnabledException, NotAllowedException;
 

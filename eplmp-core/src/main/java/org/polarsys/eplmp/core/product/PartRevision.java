@@ -524,6 +524,10 @@ public class PartRevision implements Serializable, Comparable<PartRevision> {
         return releaseStatusChange == null ? null : releaseStatusChange.getStatusModificationDate();
     }
 
+    public boolean isLastRevision() {
+        return partMaster.getLastRevision().equals(this);
+    }
+
     @Override
     public String toString() {
         return getPartNumber() + "-" + version;

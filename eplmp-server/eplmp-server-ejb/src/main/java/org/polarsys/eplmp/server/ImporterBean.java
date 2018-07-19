@@ -283,7 +283,7 @@ public class ImporterBean implements IImporterManagerLocal {
         Locale locale;
         try {
             User user = userManager.whoAmI(workspaceId);
-            locale = new Locale(user.getLanguage());
+            locale = user.getLocale();
         } catch (ApplicationException e) {
             LOGGER.log(Level.SEVERE, "Cannot fetch account info", e);
             locale = Locale.getDefault();
@@ -444,7 +444,7 @@ public class ImporterBean implements IImporterManagerLocal {
                     }
                     productManager.updatePartIteration(partIteration.getKey(), part.getRevisionNote(), partIteration.getSource(), null, part.getInstanceAttributes(), null, null, null, null);
                 } else {
-                    throw new NotAllowedException(new Locale(user.getLanguage()), "NotAllowedException25", partIteration.getPartRevision().toString());
+                    throw new NotAllowedException(user.getLocale(), "NotAllowedException25", partIteration.getPartRevision().toString());
                 }
 
                 //CheckIn if checkout before

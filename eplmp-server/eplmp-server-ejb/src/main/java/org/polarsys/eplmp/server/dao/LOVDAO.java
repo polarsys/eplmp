@@ -16,35 +16,35 @@ import org.polarsys.eplmp.core.exceptions.ListOfValuesNotFoundException;
 import org.polarsys.eplmp.core.meta.ListOfValues;
 import org.polarsys.eplmp.core.meta.ListOfValuesKey;
 
-import javax.persistence.EntityExistsException;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceException;
-import javax.persistence.TypedQuery;
+import javax.ejb.Stateless;
+import javax.persistence.*;
 import java.util.List;
 import java.util.Locale;
 
+@Stateless(name = "LOVDAO")
 public class LOVDAO {
 
+    @PersistenceContext
     private EntityManager em;
+
     private Locale mLocale;
 
-    public LOVDAO(Locale pLocale, EntityManager pEM) {
-        em = pEM;
-        mLocale = pLocale;
-    }
-
-    public LOVDAO(EntityManager pEM) {
-        em = pEM;
+    public LOVDAO() {
         mLocale = Locale.getDefault();
     }
     
-    public ListOfValues loadLOV(ListOfValuesKey lovKey) throws ListOfValuesNotFoundException {
-        ListOfValues lov=em.find(ListOfValues.class,lovKey);
+    public ListOfValues loadLOV(ListOfValuesKey pLovKey) throws ListOfValuesNotFoundException {
+        ListOfValues lov=em.find(ListOfValues.class,pLovKey);
         if (lov == null) {
-            throw new ListOfValuesNotFoundException(mLocale, lovKey.getName());
+            throw new ListOfValuesNotFoundException(mLocale, pLovKey.getName());
         } else {
             return lov;
         }
+    }
+
+    public ListOfValues loadLOV(Locale pLocale, ListOfValuesKey pLovKey) throws ListOfValuesNotFoundException{
+        mLocale = pLocale;
+        return loadLOV(pLovKey);
     }
 
     public List<ListOfValues> loadLOVList(String pWorkspaceId){
@@ -66,6 +66,11 @@ public class LOVDAO {
             //thrown instead of EntityExistsException
             throw new CreationException(mLocale);
         }
+    }
+
+    public void createLOV(Locale pLocale, ListOfValues pLov) throws CreationException, ListOfValuesAlreadyExistsException{
+        mLocale = pLocale;
+        createLOV(pLov);
     }
 
     public void deleteLOV(ListOfValues pLov) {

@@ -17,25 +17,20 @@ import org.polarsys.eplmp.core.exceptions.DocumentMasterTemplateAlreadyExistsExc
 import org.polarsys.eplmp.core.exceptions.DocumentMasterTemplateNotFoundException;
 import org.polarsys.eplmp.core.meta.ListOfValuesKey;
 
-import javax.persistence.EntityExistsException;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceException;
-import javax.persistence.TypedQuery;
+import javax.ejb.Stateless;
+import javax.persistence.*;
 import java.util.List;
 import java.util.Locale;
 
+@Stateless(name = "DocumentMasterTemplateDAO")
 public class DocumentMasterTemplateDAO {
 
+    @PersistenceContext
     private EntityManager em;
+
     private Locale mLocale;
 
-    public DocumentMasterTemplateDAO(Locale pLocale, EntityManager pEM) {
-        em = pEM;
-        mLocale = pLocale;
-    }
-
-    public DocumentMasterTemplateDAO(EntityManager pEM) {
-        em = pEM;
+    public DocumentMasterTemplateDAO() {
         mLocale = Locale.getDefault();
     }
 
@@ -64,6 +59,11 @@ public class DocumentMasterTemplateDAO {
         }
     }
 
+    public DocumentMasterTemplate loadDocMTemplate(Locale pLocale, DocumentMasterTemplateKey pKey) throws DocumentMasterTemplateNotFoundException {
+        mLocale = pLocale;
+        return loadDocMTemplate(pKey);
+    }
+
     public void createDocMTemplate(DocumentMasterTemplate pTemplate) throws DocumentMasterTemplateAlreadyExistsException, CreationException {
         try {
             //the EntityExistsException is thrown only when flush occurs
@@ -77,6 +77,11 @@ public class DocumentMasterTemplateDAO {
             //thrown instead of EntityExistsException
             throw new CreationException(mLocale);
         }
+    }
+
+    public void createDocMTemplate(Locale pLocale, DocumentMasterTemplate pTemplate) throws DocumentMasterTemplateAlreadyExistsException, CreationException {
+        mLocale = pLocale;
+        createDocMTemplate(pTemplate);
     }
 
     public List<DocumentMasterTemplate> findAllDocMTemplatesFromLOV(ListOfValuesKey lovKey){

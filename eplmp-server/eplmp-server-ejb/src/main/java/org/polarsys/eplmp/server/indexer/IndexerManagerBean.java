@@ -32,10 +32,7 @@ import org.polarsys.eplmp.core.product.*;
 import org.polarsys.eplmp.core.query.DocumentSearchQuery;
 import org.polarsys.eplmp.core.query.PartSearchQuery;
 import org.polarsys.eplmp.core.security.UserGroupMapping;
-import org.polarsys.eplmp.core.services.IAccountManagerLocal;
-import org.polarsys.eplmp.core.services.IBinaryStorageManagerLocal;
-import org.polarsys.eplmp.core.services.IIndexerManagerLocal;
-import org.polarsys.eplmp.core.services.INotifierLocal;
+import org.polarsys.eplmp.core.services.*;
 import org.polarsys.eplmp.i18n.PropertiesLoader;
 import org.polarsys.eplmp.server.dao.*;
 
@@ -68,6 +65,21 @@ public class IndexerManagerBean implements IIndexerManagerLocal {
     private JestClient esClient;
 
     @Inject
+    private DocumentMasterDAO documentMasterDAO;
+
+    @Inject
+    private DocumentRevisionDAO documentRevisionDAO;
+
+    @Inject
+    private PartMasterDAO partMasterDAO;
+
+    @Inject
+    private PartRevisionDAO partRevisionDAO;
+
+    @Inject
+    private WorkspaceDAO workspaceDAO;
+
+    @Inject
     private IAccountManagerLocal accountManager;
 
     @Inject
@@ -79,12 +91,17 @@ public class IndexerManagerBean implements IIndexerManagerLocal {
     @Inject
     private IBinaryStorageManagerLocal storageManager;
 
+    @Inject
+    private IContextManagerLocal contextManager;
+
+    @Inject
+    private IUserManagerLocal userManager;
+
     private static final String I18N_CONF = "/org/polarsys/eplmp/core/i18n/LocalStrings";
 
     private static final String ANALYZER_SETTING_RESOURCE = "/org/polarsys/eplmp/server/indexer/analyzer-setting.json";
 
     private static final Logger LOGGER = Logger.getLogger(IndexerManagerBean.class.getName());
-
 
     @Override
     @RolesAllowed({UserGroupMapping.ADMIN_ROLE_ID, UserGroupMapping.REGULAR_USER_ROLE_ID})
@@ -92,16 +109,15 @@ public class IndexerManagerBean implements IIndexerManagerLocal {
         try {
             createIndex(IndexerUtils.formatIndexName(workspaceId));
         } catch (IOException e) {
-            //Throw an application exception?
             LOGGER.log(Level.WARNING, "Cannot create index for workspace [" + workspaceId + "]", e);
         }
     }
 
     @Override
-    @Asynchronous
     @RolesAllowed({UserGroupMapping.ADMIN_ROLE_ID, UserGroupMapping.REGULAR_USER_ROLE_ID})
     public void deleteWorkspaceIndex(String workspaceId) throws AccountNotFoundException {
-        doDeleteWorkspaceIndex(workspaceId);
+        Account account = accountManager.getMyAccount();
+        doDeleteWorkspaceIndex(account, workspaceId);
     }
 
     @Override
@@ -169,15 +185,15 @@ public class IndexerManagerBean implements IIndexerManagerLocal {
 
         try {
             searchResult = esClient.execute(new Search.Builder(
-                    new SearchSourceBuilder()
-                            .query(query)
-                            .from(from)
-                            .size(size)
-                            .toString())
-                    .addIndex(IndexerUtils.formatIndexName(workspaceId))
-                    .addType(IndexerMapping.DOCUMENT_TYPE)
-                    .setSearchType(SearchType.QUERY_THEN_FETCH)
-                    .build()
+                            new SearchSourceBuilder()
+                                    .query(query)
+                                    .from(from)
+                                    .size(size)
+                                    .toString())
+                            .addIndex(IndexerUtils.formatIndexName(workspaceId))
+                            .addType(IndexerMapping.DOCUMENT_TYPE)
+                            .setSearchType(SearchType.QUERY_THEN_FETCH)
+                            .build()
             );
 
         } catch (IOException e) {
@@ -216,15 +232,15 @@ public class IndexerManagerBean implements IIndexerManagerLocal {
 
         try {
             searchResult = esClient.execute(new Search.Builder(
-                    new SearchSourceBuilder()
-                            .query(query)
-                            .from(from)
-                            .size(size)
-                            .toString())
-                    .addIndex(IndexerUtils.formatIndexName(workspaceId))
-                    .addType(IndexerMapping.PART_TYPE)
-                    .setSearchType(SearchType.QUERY_THEN_FETCH)
-                    .build()
+                            new SearchSourceBuilder()
+                                    .query(query)
+                                    .from(from)
+                                    .size(size)
+                                    .toString())
+                            .addIndex(IndexerUtils.formatIndexName(workspaceId))
+                            .addType(IndexerMapping.PART_TYPE)
+                            .setSearchType(SearchType.QUERY_THEN_FETCH)
+                            .build()
             );
 
         } catch (IOException e) {
@@ -251,25 +267,35 @@ public class IndexerManagerBean implements IIndexerManagerLocal {
     }
 
     @Override
-    @Asynchronous
     @RolesAllowed({UserGroupMapping.ADMIN_ROLE_ID})
     public void indexAllWorkspacesData() throws AccountNotFoundException {
-        WorkspaceDAO wDAO = new WorkspaceDAO(em);
+        Account account = accountManager.getMyAccount();
+        doIndexAllWorkspacesData(account);
+    }
 
-        for (Workspace workspace : wDAO.getAll()) {
-            indexWorkspaceData(workspace.getId());
+    @Asynchronous
+    private void doIndexAllWorkspacesData(Account account) {
+        for (Workspace workspace : workspaceDAO.getAll()) {
+            doIndexWorkspaceData(account, workspace.getId());
         }
     }
 
     @Override
-    @Asynchronous
     @RolesAllowed({UserGroupMapping.ADMIN_ROLE_ID, UserGroupMapping.REGULAR_USER_ROLE_ID})
-    public void indexWorkspaceData(String workspaceId) throws AccountNotFoundException {
+    public void indexWorkspaceData(String workspaceId)
+            throws WorkspaceNotFoundException, AccountNotFoundException, AccessRightException {
         Account account = accountManager.getMyAccount();
+        if (!contextManager.isCallerInRole(UserGroupMapping.ADMIN_ROLE_ID)) {
+            userManager.checkAdmin(workspaceId);
+        }
+        doIndexWorkspaceData(account, workspaceId);
+    }
 
+    @Asynchronous
+    private void doIndexWorkspaceData(Account account, String workspaceId) {
         try {
             // Clear workspace if exists, or recreate
-            doDeleteWorkspaceIndex(workspaceId);
+            doDeleteWorkspaceIndex(account, workspaceId);
             Bulk.Builder bb = new Bulk.Builder().defaultIndex(workspaceId);
             bulkWorkspaceRequestBuilder(bb, workspaceId);
 
@@ -286,6 +312,7 @@ public class IndexerManagerBean implements IIndexerManagerLocal {
             LOGGER.log(Level.WARNING, "Cannot index the whole workspace: The Elasticsearch server does not seem to respond");
             mailer.sendBulkIndexationFailure(account, getString("IndexerNotAvailableForRequest", new Locale(account.getLanguage())));
         }
+
     }
 
     @Override
@@ -327,9 +354,7 @@ public class IndexerManagerBean implements IIndexerManagerLocal {
 
     }
 
-
-    private void doDeleteWorkspaceIndex(String workspaceId) throws AccountNotFoundException {
-        Account account = accountManager.getMyAccount();
+    private void doDeleteWorkspaceIndex(Account account, String workspaceId) {
         try {
             DocumentResult result = esClient.execute(new Delete.Builder(IndexerUtils.formatIndexName(workspaceId))
                     .build());
@@ -345,7 +370,7 @@ public class IndexerManagerBean implements IIndexerManagerLocal {
 
     private void createIndex(String pIndex) throws IOException {
 
-       Settings settings = Settings.builder()
+        Settings settings = Settings.builder()
                 .loadFromStream(ANALYZER_SETTING_RESOURCE, this.getClass().getResourceAsStream(ANALYZER_SETTING_RESOURCE))
                 .put("number_of_shards", indexerConfigManager.getNumberOfShards())
                 .put("number_of_replicas", indexerConfigManager.getNumberOfReplicas())
@@ -412,15 +437,13 @@ public class IndexerManagerBean implements IIndexerManagerLocal {
     }
 
     private Bulk.Builder bulkDocumentsIndexRequestBuilder(Bulk.Builder pBulkRequest, String workspaceId) {
-        DocumentMasterDAO docMasterDAO = new DocumentMasterDAO(em);
-
-        Long countByWorkspace = docMasterDAO.getCountByWorkspace(workspaceId);
+        Long countByWorkspace = documentMasterDAO.getCountByWorkspace(workspaceId);
         Integer limit = 1000;
         int numberOfPage = (int) Math.ceil(countByWorkspace.doubleValue() / limit.doubleValue());
-        
-        for(int pageIndex = 0 ; pageIndex < numberOfPage ; pageIndex++) {
+
+        for (int pageIndex = 0; pageIndex < numberOfPage; pageIndex++) {
             int offset = pageIndex * limit;
-            for (DocumentMaster docM : docMasterDAO.getPaginatedByWorkspace(workspaceId, limit, offset)) {
+            for (DocumentMaster docM : documentMasterDAO.getPaginatedByWorkspace(workspaceId, limit, offset)) {
                 for (DocumentRevision docR : docM.getDocumentRevisions()) {
                     docR.getDocumentIterations().stream().filter(documentIteration -> documentIteration.getCheckInDate() != null)
                             .forEach(documentIteration -> {
@@ -438,13 +461,11 @@ public class IndexerManagerBean implements IIndexerManagerLocal {
     }
 
     private Bulk.Builder bulkPartsIndexRequestBuilder(Bulk.Builder pBulkRequest, String workspaceId) {
-        PartMasterDAO partMasterDAO = new PartMasterDAO(em);
-
         Long countByWorkspace = partMasterDAO.getCountByWorkspace(workspaceId);
         Integer limit = 1000;
         int numberOfPage = (int) Math.ceil(countByWorkspace.doubleValue() / limit.doubleValue());
 
-        for(int pageIndex = 0 ; pageIndex < numberOfPage ; pageIndex++) {
+        for (int pageIndex = 0; pageIndex < numberOfPage; pageIndex++) {
             int offset = pageIndex * limit;
             for (PartMaster partMaster : partMasterDAO.getPaginatedByWorkspace(workspaceId, limit, offset)) {
                 for (PartRevision partRev : partMaster.getPartRevisions()) {
@@ -550,7 +571,7 @@ public class IndexerManagerBean implements IIndexerManagerLocal {
 
     private DocumentRevision getDocumentRevision(DocumentRevisionKey documentRevisionKey) {
         try {
-            return new DocumentRevisionDAO(em).loadDocR(documentRevisionKey);
+            return documentRevisionDAO.loadDocR(documentRevisionKey);
         } catch (DocumentRevisionNotFoundException e) {
             LOGGER.log(Level.INFO, "Cannot infer document revision from key [" + documentRevisionKey + "]", e);
             return null;
@@ -583,7 +604,7 @@ public class IndexerManagerBean implements IIndexerManagerLocal {
 
     private PartRevision getPartRevision(PartRevisionKey partRevision) {
         try {
-            return new PartRevisionDAO(em).loadPartR(partRevision);
+            return partRevisionDAO.loadPartR(partRevision);
         } catch (PartRevisionNotFoundException e) {
             LOGGER.log(Level.INFO, "Cannot infer part revision from key [" + partRevision + "]", e);
             return null;

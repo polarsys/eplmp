@@ -36,6 +36,12 @@ import java.util.Locale;
 @Stateless(name = "OnDemandConverterBean")
 public class OnDemandConverterBean implements IOnDemandConverterManagerLocal {
 
+    @PersistenceContext
+    private EntityManager em;
+
+    @Inject
+    private BinaryResourceDAO binaryResourceDAO;
+
     @Inject
     @Any
     private Instance<OnDemandConverter> documentResourceGetters;
@@ -52,15 +58,11 @@ public class OnDemandConverterBean implements IOnDemandConverterManagerLocal {
     @Inject
     private IUserManagerLocal userManager;
 
-    @PersistenceContext
-    private EntityManager em;
-
     @Override
     public InputStream getDocumentConvertedResource(String outputFormat, BinaryResource binaryResource)
             throws WorkspaceNotFoundException, UserNotActiveException, UserNotFoundException, ConvertedResourceException, WorkspaceNotEnabledException {
 
         Locale locale = getCallerLocale(binaryResource);
-        BinaryResourceDAO binaryResourceDAO = new BinaryResourceDAO(locale, em);
         DocumentIteration docI = binaryResourceDAO.getDocumentHolder(binaryResource);
         OnDemandConverter selectedOnDemandConverter = selectOnDemandConverter(outputFormat, binaryResource);
 
@@ -76,7 +78,6 @@ public class OnDemandConverterBean implements IOnDemandConverterManagerLocal {
             throws WorkspaceNotFoundException, UserNotActiveException, UserNotFoundException, ConvertedResourceException, WorkspaceNotEnabledException {
 
         Locale locale = getCallerLocale(binaryResource);
-        BinaryResourceDAO binaryResourceDAO = new BinaryResourceDAO(locale, em);
         PartIteration partIteration = binaryResourceDAO.getPartHolder(binaryResource);
         OnDemandConverter selectedOnDemandConverter = selectOnDemandConverter(outputFormat, binaryResource);
 
@@ -103,7 +104,7 @@ public class OnDemandConverterBean implements IOnDemandConverterManagerLocal {
 
         if (contextManager.isCallerInRole(UserGroupMapping.REGULAR_USER_ROLE_ID)) {
             User user = userManager.whoAmI(binaryResource.getWorkspaceId());
-            locale = new Locale(user.getLanguage());
+            locale = user.getLocale();
         } else {
             locale = Locale.getDefault();
         }

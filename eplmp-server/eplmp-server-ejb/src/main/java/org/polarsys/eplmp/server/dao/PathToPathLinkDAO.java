@@ -21,10 +21,8 @@ import org.polarsys.eplmp.core.product.PartLink;
 import org.polarsys.eplmp.core.product.PartUsageLink;
 import org.polarsys.eplmp.core.product.PathToPathLink;
 
-import javax.persistence.EntityExistsException;
-import javax.persistence.EntityManager;
-import javax.persistence.NoResultException;
-import javax.persistence.PersistenceException;
+import javax.ejb.Stateless;
+import javax.persistence.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -35,32 +33,35 @@ import java.util.logging.Logger;
 /**
  * @author morgan on 29/04/15.
  */
+
+@Stateless(name = "PathToPathLinkDAO")
 public class PathToPathLinkDAO {
 
     private static final Logger LOGGER = Logger.getLogger(PathToPathLinkDAO.class.getName());
+    public static final String PRODUCT_INSTANCE_ITERATION = "productInstanceIteration";
+    public static final String PRODUCT_BASELINE = "productBaseline";
+    public static final String CONFIGURATION_ITEM = "configurationItem";
+    public static final String SOURCE = "source";
+    public static final String TARGET = "target";
 
+    @PersistenceContext
     private EntityManager em;
+
     private Locale mLocale;
 
-    public PathToPathLinkDAO(Locale pLocale, EntityManager pEM) {
-        em = pEM;
-        mLocale = pLocale;
-    }
-
-    public PathToPathLinkDAO(EntityManager pEM) {
-        em = pEM;
+    public PathToPathLinkDAO() {
         mLocale = Locale.getDefault();
     }
 
-    public void createPathToPathLink(PathToPathLink pathToPathLink) throws CreationException, PathToPathLinkAlreadyExistsException {
+    public void createPathToPathLink(PathToPathLink pPathToPathLink) throws CreationException, PathToPathLinkAlreadyExistsException {
 
         try {
             //the EntityExistsException is thrown only when flush occurs
-            em.persist(pathToPathLink);
+            em.persist(pPathToPathLink);
             em.flush();
         } catch (EntityExistsException pEEEx) {
             LOGGER.log(Level.FINEST,null,pEEEx);
-            throw new PathToPathLinkAlreadyExistsException(mLocale, pathToPathLink);
+            throw new PathToPathLinkAlreadyExistsException(mLocale, pPathToPathLink);
         } catch (PersistenceException pPEx) {
             LOGGER.log(Level.FINEST,null,pPEx);
             //EntityExistsException is case sensitive
@@ -70,12 +71,22 @@ public class PathToPathLinkDAO {
         }
     }
 
-    public PathToPathLink loadPathToPathLink(int pathToPathLinkId) throws PathToPathLinkNotFoundException {
-        PathToPathLink pathToPathLink = em.find(PathToPathLink.class,pathToPathLinkId);
+    public void createPathToPathLink(Locale pLocale, PathToPathLink pPathToPathLink) throws CreationException, PathToPathLinkAlreadyExistsException {
+        this.mLocale = pLocale;
+        createPathToPathLink(pPathToPathLink);
+    }
+
+    public PathToPathLink loadPathToPathLink(int pPathToPathLinkId) throws PathToPathLinkNotFoundException {
+        PathToPathLink pathToPathLink = em.find(PathToPathLink.class, pPathToPathLinkId);
         if(pathToPathLink != null){
             return pathToPathLink;
         }
-        throw new PathToPathLinkNotFoundException(mLocale,pathToPathLinkId);
+        throw new PathToPathLinkNotFoundException(mLocale, pPathToPathLinkId);
+    }
+
+    public PathToPathLink loadPathToPathLink(Locale pLocale, int pPathToPathLinkId) throws PathToPathLinkNotFoundException {
+        this.mLocale = pLocale;
+        return loadPathToPathLink(pPathToPathLinkId);
     }
 
     public void removePathToPathLink(PathToPathLink pathToPathLink) {
@@ -85,31 +96,31 @@ public class PathToPathLinkDAO {
 
     public List<String> getDistinctPathToPathLinkTypes(ProductInstanceIteration productInstanceIteration) {
         return em.createNamedQuery("PathToPathLink.findPathToPathLinkTypesByProductInstanceIteration",String.class)
-                .setParameter("productInstanceIteration",productInstanceIteration)
+                .setParameter(PRODUCT_INSTANCE_ITERATION,productInstanceIteration)
                 .getResultList();
     }
     public List<PathToPathLink> getDistinctPathToPathLink(ProductInstanceIteration productInstanceIteration) {
         return em.createNamedQuery("PathToPathLink.findPathToPathLinkByProductInstanceIteration",PathToPathLink.class)
-                .setParameter("productInstanceIteration",productInstanceIteration)
+                .setParameter(PRODUCT_INSTANCE_ITERATION,productInstanceIteration)
                 .getResultList();
     }
 
     public List<String> getDistinctPathToPathLinkTypes(ProductBaseline productBaseline) {
         return em.createNamedQuery("PathToPathLink.findPathToPathLinkTypesByProductBaseline",String.class)
-                .setParameter("productBaseline",productBaseline)
+                .setParameter(PRODUCT_BASELINE,productBaseline)
                 .getResultList();
     }
 
     public List<String> getDistinctPathToPathLinkTypes(ConfigurationItem configurationItem) {
         return em.createNamedQuery("PathToPathLink.findPathToPathLinkTypesByProduct",String.class)
-                .setParameter("configurationItem",configurationItem)
+                .setParameter(CONFIGURATION_ITEM,configurationItem)
                 .getResultList();
     }
 
     public PathToPathLink getSamePathToPathLink(ConfigurationItem configurationItem, PathToPathLink pathToPathLink){
         try {
             return em.createNamedQuery("PathToPathLink.findSamePathToPathLinkInProduct", PathToPathLink.class)
-                    .setParameter("configurationItem", configurationItem)
+                    .setParameter(CONFIGURATION_ITEM, configurationItem)
                     .setParameter("targetPath", pathToPathLink.getTargetPath())
                     .setParameter("sourcePath", pathToPathLink.getSourcePath())
                     .setParameter("type", pathToPathLink.getType())
@@ -121,7 +132,7 @@ public class PathToPathLinkDAO {
 
     public List<PathToPathLink> getNextPathToPathLinkInProduct(ConfigurationItem configurationItem, PathToPathLink pathToPathLink){
         return em.createNamedQuery("PathToPathLink.findNextPathToPathLinkInProduct", PathToPathLink.class)
-                .setParameter("configurationItem", configurationItem)
+                .setParameter(CONFIGURATION_ITEM, configurationItem)
                 .setParameter("targetPath", pathToPathLink.getTargetPath())
                 .setParameter("type", pathToPathLink.getType())
                 .getResultList();
@@ -130,68 +141,68 @@ public class PathToPathLinkDAO {
     public List<PathToPathLink> getPathToPathLinkFromSourceAndTarget(ProductBaseline baseline, String source, String target) {
         return em.createNamedQuery("PathToPathLink.findPathToPathLinkBySourceAndTargetInBaseline", PathToPathLink.class)
                 .setParameter("baseline", baseline)
-                .setParameter("source",source)
-                .setParameter("target", target)
+                .setParameter(SOURCE,source)
+                .setParameter(TARGET, target)
                 .getResultList();
     }
 
     public List<PathToPathLink> getPathToPathLinkFromSourceAndTarget(ProductInstanceIteration productInstanceIteration, String source, String target) {
         return em.createNamedQuery("PathToPathLink.findPathToPathLinkBySourceAndTargetInProductInstance", PathToPathLink.class)
-                .setParameter("productInstanceIteration", productInstanceIteration)
-                .setParameter("source",source)
-                .setParameter("target", target)
+                .setParameter(PRODUCT_INSTANCE_ITERATION, productInstanceIteration)
+                .setParameter(SOURCE,source)
+                .setParameter(TARGET, target)
                 .getResultList();
     }
 
     public List<PathToPathLink> getPathToPathLinkFromSourceAndTarget(ConfigurationItem configurationItem, String source, String target) {
         return em.createNamedQuery("PathToPathLink.findPathToPathLinkBySourceAndTargetInProduct", PathToPathLink.class)
-                .setParameter("configurationItem", configurationItem)
-                .setParameter("source",source)
-                .setParameter("target", target)
+                .setParameter(CONFIGURATION_ITEM, configurationItem)
+                .setParameter(SOURCE,source)
+                .setParameter(TARGET, target)
                 .getResultList();
     }
 
     public List<PathToPathLink> findRootPathToPathLinks(ConfigurationItem configurationItem, String type) {
         return em.createNamedQuery("PathToPathLink.findRootPathToPathLinkForGivenProductAndType", PathToPathLink.class)
-                .setParameter("configurationItem", configurationItem)
+                .setParameter(CONFIGURATION_ITEM, configurationItem)
                 .setParameter("type", type)
                 .getResultList();
     }
 
     public List<PathToPathLink> findRootPathToPathLinks(ProductBaseline productBaseline, String type) {
         return em.createNamedQuery("PathToPathLink.findRootPathToPathLinkForGivenProductBaselineAndType", PathToPathLink.class)
-                .setParameter("productBaseline", productBaseline)
+                .setParameter(PRODUCT_BASELINE, productBaseline)
                 .setParameter("type", type)
                 .getResultList();
     }
 
     public List<PathToPathLink> findRootPathToPathLinks(ProductInstanceIteration productInstanceIteration, String type) {
         return em.createNamedQuery("PathToPathLink.findRootPathToPathLinkForGivenProductInstanceIterationAndType", PathToPathLink.class)
-                .setParameter("productInstanceIteration", productInstanceIteration)
+                .setParameter(PRODUCT_INSTANCE_ITERATION, productInstanceIteration)
                 .setParameter("type", type)
                 .getResultList();
     }
 
     public List<PathToPathLink> getPathToPathLinkFromPathList(ConfigurationItem configurationItem, List<String> paths) {
         return em.createNamedQuery("PathToPathLink.findPathToPathLinkByPathListInProduct", PathToPathLink.class)
-                .setParameter("configurationItem", configurationItem)
+                .setParameter(CONFIGURATION_ITEM, configurationItem)
                 .setParameter("paths",paths)
                 .getResultList();
     }
 
     public List<PathToPathLink> getSourcesPathToPathLinksInProduct(ConfigurationItem configurationItem, String type, String source) {
         return em.createNamedQuery("PathToPathLink.findSourcesPathToPathLinkInProduct", PathToPathLink.class)
-                .setParameter("configurationItem", configurationItem)
+                .setParameter(CONFIGURATION_ITEM, configurationItem)
                 .setParameter("type", type)
-                .setParameter("source", source)
+                .setParameter(SOURCE, source)
                 .getResultList();
     }
 
     public List<PathToPathLink> getSourcesPathToPathLinksInBaseline(ProductBaseline productBaseline, String type, String source) {
         return em.createNamedQuery("PathToPathLink.findSourcesPathToPathLinkInProductBaseline", PathToPathLink.class)
-                .setParameter("productBaseline", productBaseline)
+                .setParameter(PRODUCT_BASELINE, productBaseline)
                 .setParameter("type", type)
-                .setParameter("source", source)
+                .setParameter(SOURCE, source)
                 .getResultList();
     }
 
@@ -310,12 +321,12 @@ public class PathToPathLinkDAO {
     public List<PathToPathLink> getPathToPathLinkSourceInContext(ConfigurationItem configurationItem, ProductInstanceIteration productInstanceIteration, String path){
         if(productInstanceIteration != null){
             return em.createNamedQuery("PathToPathLink.isSourceInProductInstanceContext", PathToPathLink.class)
-                    .setParameter("productInstanceIteration", productInstanceIteration)
+                    .setParameter(PRODUCT_INSTANCE_ITERATION, productInstanceIteration)
                     .setParameter("path", path)
                     .getResultList();
         }else{
             return em.createNamedQuery("PathToPathLink.isSourceInConfigurationItemContext", PathToPathLink.class)
-                    .setParameter("configurationItem", configurationItem)
+                    .setParameter(CONFIGURATION_ITEM, configurationItem)
                     .setParameter("path", path)
                     .getResultList();
         }
@@ -324,12 +335,12 @@ public class PathToPathLinkDAO {
     public List<PathToPathLink> getPathToPathLinkTargetInContext(ConfigurationItem configurationItem, ProductInstanceIteration productInstanceIteration, String path){
         if(productInstanceIteration != null){
             return em.createNamedQuery("PathToPathLink.isTargetInProductInstanceContext", PathToPathLink.class)
-                    .setParameter("productInstanceIteration", productInstanceIteration)
+                    .setParameter(PRODUCT_INSTANCE_ITERATION, productInstanceIteration)
                     .setParameter("path", path)
                     .getResultList();
         }else{
             return em.createNamedQuery("PathToPathLink.isTargetInConfigurationItemContext", PathToPathLink.class)
-                    .setParameter("configurationItem", configurationItem)
+                    .setParameter(CONFIGURATION_ITEM, configurationItem)
                     .setParameter("path", path)
                     .getResultList();
         }

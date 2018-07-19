@@ -54,6 +54,15 @@ public class PublicEntityManagerBean implements IPublicEntityManagerLocal {
     private EntityManager em;
 
     @Inject
+    private BinaryResourceDAO binaryResourceDAO;
+
+    @Inject
+    private DocumentRevisionDAO documentRevisionDAO;
+
+    @Inject
+    private PartRevisionDAO partRevisionDAO$;
+
+    @Inject
     @Any
     private Instance<OnDemandConverter> documentResourceGetters;
 
@@ -88,7 +97,7 @@ public class PublicEntityManagerBean implements IPublicEntityManagerLocal {
     @Override
     @RolesAllowed({UserGroupMapping.GUEST_ROLE_ID, UserGroupMapping.REGULAR_USER_ROLE_ID, UserGroupMapping.ADMIN_ROLE_ID})
     public BinaryResource getPublicBinaryResourceForDocument(String fullName) throws FileNotFoundException {
-        BinaryResource binaryResource = new BinaryResourceDAO(em).loadBinaryResource(fullName);
+        BinaryResource binaryResource = binaryResourceDAO.loadBinaryResource(fullName);
         String workspaceId = binaryResource.getWorkspaceId();
         String documentMasterId = binaryResource.getHolderId();
         String documentVersion = binaryResource.getHolderRevision();
@@ -99,7 +108,7 @@ public class PublicEntityManagerBean implements IPublicEntityManagerLocal {
     @Override
     @RolesAllowed({UserGroupMapping.GUEST_ROLE_ID, UserGroupMapping.REGULAR_USER_ROLE_ID, UserGroupMapping.ADMIN_ROLE_ID})
     public BinaryResource getPublicBinaryResourceForPart(String fileName) throws FileNotFoundException {
-        BinaryResource binaryResource = new BinaryResourceDAO(em).loadBinaryResource(fileName);
+        BinaryResource binaryResource = binaryResourceDAO.loadBinaryResource(fileName);
         String workspaceId = binaryResource.getWorkspaceId();
         String partNumber = binaryResource.getHolderId();
         String partVersion = binaryResource.getHolderRevision();
@@ -110,34 +119,34 @@ public class PublicEntityManagerBean implements IPublicEntityManagerLocal {
     @Override
     @RolesAllowed({UserGroupMapping.GUEST_ROLE_ID, UserGroupMapping.REGULAR_USER_ROLE_ID, UserGroupMapping.ADMIN_ROLE_ID})
     public BinaryResource getBinaryResourceForSharedEntity(String fileName) throws FileNotFoundException {
-        return new BinaryResourceDAO(em).loadBinaryResource(fileName);
+        return binaryResourceDAO.loadBinaryResource(fileName);
     }
 
 
     @Override
     @RolesAllowed({UserGroupMapping.GUEST_ROLE_ID, UserGroupMapping.REGULAR_USER_ROLE_ID, UserGroupMapping.ADMIN_ROLE_ID})
     public boolean canAccess(PartIterationKey partIKey) throws PartRevisionNotFoundException {
-        PartRevision partRevision = new PartRevisionDAO(em).loadPartR(partIKey.getPartRevision());
+        PartRevision partRevision = partRevisionDAO$.loadPartR(partIKey.getPartRevision());
         return partRevision.isPublicShared() && partRevision.getLastCheckedInIteration().getIteration() >= partIKey.getIteration();
     }
 
     @Override
     @RolesAllowed({UserGroupMapping.GUEST_ROLE_ID, UserGroupMapping.REGULAR_USER_ROLE_ID, UserGroupMapping.ADMIN_ROLE_ID})
     public boolean canAccess(DocumentIterationKey docIKey) throws DocumentRevisionNotFoundException {
-        DocumentRevision documentRevision = new DocumentRevisionDAO(em).loadDocR(docIKey.getDocumentRevision());
+        DocumentRevision documentRevision = documentRevisionDAO.loadDocR(docIKey.getDocumentRevision());
         return documentRevision.isPublicShared() && documentRevision.getLastCheckedInIteration().getIteration() >= docIKey.getIteration();
     }
 
     @Override
     @RolesAllowed({UserGroupMapping.GUEST_ROLE_ID, UserGroupMapping.REGULAR_USER_ROLE_ID, UserGroupMapping.ADMIN_ROLE_ID})
     public BinaryResource getBinaryResourceForProductInstance(String fullName) throws FileNotFoundException {
-        return new BinaryResourceDAO(em).loadBinaryResource(fullName);
+        return binaryResourceDAO.loadBinaryResource(fullName);
     }
 
     @Override
     @RolesAllowed({UserGroupMapping.GUEST_ROLE_ID, UserGroupMapping.REGULAR_USER_ROLE_ID, UserGroupMapping.ADMIN_ROLE_ID})
     public BinaryResource getBinaryResourceForPathData(String fullName) throws FileNotFoundException {
-        return new BinaryResourceDAO(em).loadBinaryResource(fullName);
+        return binaryResourceDAO.loadBinaryResource(fullName);
     }
 
 }

@@ -17,10 +17,8 @@ import org.polarsys.eplmp.core.exceptions.WorkflowModelNotFoundException;
 import org.polarsys.eplmp.core.product.PartMasterTemplate;
 import org.polarsys.eplmp.core.workflow.*;
 
-import javax.persistence.EntityExistsException;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceException;
-import javax.persistence.TypedQuery;
+import javax.ejb.Stateless;
+import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -28,30 +26,28 @@ import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+@Stateless(name = "WorkflowModelDAO")
 public class WorkflowModelDAO {
 
     private static final Logger LOGGER = Logger.getLogger(WorkflowModelDAO.class.getName());
+    public static final String WORKSPACE_ID = "workspaceId";
 
-
+    @PersistenceContext
     private EntityManager em;
+
     private Locale mLocale;
 
-    public WorkflowModelDAO(Locale pLocale, EntityManager pEM) {
-        em = pEM;
-        mLocale = pLocale;
+    public WorkflowModelDAO() {
+        mLocale = Locale.getDefault();
     }
 
-    public WorkflowModelDAO(EntityManager em) {
-        this.em = em;
-    }
-
-    public void removeAllActivityModels(WorkflowModelKey pKey) throws WorkflowModelNotFoundException {
+    public void removeAllActivityModels(WorkflowModelKey pKey) {
         em.createQuery("DELETE FROM TaskModel t WHERE t.activityModel.workflowModel.id = :id AND t.activityModel.workflowModel.workspaceId = :workspaceId")
                 .setParameter("id", pKey.getId())
-                .setParameter("workspaceId", pKey.getWorkspaceId()).executeUpdate();
+                .setParameter(WORKSPACE_ID, pKey.getWorkspaceId()).executeUpdate();
         em.createQuery("DELETE FROM ActivityModel a WHERE a.workflowModel.id = :id AND a.workflowModel.workspaceId = :workspaceId")
                 .setParameter("id", pKey.getId())
-                .setParameter("workspaceId", pKey.getWorkspaceId()).executeUpdate();
+                .setParameter(WORKSPACE_ID, pKey.getWorkspaceId()).executeUpdate();
     }
 
     public void removeWorkflowModel(WorkflowModelKey pKey) throws WorkflowModelNotFoundException {
@@ -65,7 +61,7 @@ public class WorkflowModelDAO {
 
     public List<WorkflowModel> findAllWorkflowModels(String pWorkspaceId) {
         TypedQuery<WorkflowModel> query = em.createQuery("SELECT DISTINCT w FROM WorkflowModel w WHERE w.workspaceId = :workspaceId",WorkflowModel.class);
-        return query.setParameter("workspaceId", pWorkspaceId).getResultList();
+        return query.setParameter(WORKSPACE_ID, pWorkspaceId).getResultList();
     }
 
     public void removeWorkflowModelConstraints(WorkflowModel pWorkflowModel){
@@ -107,6 +103,11 @@ public class WorkflowModelDAO {
         }
     }
 
+    public void createWorkflowModel(Locale pLocale, WorkflowModel pModel) throws WorkflowModelAlreadyExistsException, CreationException {
+        mLocale = pLocale;
+        createWorkflowModel(pModel);
+    }
+
     public WorkflowModel loadWorkflowModel(WorkflowModelKey pKey) throws WorkflowModelNotFoundException {
         WorkflowModel model = em.find(WorkflowModel.class, pKey);
         if (model == null) {
@@ -114,6 +115,11 @@ public class WorkflowModelDAO {
         } else {
             return model;
         }
+    }
+
+    public WorkflowModel loadWorkflowModel(Locale pLocale, WorkflowModelKey pKey) throws WorkflowModelNotFoundException {
+        mLocale = pLocale;
+        return loadWorkflowModel(pKey);
     }
 
     public boolean isInUseInDocumentMasterTemplate(WorkflowModel workflowModel) {

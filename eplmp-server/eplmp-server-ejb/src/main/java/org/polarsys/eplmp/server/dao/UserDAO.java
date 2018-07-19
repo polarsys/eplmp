@@ -18,24 +18,32 @@ import org.polarsys.eplmp.core.exceptions.*;
 import org.polarsys.eplmp.core.security.WorkspaceUserMembership;
 import org.polarsys.eplmp.core.security.WorkspaceUserMembershipKey;
 
+import javax.ejb.Stateless;
+import javax.inject.Inject;
 import javax.persistence.*;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TreeMap;
 
+@Stateless(name = "UserDAO")
 public class UserDAO {
 
+    @PersistenceContext
     private EntityManager em;
+
+    @Inject
+    private ACLDAO aclDAO;
+
+    @Inject
+    private FolderDAO folderDAO;
+
+    @Inject
+    private UserGroupDAO userGroupDAO;
+
     private Locale mLocale;
 
-    public UserDAO(Locale pLocale, EntityManager pEM) {
-        em = pEM;
-        mLocale = pLocale;
-    }
-
-    public UserDAO(EntityManager pEM) {
-        em = pEM;
+    public UserDAO() {
         mLocale = Locale.getDefault();
     }
 
@@ -46,6 +54,11 @@ public class UserDAO {
         } else {
             return user;
         }
+    }
+
+    public User loadUser(Locale pLocale, UserKey pUserKey) throws UserNotFoundException {
+        mLocale = pLocale;
+        return loadUser(pUserKey);
     }
 
     public WorkspaceUserMembership loadUserMembership(WorkspaceUserMembershipKey pKey) {
@@ -94,10 +107,10 @@ public class UserDAO {
         return memberships;
     }
 
-    public void removeUser(User pUser) throws UserNotFoundException, FolderNotFoundException, EntityConstraintException {
+    public void removeUser(User pUser) throws EntityConstraintException {
         removeUserMembership(new WorkspaceUserMembershipKey(pUser.getWorkspaceId(), pUser.getWorkspaceId(), pUser.getLogin()));
-        new UserGroupDAO(mLocale, em).removeUserFromAllGroups(pUser);
-        new ACLDAO(em).removeAclUserEntries(pUser);
+        userGroupDAO.removeUserFromAllGroups(pUser);
+        aclDAO.removeAclUserEntries(pUser);
         try {
             em.remove(pUser);
             em.flush();
@@ -106,13 +119,17 @@ public class UserDAO {
         }
     }
 
+    public void removeUser(Locale pLocale, User pUser) throws EntityConstraintException {
+        mLocale = pLocale;
+        removeUser(pUser);
+    }
 
     public void createUser(User pUser) throws UserAlreadyExistsException, FolderAlreadyExistsException, CreationException {
         try {
             //the EntityExistsException is thrown only when flush occurs
             em.persist(pUser);
             em.flush();
-            new FolderDAO(mLocale, em).createFolder(new Folder(pUser.getWorkspaceId() + "/~" + pUser.getLogin()));
+            folderDAO.createFolder(mLocale, new Folder(pUser.getWorkspaceId() + "/~" + pUser.getLogin()));
         } catch (EntityExistsException pEEEx) {
             throw new UserAlreadyExistsException(mLocale, pUser);
         } catch (PersistenceException pPEx) {
@@ -121,6 +138,11 @@ public class UserDAO {
             //thrown instead of EntityExistsException
             throw new CreationException(mLocale);
         }
+    }
+
+    public void createUser(Locale pLocale, User pUser) throws UserAlreadyExistsException, FolderAlreadyExistsException, CreationException {
+        mLocale = pLocale;
+        createUser(pUser);
     }
 
     public User[] getUsers(String pLogin) {
@@ -153,10 +175,6 @@ public class UserDAO {
                 if (!users.keySet().contains(loginUser)) {
                     users.put(loginUser,user);
                 }
-                /*else if(workspaceId.equals(user.getWorkspaceId())){
-                    users.remove(loginUser);
-                    users.put(loginUser,user);
-                }*/
             }
 
         }

@@ -12,7 +12,6 @@
 package org.polarsys.eplmp.server.dao;
 
 import org.polarsys.eplmp.core.common.User;
-import org.polarsys.eplmp.core.common.UserKey;
 import org.polarsys.eplmp.core.exceptions.TaskNotFoundException;
 import org.polarsys.eplmp.core.workflow.Task;
 import org.polarsys.eplmp.core.workflow.TaskKey;

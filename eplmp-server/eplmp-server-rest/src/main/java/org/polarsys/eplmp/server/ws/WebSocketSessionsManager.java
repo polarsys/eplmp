@@ -12,6 +12,8 @@
 package org.polarsys.eplmp.server.ws;
 
 import org.polarsys.eplmp.core.services.IUserManagerLocal;
+import org.polarsys.eplmp.server.ws.chat.Room;
+import org.polarsys.eplmp.server.ws.webrtc.WebSocketUtils;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -55,10 +57,19 @@ public class WebSocketSessionsManager {
                 .orElse(null);
     }
 
+    private void hangUpOngoingCalls(String sender, Session session) {
+        Room.getUserRooms(sender).forEach(room -> {
+            Session otherSession = room.getOtherUserSession(session);
+            room.removeSession(session);
+
+            WebSocketMessage message = WebSocketUtils.createMessage(WebSocketUtils.WEBRTC_HANGUP, sender, room.key(), null, null, 0, null, null, null, null, null);
+            send(otherSession, message);
+        });
+    }
+
     public void removeSession(Session session) {
-
         String login = getHolder(session);
-
+        hangUpOngoingCalls(login, session);
         if(null != login){
             List<Session> sessions = getSessions(login);
             if(null != sessions){

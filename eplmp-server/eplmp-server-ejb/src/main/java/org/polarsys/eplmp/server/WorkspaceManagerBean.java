@@ -48,6 +48,15 @@ public class WorkspaceManagerBean implements IWorkspaceManagerLocal {
     private EntityManager em;
 
     @Inject
+    private AccountDAO accountDAO;
+
+    @Inject
+    private UserDAO userDAO;
+
+    @Inject
+    private WorkspaceDAO workspaceDAO;
+
+    @Inject
     private IBinaryStorageManagerLocal storageManager;
 
     @Inject
@@ -70,76 +79,58 @@ public class WorkspaceManagerBean implements IWorkspaceManagerLocal {
     @RolesAllowed(UserGroupMapping.ADMIN_ROLE_ID)
     @Override
     public long getDiskUsageInWorkspace(String workspaceId) throws AccountNotFoundException {
-        Account account = new AccountDAO(em).loadAccount(contextManager.getCallerPrincipalLogin());
-        return new WorkspaceDAO(new Locale(account.getLanguage()), em).getDiskUsageForWorkspace(workspaceId);
+        Account account = accountDAO.loadAccount(contextManager.getCallerPrincipalLogin());
+        return workspaceDAO.getDiskUsageForWorkspace(workspaceId);
     }
 
     @Override
     @RolesAllowed({UserGroupMapping.REGULAR_USER_ROLE_ID, UserGroupMapping.ADMIN_ROLE_ID})
+    public void deleteWorkspace(String workspaceId)
+            throws WorkspaceNotFoundException, AccountNotFoundException, AccessRightException {
+        if (!contextManager.isCallerInRole(UserGroupMapping.ADMIN_ROLE_ID)) {
+            userManager.checkAdmin(workspaceId);
+        }
+        Workspace workspace = workspaceDAO.loadWorkspace(workspaceId);
+        doDeleteWorkspace(workspace);
+    }
+
     @Asynchronous
-    public void deleteWorkspace(String workspaceId) {
-
-        Workspace workspace;
-        Account admin = null;
+    private void doDeleteWorkspace(Workspace workspace) {
+        String workspaceId = workspace.getId();
         Exception exceptionThrown = null;
-
+        Account admin = workspace.getAdmin();
         try {
-            WorkspaceDAO workspaceDAO = new WorkspaceDAO(em, storageManager);
-            workspace = workspaceDAO.loadWorkspace(workspaceId);
-            admin = workspace.getAdmin();
-
-            String callerLogin = contextManager.getCallerPrincipalLogin();
-
-            boolean isAllowedToDeleteWorkspace =
-                    contextManager.isCallerInRole(UserGroupMapping.ADMIN_ROLE_ID) ||
-                            workspace.getAdmin().getLogin().equals(callerLogin);
-
-            if (isAllowedToDeleteWorkspace) {
-                workspaceDAO.removeWorkspace(workspace);
-                indexerManager.deleteWorkspaceIndex(workspaceId);
-                mailerManager.sendWorkspaceDeletionNotification(admin, workspaceId);
-            } else {
-                User user = userManager.whoAmI(workspaceId);
-                LOGGER.log(Level.SEVERE, "Caller (" + user.getLogin() + ") is not authorized to delete workspace : (" + workspaceId + ")");
-                throw new AccessRightException(new Locale(user.getLanguage()), user);
-            }
-
-        } catch (UserNotFoundException | UserNotActiveException | AccessRightException | WorkspaceNotEnabledException e) {
-            LOGGER.log(Level.SEVERE, "Caller not authorized to delete workspace : (" + workspaceId + ")", e);
-            exceptionThrown = e;
-        } catch (WorkspaceNotFoundException e) {
-            LOGGER.log(Level.WARNING, "Attempt to delete a workspace which does not exist : (" + workspaceId + ")", e);
-            exceptionThrown = e;
-        } catch (StorageException | IOException e) {
-            LOGGER.log(Level.SEVERE, "Unhandled Exception deleting workspace " + workspaceId, e);
-            exceptionThrown = e;
-        } catch (FolderNotFoundException | AccountNotFoundException | EntityConstraintException e) {
+            workspaceDAO.removeWorkspace(workspace);
+            indexerManager.deleteWorkspaceIndex(workspaceId);
+            mailerManager.sendWorkspaceDeletionNotification(admin, workspaceId);
+        } catch (ApplicationException e) {
             LOGGER.log(Level.SEVERE, "Application Exception deleting workspace " + workspaceId, e);
             exceptionThrown = e;
+        } catch (StorageException e) {
+            LOGGER.log(Level.SEVERE, "Unhandled Exception deleting workspace " + workspaceId, e);
+            exceptionThrown = e;
         }
-
-        if (null != exceptionThrown && null != admin) {
+        if (null != exceptionThrown) {
             mailerManager.sendWorkspaceDeletionErrorNotification(admin, workspaceId);
         }
-
     }
 
     @Override
     @RolesAllowed({UserGroupMapping.REGULAR_USER_ROLE_ID, UserGroupMapping.ADMIN_ROLE_ID})
     public Workspace changeAdmin(String workspaceId, String login) throws WorkspaceNotFoundException, AccountNotFoundException, UserNotFoundException, UserNotActiveException, AccessRightException, WorkspaceNotEnabledException, NotAllowedException {
-        Workspace workspace = new WorkspaceDAO(em).loadWorkspace(workspaceId);
-        Account account = new AccountDAO(em).loadAccount(login);
+        Workspace workspace = workspaceDAO.loadWorkspace(workspaceId);
+        Account account = accountDAO.loadAccount(login);
 
         if (contextManager.isCallerInRole(UserGroupMapping.ADMIN_ROLE_ID) || workspace.getAdmin().getLogin().equals(contextManager.getCallerPrincipalLogin())) {
             User[] users = userManager.getUsers(workspaceId);
-            if(Arrays.stream(users).noneMatch(u -> u.getLogin().equals(login))) {
+            if (Arrays.stream(users).noneMatch(u -> u.getLogin().equals(login))) {
                 User user = userManager.whoAmI(workspaceId);
-                throw new NotAllowedException(new Locale(user.getLanguage()), "NotAllowedException70");
+                throw new NotAllowedException(user.getLocale(), "NotAllowedException70");
             }
             workspace.setAdmin(account);
         } else {
             User user = userManager.whoAmI(workspaceId);
-            throw new AccessRightException(new Locale(user.getLanguage()), user);
+            throw new AccessRightException(user.getLocale(), user);
         }
 
         return workspace;
@@ -148,7 +139,7 @@ public class WorkspaceManagerBean implements IWorkspaceManagerLocal {
     @Override
     @RolesAllowed(UserGroupMapping.ADMIN_ROLE_ID)
     public Workspace enableWorkspace(String workspaceId, boolean enabled) throws WorkspaceNotFoundException {
-        Workspace workspace = new WorkspaceDAO(em).loadWorkspace(workspaceId);
+        Workspace workspace = workspaceDAO.loadWorkspace(workspaceId);
         workspace.setEnabled(enabled);
         return workspace;
     }
@@ -157,22 +148,22 @@ public class WorkspaceManagerBean implements IWorkspaceManagerLocal {
     @RolesAllowed({UserGroupMapping.REGULAR_USER_ROLE_ID, UserGroupMapping.ADMIN_ROLE_ID})
     @Override
     public Workspace createWorkspace(String pID, Account pAdmin, String pDescription, boolean pFolderLocked) throws WorkspaceAlreadyExistsException, FolderAlreadyExistsException, UserAlreadyExistsException, CreationException, NotAllowedException {
+        Locale locale = new Locale(pAdmin.getLanguage());
         if (!NamingConvention.correct(pID)) {
-            throw new NotAllowedException(new Locale(pAdmin.getLanguage()), "NotAllowedException9", pID);
+            throw new NotAllowedException(locale, "NotAllowedException9", pID);
         }
         OperationSecurityStrategy workspaceCreationStrategy = platformOptionsManager.getWorkspaceCreationStrategy();
         Workspace workspace = new Workspace(pID, pAdmin, pDescription, pFolderLocked);
         workspace.setEnabled(workspaceCreationStrategy.equals(OperationSecurityStrategy.NONE));
-        new WorkspaceDAO(em).createWorkspace(workspace);
+        workspaceDAO.createWorkspace(workspace);
         User userToCreate = new User(workspace, pAdmin);
-        UserDAO userDAO = new UserDAO(new Locale(pAdmin.getLanguage()), em);
-        userDAO.createUser(userToCreate);
+        userDAO.createUser(locale, userToCreate);
         userDAO.addUserMembership(workspace, userToCreate);
 
         try {
             indexerManager.createWorkspaceIndex(pID);
         } catch (Exception e) { // TODO review exception thrown
-            throw new WorkspaceAlreadyExistsException(new Locale(pAdmin.getLanguage()), workspace);
+            throw new WorkspaceAlreadyExistsException(locale, workspace);
         }
 
         return workspace;
@@ -183,13 +174,13 @@ public class WorkspaceManagerBean implements IWorkspaceManagerLocal {
     public Workspace getWorkspace(String workspaceId) throws WorkspaceNotFoundException, AccountNotFoundException {
 
         if (contextManager.isCallerInRole(UserGroupMapping.ADMIN_ROLE_ID)) {
-            return new WorkspaceDAO(em).loadWorkspace(workspaceId);
+            return workspaceDAO.loadWorkspace(workspaceId);
         }
 
         String login = contextManager.getCallerPrincipalLogin();
 
-        User[] users = new UserDAO(em).getUsers(login);
-        Account account = new AccountDAO(em).loadAccount(login);
+        User[] users = userDAO.getUsers(login);
+        Account account = accountDAO.loadAccount(login);
         Locale locale = new Locale(account.getLanguage());
 
         Workspace workspace = null;
@@ -212,15 +203,15 @@ public class WorkspaceManagerBean implements IWorkspaceManagerLocal {
     @Override
     public WorkspaceFrontOptions getWorkspaceFrontOptions(String workspaceId) throws AccountNotFoundException, WorkspaceNotFoundException {
 
-        WorkspaceFrontOptions settings = new WorkspaceDAO(em).loadWorkspaceFrontOptions(workspaceId);
+        WorkspaceFrontOptions settings = workspaceDAO.loadWorkspaceFrontOptions(workspaceId);
         if (contextManager.isCallerInRole(UserGroupMapping.ADMIN_ROLE_ID)) {
             return settings;
         }
 
         String login = contextManager.getCallerPrincipalLogin();
 
-        User[] users = new UserDAO(em).getUsers(login);
-        Account account = new AccountDAO(em).loadAccount(login);
+        User[] users = userDAO.getUsers(login);
+        Account account = accountDAO.loadAccount(login);
         Locale locale = new Locale(account.getLanguage());
 
         Workspace workspace = null;
@@ -243,18 +234,16 @@ public class WorkspaceManagerBean implements IWorkspaceManagerLocal {
         String workspaceId = pWorkspaceFrontOptions.getWorkspace().getId();
         Account account = userManager.checkAdmin(workspaceId);
         Locale locale = new Locale(account.getLanguage());
-        WorkspaceDAO workspaceDAO = new WorkspaceDAO(locale, em);
-        Workspace workspace = workspaceDAO.loadWorkspace(workspaceId);
+        Workspace workspace = workspaceDAO.loadWorkspace(locale, workspaceId);
         pWorkspaceFrontOptions.setWorkspace(workspace);
-        new WorkspaceDAO(new Locale(account.getLanguage()), em).updateWorkspaceFrontOptions(pWorkspaceFrontOptions);
+        workspaceDAO.updateWorkspaceFrontOptions(pWorkspaceFrontOptions);
     }
 
     @RolesAllowed({UserGroupMapping.REGULAR_USER_ROLE_ID, UserGroupMapping.ADMIN_ROLE_ID})
     public Workspace updateWorkspace(String workspaceId, String description, boolean isFolderLocked) throws AccessRightException, AccountNotFoundException, WorkspaceNotFoundException {
         Account account = userManager.checkAdmin(workspaceId);
         Locale locale = new Locale(account.getLanguage());
-        WorkspaceDAO workspaceDAO = new WorkspaceDAO(locale, em);
-        Workspace workspace = workspaceDAO.loadWorkspace(workspaceId);
+        Workspace workspace = workspaceDAO.loadWorkspace(locale, workspaceId);
 
         workspace.setDescription(description);
         workspace.setFolderLocked(isFolderLocked);
@@ -268,22 +257,20 @@ public class WorkspaceManagerBean implements IWorkspaceManagerLocal {
         String workspaceId = pWorkspaceBackOptions.getWorkspace().getId();
         Account account = userManager.checkAdmin(workspaceId);
         Locale locale = new Locale(account.getLanguage());
-        WorkspaceDAO workspaceDAO = new WorkspaceDAO(locale, em);
-        Workspace workspace = workspaceDAO.loadWorkspace(workspaceId);
+        Workspace workspace = workspaceDAO.loadWorkspace(locale, workspaceId);
         pWorkspaceBackOptions.setWorkspace(workspace);
-        new WorkspaceDAO(new Locale(account.getLanguage()), em).updateWorkspaceBackOptions(pWorkspaceBackOptions);
+        workspaceDAO.updateWorkspaceBackOptions(pWorkspaceBackOptions);
     }
 
     @Override
     @RolesAllowed({UserGroupMapping.REGULAR_USER_ROLE_ID, UserGroupMapping.ADMIN_ROLE_ID})
     public WorkspaceBackOptions getWorkspaceBackOptions(String workspaceId) throws WorkspaceNotFoundException, AccountNotFoundException, AccessRightException {
-        Account account = userManager.checkAdmin(workspaceId);
-        Locale locale = new Locale(account.getLanguage());
-        WorkspaceBackOptions workspaceBackOptions =  new WorkspaceDAO(locale, em).loadWorkspaceBackOptions(workspaceId);
+        userManager.checkAdmin(workspaceId);
+        WorkspaceBackOptions workspaceBackOptions = workspaceDAO.loadWorkspaceBackOptions(workspaceId);
 
         Workspace workspace = em.find(Workspace.class, workspaceId);
-        if(workspaceBackOptions == null){
-            workspaceBackOptions =new WorkspaceBackOptions(workspace);
+        if (workspaceBackOptions == null) {
+            workspaceBackOptions = new WorkspaceBackOptions(workspace);
         }
 
         return workspaceBackOptions;

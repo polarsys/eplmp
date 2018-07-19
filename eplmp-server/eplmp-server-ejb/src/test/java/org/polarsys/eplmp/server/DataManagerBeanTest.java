@@ -31,7 +31,7 @@ public class DataManagerBeanTest {
     private BinaryResource binaryResource;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         //Given
         defaultStorageProvider = new FileStorageProvider(System.getProperty("java.io.tmpdir")+TARGET_FILE_STORAGE);
         binaryResource = new BinaryResource(DocumentUtil.FULL_NAME4,DocumentUtil.DOCUMENT_SIZE,new Date());
@@ -41,8 +41,9 @@ public class DataManagerBeanTest {
     public void testGetBinaryResourceOutputStream() throws Exception {
         //When
         BufferedOutputStream outputStream = (BufferedOutputStream)defaultStorageProvider.getBinaryResourceOutputStream(binaryResource);
+
         //Then
-        Assert.assertTrue(outputStream != null);
+        Assert.assertNotNull(outputStream);
     }
 
 }

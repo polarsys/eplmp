@@ -95,7 +95,7 @@ public class ConverterBean implements IConverterManagerLocal {
 
             // Don't try to convert if any conversion pending
             if (existingConversion != null && existingConversion.isPending()) {
-                LOGGER.log(Level.SEVERE, "Conversion already running for part iteration " + partIterationKey);
+                LOGGER.log(Level.SEVERE, "Conversion already running for part iteration {0}", partIterationKey);
                 return;
             }
 
@@ -171,7 +171,7 @@ public class ConverterBean implements IConverterManagerLocal {
             } catch (Exception e) {
                 LOGGER.log(Level.WARNING, e.getMessage(), e);
             } finally {
-                Files.list(tempDir).forEach((p) -> {
+                Files.list(tempDir).forEach(p -> {
                     try {
                         Files.delete(p);
                     } catch (IOException e) {
@@ -255,7 +255,7 @@ public class ConverterBean implements IConverterManagerLocal {
                 partUsageLink.setCadInstances(toCADInstances(positions));
                 partUsageLinks.add(partUsageLink);
             } else {
-                LOGGER.log(Level.WARNING, "No Part found for " + cadFileName);
+                LOGGER.log(Level.WARNING, "No Part found for {0}", cadFileName);
                 succeed = false;
             }
         }
@@ -300,19 +300,19 @@ public class ConverterBean implements IConverterManagerLocal {
 
     private boolean decimate(Path file, Path tempDir, float[] ratio) {
 
-        LOGGER.log(Level.INFO, "Decimate file in progress : " + ratio);
+        LOGGER.log(Level.INFO, "Decimate file in progress : {0}", ratio);
 
         // sanity checks
         String decimater = CONF.getProperty("decimater");
         Path executable = Paths.get(decimater);
-        if (!Files.exists(executable)) {
-            LOGGER.log(Level.SEVERE, "Cannot decimate file \"" + file.getFileName() + "\", decimater \"" + decimater
-                    + "\" is not available");
+        if (!executable.toFile().exists()) {
+            LOGGER.log(Level.SEVERE, "Cannot decimate file \"{0}\", decimater \"{1}\" is not available",
+                    new Object[] {file.getFileName(), decimater});
             return false;
         }
         if (!Files.isExecutable(executable)) {
-            LOGGER.log(Level.SEVERE, "Cannot decimate file \"" + file.getFileName() + "\", decimater \"" + decimater
-                    + "\" has no execution rights");
+            LOGGER.log(Level.SEVERE, "Cannot decimate file \"{0}\", decimater \"{1}\" has no execution rights",
+                    new Object[] {file.getFileName(), decimater});
             return false;
         }
 
@@ -323,7 +323,7 @@ public class ConverterBean implements IConverterManagerLocal {
                     tempDir.toAbsolutePath().toString(), String.valueOf(ratio[0]), String.valueOf(ratio[1]),
                     String.valueOf(ratio[2])};
 
-            LOGGER.log(Level.INFO, "Decimate command" + "\n" + args);
+            LOGGER.log(Level.INFO, "Decimate command\n{0}", args);
 
             // Add redirectErrorStream, fix process hang up
             ProcessBuilder pb = new ProcessBuilder(args).redirectErrorStream(true);
@@ -338,7 +338,7 @@ public class ConverterBean implements IConverterManagerLocal {
                 LOGGER.log(Level.INFO, "Decimation done");
                 decimateSucceed = true;
             } else {
-                LOGGER.log(Level.SEVERE, "Decimation failed with code = " + proc.exitValue(), stdOutput);
+                LOGGER.log(Level.SEVERE, "Decimation failed with code = {0} {1}", new Object[]{proc.exitValue(), stdOutput});
             }
 
         } catch (IOException | InterruptedException e) {

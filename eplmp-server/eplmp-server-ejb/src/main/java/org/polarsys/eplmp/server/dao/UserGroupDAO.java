@@ -21,22 +21,21 @@ import org.polarsys.eplmp.core.exceptions.UserGroupNotFoundException;
 import org.polarsys.eplmp.core.security.WorkspaceUserGroupMembership;
 import org.polarsys.eplmp.core.security.WorkspaceUserGroupMembershipKey;
 
+import javax.ejb.Stateless;
 import javax.persistence.*;
 import java.util.List;
 import java.util.Locale;
 
+@Stateless(name = "UserGroupDAO")
 public class UserGroupDAO {
 
+    public static final String WORKSPACE_ID = "workspaceId";
+    @PersistenceContext
     private EntityManager em;
+
     private Locale mLocale;
 
-    public UserGroupDAO(Locale pLocale, EntityManager pEM) {
-        em = pEM;
-        mLocale = pLocale;
-    }
-
-    public UserGroupDAO(EntityManager pEM) {
-        em = pEM;
+    public UserGroupDAO() {
         mLocale = Locale.getDefault();
     }
 
@@ -49,10 +48,15 @@ public class UserGroupDAO {
         }
     }
 
+    public UserGroup loadUserGroup(Locale pLocale, UserGroupKey pKey) throws UserGroupNotFoundException {
+        mLocale = pLocale;
+        return loadUserGroup(pKey);
+    }
+
     public WorkspaceUserGroupMembership[] getUserGroupMemberships(String pWorkspaceId, User pUser) {
         WorkspaceUserGroupMembership[] ms;
         TypedQuery<WorkspaceUserGroupMembership> query = em.createQuery("SELECT DISTINCT m FROM WorkspaceUserGroupMembership m WHERE m.workspaceId = :workspaceId AND :user MEMBER OF m.member.users", WorkspaceUserGroupMembership.class);
-        query.setParameter("workspaceId", pWorkspaceId);
+        query.setParameter(WORKSPACE_ID, pWorkspaceId);
         query.setParameter("user", pUser);
         List<WorkspaceUserGroupMembership> listUserGroupMemberships = query.getResultList();
         ms = new WorkspaceUserGroupMembership[listUserGroupMemberships.size()];
@@ -65,7 +69,7 @@ public class UserGroupDAO {
     public UserGroup[] findAllUserGroups(String pWorkspaceId) {
         UserGroup[] groups;
         TypedQuery<UserGroup> query = em.createQuery("SELECT DISTINCT g FROM UserGroup g WHERE g.workspaceId = :workspaceId", UserGroup.class);
-        List<UserGroup> listUserGroups = query.setParameter("workspaceId", pWorkspaceId).getResultList();
+        List<UserGroup> listUserGroups = query.setParameter(WORKSPACE_ID, pWorkspaceId).getResultList();
         groups = new UserGroup[listUserGroups.size()];
         for (int i = 0; i < listUserGroups.size(); i++) {
             groups[i] = listUserGroups.get(i);
@@ -80,6 +84,11 @@ public class UserGroupDAO {
         } else {
             return workspaceUserGroupMembership;
         }
+    }
+
+    public WorkspaceUserGroupMembership loadUserGroupMembership(Locale pLocale, WorkspaceUserGroupMembershipKey pKey) throws UserGroupNotFoundException {
+        mLocale = pLocale;
+        return loadUserGroupMembership(pKey);
     }
 
     public void addUserGroupMembership(Workspace pWorkspace, UserGroup pMember) {
@@ -99,7 +108,7 @@ public class UserGroupDAO {
 
     public void removeUserFromAllGroups(User pUser) {
         TypedQuery<UserGroup> query = em.createQuery("SELECT DISTINCT g FROM UserGroup g WHERE g.workspaceId = :workspaceId", UserGroup.class);
-        List<UserGroup> listUserGroups = query.setParameter("workspaceId", pUser.getWorkspaceId()).getResultList();
+        List<UserGroup> listUserGroups = query.setParameter(WORKSPACE_ID, pUser.getWorkspaceId()).getResultList();
         for (UserGroup listUserGroup : listUserGroups) {
             listUserGroup.removeUser(pUser);
         }
@@ -108,7 +117,7 @@ public class UserGroupDAO {
     public WorkspaceUserGroupMembership[] findAllWorkspaceUserGroupMemberships(String pWorkspaceId) {
         WorkspaceUserGroupMembership[] memberships;
         TypedQuery<WorkspaceUserGroupMembership> query = em.createQuery("SELECT DISTINCT m FROM WorkspaceUserGroupMembership m WHERE m.workspaceId = :workspaceId", WorkspaceUserGroupMembership.class);
-        List<WorkspaceUserGroupMembership> listMemberships = query.setParameter("workspaceId", pWorkspaceId).getResultList();
+        List<WorkspaceUserGroupMembership> listMemberships = query.setParameter(WORKSPACE_ID, pWorkspaceId).getResultList();
         memberships = new WorkspaceUserGroupMembership[listMemberships.size()];
         for (int i = 0; i < listMemberships.size(); i++) {
             memberships[i] = listMemberships.get(i);
@@ -117,7 +126,7 @@ public class UserGroupDAO {
         return memberships;
     }
 
-    public void removeUserGroup(UserGroup pUserGroup) throws UserGroupNotFoundException, EntityConstraintException {
+    public void removeUserGroup(UserGroup pUserGroup) throws EntityConstraintException {
         removeUserGroupMembership(new WorkspaceUserGroupMembershipKey(pUserGroup.getWorkspaceId(), pUserGroup.getWorkspaceId(), pUserGroup.getId()));
         try {
             em.remove(pUserGroup);
@@ -127,10 +136,15 @@ public class UserGroupDAO {
         }
     }
 
+    public void removeUserGroup(Locale pLocale, UserGroup pUserGroup) throws EntityConstraintException {
+        mLocale = pLocale;
+        removeUserGroup(pUserGroup);
+    }
+
     public boolean hasACLConstraint(UserGroupKey pKey){
         Query query = em.createQuery("SELECT DISTINCT a FROM ACLUserGroupEntry a WHERE a.principal.id = :id AND a.principal.workspaceId = :workspaceId");
         query.setParameter("id",pKey.getId());
-        query.setParameter("workspaceId",pKey.getWorkspaceId());
+        query.setParameter(WORKSPACE_ID,pKey.getWorkspaceId());
         return !query.getResultList().isEmpty();
     }
     
@@ -149,9 +163,14 @@ public class UserGroupDAO {
         }
     }
 
+    public void createUserGroup(Locale pLocale, UserGroup pUserGroup) throws CreationException, UserGroupAlreadyExistsException {
+        mLocale = pLocale;
+        createUserGroup(pUserGroup);
+    }
+
     public List<UserGroup> getUserGroups(String workspaceId, User user) {
         return em.createNamedQuery("UserGroup.findUserGroups", UserGroup.class).
-                setParameter("workspaceId", workspaceId).
+                setParameter(WORKSPACE_ID, workspaceId).
                 setParameter("user", user).
                 getResultList();
     }

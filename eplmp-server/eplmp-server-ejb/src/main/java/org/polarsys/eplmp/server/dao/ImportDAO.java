@@ -15,38 +15,39 @@ import org.polarsys.eplmp.core.common.User;
 import org.polarsys.eplmp.core.exceptions.CreationException;
 import org.polarsys.eplmp.core.product.Import;
 
+import javax.ejb.Stateless;
 import javax.persistence.*;
 import java.util.List;
 import java.util.Locale;
 
+@Stateless(name = "ImportDAO")
 public class ImportDAO {
 
+    @PersistenceContext
     private EntityManager em;
+
     private Locale mLocale;
 
-    public ImportDAO(Locale pLocale, EntityManager pEM) {
-        mLocale=pLocale;
-        em=pEM;
-    }
-
-    public ImportDAO(EntityManager pEM) {
+    public ImportDAO() {
         mLocale=Locale.getDefault();
-        em=pEM;
     }
 
-    public void createImport(Import importToPersist) throws  CreationException {
+    public void createImport(Import pImportToPersist) throws  CreationException {
         try{
             //the EntityExistsException is thrown only when flush occurs
-            em.persist(importToPersist);
+            em.persist(pImportToPersist);
             em.flush();
-        }catch(EntityExistsException pEEEx){
-            throw new CreationException(mLocale);
-        }catch(PersistenceException pPEx){
+        } catch(PersistenceException pPEx){
             //EntityExistsException is case sensitive
             //whereas MySQL is not thus PersistenceException could be
             //thrown instead of EntityExistsException
             throw new CreationException(mLocale);
         }
+    }
+
+    public void createImport(Locale pLocale, Import pImportToPersist) throws  CreationException {
+        mLocale = pLocale;
+        createImport(pImportToPersist);
     }
 
     public Import findImport(User user, String id) {
