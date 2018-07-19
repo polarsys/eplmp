@@ -237,6 +237,7 @@ public class WorkspaceResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of updated WorkspaceDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("/{workspaceId}")
@@ -259,6 +260,7 @@ public class WorkspaceResource {
     @ApiResponses(value = {
             @ApiResponse(code = 202, message = "Accepted indexation (asynchronous method)"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Produces(MediaType.APPLICATION_JSON)
@@ -276,6 +278,7 @@ public class WorkspaceResource {
     @ApiResponses(value = {
             @ApiResponse(code = 202, message = "Accepted deletion (asynchronous method)"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("/{workspaceId}")
@@ -294,6 +297,7 @@ public class WorkspaceResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of UserGroupDTOs. It can be an empty list."),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("/{workspaceId}/user-group")
@@ -318,6 +322,7 @@ public class WorkspaceResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of created UserGroupDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("/{workspaceId}/user-group")
@@ -340,6 +345,7 @@ public class WorkspaceResource {
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful removal of user from UserGroupDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("/{workspaceId}/user-group/{groupId}")
@@ -361,6 +367,7 @@ public class WorkspaceResource {
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful addition of user in UserGroupDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("/{workspaceId}/add-user")
@@ -391,6 +398,7 @@ public class WorkspaceResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of updated Workspace"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("/{workspaceId}/admin")
@@ -412,6 +420,7 @@ public class WorkspaceResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of created Workspace"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Produces(MediaType.APPLICATION_JSON)
@@ -438,6 +447,7 @@ public class WorkspaceResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of updated UserDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("/{workspaceId}/user-access")
@@ -461,6 +471,7 @@ public class WorkspaceResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of updated WorkspaceUserGroupMemberShipDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("/{workspaceId}/group-access")
@@ -482,6 +493,7 @@ public class WorkspaceResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of updated UserGroupDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("/{workspaceId}/remove-from-group/{groupId}")
@@ -504,6 +516,7 @@ public class WorkspaceResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of updated WorkspaceDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("/{workspaceId}/remove-from-workspace")
@@ -524,6 +537,7 @@ public class WorkspaceResource {
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful enable operation"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("/{workspaceId}/enable-user")
@@ -544,6 +558,7 @@ public class WorkspaceResource {
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful disable operation"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("/{workspaceId}/disable-user")
@@ -564,6 +579,7 @@ public class WorkspaceResource {
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful enable operation"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("/{workspaceId}/enable-group")
@@ -584,6 +600,7 @@ public class WorkspaceResource {
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful disable operation"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("/{workspaceId}/disable-group")
@@ -604,6 +621,7 @@ public class WorkspaceResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of StatsOverviewDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("/{workspaceId}/stats-overview")
@@ -631,6 +649,7 @@ public class WorkspaceResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of DiskUsageSpaceDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("/{workspaceId}/disk-usage-stats")
@@ -655,6 +674,7 @@ public class WorkspaceResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of documents stats"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("/{workspaceId}/checked-out-documents-stats")
@@ -732,6 +752,7 @@ public class WorkspaceResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of users stats"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("/{workspaceId}/users-stats")
@@ -769,12 +790,14 @@ public class WorkspaceResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieve of workspace front options"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     public WorkspaceFrontOptionsDTO getWorkspaceFrontOptions(
-            @ApiParam(value = "Workspace id", required = true) @PathParam("workspaceId") String workspaceId) throws EntityNotFoundException {
+            @ApiParam(value = "Workspace id", required = true) @PathParam("workspaceId") String workspaceId)
+            throws EntityNotFoundException, UserNotActiveException {
 
         WorkspaceFrontOptions workspaceFrontOptions = Optional.ofNullable(workspaceManager.getWorkspaceFrontOptions(workspaceId)).orElse(new WorkspaceFrontOptions());
         return mapper.map(workspaceFrontOptions, WorkspaceFrontOptionsDTO.class);
@@ -788,13 +811,15 @@ public class WorkspaceResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful update of workspace front options"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     public Response updateWorkspaceFrontOptions(
             @ApiParam(value = "Workspace id", required = true) @PathParam("workspaceId") String workspaceId,
-            @ApiParam(value = "Option values", required = true) WorkspaceFrontOptionsDTO workspaceFrontOptionsDTO) throws AccessRightException, AccountNotFoundException, WorkspaceNotFoundException {
+            @ApiParam(value = "Option values", required = true) WorkspaceFrontOptionsDTO workspaceFrontOptionsDTO)
+            throws AccessRightException, AccountNotFoundException, WorkspaceNotFoundException {
 
         List<String> partTableColumns = workspaceFrontOptionsDTO.getPartTableColumns();
         List<String> documentTableColumns = workspaceFrontOptionsDTO.getDocumentTableColumns();
@@ -813,6 +838,7 @@ public class WorkspaceResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of workspace back options"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("/{workspaceId}/back-options")
@@ -832,6 +858,7 @@ public class WorkspaceResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful update of workspace back options"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("/{workspaceId}/back-options")

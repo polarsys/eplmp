@@ -64,6 +64,7 @@ public class PartTemplateResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of PartMasterTemplateDTOs. It can be an empty list."),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Produces(MediaType.APPLICATION_JSON)
@@ -88,6 +89,7 @@ public class PartTemplateResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of PartMasterTemplateDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{templateId}")
@@ -107,6 +109,7 @@ public class PartTemplateResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of TemplateGeneratedIdDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{templateId}/generate_id")
@@ -126,6 +129,7 @@ public class PartTemplateResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of created PartMasterTemplateDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Consumes(MediaType.APPLICATION_JSON)
@@ -176,6 +180,7 @@ public class PartTemplateResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of updated PartMasterTemplateDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{templateId}")
@@ -226,6 +231,7 @@ public class PartTemplateResource {
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful update of ACL"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{templateId}/acl")
@@ -251,6 +257,7 @@ public class PartTemplateResource {
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful deletion of PartMasterTemplateDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{templateId}")
@@ -269,6 +276,7 @@ public class PartTemplateResource {
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful file deletion of PartMasterTemplateDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{templateId}/files/{fileName}")
@@ -290,6 +298,7 @@ public class PartTemplateResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful file renaming of PartMasterTemplateDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{templateId}/files/{fileName}")

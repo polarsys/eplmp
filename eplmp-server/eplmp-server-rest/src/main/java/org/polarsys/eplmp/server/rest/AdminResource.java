@@ -98,6 +98,7 @@ public class AdminResource implements Serializable {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of disk usage statistics"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Produces(MediaType.APPLICATION_JSON)
@@ -124,6 +125,7 @@ public class AdminResource implements Serializable {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of user statistics"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Produces(MediaType.APPLICATION_JSON)
@@ -151,6 +153,7 @@ public class AdminResource implements Serializable {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of documents statistics"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Produces(MediaType.APPLICATION_JSON)
@@ -177,6 +180,7 @@ public class AdminResource implements Serializable {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of products statistics"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Produces(MediaType.APPLICATION_JSON)
@@ -204,6 +208,7 @@ public class AdminResource implements Serializable {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of parts statistics"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Produces(MediaType.APPLICATION_JSON)
@@ -230,6 +235,7 @@ public class AdminResource implements Serializable {
     @ApiResponses(value = {
             @ApiResponse(code = 202, message = "Accepted delete operation (asynchronous method)"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("index/{workspaceId}")
@@ -247,6 +253,7 @@ public class AdminResource implements Serializable {
     @ApiResponses(value = {
             @ApiResponse(code = 202, message = "Accepted delete operation (asynchronous method)"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("index-all")
@@ -262,6 +269,7 @@ public class AdminResource implements Serializable {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of PlatformOptions"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Produces(MediaType.APPLICATION_JSON)
@@ -276,6 +284,7 @@ public class AdminResource implements Serializable {
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful update of PlatformOptions"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Produces(MediaType.APPLICATION_JSON)
@@ -293,6 +302,7 @@ public class AdminResource implements Serializable {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of updated Workspace"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("workspace/{workspaceId}/enable")
@@ -311,6 +321,7 @@ public class AdminResource implements Serializable {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of updated Account"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("accounts/{login}/enable")
@@ -332,6 +343,7 @@ public class AdminResource implements Serializable {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of Accounts"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Produces(MediaType.APPLICATION_JSON)
@@ -349,6 +361,7 @@ public class AdminResource implements Serializable {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of updated Account"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @ApiOperation(value = "Update account",
@@ -375,6 +388,7 @@ public class AdminResource implements Serializable {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of auth providers"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @ApiOperation(value = "Get detailed providers",
@@ -398,6 +412,7 @@ public class AdminResource implements Serializable {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of auth provider"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @ApiOperation(value = "Get detailed provider",
@@ -413,6 +428,7 @@ public class AdminResource implements Serializable {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful creation of auth provider"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @ApiOperation(value = "Create a new OAuth provider",
@@ -434,6 +450,7 @@ public class AdminResource implements Serializable {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful update of auth provider"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @ApiOperation(value = "Update OAuth provider",
@@ -457,6 +474,7 @@ public class AdminResource implements Serializable {
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful removal of auth provider"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @ApiOperation(value = "Delete OAuth provider",

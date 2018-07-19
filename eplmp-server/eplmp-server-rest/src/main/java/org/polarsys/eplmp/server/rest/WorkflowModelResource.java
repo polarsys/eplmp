@@ -66,6 +66,7 @@ public class WorkflowModelResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of WorkflowModelDTOs. It can be an empty list."),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Produces(MediaType.APPLICATION_JSON)
@@ -89,6 +90,7 @@ public class WorkflowModelResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of WorkflowModelDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{workflowModelId}")
@@ -108,6 +110,7 @@ public class WorkflowModelResource {
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful deletion of WorkflowModelDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{workflowModelId}")
@@ -125,6 +128,7 @@ public class WorkflowModelResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of updated WorkflowModelDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{workflowModelId}")
@@ -150,6 +154,7 @@ public class WorkflowModelResource {
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful update of WorkflowModelDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{workflowModelId}/acl")
@@ -174,6 +179,7 @@ public class WorkflowModelResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of created WorkflowModelDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Consumes(MediaType.APPLICATION_JSON)

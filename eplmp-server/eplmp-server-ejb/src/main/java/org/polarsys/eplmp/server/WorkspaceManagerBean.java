@@ -171,10 +171,13 @@ public class WorkspaceManagerBean implements IWorkspaceManagerLocal {
 
     @RolesAllowed({UserGroupMapping.REGULAR_USER_ROLE_ID, UserGroupMapping.ADMIN_ROLE_ID})
     @Override
-    public Workspace getWorkspace(String workspaceId) throws WorkspaceNotFoundException, AccountNotFoundException {
+    public Workspace getWorkspace(String workspaceId)
+            throws WorkspaceNotFoundException, AccountNotFoundException, UserNotFoundException, UserNotActiveException, WorkspaceNotEnabledException {
 
         if (contextManager.isCallerInRole(UserGroupMapping.ADMIN_ROLE_ID)) {
             return workspaceDAO.loadWorkspace(workspaceId);
+        }else {
+            userManager.checkWorkspaceReadAccess(workspaceId);
         }
 
         String login = contextManager.getCallerPrincipalLogin();
@@ -201,11 +204,14 @@ public class WorkspaceManagerBean implements IWorkspaceManagerLocal {
 
     @RolesAllowed({UserGroupMapping.REGULAR_USER_ROLE_ID, UserGroupMapping.ADMIN_ROLE_ID})
     @Override
-    public WorkspaceFrontOptions getWorkspaceFrontOptions(String workspaceId) throws AccountNotFoundException, WorkspaceNotFoundException {
+    public WorkspaceFrontOptions getWorkspaceFrontOptions(String workspaceId)
+            throws AccountNotFoundException, WorkspaceNotFoundException, UserNotFoundException, UserNotActiveException, WorkspaceNotEnabledException {
 
         WorkspaceFrontOptions settings = workspaceDAO.loadWorkspaceFrontOptions(workspaceId);
         if (contextManager.isCallerInRole(UserGroupMapping.ADMIN_ROLE_ID)) {
             return settings;
+        }else{
+            userManager.checkWorkspaceReadAccess(workspaceId);
         }
 
         String login = contextManager.getCallerPrincipalLogin();

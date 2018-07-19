@@ -77,6 +77,7 @@ public class TaskResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of TaskDTOs. It can be an empty list."),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{assignedUserLogin}/assigned")
@@ -106,6 +107,7 @@ public class TaskResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of TaskDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{taskId}")
@@ -141,6 +143,7 @@ public class TaskResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of DocumentRevisionDTOs. It can be an empty list."),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{assignedUserLogin}/documents")
@@ -182,6 +185,7 @@ public class TaskResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of PartRevisionDTOs. It can be an empty list."),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{assignedUserLogin}/parts")
@@ -224,6 +228,7 @@ public class TaskResource {
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful task process"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{taskId}/process")

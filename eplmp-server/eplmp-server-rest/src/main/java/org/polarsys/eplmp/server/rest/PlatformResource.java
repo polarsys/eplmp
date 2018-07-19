@@ -41,13 +41,14 @@ public class PlatformResource {
     public void init() {
     }
 
+    // TODO: use DTO as response
     @GET
     @Path("health")
     @ApiOperation(value = "Get platform health status",
-            response = Response.class,
+            response = String.class,
             authorizations = {})
     @ApiResponses(value = {
-            @ApiResponse(code = 204, message = "Server health is ok"),
+            @ApiResponse(code = 200, message = "Server health is ok. A JSON object is sent in the body"),
             @ApiResponse(code = 500, message = "Server health is ko or partial")
     })
     @Produces(MediaType.APPLICATION_JSON)

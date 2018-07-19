@@ -56,6 +56,7 @@ public class LayerResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of LayerDTOs. It can be an empty list."),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Produces(MediaType.APPLICATION_JSON)
@@ -79,6 +80,7 @@ public class LayerResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of created LayerDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Consumes(MediaType.APPLICATION_JSON)
@@ -100,6 +102,7 @@ public class LayerResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of updated LayerDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{layerId}")
@@ -122,6 +125,7 @@ public class LayerResource {
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful deletion of LayerDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{layerId}")
@@ -143,6 +147,7 @@ public class LayerResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of MarkerDTOs. It can be an empty list."),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{layerId}/markers")
@@ -169,6 +174,7 @@ public class LayerResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of created MarkerDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{layerId}/markers")
@@ -191,6 +197,7 @@ public class LayerResource {
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful deletion of LayerDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{layerId}/markers/{markerId}")

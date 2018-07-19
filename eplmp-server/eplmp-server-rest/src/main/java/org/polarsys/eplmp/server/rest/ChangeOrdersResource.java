@@ -66,6 +66,7 @@ public class ChangeOrdersResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of ChangeOrderDTOs. It can be an empty list."),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Produces(MediaType.APPLICATION_JSON)
@@ -89,6 +90,7 @@ public class ChangeOrdersResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of created ChangeOrderDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Consumes(MediaType.APPLICATION_JSON)
@@ -115,6 +117,7 @@ public class ChangeOrdersResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of ChangeOrderDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Produces(MediaType.APPLICATION_JSON)
@@ -135,6 +138,7 @@ public class ChangeOrdersResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of updated ChangeOrderDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Consumes(MediaType.APPLICATION_JSON)
@@ -163,6 +167,7 @@ public class ChangeOrdersResource {
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful deletion of ChangeOrderDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Consumes(MediaType.APPLICATION_JSON)
@@ -182,6 +187,7 @@ public class ChangeOrdersResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of updated ChangeOrderDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{orderId}/tags")
@@ -210,6 +216,7 @@ public class ChangeOrdersResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of updated ChangeOrderDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{orderId}/tags")
@@ -245,6 +252,7 @@ public class ChangeOrdersResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of updated ChangeOrderDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{orderId}/tags/{tagName}")
@@ -265,6 +273,7 @@ public class ChangeOrdersResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of updated ChangeOrderDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{orderId}/affected-documents")
@@ -291,6 +300,7 @@ public class ChangeOrdersResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of updated ChangeOrderDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{orderId}/affected-parts")
@@ -317,6 +327,7 @@ public class ChangeOrdersResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of updated ChangeOrderDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{orderId}/affected-requests")
@@ -351,6 +362,7 @@ public class ChangeOrdersResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of updated ChangeOrderDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{orderId}/acl")

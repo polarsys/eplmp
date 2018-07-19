@@ -67,6 +67,7 @@ public class FolderResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of DocumentRevisionDTOs. It can be an empty list."),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Produces(MediaType.APPLICATION_JSON)
@@ -98,6 +99,7 @@ public class FolderResource {
     @ApiResponses(value = {
             @ApiResponse(code = 201, message = "Successful retrieval of created DocumentRevisionDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Consumes(MediaType.APPLICATION_JSON)
@@ -164,6 +166,7 @@ public class FolderResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of FolderDTOs. It can be an empty list."),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Produces(MediaType.APPLICATION_JSON)
@@ -181,6 +184,7 @@ public class FolderResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of FolderDTOs. It can be an empty list."),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{completePath}/folders")
@@ -203,6 +207,7 @@ public class FolderResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of updated FolderDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{folderId}")
@@ -241,6 +246,7 @@ public class FolderResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of updated FolderDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{folderId}/move")
@@ -277,6 +283,7 @@ public class FolderResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of created FolderDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{parentFolderPath}/folders")
@@ -301,6 +308,7 @@ public class FolderResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of created FolderDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Consumes(MediaType.APPLICATION_JSON)
@@ -327,6 +335,7 @@ public class FolderResource {
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful deletion of FolderDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{folderId}")

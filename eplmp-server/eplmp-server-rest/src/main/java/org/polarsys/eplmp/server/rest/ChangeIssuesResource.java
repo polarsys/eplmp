@@ -64,6 +64,7 @@ public class ChangeIssuesResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of ChangeIssueDTOs. It can be an empty list."),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Produces(MediaType.APPLICATION_JSON)
@@ -87,6 +88,7 @@ public class ChangeIssuesResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of created ChangeIssueDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Consumes(MediaType.APPLICATION_JSON)
@@ -114,6 +116,7 @@ public class ChangeIssuesResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of ChangeIssueDTOs. It can be an empty list"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("link")
@@ -139,6 +142,7 @@ public class ChangeIssuesResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of ChangeIssueDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Produces(MediaType.APPLICATION_JSON)
@@ -159,6 +163,7 @@ public class ChangeIssuesResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of updated ChangeIssueDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Consumes(MediaType.APPLICATION_JSON)
@@ -186,6 +191,7 @@ public class ChangeIssuesResource {
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful deletion"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Consumes(MediaType.APPLICATION_JSON)
@@ -204,6 +210,7 @@ public class ChangeIssuesResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of updated ChangeIssueDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{issueId}/tags")
@@ -233,6 +240,7 @@ public class ChangeIssuesResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of updated ChangeIssueDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{issueId}/tags")
@@ -267,6 +275,7 @@ public class ChangeIssuesResource {
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful retrieval of updated ChangeIssueDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{issueId}/tags/{tagName}")
@@ -285,6 +294,7 @@ public class ChangeIssuesResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of updated ChangeIssueDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{issueId}/affected-documents")
@@ -311,6 +321,7 @@ public class ChangeIssuesResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of updated ChangeIssueDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{issueId}/affected-parts")
@@ -337,6 +348,7 @@ public class ChangeIssuesResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of updated ChangeIssueDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{issueId}/acl")

@@ -63,6 +63,7 @@ public class WebhookResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of WebhookDTOs. It can be an empty list."),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Produces(MediaType.APPLICATION_JSON)
@@ -84,6 +85,7 @@ public class WebhookResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of WebhookDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 404, message = "Not found"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
@@ -103,6 +105,7 @@ public class WebhookResource {
     @ApiResponses(value = {
             @ApiResponse(code = 201, message = "Successful creation of webhook"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Produces(MediaType.APPLICATION_JSON)
@@ -124,6 +127,7 @@ public class WebhookResource {
     @ApiResponses(value = {
             @ApiResponse(code = 201, message = "Successful update of webhook"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 404, message = "Webhook not found"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
@@ -146,6 +150,7 @@ public class WebhookResource {
     @ApiResponses(value = {
             @ApiResponse(code = 201, message = "Successful delete of webhook"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 404, message = "Webhook not found"),
             @ApiResponse(code = 500, message = "Internal server error")
     })

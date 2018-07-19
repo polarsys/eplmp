@@ -166,6 +166,7 @@ public class AuthResource {
             authorizations = {})
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful request"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Produces(MediaType.APPLICATION_JSON)
@@ -266,7 +267,8 @@ public class AuthResource {
     })
     @Produces(MediaType.APPLICATION_JSON)
     public OAuthProviderPublicDTO getProvider(
-            @ApiParam(required = true, value = "Password recovery process") @PathParam("id") Integer providerId) throws OAuthProviderNotFoundException {
+            @ApiParam(required = true, value = "Provider id") @PathParam("id") Integer providerId)
+            throws OAuthProviderNotFoundException {
         OAuthProvider provider = oAuthManager.getProvider(providerId);
         OAuthProviderPublicDTO oAuthProviderPublicDTO = mapper.map(provider, OAuthProviderPublicDTO.class);
         oAuthProviderPublicDTO.setSigningKeys(getSigningKeys(provider.getJwkSetURL()));
