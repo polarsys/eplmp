@@ -109,7 +109,6 @@
         <class>org.polarsys.eplmp.core.hooks.Webhook</class>
         <class>org.polarsys.eplmp.core.hooks.SimpleWebhookApp</class>
         <class>org.polarsys.eplmp.core.hooks.SNSWebhookApp</class>
-        <class>org.polarsys.eplmp.core.hooks.Webhook</class>
         <class>org.polarsys.eplmp.core.hooks.WebhookApp</class>
 
         <class>org.polarsys.eplmp.server.storage.CryptoConverter</class>
