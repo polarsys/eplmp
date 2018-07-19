@@ -81,6 +81,7 @@ public class PartResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of PartRevisionDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Produces(MediaType.APPLICATION_JSON)
@@ -109,6 +110,7 @@ public class PartResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of ProductInstanceMasterDTOs. It can be an empty list."),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("/used-by-product-instance-masters")
@@ -142,6 +144,7 @@ public class PartResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of PartRevisionDTOs. It can be an empty list."),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("/used-by-as-component")
@@ -173,6 +176,7 @@ public class PartResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of PartRevisionDTOs. It can be an empty list."),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("/used-by-as-substitute")
@@ -203,6 +207,7 @@ public class PartResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of updated PartRevisionDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("/iterations/{partIteration}")
@@ -284,6 +289,7 @@ public class PartResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of ConversionDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("/iterations/{partIteration}/conversion")
@@ -310,6 +316,7 @@ public class PartResource {
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful conversion retry"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("/iterations/{partIteration}/conversion")
@@ -338,6 +345,7 @@ public class PartResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of checked in PartRevisionDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("/checkin")
@@ -361,6 +369,7 @@ public class PartResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of checked out PartRevisionDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("/checkout")
@@ -384,6 +393,7 @@ public class PartResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of undo checked out PartRevisionDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("/undocheckout")
@@ -406,6 +416,7 @@ public class PartResource {
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful ACL removal of PartRevisionDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("/acl")
@@ -434,6 +445,7 @@ public class PartResource {
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful retrieval of the new version of PartRevisionDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("/newVersion")
@@ -476,6 +488,7 @@ public class PartResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of released PartRevisionDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("/release")
@@ -498,6 +511,7 @@ public class PartResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of obsolete PartRevisionDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("/obsolete")
@@ -520,6 +534,7 @@ public class PartResource {
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful deletion of PartRevisionDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Produces(MediaType.APPLICATION_JSON)
@@ -540,6 +555,7 @@ public class PartResource {
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful deletion of file of PartRevisionDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Consumes(MediaType.APPLICATION_JSON)
@@ -564,6 +580,7 @@ public class PartResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful renaming of file of PartRevisionDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Consumes(MediaType.APPLICATION_JSON)
@@ -592,6 +609,7 @@ public class PartResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of created SharedPartDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Consumes(MediaType.APPLICATION_JSON)
@@ -619,6 +637,7 @@ public class PartResource {
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful publish of PartRevisionDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Consumes(MediaType.APPLICATION_JSON)
@@ -640,6 +659,7 @@ public class PartResource {
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful un-publish of PartRevisionDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Consumes(MediaType.APPLICATION_JSON)
@@ -661,6 +681,7 @@ public class PartResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of WorkflowDTOs. It can be an empty list."),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("/aborted-workflows")
@@ -691,6 +712,7 @@ public class PartResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of updated PartRevisionDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("/tags")
@@ -721,6 +743,7 @@ public class PartResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of updated PartRevisionDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("/tags")
@@ -756,6 +779,7 @@ public class PartResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of updated PartRevisionDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("/tags/{tagName}")
@@ -778,6 +802,7 @@ public class PartResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of instance nodes"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("/instances")
@@ -800,6 +825,7 @@ public class PartResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of ProductBaselineDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("/baselines")

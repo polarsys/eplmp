@@ -64,6 +64,7 @@ public class PartEffectivityResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of created effectivity"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Produces(MediaType.APPLICATION_JSON)
@@ -108,6 +109,7 @@ public class PartEffectivityResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of effectivities. It can be an empty list"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Produces(MediaType.APPLICATION_JSON)
@@ -149,6 +151,7 @@ public class PartEffectivityResource {
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful deletion of effectivity"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{effectivityId}")

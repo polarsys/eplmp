@@ -64,6 +64,7 @@ public class MilestonesResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of MilestoneDTOs. It can be an empty list."),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Produces(MediaType.APPLICATION_JSON)
@@ -90,6 +91,7 @@ public class MilestonesResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of created MilestoneDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Consumes(MediaType.APPLICATION_JSON)
@@ -111,6 +113,7 @@ public class MilestonesResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of MilestoneDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Produces(MediaType.APPLICATION_JSON)
@@ -134,6 +137,7 @@ public class MilestonesResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of updated MilestoneDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Consumes(MediaType.APPLICATION_JSON)
@@ -159,6 +163,7 @@ public class MilestonesResource {
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful deletion of MilestoneDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Consumes(MediaType.APPLICATION_JSON)
@@ -178,6 +183,7 @@ public class MilestonesResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of created ChangeRequestDTOs. It can be an empty list."),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Produces(MediaType.APPLICATION_JSON)
@@ -203,6 +209,7 @@ public class MilestonesResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of created ChangeOrderDTOs. It can be an empty list."),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Produces(MediaType.APPLICATION_JSON)
@@ -227,6 +234,7 @@ public class MilestonesResource {
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful ACL update of MilestoneDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{milestoneId}/acl")

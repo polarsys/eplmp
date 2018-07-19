@@ -68,6 +68,7 @@ public class WorkspaceMembershipResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of WorkspaceUserMemberShipDTOs. It can be an empty list."),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("users")
@@ -108,6 +109,7 @@ public class WorkspaceMembershipResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of WorkspaceUserGroupMemberShipDTOs. It can be an empty list."),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("usergroups")
@@ -131,6 +133,7 @@ public class WorkspaceMembershipResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of WorkspaceUserGroupMemberShipDTOs. It can be an empty list."),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("usergroups/me")

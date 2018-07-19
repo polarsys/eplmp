@@ -50,6 +50,7 @@ public class ModificationNotificationResource {
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful acknowledge of ModificationNotification"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("/{notificationId}")

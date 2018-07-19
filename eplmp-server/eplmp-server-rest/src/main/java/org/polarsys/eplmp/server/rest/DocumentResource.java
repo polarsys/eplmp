@@ -80,6 +80,7 @@ public class DocumentResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of DocumentRevisionDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Produces(MediaType.APPLICATION_JSON)
@@ -110,6 +111,7 @@ public class DocumentResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of checked in DocumentRevisionDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("/checkin")
@@ -132,6 +134,7 @@ public class DocumentResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of checked out DocumentRevisionDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("/checkout")
@@ -157,6 +160,7 @@ public class DocumentResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of undo checked out DocumentRevisionDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("/undocheckout")
@@ -180,6 +184,7 @@ public class DocumentResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of updated DocumentRevisionDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("/move")
@@ -207,6 +212,7 @@ public class DocumentResource {
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful change event subscription"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("/notification/iterationChange/subscribe")
@@ -225,6 +231,7 @@ public class DocumentResource {
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful change event un-subscription"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("/notification/iterationChange/unsubscribe")
@@ -243,6 +250,7 @@ public class DocumentResource {
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful state event subscription"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("/notification/stateChange/subscribe")
@@ -261,6 +269,7 @@ public class DocumentResource {
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful state event un-subscription"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("/notification/stateChange/unsubscribe")
@@ -279,6 +288,7 @@ public class DocumentResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of updated DocumentIterationDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("/iterations/{docIteration}")
@@ -333,6 +343,7 @@ public class DocumentResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of created DocumentRevisionDTO version, and its previous version"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("/newVersion")
@@ -388,6 +399,7 @@ public class DocumentResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of released DocumentRevisionDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("/release")
@@ -410,6 +422,7 @@ public class DocumentResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of obsolete DocumentRevisionDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("/obsolete")
@@ -432,6 +445,7 @@ public class DocumentResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of updated DocumentRevisionDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("/tags")
@@ -464,6 +478,7 @@ public class DocumentResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of updated DocumentRevisionDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("/tags")
@@ -503,6 +518,7 @@ public class DocumentResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of updated DocumentRevisionDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("/tags/{tagName}")
@@ -525,6 +541,7 @@ public class DocumentResource {
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful deletion of DocumentRevisionDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @DELETE
@@ -545,6 +562,7 @@ public class DocumentResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of updated FileDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("/iterations/{docIteration}/files/{fileName}")
@@ -571,6 +589,7 @@ public class DocumentResource {
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful deletion of file"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("/iterations/{docIteration}/files/{fileName}")
@@ -592,6 +611,7 @@ public class DocumentResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of created SharedDocumentDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("share")
@@ -621,6 +641,7 @@ public class DocumentResource {
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful publication"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("publish")
@@ -640,6 +661,7 @@ public class DocumentResource {
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful un-publication"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("unpublish")
@@ -659,6 +681,7 @@ public class DocumentResource {
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful ACL removal"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("acl")
@@ -686,6 +709,7 @@ public class DocumentResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of aborted WorkflowDTOs. It can be an empty list."),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("aborted-workflows")
@@ -715,6 +739,7 @@ public class DocumentResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of DocumentRevisionDTO pointing to this document. It can be an empty list."),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{iteration}/inverse-document-link")
@@ -743,6 +768,7 @@ public class DocumentResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of PartRevisionDTO pointing to this document. It can be an empty list."),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{iteration}/inverse-part-link")
@@ -772,6 +798,7 @@ public class DocumentResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of ProductInstanceMasterDTO pointing to this document. It can be an empty list."),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{iteration}/inverse-product-instances-link")
@@ -802,6 +829,7 @@ public class DocumentResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of PathDataMasterDTO pointing to this document. It can be an empty list."),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{iteration}/inverse-path-data-link")

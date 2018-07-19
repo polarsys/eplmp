@@ -82,6 +82,7 @@ public class DocumentBaselinesResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of checked out DocumentBaselineDTOs. It can be an empty list."),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Produces(MediaType.APPLICATION_JSON)
@@ -111,6 +112,7 @@ public class DocumentBaselinesResource {
     @ApiResponses(value = {
             @ApiResponse(code = 201, message = "Successful retrieval of created DocumentBaselineDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Consumes(MediaType.APPLICATION_JSON)
@@ -144,6 +146,7 @@ public class DocumentBaselinesResource {
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful deletion of DocumentBaselineDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{baselineId}")
@@ -170,6 +173,7 @@ public class DocumentBaselinesResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of DocumentBaselineDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{baselineId}")
@@ -200,6 +204,7 @@ public class DocumentBaselinesResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of DocumentBaselineDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{baselineId}-light")
@@ -218,6 +223,7 @@ public class DocumentBaselinesResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful files export, download a zipped file containing requested files."),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{baselineId}/export-files")

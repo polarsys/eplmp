@@ -106,6 +106,7 @@ public class OrganizationResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of updated OrganizationDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Produces(MediaType.APPLICATION_JSON)
@@ -126,6 +127,7 @@ public class OrganizationResource {
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful deletion of OrganizationDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Produces(MediaType.APPLICATION_JSON)
@@ -145,6 +147,7 @@ public class OrganizationResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of AccountDTOs. It can be an empty list."),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Produces(MediaType.APPLICATION_JSON)
@@ -170,6 +173,7 @@ public class OrganizationResource {
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful member add operation"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Produces(MediaType.APPLICATION_JSON)
@@ -191,6 +195,7 @@ public class OrganizationResource {
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful member removal operation"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Produces(MediaType.APPLICATION_JSON)
@@ -214,6 +219,7 @@ public class OrganizationResource {
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful member moved operation"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Produces(MediaType.APPLICATION_JSON)

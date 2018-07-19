@@ -72,6 +72,7 @@ public class RoleResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of RoleDTOs. It can be an empty list."),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Produces(MediaType.APPLICATION_JSON)
@@ -97,6 +98,7 @@ public class RoleResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of RoleDTOs. It can be an empty list."),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("inuse")
@@ -124,6 +126,7 @@ public class RoleResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of created RoleDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Produces(MediaType.APPLICATION_JSON)
@@ -165,6 +168,7 @@ public class RoleResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of updated RoleDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{roleName}")
@@ -207,6 +211,7 @@ public class RoleResource {
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful deletion of RoleDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{roleName}")

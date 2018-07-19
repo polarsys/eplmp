@@ -76,6 +76,7 @@ public class DocumentsResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of DocumentRevisionDTO. It can be an empty list."),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Produces(MediaType.APPLICATION_JSON)
@@ -98,6 +99,7 @@ public class DocumentsResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of searched DocumentRevisionDTO. It can be an empty list."),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("search")
@@ -138,6 +140,7 @@ public class DocumentsResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of documents count"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("count")
@@ -157,6 +160,7 @@ public class DocumentsResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of checked out documents. It can be an empty list."),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("checkedout")
@@ -176,6 +180,7 @@ public class DocumentsResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of checked out documents count"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("countCheckedOut")
@@ -195,6 +200,7 @@ public class DocumentsResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of searched documents. It can be an empty list."),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("doc_revs")

@@ -95,6 +95,7 @@ public class ProductResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of ConfigurationItemDTOs. It can be an empty list."),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Produces(MediaType.APPLICATION_JSON)
@@ -146,6 +147,7 @@ public class ProductResource {
     @ApiResponses(value = {
             @ApiResponse(code = 201, message = "Successful retrieval of ConfigurationItemDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Produces(MediaType.APPLICATION_JSON)
@@ -176,6 +178,7 @@ public class ProductResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of PartRevisionDTOs. It can be an empty list."),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{ciId}/bom")
@@ -230,6 +233,7 @@ public class ProductResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of ComponentDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{ciId}/filter")
@@ -274,6 +278,7 @@ public class ProductResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of ConfigurationItemDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{ciId}")
@@ -298,6 +303,7 @@ public class ProductResource {
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful deletion of ConfigurationItemDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{ciId}")
@@ -320,6 +326,7 @@ public class ProductResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of PathDTOs. It can be an empty list."),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{ciId}/paths")
@@ -360,6 +367,7 @@ public class ProductResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of PathChoiceDTOs. It can be an empty list."),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{ciId}/path-choices")
@@ -399,6 +407,7 @@ public class ProductResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of BaselinedPartDTOs. It can be an empty list."),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{ciId}/versions-choices")
@@ -448,6 +457,7 @@ public class ProductResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of LeafDTOs. It can be an empty list."),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{ciId}/instances")
@@ -491,6 +501,7 @@ public class ProductResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of LeafDTOs. It can be an empty list."),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{ciId}/instances")
@@ -537,6 +548,7 @@ public class ProductResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of PartRevisionDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{ciId}/releases/last")
@@ -565,6 +577,7 @@ public class ProductResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful export"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{ciId}/export-files")
@@ -634,6 +647,7 @@ public class ProductResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of created LightPathToPathLinkDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{ciId}/path-to-path-links")
@@ -658,6 +672,7 @@ public class ProductResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of updated LightPathToPathLinkDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{ciId}/path-to-path-links/{pathToPathLinkId}")
@@ -684,6 +699,7 @@ public class ProductResource {
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful deletion of PathToPathLink"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{ciId}/path-to-path-links/{pathToPathLinkId}")
@@ -706,6 +722,7 @@ public class ProductResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of PathToPathLinkDTOs. It can be an empty list."),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{ciId}/path-to-path-links/source/{sourcePath}/target/{targetPath}")
@@ -756,6 +773,7 @@ public class ProductResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of LightPathToPathLinkDTOs. It can be an empty list."),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{ciId}/path-to-path-links-types")
@@ -785,6 +803,7 @@ public class ProductResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of LightPartLinkDTOs. It can be an empty list."),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{ciId}/decode-path/{path}")
@@ -815,6 +834,7 @@ public class ProductResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of DocumentIterationLinkDTOs. It can be an empty list."),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{ciId}/document-links/{partNumber: [^/].*}-{partVersion:[A-Z]+}-{partIteration:[0-9]+}/{configSpec}")
@@ -860,6 +880,7 @@ public class ProductResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of CascadeResult"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{ciId}/cascade-checkout")
@@ -884,6 +905,7 @@ public class ProductResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of CascadeResult"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{ciId}/cascade-checkin")
@@ -910,6 +932,7 @@ public class ProductResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of CascadeResult"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{ciId}/cascade-undocheckout")

@@ -72,6 +72,7 @@ public class ProductConfigurationsResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of ProductConfigurationDTOs. It can be an empty list."),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Produces(MediaType.APPLICATION_JSON)
@@ -92,6 +93,7 @@ public class ProductConfigurationsResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of ProductConfigurationDTOs. It can be an empty list."),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Produces(MediaType.APPLICATION_JSON)
@@ -114,6 +116,7 @@ public class ProductConfigurationsResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of ProductConfigurationDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{ciId}/configurations/{productConfigurationId}")
@@ -163,6 +166,7 @@ public class ProductConfigurationsResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of created ProductConfigurationDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Consumes(MediaType.APPLICATION_JSON)
@@ -196,6 +200,7 @@ public class ProductConfigurationsResource {
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful ACL update"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{ciId}/configurations/{productConfigurationId}/acl")
@@ -225,6 +230,7 @@ public class ProductConfigurationsResource {
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful deletion of ProductConfigurationDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{ciId}/configurations/{productConfigurationId}")

@@ -65,6 +65,7 @@ public class DocumentTemplateResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of DocumentMasterTemplateDTOs. It can be an empty list."),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Produces(MediaType.APPLICATION_JSON)
@@ -88,6 +89,7 @@ public class DocumentTemplateResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of DocumentMasterTemplateDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{templateId}")
@@ -107,6 +109,7 @@ public class DocumentTemplateResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of TemplateGeneratedIdDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{templateId}/generate_id")
@@ -126,6 +129,7 @@ public class DocumentTemplateResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of created DocumentMasterTemplateDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Consumes(MediaType.APPLICATION_JSON)
@@ -163,6 +167,7 @@ public class DocumentTemplateResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of updated DocumentMasterTemplateDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{templateId}")
@@ -200,6 +205,7 @@ public class DocumentTemplateResource {
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful ACL update"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{templateId}/acl")
@@ -225,6 +231,7 @@ public class DocumentTemplateResource {
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful deletion of DocumentMasterTemplateDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{templateId}")
@@ -243,6 +250,7 @@ public class DocumentTemplateResource {
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful deletion of file in DocumentMasterTemplateDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{templateId}/files/{fileName}")
@@ -265,6 +273,7 @@ public class DocumentTemplateResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful rename file operation"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{templateId}/files/{fileName}")

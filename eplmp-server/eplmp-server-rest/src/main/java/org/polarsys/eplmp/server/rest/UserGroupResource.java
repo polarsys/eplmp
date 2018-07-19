@@ -75,6 +75,7 @@ public class UserGroupResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of UserGroupDTOs. It can be an empty list."),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Produces(MediaType.APPLICATION_JSON)
@@ -98,6 +99,7 @@ public class UserGroupResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of TagSubscriptionDTOs. It can be an empty list."),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{groupId}/tag-subscriptions")
@@ -124,6 +126,7 @@ public class UserGroupResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of UserDTOs. It can be an empty list."),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{groupId}/users")
@@ -152,6 +155,7 @@ public class UserGroupResource {
     @ApiResponses(value = {
             @ApiResponse(code = 201, message = "Successful retrieval of TagSubscriptionDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{groupId}/tag-subscriptions/{tagName}")
@@ -184,6 +188,7 @@ public class UserGroupResource {
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful deletion of TagSubscriptionDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{groupId}/tag-subscriptions/{tagName}")

@@ -75,6 +75,7 @@ public class UserResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of UserDTOs. It can be an empty list."),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Produces(MediaType.APPLICATION_JSON)
@@ -98,6 +99,7 @@ public class UserResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of UserDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("me")
@@ -116,13 +118,14 @@ public class UserResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of UserDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("admin")
     @Produces(MediaType.APPLICATION_JSON)
     public UserDTO getAdminInWorkspace(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId)
-            throws EntityNotFoundException {
+            throws EntityNotFoundException, UserNotActiveException {
 
         Workspace workspace = workspaceManager.getWorkspace(workspaceId);
         UserDTO userDTO = mapper.map(workspace.getAdmin(), UserDTO.class);
@@ -163,6 +166,7 @@ public class UserResource {
     @ApiResponses(value = {
             @ApiResponse(code = 201, message = "Successful retrieval of created/updated TagSubscriptionDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{login}/tag-subscriptions/{tagName}")
@@ -195,6 +199,7 @@ public class UserResource {
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful deletion of TagSubscriptionDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{login}/tag-subscriptions/{tagName}")
