@@ -50,6 +50,9 @@ public class PartWorkflowManagerBean implements IPartWorkflowManagerLocal {
     private PartRevisionDAO partRevisionDAO;
 
     @Inject
+    private TaskDAO taskDAO;
+
+    @Inject
     private IUserManagerLocal userManager;
 
     @Inject
@@ -94,7 +97,7 @@ public class PartWorkflowManagerBean implements IPartWorkflowManagerLocal {
     public PartRevision approveTaskOnPart(String pWorkspaceId, TaskKey pTaskKey, String pComment, String pSignature) throws WorkspaceNotFoundException, TaskNotFoundException, NotAllowedException, UserNotFoundException, UserNotActiveException, WorkflowNotFoundException, WorkspaceNotEnabledException {
         User user = userManager.checkWorkspaceReadAccess(pWorkspaceId);
 
-        Task task = new TaskDAO(user.getLocale(), em).loadTask(pTaskKey);
+        Task task = taskDAO.loadTask(user.getLocale(), pTaskKey);
         Workflow workflow = task.getActivity().getWorkflow();
         PartRevision partRevision = checkTaskAccess(user, task);
         task = partRevision.getWorkflow().getTasks().stream().filter(pTask -> pTask.getKey().equals(pTaskKey)).findFirst().get();
@@ -115,7 +118,7 @@ public class PartWorkflowManagerBean implements IPartWorkflowManagerLocal {
     public PartRevision rejectTaskOnPart(String pWorkspaceId, TaskKey pTaskKey, String pComment, String pSignature) throws WorkspaceNotFoundException, TaskNotFoundException, NotAllowedException, UserNotFoundException, UserNotActiveException, WorkflowNotFoundException, WorkspaceNotEnabledException {
         User user = userManager.checkWorkspaceReadAccess(pWorkspaceId);
 
-        Task task = new TaskDAO(user.getLocale(), em).loadTask(pTaskKey);
+        Task task = taskDAO.loadTask(user.getLocale(), pTaskKey);
         PartRevision partRevision = checkTaskAccess(user, task);
         task = partRevision.getWorkflow().getTasks().stream().filter(pTask -> pTask.getKey().equals(pTaskKey)).findFirst().get();
 

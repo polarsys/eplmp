@@ -63,6 +63,9 @@ public class DocumentManagerBean implements IDocumentManagerLocal {
     private ACLDAO aclDAO;
 
     @Inject
+    private TaskDAO taskDAO;
+
+    @Inject
     private ACLFactory aclFactory;
 
     @Inject
@@ -495,7 +498,7 @@ public class DocumentManagerBean implements IDocumentManagerLocal {
     @Override
     public Task[] getTasks(String pWorkspaceId) throws WorkspaceNotFoundException, UserNotFoundException, UserNotActiveException, WorkspaceNotEnabledException {
         User user = userManager.checkWorkspaceReadAccess(pWorkspaceId);
-        return new TaskDAO(user.getLocale(), em).findTasks(user);
+        return taskDAO.findTasks(user);
     }
 
     @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)

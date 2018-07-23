@@ -45,6 +45,9 @@ public class WorkflowManagerBean implements IWorkflowManagerLocal {
     private ACLDAO aclDAO;
 
     @Inject
+    private TaskDAO taskDAO;
+
+    @Inject
     private ACLFactory aclFactory;
 
     @Inject
@@ -425,7 +428,7 @@ public class WorkflowManagerBean implements IWorkflowManagerLocal {
     public void approveTaskOnWorkspaceWorkflow(String workspaceId, TaskKey taskKey, String comment, String signature) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, TaskNotFoundException, AccessRightException, WorkflowNotFoundException, NotAllowedException, WorkspaceNotEnabledException {
         User user = userManager.checkWorkspaceReadAccess(workspaceId);
 
-        Task task = new TaskDAO(user.getLocale(), em).loadTask(taskKey);
+        Task task =taskDAO.loadTask(user.getLocale(), taskKey);
         Workflow workflow = task.getActivity().getWorkflow();
         task = workflow.getTasks().stream().filter(pTask -> pTask.getKey().equals(taskKey)).findFirst().get();
 
@@ -446,7 +449,7 @@ public class WorkflowManagerBean implements IWorkflowManagerLocal {
     public void rejectTaskOnWorkspaceWorkflow(String workspaceId, TaskKey taskKey, String comment, String signature) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, TaskNotFoundException, AccessRightException, WorkflowNotFoundException, NotAllowedException, WorkspaceNotEnabledException {
         User user = userManager.checkWorkspaceReadAccess(workspaceId);
 
-        Task task = new TaskDAO(user.getLocale(), em).loadTask(taskKey);
+        Task task = taskDAO.loadTask(user.getLocale(), taskKey);
 
         WorkspaceWorkflow workspaceWorkflow = checkTaskAccess(user, task);
 

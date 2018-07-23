@@ -31,7 +31,6 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
@@ -55,6 +54,9 @@ public class TaskManagerBean implements ITaskManagerLocal {
     private PartRevisionDAO partRevisionDAO;
 
     @Inject
+    private TaskDAO taskDAO;
+
+    @Inject
     private IUserManagerLocal userManager;
 
     @Inject
@@ -72,8 +74,8 @@ public class TaskManagerBean implements ITaskManagerLocal {
     @Override
     @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
     public TaskWrapper[] getAssignedTasksForGivenUser(String workspaceId, String userLogin) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, WorkspaceNotEnabledException {
-        User user = userManager.checkWorkspaceReadAccess(workspaceId);
-        TaskDAO taskDAO = new TaskDAO(user.getLocale(), em);
+        userManager.checkWorkspaceReadAccess(workspaceId);
+
         Task[] assignedTasks = taskDAO.findAssignedTasks(workspaceId, userLogin);
 
         List<TaskWrapper> taskWrappers = Stream.of(assignedTasks)
@@ -87,8 +89,7 @@ public class TaskManagerBean implements ITaskManagerLocal {
     @Override
     @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
     public TaskWrapper[] getInProgressTasksForGivenUser(String workspaceId, String userLogin) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, WorkspaceNotEnabledException {
-        User user = userManager.checkWorkspaceReadAccess(workspaceId);
-        TaskDAO taskDAO = new TaskDAO(user.getLocale(), em);
+        userManager.checkWorkspaceReadAccess(workspaceId);
         Task[] inProgressTasks = taskDAO.findInProgressTasks(workspaceId, userLogin);
 
         List<TaskWrapper> taskWrappers = Stream.of(inProgressTasks)
@@ -104,8 +105,7 @@ public class TaskManagerBean implements ITaskManagerLocal {
     public TaskWrapper getTask(String workspaceId, TaskKey taskKey) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, TaskNotFoundException, AccessRightException, WorkspaceNotEnabledException {
         User user = userManager.checkWorkspaceReadAccess(workspaceId);
         Locale userLocale = user.getLocale();
-        TaskDAO taskDAO = new TaskDAO(userLocale, em);
-        Task task = taskDAO.loadTask(taskKey);
+        Task task = taskDAO.loadTask(userLocale, taskKey);
         TaskWrapper taskWrapper = wrapTask(task, workspaceId);
         if (taskWrapper == null) {
             throw new AccessRightException(userLocale, user);
@@ -118,8 +118,7 @@ public class TaskManagerBean implements ITaskManagerLocal {
     public void processTask(String workspaceId, TaskKey taskKey, String action, String comment, String signature) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, TaskNotFoundException, NotAllowedException, WorkflowNotFoundException, AccessRightException, DocumentRevisionNotFoundException, WorkspaceNotEnabledException {
         User user = userManager.checkWorkspaceReadAccess(workspaceId);
         Locale userLocale = user.getLocale();
-        TaskDAO taskDAO = new TaskDAO(userLocale, em);
-        Task task = taskDAO.loadTask(taskKey);
+        Task task = taskDAO.loadTask(userLocale, taskKey);
         TaskWrapper taskWrapper = wrapTask(task, workspaceId);
         if (taskWrapper == null) {
             throw new AccessRightException(userLocale, user);
@@ -158,7 +157,7 @@ public class TaskManagerBean implements ITaskManagerLocal {
     public void checkTask(String workspaceId, TaskKey taskKey) throws UserNotFoundException, WorkspaceNotFoundException, UserNotActiveException, WorkspaceNotEnabledException, TaskNotFoundException, WorkflowNotFoundException, NotAllowedException {
         User user = userManager.checkWorkspaceReadAccess(workspaceId);
         Locale userLocale = user.getLocale();
-        Task task = new TaskDAO(userLocale, em).loadTask(taskKey);
+        Task task = taskDAO.loadTask(userLocale, taskKey);
         Workflow workflow = task.getActivity().getWorkflow();
         DocumentRevision docR = workflowDAO.getDocumentTarget(workflow);
         if (docR == null) {
