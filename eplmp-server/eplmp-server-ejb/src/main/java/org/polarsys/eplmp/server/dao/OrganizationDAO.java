@@ -47,6 +47,11 @@ public class OrganizationDAO {
         return findOrganizationOfAccount(pAccount);
     }
 
+    public boolean hasOrganization(Account pAccount) {
+        return !em.createNamedQuery("Organization.ofAccount", Organization.class)
+                .setParameter("account", pAccount).getResultList().isEmpty() ;
+    }
+
     public void updateOrganization(Organization pOrganization) {
         em.merge(pOrganization);
     }

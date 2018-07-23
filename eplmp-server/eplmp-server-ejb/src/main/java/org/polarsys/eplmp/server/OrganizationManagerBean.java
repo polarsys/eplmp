@@ -46,9 +46,6 @@ public class OrganizationManagerBean implements IOrganizationManagerLocal {
     private OrganizationDAO organizationDAO;
 
     @Inject
-    private IUserManagerLocal userManager;
-
-    @Inject
     private IContextManagerLocal contextManagerLocal;
 
     @Inject
@@ -91,12 +88,9 @@ public class OrganizationManagerBean implements IOrganizationManagerLocal {
         Account me = accountManager.getMyAccount();
         Locale locale = new Locale(me.getLanguage());
 
-        try {
-            // Will throw an exception if account already have an organization
-            organizationDAO.findOrganizationOfAccount(locale, me);
+        if (organizationDAO.hasOrganization(me)) {
             throw new NotAllowedException(locale, "NotAllowedException11");
-        } catch (OrganizationNotFoundException e) {
-            // No organization for account, allowed to creat it
+        } else {
             Organization organization = new Organization(pName, me, pDescription);
             organizationDAO.createOrganization(locale, organization);
             organization.addMember(me);

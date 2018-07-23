@@ -728,7 +728,7 @@ public class DocumentResource {
 
         Collections.sort(abortedWorkflowDTOList);
 
-        return Response.ok(new GenericEntity<List<WorkflowDTO>>((List<WorkflowDTO>) abortedWorkflowDTOList) {
+        return Response.ok(new GenericEntity<List<WorkflowDTO>>(abortedWorkflowDTOList) {
         }).build();
     }
 
@@ -756,7 +756,7 @@ public class DocumentResource {
         Set<DocumentRevisionDTO> documentRevisionDTOs = documents.stream()
                 .map(doc -> new DocumentRevisionDTO(doc.getWorkspaceId(), doc.getDocumentMasterId(), doc.getTitle(), doc.getVersion()))
                 .collect(Collectors.toSet());
-        return Response.ok(new GenericEntity<List<DocumentRevisionDTO>>((List<DocumentRevisionDTO>) new ArrayList<>(documentRevisionDTOs)) {
+        return Response.ok(new GenericEntity<List<DocumentRevisionDTO>>(new ArrayList<>(documentRevisionDTOs)) {
         }).build();
     }
 
@@ -784,7 +784,7 @@ public class DocumentResource {
         Set<PartRevisionDTO> partRevisionDTOs = parts.stream()
                 .map(part -> new PartRevisionDTO(workspaceId, part.getNumber(), part.getPartName(), part.getVersion()))
                 .collect(Collectors.toSet());
-        return Response.ok(new GenericEntity<List<PartRevisionDTO>>((List<PartRevisionDTO>) new ArrayList<>(partRevisionDTOs)) {
+        return Response.ok(new GenericEntity<List<PartRevisionDTO>>(new ArrayList<>(partRevisionDTOs)) {
         }).build();
     }
 
@@ -805,7 +805,7 @@ public class DocumentResource {
             @ApiParam(required = true, value = "Document master id") @PathParam("documentId") String documentId,
             @ApiParam(required = true, value = "Document version") @PathParam("documentVersion") String documentVersion,
             @ApiParam(required = true, value = "Document iteration") @PathParam("iteration") int iteration)
-            throws  UserNotActiveException, EntityNotFoundException, DocumentRevisionNotFoundException, WorkspaceNotEnabledException {
+            throws  UserNotActiveException, EntityNotFoundException, WorkspaceNotEnabledException {
 
         DocumentRevisionKey docKey = new DocumentRevisionKey(workspaceId, documentId, documentVersion);
         Set<ProductInstanceMaster> productInstanceMasterList = productService.getInverseProductInstancesLink(docKey);
@@ -813,7 +813,7 @@ public class DocumentResource {
         for (ProductInstanceMaster productInstanceMaster : productInstanceMasterList) {
             productInstanceMasterDTOs.add(mapper.map(productInstanceMaster, ProductInstanceMasterDTO.class));
         }
-        return Response.ok(new GenericEntity<List<ProductInstanceMasterDTO>>((List<ProductInstanceMasterDTO>) new ArrayList<>(productInstanceMasterDTOs)) {
+        return Response.ok(new GenericEntity<List<ProductInstanceMasterDTO>>(new ArrayList<>(productInstanceMasterDTOs)) {
         }).build();
     }
 
@@ -855,7 +855,7 @@ public class DocumentResource {
             pathDataMasterDTOs.add(dto);
         }
 
-        return Response.ok(new GenericEntity<List<PathDataMasterDTO>>((List<PathDataMasterDTO>) new ArrayList<>(pathDataMasterDTOs)) {
+        return Response.ok(new GenericEntity<List<PathDataMasterDTO>>(new ArrayList<>(pathDataMasterDTOs)) {
         }).build();
 
     }

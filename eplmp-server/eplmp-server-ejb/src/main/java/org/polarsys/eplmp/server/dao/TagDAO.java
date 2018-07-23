@@ -82,22 +82,30 @@ public class TagDAO {
     }
 
     public void createTag(Tag pTag) throws CreationException, TagAlreadyExistsException {
+        createTag(pTag, false);
+    }
+
+    public void createTag(Tag pTag, boolean silent) throws CreationException, TagAlreadyExistsException {
         try {
             //the EntityExistsException is thrown only when flush occurs
             em.persist(pTag);
             em.flush();
         } catch (EntityExistsException pEEEx) {
-            throw new TagAlreadyExistsException(mLocale, pTag);
+            if(!silent) {
+                throw new TagAlreadyExistsException(mLocale, pTag);
+            }
         } catch (PersistenceException pPEx) {
             //EntityExistsException is case sensitive
             //whereas MySQL is not thus PersistenceException could be
             //thrown instead of EntityExistsException
-            throw new CreationException(mLocale);
+            if(!silent) {
+                throw new CreationException(mLocale);
+            }
         }
     }
 
     public void createTag(Locale pLocale, Tag pTag) throws CreationException, TagAlreadyExistsException {
         mLocale = pLocale;
-        createTag(pTag);
+        createTag(pTag, false);
     }
 }

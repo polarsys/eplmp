@@ -42,17 +42,11 @@ import java.util.Locale;
 @Stateless(name = "WebhookManagerBean")
 public class WebhookManagerBean implements IWebhookManagerLocal {
 
-    @PersistenceContext
-    private EntityManager em;
-
     @Inject
     private WebhookDAO webhookDAO;
 
     @Inject
     private WorkspaceDAO workspaceDAO;
-
-    @Inject
-    private IContextManagerLocal contextManager;
 
     @Inject
     private IUserManagerLocal userManager;
@@ -61,7 +55,7 @@ public class WebhookManagerBean implements IWebhookManagerLocal {
     @Override
     @RolesAllowed({UserGroupMapping.REGULAR_USER_ROLE_ID})
     public Webhook createWebhook(String workspaceId, String name, boolean active)
-            throws UserNotFoundException, WorkspaceNotFoundException, UserNotActiveException, WorkspaceNotEnabledException, AccessRightException, AccountNotFoundException {
+            throws WorkspaceNotFoundException, AccessRightException, AccountNotFoundException {
         Account account = userManager.checkAdmin(workspaceId);
         Locale locale = new Locale(account.getLanguage());
         Workspace workspace = workspaceDAO.loadWorkspace(locale, workspaceId);
@@ -73,7 +67,7 @@ public class WebhookManagerBean implements IWebhookManagerLocal {
     @Override
     @RolesAllowed({UserGroupMapping.REGULAR_USER_ROLE_ID})
     public List<Webhook> getWebHooks(String workspaceId) throws WorkspaceNotFoundException, AccountNotFoundException, AccessRightException {
-        Account account = userManager.checkAdmin(workspaceId);
+        userManager.checkAdmin(workspaceId);
         return webhookDAO.loadWebhooks(workspaceId);
     }
 
@@ -131,7 +125,7 @@ public class WebhookManagerBean implements IWebhookManagerLocal {
     @Override
     @RolesAllowed({UserGroupMapping.REGULAR_USER_ROLE_ID})
     public List<Webhook> getActiveWebHooks(String workspaceId) throws UserNotFoundException, WorkspaceNotFoundException, UserNotActiveException, WorkspaceNotEnabledException {
-        User user = userManager.checkWorkspaceReadAccess(workspaceId);
+        userManager.checkWorkspaceReadAccess(workspaceId);
         return webhookDAO.loadActiveWebhooks(workspaceId);
     }
 

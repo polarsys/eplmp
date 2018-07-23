@@ -22,8 +22,6 @@ import javax.interceptor.InvocationContext;
 @CheckActivity
 @Interceptor
 public class ActivityCheckerInterceptor {
-    @Inject
-    private IUserManagerLocal userManager;
 
     @Inject
     private ITaskManagerLocal taskManager;

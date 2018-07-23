@@ -519,12 +519,7 @@ public class ImporterBean implements IImporterManagerLocal {
             // Cache hack start //
             String productId = pathData.getProductId();
             String serialNUmber = pathData.getSerialNumber();
-            Map<String, Boolean> productAccess = instancesAccess.get(productId);
-
-            if (productAccess == null) {
-                productAccess = new HashMap<>();
-                instancesAccess.put(productId, productAccess);
-            }
+            Map<String, Boolean> productAccess = instancesAccess.computeIfAbsent(productId, k -> new HashMap<>());
 
             Boolean hasInstanceAccess = productAccess.get(serialNUmber);
             if (hasInstanceAccess == null) {
@@ -534,11 +529,7 @@ public class ImporterBean implements IImporterManagerLocal {
 
             ProductInstanceIteration productInstanceIteration = null;
             if (hasInstanceAccess) {
-                Map<String, ProductInstanceIteration> cache = productInstancesCache.get(productId);
-                if (cache == null) {
-                    cache = new HashMap<>();
-                    productInstancesCache.put(productId, cache);
-                }
+                Map<String, ProductInstanceIteration> cache = productInstancesCache.computeIfAbsent(productId, k -> new HashMap<>());
 
                 productInstanceIteration = cache.get(serialNUmber);
 

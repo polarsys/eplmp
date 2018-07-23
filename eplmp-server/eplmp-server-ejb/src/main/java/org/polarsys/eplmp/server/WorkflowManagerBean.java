@@ -116,7 +116,7 @@ public class WorkflowManagerBean implements IWorkflowManagerLocal {
 
     @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
     @Override
-    public WorkflowModel updateWorkflowModel(WorkflowModelKey workflowModelKey, String pFinalLifeCycleState, ActivityModel[] pActivityModels) throws UserNotFoundException, WorkspaceNotFoundException, UserNotActiveException, AccessRightException, WorkflowModelNotFoundException, NotAllowedException, WorkflowModelAlreadyExistsException, CreationException, WorkspaceNotEnabledException {
+    public WorkflowModel updateWorkflowModel(WorkflowModelKey workflowModelKey, String pFinalLifeCycleState, ActivityModel[] pActivityModels) throws UserNotFoundException, WorkspaceNotFoundException, UserNotActiveException, AccessRightException, WorkflowModelNotFoundException, NotAllowedException, WorkspaceNotEnabledException {
         //remove all activities from workflow model
         //but do not remove it to maintain associated links
         //for instance document or part templates
@@ -146,7 +146,7 @@ public class WorkflowManagerBean implements IWorkflowManagerLocal {
         List<WorkflowModel> allWorkflowModels = workflowModelDAO.findAllWorkflowModels(pWorkspaceId);
 
         allWorkflowModels.removeIf(workflowModel -> !hasWorkflowModelReadAccess(workflowModel, user));
-        return allWorkflowModels.toArray(new WorkflowModel[allWorkflowModels.size()]);
+        return allWorkflowModels.toArray(new WorkflowModel[0]);
     }
 
     private boolean hasWorkflowModelReadAccess(WorkflowModel workflowModel, User user) {
@@ -169,7 +169,7 @@ public class WorkflowManagerBean implements IWorkflowManagerLocal {
     public Role[] getRoles(String pWorkspaceId) throws WorkspaceNotFoundException, UserNotFoundException, UserNotActiveException, WorkspaceNotEnabledException {
         userManager.checkWorkspaceReadAccess(pWorkspaceId);
         List<Role> roles = roleDAO.findRolesInWorkspace(pWorkspaceId);
-        return roles.toArray(new Role[roles.size()]);
+        return roles.toArray(new Role[0]);
     }
 
     @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
@@ -177,12 +177,12 @@ public class WorkflowManagerBean implements IWorkflowManagerLocal {
     public Role[] getRolesInUse(String pWorkspaceId) throws WorkspaceNotFoundException, UserNotFoundException, UserNotActiveException, WorkspaceNotEnabledException {
         userManager.checkWorkspaceReadAccess(pWorkspaceId);
         List<Role> roles = roleDAO.findRolesInUseWorkspace(pWorkspaceId);
-        return roles.toArray(new Role[roles.size()]);
+        return roles.toArray(new Role[0]);
     }
 
     @Override
     @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
-    public Role createRole(String roleName, String workspaceId, List<String> userLogins, List<String> userGroupIds) throws WorkspaceNotFoundException, UserNotFoundException, UserNotActiveException, AccessRightException, RoleAlreadyExistsException, CreationException, UserGroupNotFoundException, WorkspaceNotEnabledException {
+    public Role createRole(String roleName, String workspaceId, List<String> userLogins, List<String> userGroupIds) throws WorkspaceNotFoundException, UserNotFoundException, AccessRightException, RoleAlreadyExistsException, CreationException, UserGroupNotFoundException, WorkspaceNotEnabledException {
         User user = userManager.checkWorkspaceWriteAccess(workspaceId);
         Locale userLocale = user.getLocale();
         Workspace wks = workspaceDAO.loadWorkspace(userLocale, workspaceId);
@@ -210,7 +210,7 @@ public class WorkflowManagerBean implements IWorkflowManagerLocal {
 
     @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
     @Override
-    public Role updateRole(RoleKey roleKey, List<String> userLogins, List<String> userGroupIds) throws WorkspaceNotFoundException, UserNotFoundException, UserNotActiveException, AccessRightException, RoleNotFoundException, UserGroupNotFoundException, WorkspaceNotEnabledException {
+    public Role updateRole(RoleKey roleKey, List<String> userLogins, List<String> userGroupIds) throws WorkspaceNotFoundException, UserNotFoundException, AccessRightException, RoleNotFoundException, UserGroupNotFoundException, WorkspaceNotEnabledException {
         User user = userManager.checkWorkspaceWriteAccess(roleKey.getWorkspace());
         Locale userLocale = user.getLocale();
 
@@ -239,7 +239,7 @@ public class WorkflowManagerBean implements IWorkflowManagerLocal {
 
     @Override
     @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
-    public void deleteRole(RoleKey roleKey) throws WorkspaceNotFoundException, UserNotFoundException, UserNotActiveException, AccessRightException, RoleNotFoundException, EntityConstraintException, WorkspaceNotEnabledException {
+    public void deleteRole(RoleKey roleKey) throws WorkspaceNotFoundException, UserNotFoundException, AccessRightException, RoleNotFoundException, EntityConstraintException, WorkspaceNotEnabledException {
         User user = userManager.checkWorkspaceWriteAccess(roleKey.getWorkspace());
         Locale userLocale = user.getLocale();
         Role role = roleDAO.loadRole(userLocale, roleKey);
@@ -287,7 +287,7 @@ public class WorkflowManagerBean implements IWorkflowManagerLocal {
 
     @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
     @Override
-    public WorkflowModel updateACLForWorkflow(String pWorkspaceId, String workflowModelId, Map<String, String> userEntries, Map<String, String> groupEntries) throws WorkflowNotFoundException, UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, WorkflowModelNotFoundException, AccessRightException, WorkspaceNotEnabledException {
+    public WorkflowModel updateACLForWorkflow(String pWorkspaceId, String workflowModelId, Map<String, String> userEntries, Map<String, String> groupEntries) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, WorkflowModelNotFoundException, AccessRightException, WorkspaceNotEnabledException {
         // Check the read access to the workspace
         User user = userManager.checkWorkspaceReadAccess(pWorkspaceId);
         // Load the workflowModel
@@ -397,7 +397,7 @@ public class WorkflowManagerBean implements IWorkflowManagerLocal {
         if(documentTarget!= null){
             if( documentTarget.getWorkspaceId().equals(workspaceId)){
                 List<Workflow> abortedWorkflowList = documentTarget.getAbortedWorkflows();
-                return abortedWorkflowList.toArray(new Workflow[abortedWorkflowList.size()]);
+                return abortedWorkflowList.toArray(new Workflow[0]);
             }else{
                 throw new AccessRightException(userLocale,user);
             }
@@ -407,7 +407,7 @@ public class WorkflowManagerBean implements IWorkflowManagerLocal {
         if(partTarget!= null){
             if( partTarget.getWorkspaceId().equals(workspaceId)){
                 List<Workflow> abortedWorkflowList = partTarget.getAbortedWorkflows();
-                return abortedWorkflowList.toArray(new Workflow[abortedWorkflowList.size()]);
+                return abortedWorkflowList.toArray(new Workflow[0]);
             }else{
                 throw new AccessRightException(userLocale,user);
             }
@@ -416,7 +416,7 @@ public class WorkflowManagerBean implements IWorkflowManagerLocal {
         WorkspaceWorkflow workspaceWorkflowTarget = workflowDAO.getWorkspaceWorkflowTarget(workspaceId,workflow);
         if(workspaceWorkflowTarget!=null){
             List<Workflow> abortedWorkflowList = workspaceWorkflowTarget.getAbortedWorkflows();
-            return abortedWorkflowList.toArray(new Workflow[abortedWorkflowList.size()]);
+            return abortedWorkflowList.toArray(new Workflow[0]);
         }else{
             throw new AccessRightException(userLocale,user);
         }
@@ -425,7 +425,7 @@ public class WorkflowManagerBean implements IWorkflowManagerLocal {
 
     @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
     @Override
-    public void approveTaskOnWorkspaceWorkflow(String workspaceId, TaskKey taskKey, String comment, String signature) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, TaskNotFoundException, AccessRightException, WorkflowNotFoundException, NotAllowedException, WorkspaceNotEnabledException {
+    public void approveTaskOnWorkspaceWorkflow(String workspaceId, TaskKey taskKey, String comment, String signature) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, TaskNotFoundException, WorkflowNotFoundException, NotAllowedException, WorkspaceNotEnabledException {
         User user = userManager.checkWorkspaceReadAccess(workspaceId);
 
         Task task =taskDAO.loadTask(user.getLocale(), taskKey);
@@ -446,7 +446,7 @@ public class WorkflowManagerBean implements IWorkflowManagerLocal {
 
     @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
     @Override
-    public void rejectTaskOnWorkspaceWorkflow(String workspaceId, TaskKey taskKey, String comment, String signature) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, TaskNotFoundException, AccessRightException, WorkflowNotFoundException, NotAllowedException, WorkspaceNotEnabledException {
+    public void rejectTaskOnWorkspaceWorkflow(String workspaceId, TaskKey taskKey, String comment, String signature) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, TaskNotFoundException, WorkflowNotFoundException, NotAllowedException, WorkspaceNotEnabledException {
         User user = userManager.checkWorkspaceReadAccess(workspaceId);
 
         Task task = taskDAO.loadTask(user.getLocale(), taskKey);
@@ -556,11 +556,9 @@ public class WorkflowManagerBean implements IWorkflowManagerLocal {
             }
         }
 
-        WorkspaceWorkflow workspaceWorkflowTarget = workflowDAO.getWorkspaceWorkflowTarget(workspaceId,workflow);
-        if(workspaceWorkflowTarget!=null){
-            return;
-        }else{
-            throw new AccessRightException(userLocale,user);
+        WorkspaceWorkflow workspaceWorkflowTarget = workflowDAO.getWorkspaceWorkflowTarget(workspaceId, workflow);
+        if (workspaceWorkflowTarget == null) {
+            throw new AccessRightException(userLocale, user);
         }
 
     }
@@ -601,17 +599,16 @@ public class WorkflowManagerBean implements IWorkflowManagerLocal {
 
 
 
-    private User checkWorkflowWriteAccess(WorkflowModel workflow, User user) throws UserNotFoundException, AccessRightException, WorkspaceNotFoundException, WorkspaceNotEnabledException {
+    private void checkWorkflowWriteAccess(WorkflowModel workflow, User user) throws UserNotFoundException, AccessRightException, WorkspaceNotFoundException, WorkspaceNotEnabledException {
         if (user.isAdministrator()) {
             // Check if it is the workspace's administrator
-            return user;
+            return;
         }
         if (workflow.getAcl() == null) {
             // Check if the item haven't ACL
-            return userManager.checkWorkspaceWriteAccess(workflow.getWorkspaceId());
+            userManager.checkWorkspaceWriteAccess(workflow.getWorkspaceId());
         } else if (workflow.getAcl().hasWriteAccess(user)) {
             // Check if there is a write access
-            return user;
         } else {
             // Else throw a AccessRightException
             throw new AccessRightException(user.getLocale(), user);

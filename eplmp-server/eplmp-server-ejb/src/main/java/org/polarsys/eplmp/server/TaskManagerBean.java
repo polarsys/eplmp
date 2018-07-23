@@ -33,6 +33,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -78,12 +79,9 @@ public class TaskManagerBean implements ITaskManagerLocal {
 
         Task[] assignedTasks = taskDAO.findAssignedTasks(workspaceId, userLogin);
 
-        List<TaskWrapper> taskWrappers = Stream.of(assignedTasks)
+        return Stream.of(assignedTasks)
                 .map(task -> wrapTask(task, workspaceId))
-                .filter(taskWrapper -> taskWrapper != null)
-                .collect(Collectors.toList());
-
-        return taskWrappers.toArray(new TaskWrapper[taskWrappers.size()]);
+                .filter(Objects::nonNull).toArray(TaskWrapper[]::new);
     }
 
     @Override
@@ -92,12 +90,9 @@ public class TaskManagerBean implements ITaskManagerLocal {
         userManager.checkWorkspaceReadAccess(workspaceId);
         Task[] inProgressTasks = taskDAO.findInProgressTasks(workspaceId, userLogin);
 
-        List<TaskWrapper> taskWrappers = Stream.of(inProgressTasks)
+        return Stream.of(inProgressTasks)
                 .map(task -> wrapTask(task, workspaceId))
-                .filter(taskWrapper -> taskWrapper != null)
-                .collect(Collectors.toList());
-
-        return taskWrappers.toArray(new TaskWrapper[taskWrappers.size()]);
+                .filter(Objects::nonNull).toArray(TaskWrapper[]::new);
     }
 
     @Override

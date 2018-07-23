@@ -39,7 +39,7 @@ public interface IAccountManagerLocal {
 
     Account checkAdmin(String pOrganizationName) throws AccessRightException, AccountNotFoundException, OrganizationNotFoundException;
 
-    void setGCMAccount(String gcmId) throws AccountNotFoundException, GCMAccountAlreadyExistsException, CreationException;
+    void setGCMAccount(String gcmId) throws AccountNotFoundException, GCMAccountAlreadyExistsException, CreationException, GCMAccountNotFoundException;
 
     void deleteGCMAccount() throws AccountNotFoundException, GCMAccountNotFoundException;
 

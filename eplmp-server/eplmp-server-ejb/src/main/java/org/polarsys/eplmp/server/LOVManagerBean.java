@@ -42,9 +42,6 @@ import java.util.Locale;
 @Stateless(name = "LOVManagerBean")
 public class LOVManagerBean implements ILOVManagerLocal {
 
-    @PersistenceContext
-    private EntityManager em;
-
     @Inject
     private LOVDAO lovDAO;
 

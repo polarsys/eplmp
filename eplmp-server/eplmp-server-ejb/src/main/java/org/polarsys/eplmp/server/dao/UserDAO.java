@@ -180,7 +180,7 @@ public class UserDAO {
         }
 
 
-        return users.values().toArray(new User[users.size()]);
+        return users.values().toArray(new User[0]);
 
     }
 

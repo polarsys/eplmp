@@ -40,9 +40,6 @@ import javax.persistence.PersistenceContext;
 @Stateless(name = "PSFilterManagerBean")
 public class PSFilterManagerBean implements IPSFilterManagerLocal {
 
-    @PersistenceContext
-    private EntityManager em;
-
     @Inject
     private ProductBaselineDAO productBaselineDAO;
 

@@ -43,6 +43,10 @@ public class GCMAccountDAO {
         }
         return gcmAccount;
     }
+    public boolean hasGCMAccount(Account pAccount) {
+        GCMAccount gcmAccount = em.find(GCMAccount.class, pAccount.getLogin());
+        return gcmAccount != null;
+    }
 
     public GCMAccount loadGCMAccount(Locale pLocale, Account pAccount) throws GCMAccountNotFoundException {
         mLocale = pLocale;

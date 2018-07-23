@@ -36,9 +36,6 @@ import java.util.Set;
 @Stateless(name = "EffectivityManagerBean")
 public class EffectivityManagerBean implements IEffectivityManagerLocal {
 
-    @PersistenceContext
-    private EntityManager em;
-
     @Inject
     private ConfigurationItemDAO configurationItemDAO;
 
@@ -47,9 +44,6 @@ public class EffectivityManagerBean implements IEffectivityManagerLocal {
 
     @Inject
     private PartRevisionDAO partRevisionDAO;
-
-    @Inject
-    private IAccountManagerLocal accountManager;
 
 
     @Inject
