@@ -21,8 +21,8 @@ import org.polarsys.eplmp.core.configuration.ProductInstanceIteration;
 import org.polarsys.eplmp.core.document.DocumentIteration;
 import org.polarsys.eplmp.core.document.DocumentLink;
 import org.polarsys.eplmp.core.document.DocumentMaster;
-import org.polarsys.eplmp.core.meta.Folder;
 import org.polarsys.eplmp.core.exceptions.*;
+import org.polarsys.eplmp.core.meta.Folder;
 import org.polarsys.eplmp.core.product.PartIteration;
 import org.polarsys.eplmp.core.product.PartMaster;
 import org.polarsys.eplmp.core.product.PartUsageLink;
@@ -30,7 +30,6 @@ import org.polarsys.eplmp.core.services.IBinaryStorageManagerLocal;
 import org.polarsys.eplmp.core.workflow.WorkflowModel;
 import org.polarsys.eplmp.core.workflow.WorkspaceWorkflow;
 
-import javax.ejb.Asynchronous;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.persistence.EntityExistsException;
@@ -192,22 +191,6 @@ public class WorkspaceDAO {
             em.clear();
             i += batchSize;
         }
-
-        // PathDatas
-        em.createQuery("DELETE FROM PathDataIteration pdi " +
-            "where pdi.pathDataMaster IN (" +
-            "SELECT pdm FROM ProductInstanceIteration pii, PathDataMaster pdm " +
-            "WHERE pdm = pii.pathDataMasterList " +
-            "AND pii.productInstanceMaster.instanceOf.workspace = :workspace" +
-            ")")
-            .setParameter(WORKSPACE, workspace).executeUpdate();
-        em.createQuery("DELETE FROM PathDataMaster pdm " +
-            "where pdm IN (" +
-            "SELECT pdm2 FROM ProductInstanceIteration pii, PathDataMaster pdm2 " +
-            "WHERE pdm2 = pii.pathDataMasterList " +
-            "AND pii.productInstanceMaster.instanceOf.workspace = :workspace" +
-            ")")
-            .setParameter(WORKSPACE, workspace).executeUpdate();
 
         // ProductInstances
         em.createQuery("DELETE FROM ProductInstanceIteration pii where pii.productInstanceMaster.instanceOf.workspace = :workspace")
