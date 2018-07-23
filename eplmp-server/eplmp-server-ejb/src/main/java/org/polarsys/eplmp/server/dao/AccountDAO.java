@@ -24,7 +24,7 @@ import javax.persistence.*;
 import java.util.List;
 import java.util.Locale;
 
-@Stateless
+@Stateless(name = "AccountDAO")
 public class AccountDAO {
 
     @PersistenceContext
