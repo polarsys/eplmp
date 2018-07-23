@@ -57,9 +57,6 @@ public class WorkspaceManagerBean implements IWorkspaceManagerLocal {
     private WorkspaceDAO workspaceDAO;
 
     @Inject
-    private IBinaryStorageManagerLocal storageManager;
-
-    @Inject
     private IUserManagerLocal userManager;
 
     @Inject
@@ -79,7 +76,7 @@ public class WorkspaceManagerBean implements IWorkspaceManagerLocal {
     @RolesAllowed(UserGroupMapping.ADMIN_ROLE_ID)
     @Override
     public long getDiskUsageInWorkspace(String workspaceId) throws AccountNotFoundException {
-        Account account = accountDAO.loadAccount(contextManager.getCallerPrincipalLogin());
+        accountDAO.loadAccount(contextManager.getCallerPrincipalLogin());
         return workspaceDAO.getDiskUsageForWorkspace(workspaceId);
     }
 

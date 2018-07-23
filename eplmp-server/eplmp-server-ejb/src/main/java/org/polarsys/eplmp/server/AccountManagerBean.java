@@ -74,12 +74,12 @@ public class AccountManagerBean implements IAccountManagerLocal {
     public Account authenticateAccount(String login, String password) {
         Account account = null;
 
-        if(accountDAO.authenticate(login, password, configManager.getDigestAlgorithm())){
+        if (accountDAO.authenticate(login, password, configManager.getDigestAlgorithm())) {
 
             try {
                 account = getAccount(login);
             } catch (AccountNotFoundException e) {
-               return null;
+                return null;
             }
         }
 
@@ -88,7 +88,7 @@ public class AccountManagerBean implements IAccountManagerLocal {
 
     @Override
     public UserGroupMapping getUserGroupMapping(String login) {
-        return em.find(UserGroupMapping.class,login);
+        return em.find(UserGroupMapping.class, login);
     }
 
     @Override
@@ -159,15 +159,15 @@ public class AccountManagerBean implements IAccountManagerLocal {
 
     @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
     @Override
-    public void setGCMAccount(String gcmId) throws AccountNotFoundException, GCMAccountAlreadyExistsException, CreationException {
+    public void setGCMAccount(String gcmId) throws AccountNotFoundException, GCMAccountAlreadyExistsException, CreationException, GCMAccountNotFoundException {
         String callerLogin = contextManager.getCallerPrincipalLogin();
         Account account = getAccount(callerLogin);
 
         Locale accountLocale = account.getLocale();
-        try {
+        if (gcmAccountDAO.hasGCMAccount(account)) {
             GCMAccount gcmAccount = gcmAccountDAO.loadGCMAccount(accountLocale, account);
             gcmAccount.setGcmId(gcmId);
-        } catch (GCMAccountNotFoundException e) {
+        } else {
             gcmAccountDAO.createGCMAccount(accountLocale, new GCMAccount(account, gcmId));
         }
 
