@@ -2503,12 +2503,10 @@ public class ProductManagerBean implements IProductManagerLocal {
 
         if (path == null) {
             ConfigurationItem ci = configurationItemDAO.loadConfigurationItem(user.getLocale(), ciKey);
-            psFilterVisitor.visit(user, filter, ci.getDesignItem(), pDepth, callbacks);
+            return psFilterVisitor.visit(user, filter, ci.getDesignItem(), pDepth, callbacks);
         } else {
-            psFilterVisitor.visit(user, filter, path, pDepth, callbacks);
+            return psFilterVisitor.visit(user, filter, path, pDepth, callbacks);
         }
-
-        return psFilterVisitor.getComponent();
 
     }
 
