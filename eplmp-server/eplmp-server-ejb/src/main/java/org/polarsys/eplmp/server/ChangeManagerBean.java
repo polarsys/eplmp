@@ -36,6 +36,7 @@ import javax.persistence.PersistenceContext;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 /**
  * @author Florent Garin
@@ -77,7 +78,7 @@ public class ChangeManagerBean implements IChangeManagerLocal {
     @Override
     public ChangeIssue getChangeIssue(String pWorkspaceId, int pId) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, ChangeIssueNotFoundException, AccessRightException, WorkspaceNotEnabledException {
         User user = userManager.checkWorkspaceReadAccess(pWorkspaceId);
-        ChangeIssue changeIssue = changeItemDAO.loadChangeIssue(user.getLocale(), pId);
+        ChangeIssue changeIssue = loadChangeIssue(user.getLocale(), pId);
         checkChangeItemReadAccess(changeIssue, user);
         return changeIssue;
     }
@@ -145,7 +146,7 @@ public class ChangeManagerBean implements IChangeManagerLocal {
     @Override
     public ChangeIssue updateChangeIssue(int pId, String pWorkspaceId, String description, ChangeItemPriority priority, String assignee, ChangeItemCategory category) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, ChangeIssueNotFoundException, AccessRightException, WorkspaceNotEnabledException, AccountNotFoundException, NotAllowedException {
         User user = userManager.checkWorkspaceReadAccess(pWorkspaceId);
-        ChangeIssue changeIssue = changeItemDAO.loadChangeIssue(user.getLocale(), pId);
+        ChangeIssue changeIssue = loadChangeIssue(user.getLocale(), pId);
         checkChangeItemWriteAccess(changeIssue, user);
         changeIssue.setDescription(description);
         changeIssue.setPriority(priority);
@@ -166,7 +167,7 @@ public class ChangeManagerBean implements IChangeManagerLocal {
     @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
     @Override
     public void deleteChangeIssue(int pId) throws ChangeIssueNotFoundException, UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, AccessRightException, EntityConstraintException, WorkspaceNotEnabledException {
-        ChangeIssue changeIssue = changeItemDAO.loadChangeIssue(pId);
+        ChangeIssue changeIssue = loadChangeIssue(Locale.getDefault(), pId);
         User user = userManager.checkWorkspaceReadAccess(changeIssue.getWorkspaceId());
         checkChangeItemWriteAccess(changeIssue, user);
 
@@ -182,7 +183,7 @@ public class ChangeManagerBean implements IChangeManagerLocal {
     public ChangeIssue saveChangeIssueAffectedDocuments(String pWorkspaceId, int pId, DocumentIterationKey[] pAffectedDocuments) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, ChangeIssueNotFoundException, AccessRightException, DocumentRevisionNotFoundException, WorkspaceNotEnabledException {
         User user = userManager.checkWorkspaceReadAccess(pWorkspaceId);
         Locale userLocale = user.getLocale();
-        ChangeIssue changeIssue = changeItemDAO.loadChangeIssue(userLocale, pId);
+        ChangeIssue changeIssue = loadChangeIssue(userLocale, pId);
         checkChangeItemWriteAccess(changeIssue, user);
         changeIssue.setAffectedDocuments(getDocumentIterations(pAffectedDocuments, userLocale));
         return changeIssue;
@@ -193,17 +194,10 @@ public class ChangeManagerBean implements IChangeManagerLocal {
     public ChangeIssue saveChangeIssueAffectedParts(String pWorkspaceId, int pId, PartIterationKey[] pAffectedParts) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, ChangeIssueNotFoundException, AccessRightException, WorkspaceNotEnabledException {
         User user = userManager.checkWorkspaceReadAccess(pWorkspaceId);
         Locale userLocale = user.getLocale();
-        ChangeIssue changeIssue = changeItemDAO.loadChangeIssue(userLocale, pId);
+        ChangeIssue changeIssue = loadChangeIssue(userLocale, pId);
         checkChangeItemWriteAccess(changeIssue, user);
 
-        Set<PartIteration> partIterations = new HashSet<>();
-        for (PartIterationKey partKey : pAffectedParts) {
-            try {
-                partIterations.add(partRevisionDAO.loadPartR(userLocale, partKey.getPartRevision()).getIteration(partKey.getIteration()));
-            } catch (PartRevisionNotFoundException e) {
-                LOGGER.log(Level.SEVERE, null, e);
-            }
-        }
+        Set<PartIteration> partIterations = getPartIterations(pAffectedParts, userLocale);
 
         changeIssue.setAffectedParts(partIterations);
         return changeIssue;
@@ -213,7 +207,7 @@ public class ChangeManagerBean implements IChangeManagerLocal {
     @Override
     public ChangeIssue saveChangeIssueTags(String pWorkspaceId, int pId, String[] tagsLabel) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, ChangeIssueNotFoundException, AccessRightException, WorkspaceNotEnabledException {
         User user = userManager.checkWorkspaceReadAccess(pWorkspaceId);
-        ChangeIssue changeIssue = changeItemDAO.loadChangeIssue(user.getLocale(), pId);
+        ChangeIssue changeIssue = loadChangeIssue(user.getLocale(), pId);
         checkChangeItemWriteAccess(changeIssue, user);
 
         Set<Tag> tags = new HashSet<>();
@@ -228,7 +222,7 @@ public class ChangeManagerBean implements IChangeManagerLocal {
 
         for (Tag t : tagsToCreate) {
             try {
-                tagDAO.createTag(t);
+                tagDAO.createTag(t, true);
             } catch (CreationException | TagAlreadyExistsException ex) {
                 LOGGER.log(Level.SEVERE, null, ex);
             }
@@ -242,7 +236,7 @@ public class ChangeManagerBean implements IChangeManagerLocal {
     @Override
     public ChangeIssue removeChangeIssueTag(String pWorkspaceId, int pId, String tagName) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, ChangeIssueNotFoundException, AccessRightException, WorkspaceNotEnabledException {
         User user = userManager.checkWorkspaceReadAccess(pWorkspaceId);
-        ChangeIssue changeIssue = changeItemDAO.loadChangeIssue(user.getLocale(), pId);
+        ChangeIssue changeIssue = loadChangeIssue(user.getLocale(), pId);
         checkChangeItemWriteAccess(changeIssue, user);
         return (ChangeIssue) changeItemDAO.removeTag(changeIssue, tagName);
     }
@@ -251,7 +245,7 @@ public class ChangeManagerBean implements IChangeManagerLocal {
     @Override
     public ChangeRequest getChangeRequest(String pWorkspaceId, int pId) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, ChangeRequestNotFoundException, AccessRightException, WorkspaceNotEnabledException {
         User user = userManager.checkWorkspaceReadAccess(pWorkspaceId);
-        ChangeRequest changeRequest = changeItemDAO.loadChangeRequest(user.getLocale(), pId);
+        ChangeRequest changeRequest = loadChangeRequest(pId, user.getLocale());
         checkChangeItemReadAccess(changeRequest, user);
         return filterLinkedChangeIssues(changeRequest, user);
     }
@@ -319,7 +313,7 @@ public class ChangeManagerBean implements IChangeManagerLocal {
     @Override
     public ChangeRequest updateChangeRequest(int pId, String pWorkspaceId, String description, int milestoneId, ChangeItemPriority priority, String assignee, ChangeItemCategory category) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, ChangeRequestNotFoundException, AccessRightException, WorkspaceNotEnabledException, AccountNotFoundException, NotAllowedException {
         User user = userManager.checkWorkspaceReadAccess(pWorkspaceId);
-        ChangeRequest changeRequest = changeItemDAO.loadChangeRequest(user.getLocale(), pId);
+        ChangeRequest changeRequest = loadChangeRequest(pId, user.getLocale());
         checkChangeItemWriteAccess(changeRequest, user);
         changeRequest.setDescription(description);
         changeRequest.setPriority(priority);
@@ -344,7 +338,7 @@ public class ChangeManagerBean implements IChangeManagerLocal {
         User user = userManager.checkWorkspaceReadAccess(pWorkspaceId);
         Locale userLocale = user.getLocale();
 
-        ChangeRequest changeRequest = changeItemDAO.loadChangeRequest(userLocale, pId);
+        ChangeRequest changeRequest = loadChangeRequest(pId, userLocale);
 
         if (changeItemDAO.hasChangeOrdersLinked(changeRequest)) {
             throw new EntityConstraintException(userLocale, "EntityConstraintException10");
@@ -359,7 +353,7 @@ public class ChangeManagerBean implements IChangeManagerLocal {
     public ChangeRequest saveChangeRequestAffectedDocuments(String pWorkspaceId, int pId, DocumentIterationKey[] pAffectedDocuments) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, ChangeRequestNotFoundException, AccessRightException, DocumentRevisionNotFoundException, WorkspaceNotEnabledException {
         User user = userManager.checkWorkspaceReadAccess(pWorkspaceId);
         Locale userLocale = user.getLocale();
-        ChangeRequest changeRequest = changeItemDAO.loadChangeRequest(userLocale, pId);
+        ChangeRequest changeRequest = loadChangeRequest(pId, userLocale);
         checkChangeItemWriteAccess(changeRequest, user);
         changeRequest.setAffectedDocuments(getDocumentIterations(pAffectedDocuments, userLocale));
         return changeRequest;
@@ -370,17 +364,11 @@ public class ChangeManagerBean implements IChangeManagerLocal {
     public ChangeRequest saveChangeRequestAffectedParts(String pWorkspaceId, int pId, PartIterationKey[] pAffectedParts) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, ChangeRequestNotFoundException, AccessRightException, WorkspaceNotEnabledException {
         User user = userManager.checkWorkspaceReadAccess(pWorkspaceId);
         Locale userLocale = user.getLocale();
-        ChangeRequest changeRequest = changeItemDAO.loadChangeRequest(userLocale, pId);
+        ChangeRequest changeRequest = loadChangeRequest(pId, userLocale);
         checkChangeItemWriteAccess(changeRequest, user);
 
-        Set<PartIteration> partIterations = new HashSet<>();
-        for (PartIterationKey partKey : pAffectedParts) {
-            try {
-                partIterations.add(partRevisionDAO.loadPartR(userLocale, partKey.getPartRevision()).getIteration(partKey.getIteration()));
-            } catch (PartRevisionNotFoundException e) {
-                LOGGER.log(Level.SEVERE, null, e);
-            }
-        }
+        Set<PartIteration> partIterations = getPartIterations(pAffectedParts, userLocale);
+
         changeRequest.setAffectedParts(partIterations);
         return changeRequest;
     }
@@ -390,17 +378,14 @@ public class ChangeManagerBean implements IChangeManagerLocal {
     public ChangeRequest saveChangeRequestAffectedIssues(String pWorkspaceId, int pId, int[] pLinkIds) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, ChangeRequestNotFoundException, AccessRightException, WorkspaceNotEnabledException {
         User user = userManager.checkWorkspaceReadAccess(pWorkspaceId);
         Locale userLocale = user.getLocale();
-        ChangeRequest changeRequest = changeItemDAO.loadChangeRequest(userLocale, pId);
+        ChangeRequest changeRequest = loadChangeRequest(pId, userLocale);
         checkChangeItemWriteAccess(changeRequest, user);
 
-        Set<ChangeIssue> changeIssues = new HashSet<>();
-        for (int linkId : pLinkIds) {
-            try {
-                changeIssues.add(changeItemDAO.loadChangeIssue(userLocale, linkId));
-            } catch (ChangeIssueNotFoundException e) {
-                LOGGER.log(Level.SEVERE, null, e);
-            }
-        }
+        Set<ChangeIssue> changeIssues = Arrays.stream(pLinkIds)
+                .mapToObj(linkId -> changeItemDAO.loadChangeIssue(userLocale, linkId))
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+
         changeRequest.setAddressedChangeIssues(changeIssues);
         return changeRequest;
     }
@@ -409,7 +394,7 @@ public class ChangeManagerBean implements IChangeManagerLocal {
     @Override
     public ChangeRequest saveChangeRequestTags(String pWorkspaceId, int pId, String[] tagsLabel) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, ChangeRequestNotFoundException, AccessRightException, WorkspaceNotEnabledException {
         User user = userManager.checkWorkspaceReadAccess(pWorkspaceId);
-        ChangeRequest changeRequest = changeItemDAO.loadChangeRequest(user.getLocale(), pId);
+        ChangeRequest changeRequest = loadChangeRequest(pId, user.getLocale());
         checkChangeItemWriteAccess(changeRequest, user);
 
         Set<Tag> tags = new HashSet<>();
@@ -417,14 +402,15 @@ public class ChangeManagerBean implements IChangeManagerLocal {
             tags.add(new Tag(user.getWorkspace(), label));
         }
 
-        List<Tag> existingTags = Arrays.asList(tagDAO.findAllTags(user.getWorkspaceId()));
+        List<Tag> existingTags =
+                Arrays.asList(tagDAO.findAllTags(user.getWorkspaceId()));
 
         Set<Tag> tagsToCreate = new HashSet<>(tags);
         tagsToCreate.removeAll(existingTags);
 
         for (Tag t : tagsToCreate) {
             try {
-                tagDAO.createTag(t);
+                tagDAO.createTag(t, true);
             } catch (CreationException | TagAlreadyExistsException ex) {
                 LOGGER.log(Level.SEVERE, null, ex);
             }
@@ -438,7 +424,7 @@ public class ChangeManagerBean implements IChangeManagerLocal {
     @Override
     public ChangeRequest removeChangeRequestTag(String pWorkspaceId, int pId, String tagName) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, ChangeIssueNotFoundException, AccessRightException, WorkspaceNotEnabledException {
         User user = userManager.checkWorkspaceReadAccess(pWorkspaceId);
-        ChangeIssue changeRequest = changeItemDAO.loadChangeIssue(user.getLocale(), pId);
+        ChangeIssue changeRequest = loadChangeIssue(user.getLocale(), pId);
         checkChangeItemWriteAccess(changeRequest, user);
         return (ChangeRequest) changeItemDAO.removeTag(changeRequest, tagName);
     }
@@ -447,7 +433,7 @@ public class ChangeManagerBean implements IChangeManagerLocal {
     @Override
     public ChangeOrder getChangeOrder(String pWorkspaceId, int pId) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, ChangeOrderNotFoundException, AccessRightException, WorkspaceNotEnabledException {
         User user = userManager.checkWorkspaceReadAccess(pWorkspaceId);
-        ChangeOrder changeOrder = changeItemDAO.loadChangeOrder(user.getLocale(), pId);
+        ChangeOrder changeOrder = loadChangeOrder(pId, user.getLocale());
         checkChangeItemReadAccess(changeOrder, user);
         return filterLinkedChangeRequests(changeOrder, user);
     }
@@ -497,7 +483,7 @@ public class ChangeManagerBean implements IChangeManagerLocal {
     @Override
     public ChangeOrder updateChangeOrder(int pId, String pWorkspaceId, String description, int milestoneId, ChangeItemPriority priority, String assignee, ChangeItemCategory category) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, ChangeOrderNotFoundException, AccessRightException, WorkspaceNotEnabledException, AccountNotFoundException, NotAllowedException {
         User user = userManager.checkWorkspaceReadAccess(pWorkspaceId);
-        ChangeOrder changeOrder = changeItemDAO.loadChangeOrder(user.getLocale(), pId);
+        ChangeOrder changeOrder = loadChangeOrder(pId, user.getLocale());
         checkChangeItemWriteAccess(changeOrder, user);
         changeOrder.setDescription(description);
         changeOrder.setPriority(priority);
@@ -519,7 +505,7 @@ public class ChangeManagerBean implements IChangeManagerLocal {
     @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
     @Override
     public void deleteChangeOrder(int pId) throws ChangeOrderNotFoundException, UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, AccessRightException, WorkspaceNotEnabledException {
-        ChangeOrder changeOrder = changeItemDAO.loadChangeOrder(pId);
+        ChangeOrder changeOrder = loadChangeOrder(pId, Locale.getDefault());
         User user = userManager.checkWorkspaceReadAccess(changeOrder.getWorkspaceId());
         checkChangeItemWriteAccess(changeOrder, user);
         changeItemDAO.deleteChangeItem(changeOrder);
@@ -530,7 +516,7 @@ public class ChangeManagerBean implements IChangeManagerLocal {
     public ChangeOrder saveChangeOrderAffectedDocuments(String pWorkspaceId, int pId, DocumentIterationKey[] pAffectedDocuments) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, ChangeOrderNotFoundException, AccessRightException, DocumentRevisionNotFoundException, WorkspaceNotEnabledException {
         User user = userManager.checkWorkspaceReadAccess(pWorkspaceId);
         Locale userLocale = user.getLocale();
-        ChangeOrder changeOrder = changeItemDAO.loadChangeOrder(userLocale, pId);
+        ChangeOrder changeOrder = loadChangeOrder(pId, userLocale);
         checkChangeItemWriteAccess(changeOrder, user);
         changeOrder.setAffectedDocuments(getDocumentIterations(pAffectedDocuments, userLocale));
         return changeOrder;
@@ -541,19 +527,20 @@ public class ChangeManagerBean implements IChangeManagerLocal {
     public ChangeOrder saveChangeOrderAffectedParts(String pWorkspaceId, int pId, PartIterationKey[] pAffectedParts) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, ChangeOrderNotFoundException, AccessRightException, WorkspaceNotEnabledException {
         User user = userManager.checkWorkspaceReadAccess(pWorkspaceId);
         Locale userLocale = user.getLocale();
-        ChangeOrder changeOrder = changeItemDAO.loadChangeOrder(userLocale, pId);
+        ChangeOrder changeOrder = loadChangeOrder(pId, userLocale);
         checkChangeItemWriteAccess(changeOrder, user);
 
-        Set<PartIteration> partIterations = new HashSet<>();
-        for (PartIterationKey partKey : pAffectedParts) {
-            try {
-                partIterations.add(partRevisionDAO.loadPartR(userLocale, partKey.getPartRevision()).getIteration(partKey.getIteration()));
-            } catch (PartRevisionNotFoundException e) {
-                LOGGER.log(Level.SEVERE, null, e);
-            }
-        }
+        Set<PartIteration> partIterations = getPartIterations(pAffectedParts, userLocale);
+
         changeOrder.setAffectedParts(partIterations);
         return changeOrder;
+    }
+
+    private Set<PartIteration> getPartIterations(PartIterationKey[] pAffectedParts, Locale userLocale) {
+        return Arrays.stream(pAffectedParts)
+                .map(partKey -> partRevisionDAO.loadPartR(userLocale, partKey.getPartRevision()).getIteration(partKey.getIteration()))
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
     }
 
     @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
@@ -561,17 +548,14 @@ public class ChangeManagerBean implements IChangeManagerLocal {
     public ChangeOrder saveChangeOrderAffectedRequests(String pWorkspaceId, int pId, int[] pLinkIds) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, ChangeOrderNotFoundException, AccessRightException, WorkspaceNotEnabledException {
         User user = userManager.checkWorkspaceReadAccess(pWorkspaceId);
         Locale userLocale = user.getLocale();
-        ChangeOrder changeOrder = changeItemDAO.loadChangeOrder(userLocale, pId);
+        ChangeOrder changeOrder = loadChangeOrder(pId, userLocale);
         checkChangeItemWriteAccess(changeOrder, user);
 
-        Set<ChangeRequest> changeRequests = new HashSet<>();
-        for (int linkId : pLinkIds) {
-            try {
-                changeRequests.add(changeItemDAO.loadChangeRequest(userLocale, linkId));
-            } catch (ChangeRequestNotFoundException e) {
-                LOGGER.log(Level.SEVERE, null, e);
-            }
-        }
+        Set<ChangeRequest> changeRequests = Arrays.stream(pLinkIds)
+                .mapToObj(linkId -> changeItemDAO.loadChangeRequest(userLocale, linkId))
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+
         changeOrder.setAddressedChangeRequests(changeRequests);
         return changeOrder;
     }
@@ -580,7 +564,7 @@ public class ChangeManagerBean implements IChangeManagerLocal {
     @Override
     public ChangeOrder saveChangeOrderTags(String pWorkspaceId, int pId, String[] tagsLabel) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, ChangeOrderNotFoundException, AccessRightException, WorkspaceNotEnabledException {
         User user = userManager.checkWorkspaceReadAccess(pWorkspaceId);
-        ChangeOrder changeOrder = changeItemDAO.loadChangeOrder(user.getLocale(), pId);
+        ChangeOrder changeOrder = loadChangeOrder(pId, user.getLocale());
         checkChangeItemWriteAccess(changeOrder, user);
 
         Set<Tag> tags = new HashSet<>();
@@ -588,14 +572,15 @@ public class ChangeManagerBean implements IChangeManagerLocal {
             tags.add(new Tag(user.getWorkspace(), label));
         }
 
-        List<Tag> existingTags = Arrays.asList(tagDAO.findAllTags(user.getWorkspaceId()));
+        List<Tag> existingTags =
+                Arrays.asList(tagDAO.findAllTags(user.getWorkspaceId()));
 
         Set<Tag> tagsToCreate = new HashSet<>(tags);
         tagsToCreate.removeAll(existingTags);
 
         for (Tag t : tagsToCreate) {
             try {
-                tagDAO.createTag(t);
+                tagDAO.createTag(t, true);
             } catch (CreationException | TagAlreadyExistsException ex) {
                 LOGGER.log(Level.SEVERE, null, ex);
             }
@@ -608,7 +593,8 @@ public class ChangeManagerBean implements IChangeManagerLocal {
     @Override
     public ChangeOrder removeChangeOrderTag(String pWorkspaceId, int pId, String tagName) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, ChangeIssueNotFoundException, AccessRightException, WorkspaceNotEnabledException {
         User user = userManager.checkWorkspaceReadAccess(pWorkspaceId);
-        ChangeIssue changeOrder = changeItemDAO.loadChangeIssue(user.getLocale(), pId);
+        ChangeIssue changeOrder = loadChangeIssue(user.getLocale(), pId);
+
         checkChangeItemWriteAccess(changeOrder, user);
         return (ChangeOrder) changeItemDAO.removeTag(changeOrder, tagName);
     }
@@ -753,7 +739,7 @@ public class ChangeManagerBean implements IChangeManagerLocal {
     @Override
     public ChangeIssue updateACLForChangeIssue(String pWorkspaceId, int pId, Map<String, String> pUserEntries, Map<String, String> pGroupEntries) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, ChangeIssueNotFoundException, AccessRightException, WorkspaceNotEnabledException {
         User user = userManager.checkWorkspaceReadAccess(pWorkspaceId);
-        ChangeIssue changeIssue = changeItemDAO.loadChangeIssue(user.getLocale(), pId);
+        ChangeIssue changeIssue = loadChangeIssue(user.getLocale(), pId);
         checkChangeItemGrantAccess(changeIssue, user);
 
         updateACLForChangeItem(pWorkspaceId, changeIssue, pUserEntries, pGroupEntries);
@@ -764,7 +750,7 @@ public class ChangeManagerBean implements IChangeManagerLocal {
     @Override
     public ChangeRequest updateACLForChangeRequest(String pWorkspaceId, int pId, Map<String, String> pUserEntries, Map<String, String> pGroupEntries) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, ChangeRequestNotFoundException, AccessRightException, WorkspaceNotEnabledException {
         User user = userManager.checkWorkspaceReadAccess(pWorkspaceId);
-        ChangeRequest changeRequest = changeItemDAO.loadChangeRequest(user.getLocale(), pId);
+        ChangeRequest changeRequest = loadChangeRequest(pId, user.getLocale());
         checkChangeItemGrantAccess(changeRequest, user);
 
         updateACLForChangeItem(pWorkspaceId, changeRequest, pUserEntries, pGroupEntries);
@@ -775,7 +761,7 @@ public class ChangeManagerBean implements IChangeManagerLocal {
     @Override
     public ChangeOrder updateACLForChangeOrder(String pWorkspaceId, int pId, Map<String, String> pUserEntries, Map<String, String> pGroupEntries) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, ChangeOrderNotFoundException, AccessRightException, WorkspaceNotEnabledException {
         User user = userManager.checkWorkspaceReadAccess(pWorkspaceId);
-        ChangeOrder changeOrder = changeItemDAO.loadChangeOrder(user.getLocale(), pId);
+        ChangeOrder changeOrder = loadChangeOrder(pId, user.getLocale());
         checkChangeItemGrantAccess(changeOrder, user);
 
         updateACLForChangeItem(pWorkspaceId, changeOrder, pUserEntries, pGroupEntries);
@@ -803,7 +789,7 @@ public class ChangeManagerBean implements IChangeManagerLocal {
     @Override
     public ChangeIssue removeACLFromChangeIssue(String pWorkspaceId, int pId) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, ChangeIssueNotFoundException, AccessRightException, WorkspaceNotEnabledException {
         User user = userManager.checkWorkspaceReadAccess(pWorkspaceId);
-        ChangeIssue changeIssue = changeItemDAO.loadChangeIssue(user.getLocale(), pId);
+        ChangeIssue changeIssue = loadChangeIssue(user.getLocale(), pId);
         checkChangeItemGrantAccess(changeIssue, user);
 
         removeACLFromChangeItem(changeIssue);
@@ -814,7 +800,7 @@ public class ChangeManagerBean implements IChangeManagerLocal {
     @Override
     public ChangeRequest removeACLFromChangeRequest(String pWorkspaceId, int pId) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, ChangeRequestNotFoundException, AccessRightException, WorkspaceNotEnabledException {
         User user = userManager.checkWorkspaceReadAccess(pWorkspaceId);
-        ChangeRequest changeRequest = changeItemDAO.loadChangeRequest(user.getLocale(), pId);
+        ChangeRequest changeRequest = loadChangeRequest(pId, user.getLocale());
         checkChangeItemGrantAccess(changeRequest, user);
 
         removeACLFromChangeItem(changeRequest);
@@ -825,7 +811,7 @@ public class ChangeManagerBean implements IChangeManagerLocal {
     @Override
     public ChangeOrder removeACLFromChangeOrder(String pWorkspaceId, int pId) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, ChangeOrderNotFoundException, AccessRightException, WorkspaceNotEnabledException {
         User user = userManager.checkWorkspaceReadAccess(pWorkspaceId);
-        ChangeOrder changeOrder = changeItemDAO.loadChangeOrder(pId);
+        ChangeOrder changeOrder = loadChangeOrder(pId, user.getLocale());
         checkChangeItemGrantAccess(changeOrder, user);
 
         removeACLFromChangeItem(changeOrder);
@@ -892,7 +878,7 @@ public class ChangeManagerBean implements IChangeManagerLocal {
         }
     }
 
-    private User checkChangeItemGrantAccess(ChangeItem pChangeItem, User pUser) throws AccessRightException, UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, WorkspaceNotEnabledException {
+    private User checkChangeItemGrantAccess(ChangeItem pChangeItem, User pUser) throws AccessRightException, UserNotFoundException, WorkspaceNotFoundException, WorkspaceNotEnabledException {
         if (pUser.isAdministrator()) {
             return pUser;
         } else if (pUser.getLogin().equals(pChangeItem.getAuthor().getLogin())) {
@@ -903,7 +889,7 @@ public class ChangeManagerBean implements IChangeManagerLocal {
         }
     }
 
-    private User checkChangeItemWriteAccess(ChangeItem pChangeItem, User pUser) throws AccessRightException, UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, WorkspaceNotEnabledException {
+    private User checkChangeItemWriteAccess(ChangeItem pChangeItem, User pUser) throws AccessRightException, UserNotFoundException, WorkspaceNotFoundException, WorkspaceNotEnabledException {
         if (pUser.isAdministrator()) {
             return pUser;
         }
@@ -916,7 +902,7 @@ public class ChangeManagerBean implements IChangeManagerLocal {
         }
     }
 
-    private User checkChangeItemReadAccess(ChangeItem pChangeItem, User pUser) throws AccessRightException, UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException {
+    private User checkChangeItemReadAccess(ChangeItem pChangeItem, User pUser) throws AccessRightException {
         if (pUser.isAdministrator() ||
                 pChangeItem.getACL() == null ||
                 pChangeItem.getACL().hasReadAccess(pUser)) {
@@ -926,7 +912,7 @@ public class ChangeManagerBean implements IChangeManagerLocal {
         }
     }
 
-    private User checkMilestoneWriteAccess(Milestone pMilestone, User pUser) throws AccessRightException, UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, WorkspaceNotEnabledException {
+    private User checkMilestoneWriteAccess(Milestone pMilestone, User pUser) throws AccessRightException, UserNotFoundException, WorkspaceNotFoundException, WorkspaceNotEnabledException {
         if (pUser.isAdministrator()) {
             return pUser;
         }
@@ -939,7 +925,7 @@ public class ChangeManagerBean implements IChangeManagerLocal {
         }
     }
 
-    private User checkMilestoneReadAccess(Milestone pMilestone, User pUser) throws AccessRightException, UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException {
+    private User checkMilestoneReadAccess(Milestone pMilestone, User pUser) throws AccessRightException {
         if (pUser.isAdministrator() ||
                 pMilestone.getACL() == null ||
                 pMilestone.getACL().hasReadAccess(pUser)) {
@@ -1003,4 +989,16 @@ public class ChangeManagerBean implements IChangeManagerLocal {
         return documentIterations;
     }
 
+    private ChangeIssue loadChangeIssue(Locale locale, int pId) throws ChangeIssueNotFoundException {
+        return Optional.of(changeItemDAO.loadChangeIssue(locale, pId)).orElseThrow(() -> new ChangeIssueNotFoundException(locale, pId));
+    }
+
+    private ChangeRequest loadChangeRequest(int pId, Locale locale) throws ChangeRequestNotFoundException {
+        return Optional.of(changeItemDAO.loadChangeRequest(locale, pId)).orElseThrow(() -> new ChangeRequestNotFoundException(locale, pId));
+    }
+
+    private ChangeOrder loadChangeOrder(int pId, Locale locale) throws ChangeOrderNotFoundException {
+        return Optional.of(changeItemDAO.loadChangeOrder(locale, pId)).orElseThrow(() -> new ChangeOrderNotFoundException(locale,
+                pId));
+    }
 }

@@ -602,13 +602,13 @@ public class IndexerManagerBean implements IIndexerManagerLocal {
 
     }
 
-    private PartRevision getPartRevision(PartRevisionKey partRevision) {
-        try {
-            return partRevisionDAO.loadPartR(partRevision);
-        } catch (PartRevisionNotFoundException e) {
-            LOGGER.log(Level.INFO, "Cannot infer part revision from key [" + partRevision + "]", e);
-            return null;
+    private PartRevision getPartRevision(PartRevisionKey partRevisionKey) {
+        PartRevision partRevision = partRevisionDAO.loadPartR(partRevisionKey);
+
+        if (partRevision == null) {
+            LOGGER.log(Level.INFO, "Cannot infer part revision from key [" + partRevisionKey + "]");
         }
+        return partRevision;
     }
 
 }

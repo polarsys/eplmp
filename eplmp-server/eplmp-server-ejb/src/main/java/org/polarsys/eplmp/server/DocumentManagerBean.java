@@ -989,7 +989,7 @@ public class DocumentManagerBean implements IDocumentManagerLocal {
 
             for (Tag t : tagsToCreate) {
                 try {
-                    tagDAO.createTag(userLocale, t);
+                    tagDAO.createTag(t, true);
                 } catch (CreationException | TagAlreadyExistsException ex) {
                     LOGGER.log(Level.SEVERE, null, ex);
                 }
@@ -1313,14 +1313,9 @@ public class DocumentManagerBean implements IDocumentManagerLocal {
         checkNameFileValidity(pNewName, userLocale);
 
         BinaryResource file = binaryResourceDAO.loadBinaryResource(userLocale, pFullName);
-
-        try {
-
-            binaryResourceDAO.loadBinaryResource(userLocale, file.getNewFullName(pNewName));
+        if (binaryResourceDAO.exists(file.getNewFullName(pNewName))) {
             throw new FileAlreadyExistsException(userLocale, pNewName);
-
-        } catch (FileNotFoundException e) {
-
+        } else {
             DocumentIteration document = binaryResourceDAO.getDocumentHolder(file);
             DocumentRevision docR = document.getDocumentRevision();
 
@@ -1339,7 +1334,6 @@ public class DocumentManagerBean implements IDocumentManagerLocal {
                 throw new NotAllowedException(userLocale, "NotAllowedException29");
             }
         }
-
     }
 
     @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
@@ -1372,10 +1366,9 @@ public class DocumentManagerBean implements IDocumentManagerLocal {
 
         BinaryResource file = binaryResourceDAO.loadBinaryResource(userLocale, pFullName);
 
-        try {
-            binaryResourceDAO.loadBinaryResource(userLocale, file.getNewFullName(pNewName));
+        if (binaryResourceDAO.exists(file.getNewFullName(pNewName))) {
             throw new FileAlreadyExistsException(userLocale, pNewName);
-        } catch (FileNotFoundException e) {
+        } else {
             DocumentMasterTemplate template = binaryResourceDAO.getDocumentTemplateHolder(file);
 
             checkDocumentTemplateWriteAccess(template, user);
