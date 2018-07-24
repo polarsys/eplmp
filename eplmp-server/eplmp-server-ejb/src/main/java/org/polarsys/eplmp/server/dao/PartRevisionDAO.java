@@ -50,16 +50,11 @@ public class PartRevisionDAO {
         mLocale = Locale.getDefault();
     }
 
-    public PartRevision loadPartR(PartRevisionKey pKey) throws PartRevisionNotFoundException {
-        PartRevision partR = em.find(PartRevision.class, pKey);
-        if (partR == null) {
-            throw new PartRevisionNotFoundException(mLocale, pKey);
-        } else {
-            return partR;
-        }
+    public PartRevision loadPartR(PartRevisionKey pKey) {
+        return em.find(PartRevision.class, pKey);
     }
 
-    public PartRevision loadPartR(Locale pLocale, PartRevisionKey pKey) throws PartRevisionNotFoundException {
+    public PartRevision loadPartR(Locale pLocale, PartRevisionKey pKey) {
         mLocale = pLocale;
         return loadPartR(pKey);
     }

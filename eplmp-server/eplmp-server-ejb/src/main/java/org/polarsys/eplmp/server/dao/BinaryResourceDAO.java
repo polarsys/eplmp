@@ -81,6 +81,10 @@ public class BinaryResourceDAO {
         return file;
     }
 
+    public boolean exists(String pFullName) {
+        return em.find(BinaryResource.class, pFullName) != null;
+    }
+
     public BinaryResource loadBinaryResource(Locale pLocale, String pFullName) throws FileNotFoundException {
         mLocale = pLocale;
         return loadBinaryResource(pFullName);

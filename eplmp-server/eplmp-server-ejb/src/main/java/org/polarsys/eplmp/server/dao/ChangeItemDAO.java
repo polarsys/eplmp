@@ -15,10 +15,8 @@ import org.polarsys.eplmp.core.change.ChangeItem;
 import org.polarsys.eplmp.core.change.ChangeOrder;
 import org.polarsys.eplmp.core.change.ChangeRequest;
 import org.polarsys.eplmp.core.document.DocumentRevisionKey;
-import org.polarsys.eplmp.core.meta.Folder;
-import org.polarsys.eplmp.core.exceptions.ChangeIssueNotFoundException;
 import org.polarsys.eplmp.core.exceptions.ChangeOrderNotFoundException;
-import org.polarsys.eplmp.core.exceptions.ChangeRequestNotFoundException;
+import org.polarsys.eplmp.core.meta.Folder;
 import org.polarsys.eplmp.core.meta.Tag;
 import org.polarsys.eplmp.core.product.PartRevisionKey;
 
@@ -71,44 +69,29 @@ public class ChangeItemDAO {
                  .getResultList();
     }
     
-    public ChangeIssue loadChangeIssue(int pId) throws ChangeIssueNotFoundException {
-        ChangeIssue change = em.find(ChangeIssue.class, pId);
-        if (change == null) {
-            throw new ChangeIssueNotFoundException(mLocale, pId);
-        } else {
-            return change;
-        }
+    public ChangeIssue loadChangeIssue(int pId) {
+        return  em.find(ChangeIssue.class, pId);
     }
 
-    public ChangeIssue loadChangeIssue(Locale pLocale, int pId) throws ChangeIssueNotFoundException {
+    public ChangeIssue loadChangeIssue(Locale pLocale, int pId) {
         mLocale = pLocale;
         return loadChangeIssue(pId);
     }
 
-    public ChangeOrder loadChangeOrder(int pId) throws ChangeOrderNotFoundException {
-        ChangeOrder change = em.find(ChangeOrder.class, pId);
-        if (change == null) {
-            throw new ChangeOrderNotFoundException(mLocale, pId);
-        } else {
-            return change;
-        }
+    public ChangeOrder loadChangeOrder(int pId) {
+        return em.find(ChangeOrder.class, pId);
     }
 
-    public ChangeOrder loadChangeOrder(Locale pLocale, int pId) throws ChangeOrderNotFoundException {
+    public ChangeOrder loadChangeOrder(Locale pLocale, int pId) {
         mLocale = pLocale;
         return loadChangeOrder(pId);
     }
 
-    public ChangeRequest loadChangeRequest(int pId) throws ChangeRequestNotFoundException {
-        ChangeRequest change = em.find(ChangeRequest.class, pId);
-        if (change == null) {
-            throw new ChangeRequestNotFoundException(mLocale, pId);
-        } else {
-            return change;
-        }
+    public ChangeRequest loadChangeRequest(int pId) {
+        return em.find(ChangeRequest.class, pId);
     }
 
-    public ChangeRequest loadChangeRequest(Locale pLocale, int pId) throws ChangeRequestNotFoundException {
+    public ChangeRequest loadChangeRequest(Locale pLocale, int pId) {
         mLocale = pLocale;
         return loadChangeRequest(pId);
     }
