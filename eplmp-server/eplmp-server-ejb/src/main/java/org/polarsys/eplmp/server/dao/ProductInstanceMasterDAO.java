@@ -90,6 +90,10 @@ public class ProductInstanceMasterDAO {
         return loadProductInstanceMaster(pId);
     }
 
+    public boolean existsProductInstanceMaster(ProductInstanceMasterKey pId) {
+        return em.find(ProductInstanceMaster.class, pId) != null;
+    }
+
     public void deleteProductInstanceMaster(ProductInstanceMaster productInstanceMaster) {
         for(ProductInstanceIteration productInstanceIteration : productInstanceMaster.getProductInstanceIterations()){
             for(BaselinedPart baselinedPart : productInstanceIteration.getBaselinedParts().values()){

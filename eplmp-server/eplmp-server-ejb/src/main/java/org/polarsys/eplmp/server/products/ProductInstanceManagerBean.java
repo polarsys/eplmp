@@ -180,15 +180,13 @@ public class ProductInstanceManagerBean implements IProductInstanceManagerLocal 
         Locale userLocale = user.getLocale();
 
         checkNameValidity(serialNumber,userLocale);
+        ProductInstanceMasterKey productInstanceMasterKey = new ProductInstanceMasterKey(serialNumber, configurationItemKey.getWorkspace(), configurationItemKey.getId());
+        ConfigurationItem configurationItem = configurationItemDAO.loadConfigurationItem(userLocale, configurationItemKey);
 
-        try {// Check if ths product instance already exist
-            ProductInstanceMaster productInstanceMaster = productInstanceMasterDAO.loadProductInstanceMaster(userLocale, new ProductInstanceMasterKey(serialNumber, configurationItemKey.getWorkspace(), configurationItemKey.getId()));
-            throw new ProductInstanceAlreadyExistsException(userLocale, productInstanceMaster);
-        } catch (ProductInstanceMasterNotFoundException e) {
-            LOGGER.log(Level.FINEST, null, e);
+        if(productInstanceMasterDAO.existsProductInstanceMaster(productInstanceMasterKey)){
+            throw new ProductInstanceAlreadyExistsException(userLocale, new ProductInstanceMaster(configurationItem,serialNumber));
         }
 
-        ConfigurationItem configurationItem = configurationItemDAO.loadConfigurationItem(userLocale, configurationItemKey);
         ProductInstanceMaster productInstanceMaster = new ProductInstanceMaster(configurationItem, serialNumber);
 
         if(aclUserEntries != null && !aclUserEntries.isEmpty() || aclUserGroupEntries != null &&  !aclUserGroupEntries.isEmpty()){
