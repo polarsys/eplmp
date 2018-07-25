@@ -18,11 +18,14 @@ import org.polarsys.eplmp.core.product.Effectivity;
 import org.polarsys.eplmp.core.product.PartRevision;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.persistence.*;
 import java.util.List;
 import java.util.Locale;
 
 @Stateless(name = "EffectivityDAO")
+@TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
 public class EffectivityDAO {
 
     @PersistenceContext

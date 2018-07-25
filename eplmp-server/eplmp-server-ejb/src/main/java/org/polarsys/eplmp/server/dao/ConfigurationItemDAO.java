@@ -17,11 +17,14 @@ import org.polarsys.eplmp.core.exceptions.CreationException;
 import org.polarsys.eplmp.core.product.*;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.persistence.*;
 import java.util.List;
 import java.util.Locale;
 
 @Stateless(name = "ConfigurationItemDAO")
+@TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
 public class ConfigurationItemDAO {
 
     public static final String WORKSPACE_ID = "workspaceId";

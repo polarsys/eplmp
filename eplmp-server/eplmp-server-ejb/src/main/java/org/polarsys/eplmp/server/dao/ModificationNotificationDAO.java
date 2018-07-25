@@ -15,11 +15,14 @@ import org.polarsys.eplmp.core.product.PartIterationKey;
 import org.polarsys.eplmp.core.product.PartRevisionKey;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import java.util.List;
 
 @Stateless(name = "ModificationNotificationDAO")
+@TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
 public class ModificationNotificationDAO {
 
     public static final String WORKSPACE_ID = "workspaceId";

@@ -20,12 +20,15 @@ import org.polarsys.eplmp.core.product.*;
 import org.polarsys.eplmp.core.workflow.Workflow;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 import javax.persistence.*;
 import java.util.List;
 import java.util.Locale;
 
 @Stateless(name = "PartRevisionDAO")
+@TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
 public class PartRevisionDAO {
 
     public static final String WORKSPACE_ID = "workspaceId";

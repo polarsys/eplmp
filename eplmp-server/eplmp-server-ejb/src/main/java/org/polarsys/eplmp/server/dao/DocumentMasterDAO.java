@@ -16,6 +16,8 @@ import org.polarsys.eplmp.core.exceptions.CreationException;
 import org.polarsys.eplmp.core.exceptions.DocumentMasterAlreadyExistsException;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 import javax.persistence.EntityExistsException;
 import javax.persistence.EntityManager;
@@ -30,6 +32,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 @Stateless(name = "DocumentMasterDAO")
+@TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
 public class DocumentMasterDAO {
     private static final Logger LOGGER = Logger.getLogger(DocumentMasterDAO.class.getName());
 

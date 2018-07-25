@@ -23,12 +23,15 @@ import org.polarsys.eplmp.core.product.PartIteration;
 import org.polarsys.eplmp.core.product.PartMasterTemplate;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.persistence.*;
 import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 @Stateless(name = "BinaryResourceDAO")
+@TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
 public class BinaryResourceDAO {
     private static final Logger LOGGER = Logger.getLogger(BinaryResourceDAO.class.getName());
 

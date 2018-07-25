@@ -18,12 +18,15 @@ import org.polarsys.eplmp.core.security.ACLUserEntry;
 import org.polarsys.eplmp.core.security.ACLUserGroupEntry;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import java.util.Map;
 
 @Stateless(name = "ACLDAO")
+@TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
 public class ACLDAO {
 
     @PersistenceContext

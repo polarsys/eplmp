@@ -14,6 +14,8 @@ package org.polarsys.eplmp.server.dao;
 import org.polarsys.eplmp.core.meta.InstanceAttribute;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.persistence.EntityExistsException;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -22,6 +24,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 @Stateless(name = "InstanceAttributeDAO")
+@TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
 public class InstanceAttributeDAO {
     private static final Logger LOGGER = Logger.getLogger(InstanceAttributeDAO.class.getName());
 

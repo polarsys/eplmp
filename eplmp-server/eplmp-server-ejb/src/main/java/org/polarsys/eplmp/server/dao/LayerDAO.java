@@ -15,6 +15,8 @@ import org.polarsys.eplmp.core.product.ConfigurationItemKey;
 import org.polarsys.eplmp.core.product.Layer;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
@@ -22,6 +24,7 @@ import java.util.List;
 import java.util.Locale;
 
 @Stateless(name = "LayerDAO")
+@TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
 public class LayerDAO {
 
     @PersistenceContext

@@ -21,6 +21,8 @@ import org.polarsys.eplmp.core.meta.Tag;
 import org.polarsys.eplmp.core.workflow.Workflow;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 import javax.persistence.*;
 import java.util.List;
@@ -29,6 +31,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 @Stateless(name = "DocumentRevisionDAO")
+@TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
 public class DocumentRevisionDAO {
 
     public static final String WORKSPACE_ID = "workspaceId";

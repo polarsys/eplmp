@@ -19,6 +19,8 @@ import org.polarsys.eplmp.core.workflow.WorkspaceWorkflow;
 import org.polarsys.eplmp.core.workflow.WorkspaceWorkflowKey;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
@@ -27,6 +29,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Stateless(name = "WorkflowDAO")
+@TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
 public class WorkflowDAO {
 
     public static final String WORKFLOW = "workflow";

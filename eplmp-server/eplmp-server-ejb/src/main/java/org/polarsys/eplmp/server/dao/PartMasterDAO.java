@@ -19,6 +19,8 @@ import org.polarsys.eplmp.core.product.PartMasterKey;
 import org.polarsys.eplmp.core.product.PartRevision;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 import javax.persistence.*;
 import javax.persistence.criteria.CriteriaBuilder;
@@ -29,6 +31,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 @Stateless(name = "PartMasterDAO")
+@TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
 public class PartMasterDAO {
 
     public static final String WORKSPACE_ID = "workspaceId";
