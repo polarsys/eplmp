@@ -43,6 +43,7 @@ import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.ws.rs.*;
 import javax.ws.rs.core.*;
+import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URLEncoder;
@@ -568,10 +569,9 @@ public class ProductResource {
         return Response.ok(partRevisionDTO).build();
     }
 
-    // TODO : set the appropriate response class for generated API usage
     @GET
     @ApiOperation(value = "Export files from configuration item with given config spec",
-            response = Response.class)
+            response = File.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful export"),
             @ApiResponse(code = 401, message = "Unauthorized"),
