@@ -17,6 +17,8 @@ import org.polarsys.eplmp.core.exceptions.ProductConfigurationNotFoundException;
 import org.polarsys.eplmp.core.product.ConfigurationItemKey;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceException;
@@ -26,6 +28,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 @Stateless(name = "ProductConfigurationDAO")
+@TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
 public class ProductConfigurationDAO {
 
     @PersistenceContext

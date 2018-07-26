@@ -17,6 +17,8 @@ import org.polarsys.eplmp.core.product.PartSubstituteLink;
 import org.polarsys.eplmp.core.product.PartUsageLink;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -25,6 +27,7 @@ import java.util.List;
 import java.util.Locale;
 
 @Stateless(name = "PartUsageLinkDAO")
+@TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
 public class PartUsageLinkDAO {
 
     @PersistenceContext

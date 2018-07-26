@@ -18,10 +18,13 @@ import org.polarsys.eplmp.core.exceptions.OrganizationAlreadyExistsException;
 import org.polarsys.eplmp.core.exceptions.OrganizationNotFoundException;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.persistence.*;
 import java.util.Locale;
 
 @Stateless(name = "OrganizationDAO")
+@TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
 public class OrganizationDAO {
 
     @PersistenceContext

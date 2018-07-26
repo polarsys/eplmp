@@ -14,12 +14,15 @@ package org.polarsys.eplmp.server.dao;
 import org.polarsys.eplmp.core.configuration.PartCollection;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 @Stateless(name = "PartCollectionDAO")
+@TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
 public class PartCollectionDAO {
 
     @PersistenceContext

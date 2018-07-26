@@ -18,11 +18,14 @@ import org.polarsys.eplmp.core.exceptions.DocumentMasterTemplateNotFoundExceptio
 import org.polarsys.eplmp.core.meta.ListOfValuesKey;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.persistence.*;
 import java.util.List;
 import java.util.Locale;
 
 @Stateless(name = "DocumentMasterTemplateDAO")
+@TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
 public class DocumentMasterTemplateDAO {
 
     @PersistenceContext

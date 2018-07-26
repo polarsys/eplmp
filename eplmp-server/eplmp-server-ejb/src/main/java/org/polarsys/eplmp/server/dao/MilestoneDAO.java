@@ -17,6 +17,8 @@ import org.polarsys.eplmp.core.exceptions.MilestoneAlreadyExistsException;
 import org.polarsys.eplmp.core.exceptions.MilestoneNotFoundException;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
@@ -25,6 +27,7 @@ import java.util.List;
 import java.util.Locale;
 
 @Stateless(name = "MilestoneDAO")
+@TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
 public class MilestoneDAO {
 
     public static final String WORKSPACE_ID = "workspaceId";

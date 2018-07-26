@@ -17,10 +17,13 @@ import org.polarsys.eplmp.core.product.PartIteration;
 import org.polarsys.eplmp.core.product.PartRevision;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.persistence.*;
 import java.util.Locale;
 
 @Stateless(name = "ConversionDAO")
+@TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
 public class ConversionDAO {
 
     @PersistenceContext

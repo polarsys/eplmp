@@ -21,6 +21,8 @@ import org.polarsys.eplmp.core.query.QueryRule;
 
 import javax.annotation.PostConstruct;
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
@@ -38,6 +40,7 @@ import java.util.stream.Collectors;
  */
 
 @Stateless(name = "PartRevisionQueryDAO")
+@TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
 public class PartRevisionQueryDAO {
 
     public static final String STRING = "string";

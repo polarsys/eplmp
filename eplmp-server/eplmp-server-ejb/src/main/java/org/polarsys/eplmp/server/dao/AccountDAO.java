@@ -20,11 +20,14 @@ import org.polarsys.eplmp.core.security.Credential;
 import org.polarsys.eplmp.core.security.UserGroupMapping;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.persistence.*;
 import java.util.List;
 import java.util.Locale;
 
 @Stateless(name = "AccountDAO")
+@TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
 public class AccountDAO {
 
     @PersistenceContext

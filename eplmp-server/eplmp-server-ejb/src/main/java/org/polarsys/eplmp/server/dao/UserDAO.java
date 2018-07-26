@@ -19,6 +19,8 @@ import org.polarsys.eplmp.core.security.WorkspaceUserMembership;
 import org.polarsys.eplmp.core.security.WorkspaceUserMembershipKey;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 import javax.persistence.*;
 import java.util.List;
@@ -27,6 +29,7 @@ import java.util.Map;
 import java.util.TreeMap;
 
 @Stateless(name = "UserDAO")
+@TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
 public class UserDAO {
 
     @PersistenceContext

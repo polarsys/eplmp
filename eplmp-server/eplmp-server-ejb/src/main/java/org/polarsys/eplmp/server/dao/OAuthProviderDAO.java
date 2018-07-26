@@ -18,6 +18,8 @@ import org.polarsys.eplmp.core.exceptions.OAuthProviderNotFoundException;
 import org.polarsys.eplmp.core.exceptions.ProvidedAccountNotFoundException;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
@@ -25,6 +27,7 @@ import java.util.List;
 import java.util.Locale;
 
 @Stateless(name = "OAuthProviderDAO")
+@TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
 public class OAuthProviderDAO {
 
     @PersistenceContext

@@ -21,6 +21,8 @@ import org.polarsys.eplmp.core.notification.TagUserSubscription;
 import org.polarsys.eplmp.core.notification.TagUserSubscriptionKey;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.persistence.*;
 import java.util.*;
 import java.util.logging.Level;
@@ -28,6 +30,7 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 @Stateless(name = "SubscriptionDAO")
+@TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
 public class SubscriptionDAO {
     private static final Logger LOGGER = Logger.getLogger(SubscriptionDAO.class.getName());
     public static final String WORKSPACE_ID = "workspaceId";

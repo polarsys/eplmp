@@ -14,11 +14,14 @@ package org.polarsys.eplmp.server.dao;
 import org.polarsys.eplmp.core.document.DocumentIteration;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
 
 @Stateless(name = "DocumentDAO")
+@TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
 public class DocumentDAO {
 
     @PersistenceContext

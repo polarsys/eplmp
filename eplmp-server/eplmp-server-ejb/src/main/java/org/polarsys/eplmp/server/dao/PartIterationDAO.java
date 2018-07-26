@@ -16,6 +16,8 @@ import org.polarsys.eplmp.core.meta.ListOfValuesKey;
 import org.polarsys.eplmp.core.product.*;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -23,6 +25,7 @@ import java.util.List;
 import java.util.Locale;
 
 @Stateless(name = "PartIterationDAO")
+@TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
 public class PartIterationDAO {
 
     @PersistenceContext

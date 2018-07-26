@@ -18,6 +18,8 @@ import org.polarsys.eplmp.core.exceptions.GCMAccountNotFoundException;
 import org.polarsys.eplmp.core.gcm.GCMAccount;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.persistence.EntityExistsException;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -25,6 +27,7 @@ import javax.persistence.PersistenceException;
 import java.util.Locale;
 
 @Stateless(name = "GCMAccountDAO")
+@TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
 public class GCMAccountDAO {
 
     @PersistenceContext

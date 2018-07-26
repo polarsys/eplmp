@@ -19,6 +19,8 @@ import org.polarsys.eplmp.core.exceptions.FolderAlreadyExistsException;
 import org.polarsys.eplmp.core.exceptions.FolderNotFoundException;
 
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.inject.Inject;
 import javax.persistence.*;
 import java.util.LinkedList;
@@ -28,6 +30,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 @Stateless(name = "FolderDAO")
+@TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
 public class FolderDAO {
 
     @PersistenceContext
