@@ -14,14 +14,14 @@ import org.polarsys.eplmp.core.exceptions.LayerNotFoundException;
 import org.polarsys.eplmp.core.product.ConfigurationItemKey;
 import org.polarsys.eplmp.core.product.Layer;
 
-import javax.ejb.Stateless;
+import javax.enterprise.context.RequestScoped;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
 import java.util.List;
 import java.util.Locale;
 
-@Stateless(name = "LayerDAO")
+@RequestScoped
 public class LayerDAO {
 
     @PersistenceContext

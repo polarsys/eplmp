@@ -18,7 +18,7 @@ import org.polarsys.eplmp.core.sharing.SharedDocument;
 import org.polarsys.eplmp.core.sharing.SharedEntity;
 import org.polarsys.eplmp.core.sharing.SharedPart;
 
-import javax.ejb.Stateless;
+import javax.enterprise.context.RequestScoped;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
@@ -29,7 +29,7 @@ import java.util.Locale;
  * @author Morgan Guimard
  */
 
-@Stateless(name = "SharedEntityDAO")
+@RequestScoped
 public class SharedEntityDAO {
 
     @PersistenceContext

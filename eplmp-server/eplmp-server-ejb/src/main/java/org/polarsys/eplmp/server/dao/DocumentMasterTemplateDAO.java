@@ -17,12 +17,12 @@ import org.polarsys.eplmp.core.exceptions.DocumentMasterTemplateAlreadyExistsExc
 import org.polarsys.eplmp.core.exceptions.DocumentMasterTemplateNotFoundException;
 import org.polarsys.eplmp.core.meta.ListOfValuesKey;
 
-import javax.ejb.Stateless;
+import javax.enterprise.context.RequestScoped;
 import javax.persistence.*;
 import java.util.List;
 import java.util.Locale;
 
-@Stateless(name = "DocumentMasterTemplateDAO")
+@RequestScoped
 public class DocumentMasterTemplateDAO {
 
     @PersistenceContext

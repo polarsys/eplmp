@@ -16,7 +16,7 @@ import org.polarsys.eplmp.core.product.PartMasterKey;
 import org.polarsys.eplmp.core.product.PartSubstituteLink;
 import org.polarsys.eplmp.core.product.PartUsageLink;
 
-import javax.ejb.Stateless;
+import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -24,7 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-@Stateless(name = "PartUsageLinkDAO")
+@RequestScoped
 public class PartUsageLinkDAO {
 
     @PersistenceContext

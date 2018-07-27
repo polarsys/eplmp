@@ -30,7 +30,7 @@ import org.polarsys.eplmp.core.services.IBinaryStorageManagerLocal;
 import org.polarsys.eplmp.core.workflow.WorkflowModel;
 import org.polarsys.eplmp.core.workflow.WorkspaceWorkflow;
 
-import javax.ejb.Stateless;
+import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.persistence.EntityExistsException;
 import javax.persistence.EntityManager;
@@ -41,7 +41,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 
-@Stateless(name = "WorkspaceDAO")
+@RequestScoped
 public class WorkspaceDAO {
 
     public static final String WORKSPACE = "workspace";

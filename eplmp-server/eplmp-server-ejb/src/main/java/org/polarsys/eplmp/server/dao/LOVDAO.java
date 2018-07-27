@@ -16,12 +16,12 @@ import org.polarsys.eplmp.core.exceptions.ListOfValuesNotFoundException;
 import org.polarsys.eplmp.core.meta.ListOfValues;
 import org.polarsys.eplmp.core.meta.ListOfValuesKey;
 
-import javax.ejb.Stateless;
+import javax.enterprise.context.RequestScoped;
 import javax.persistence.*;
 import java.util.List;
 import java.util.Locale;
 
-@Stateless(name = "LOVDAO")
+@RequestScoped
 public class LOVDAO {
 
     @PersistenceContext

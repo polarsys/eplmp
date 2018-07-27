@@ -14,13 +14,13 @@ package org.polarsys.eplmp.server.dao;
 import org.polarsys.eplmp.core.exceptions.WebhookNotFoundException;
 import org.polarsys.eplmp.core.hooks.Webhook;
 
-import javax.ejb.Stateless;
+import javax.enterprise.context.RequestScoped;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import java.util.List;
 import java.util.Locale;
 
-@Stateless(name = "WebhookDAO")
+@RequestScoped
 public class WebhookDAO {
 
     @PersistenceContext

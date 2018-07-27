@@ -19,7 +19,7 @@ import org.polarsys.eplmp.core.exceptions.RoleNotFoundException;
 import org.polarsys.eplmp.core.workflow.Role;
 import org.polarsys.eplmp.core.workflow.RoleKey;
 
-import javax.ejb.Stateless;
+import javax.enterprise.context.RequestScoped;
 import javax.persistence.EntityExistsException;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -32,7 +32,7 @@ import java.util.logging.Logger;
 /**
  * @author Morgan Guimard
  */
-@Stateless(name = "RoleDAO")
+@RequestScoped
 public class RoleDAO {
 
     @PersistenceContext

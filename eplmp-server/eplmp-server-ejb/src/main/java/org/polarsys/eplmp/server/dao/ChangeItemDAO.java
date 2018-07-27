@@ -20,7 +20,7 @@ import org.polarsys.eplmp.core.meta.Folder;
 import org.polarsys.eplmp.core.meta.Tag;
 import org.polarsys.eplmp.core.product.PartRevisionKey;
 
-import javax.ejb.Stateless;
+import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -28,7 +28,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-@Stateless(name = "ChangeItemDAO")
+@RequestScoped
 public class ChangeItemDAO {
 
     private static final String DOCUMENT_MASTER_ID = "documentMasterId";

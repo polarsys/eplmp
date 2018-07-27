@@ -17,12 +17,12 @@ import org.polarsys.eplmp.core.meta.ListOfValuesKey;
 import org.polarsys.eplmp.core.product.PartMasterTemplate;
 import org.polarsys.eplmp.core.product.PartMasterTemplateKey;
 
-import javax.ejb.Stateless;
+import javax.enterprise.context.RequestScoped;
 import javax.persistence.*;
 import java.util.List;
 import java.util.Locale;
 
-@Stateless(name = "PartMasterTemplateDAO")
+@RequestScoped
 public class PartMasterTemplateDAO {
 
     @PersistenceContext

@@ -17,11 +17,11 @@ import org.polarsys.eplmp.core.exceptions.CreationException;
 import org.polarsys.eplmp.core.exceptions.OrganizationAlreadyExistsException;
 import org.polarsys.eplmp.core.exceptions.OrganizationNotFoundException;
 
-import javax.ejb.Stateless;
+import javax.enterprise.context.RequestScoped;
 import javax.persistence.*;
 import java.util.Locale;
 
-@Stateless(name = "OrganizationDAO")
+@RequestScoped
 public class OrganizationDAO {
 
     @PersistenceContext

@@ -18,13 +18,13 @@ import org.polarsys.eplmp.core.document.DocumentLink;
 import org.polarsys.eplmp.core.document.DocumentRevision;
 import org.polarsys.eplmp.core.product.PartIteration;
 
-import javax.ejb.Stateless;
+import javax.enterprise.context.RequestScoped;
 import javax.persistence.EntityExistsException;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import java.util.List;
 
-@Stateless(name = "DocumentLinkDAO")
+@RequestScoped
 public class DocumentLinkDAO {
 
     public static final String DOCUMENT_REVISION = "documentRevision";

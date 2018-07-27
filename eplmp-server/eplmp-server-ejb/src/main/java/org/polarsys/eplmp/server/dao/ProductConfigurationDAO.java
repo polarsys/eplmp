@@ -16,7 +16,7 @@ import org.polarsys.eplmp.core.exceptions.CreationException;
 import org.polarsys.eplmp.core.exceptions.ProductConfigurationNotFoundException;
 import org.polarsys.eplmp.core.product.ConfigurationItemKey;
 
-import javax.ejb.Stateless;
+import javax.enterprise.context.RequestScoped;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceException;
@@ -25,7 +25,7 @@ import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-@Stateless(name = "ProductConfigurationDAO")
+@RequestScoped
 public class ProductConfigurationDAO {
 
     @PersistenceContext

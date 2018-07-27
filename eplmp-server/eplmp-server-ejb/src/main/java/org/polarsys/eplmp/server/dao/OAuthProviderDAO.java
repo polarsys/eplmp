@@ -17,14 +17,14 @@ import org.polarsys.eplmp.core.common.ProvidedAccount;
 import org.polarsys.eplmp.core.exceptions.OAuthProviderNotFoundException;
 import org.polarsys.eplmp.core.exceptions.ProvidedAccountNotFoundException;
 
-import javax.ejb.Stateless;
+import javax.enterprise.context.RequestScoped;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 import java.util.List;
 import java.util.Locale;
 
-@Stateless(name = "OAuthProviderDAO")
+@RequestScoped
 public class OAuthProviderDAO {
 
     @PersistenceContext

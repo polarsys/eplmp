@@ -21,7 +21,7 @@ import org.polarsys.eplmp.core.product.PartLink;
 import org.polarsys.eplmp.core.product.PartUsageLink;
 import org.polarsys.eplmp.core.product.PathToPathLink;
 
-import javax.ejb.Stateless;
+import javax.enterprise.context.RequestScoped;
 import javax.persistence.*;
 import java.util.HashMap;
 import java.util.List;
@@ -34,7 +34,7 @@ import java.util.logging.Logger;
  * @author morgan on 29/04/15.
  */
 
-@Stateless(name = "PathToPathLinkDAO")
+@RequestScoped
 public class PathToPathLinkDAO {
 
     private static final Logger LOGGER = Logger.getLogger(PathToPathLinkDAO.class.getName());

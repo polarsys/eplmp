@@ -18,7 +18,7 @@ import org.polarsys.eplmp.core.workflow.Workflow;
 import org.polarsys.eplmp.core.workflow.WorkspaceWorkflow;
 import org.polarsys.eplmp.core.workflow.WorkspaceWorkflowKey;
 
-import javax.ejb.Stateless;
+import javax.enterprise.context.RequestScoped;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
@@ -26,7 +26,7 @@ import javax.persistence.TypedQuery;
 import java.util.ArrayList;
 import java.util.List;
 
-@Stateless(name = "WorkflowDAO")
+@RequestScoped
 public class WorkflowDAO {
 
     public static final String WORKFLOW = "workflow";

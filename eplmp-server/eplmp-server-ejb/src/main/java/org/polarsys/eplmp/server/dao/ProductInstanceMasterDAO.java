@@ -20,7 +20,7 @@ import org.polarsys.eplmp.core.exceptions.ProductInstanceAlreadyExistsException;
 import org.polarsys.eplmp.core.exceptions.ProductInstanceMasterNotFoundException;
 import org.polarsys.eplmp.core.product.PartRevision;
 
-import javax.ejb.Stateless;
+import javax.enterprise.context.RequestScoped;
 import javax.persistence.EntityExistsException;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -28,7 +28,7 @@ import javax.persistence.PersistenceException;
 import java.util.List;
 import java.util.Locale;
 
-@Stateless(name = "ProductInstanceMasterDAO")
+@RequestScoped
 public class ProductInstanceMasterDAO {
 
     @PersistenceContext

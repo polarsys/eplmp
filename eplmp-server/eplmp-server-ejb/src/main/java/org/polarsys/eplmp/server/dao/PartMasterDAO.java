@@ -18,7 +18,7 @@ import org.polarsys.eplmp.core.product.PartMaster;
 import org.polarsys.eplmp.core.product.PartMasterKey;
 import org.polarsys.eplmp.core.product.PartRevision;
 
-import javax.ejb.Stateless;
+import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.persistence.*;
 import javax.persistence.criteria.CriteriaBuilder;
@@ -28,7 +28,7 @@ import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-@Stateless(name = "PartMasterDAO")
+@RequestScoped
 public class PartMasterDAO {
 
     public static final String WORKSPACE_ID = "workspaceId";

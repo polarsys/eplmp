@@ -20,7 +20,7 @@ import org.polarsys.eplmp.core.exceptions.DocumentRevisionNotFoundException;
 import org.polarsys.eplmp.core.meta.Tag;
 import org.polarsys.eplmp.core.workflow.Workflow;
 
-import javax.ejb.Stateless;
+import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.persistence.*;
 import java.util.List;
@@ -28,7 +28,7 @@ import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-@Stateless(name = "DocumentRevisionDAO")
+@RequestScoped
 public class DocumentRevisionDAO {
 
     public static final String WORKSPACE_ID = "workspaceId";

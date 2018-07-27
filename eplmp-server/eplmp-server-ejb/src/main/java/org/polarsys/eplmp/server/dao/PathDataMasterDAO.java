@@ -16,7 +16,7 @@ import org.polarsys.eplmp.core.configuration.ProductInstanceIteration;
 import org.polarsys.eplmp.core.configuration.ProductInstanceMaster;
 import org.polarsys.eplmp.core.exceptions.PathDataMasterNotFoundException;
 
-import javax.ejb.Stateless;
+import javax.enterprise.context.RequestScoped;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
@@ -24,7 +24,7 @@ import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-@Stateless(name = "PathDataMasterDAO")
+@RequestScoped
 public class PathDataMasterDAO {
 
     @PersistenceContext

@@ -14,15 +14,16 @@ package org.polarsys.eplmp.server.dao;
 import org.polarsys.eplmp.core.exceptions.PartIterationNotFoundException;
 import org.polarsys.eplmp.core.meta.ListOfValuesKey;
 import org.polarsys.eplmp.core.product.*;
+import org.polarsys.eplmp.server.dao.ConversionDAO;
 
-import javax.ejb.Stateless;
+import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import java.util.List;
 import java.util.Locale;
 
-@Stateless(name = "PartIterationDAO")
+@RequestScoped
 public class PartIterationDAO {
 
     @PersistenceContext
