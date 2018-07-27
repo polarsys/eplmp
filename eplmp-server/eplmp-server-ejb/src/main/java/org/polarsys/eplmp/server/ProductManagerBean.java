@@ -13,7 +13,10 @@ package org.polarsys.eplmp.server;
 import org.polarsys.eplmp.core.change.ModificationNotification;
 import org.polarsys.eplmp.core.common.*;
 import org.polarsys.eplmp.core.configuration.*;
-import org.polarsys.eplmp.core.document.*;
+import org.polarsys.eplmp.core.document.DocumentIteration;
+import org.polarsys.eplmp.core.document.DocumentLink;
+import org.polarsys.eplmp.core.document.DocumentRevision;
+import org.polarsys.eplmp.core.document.DocumentRevisionKey;
 import org.polarsys.eplmp.core.exceptions.*;
 import org.polarsys.eplmp.core.meta.*;
 import org.polarsys.eplmp.core.product.*;
@@ -410,7 +413,7 @@ public class ProductManagerBean implements IProductManagerLocal {
         User user = userManager.checkWorkspaceReadAccess(pPartRPK.getPartMaster().getWorkspace());
         Locale userLocale = user.getLocale();
 
-        PartRevision partR = partRevisionDAO.loadPartR(userLocale, pPartRPK);
+        PartRevision partR = loadRevision(userLocale, pPartRPK);
         if (partR.getACL() == null) {
             userManager.checkWorkspaceWriteAccess(pPartRPK.getWorkspaceId());
         }
@@ -492,7 +495,7 @@ public class ProductManagerBean implements IProductManagerLocal {
         User user = userManager.checkWorkspaceReadAccess(pPartRPK.getPartMaster().getWorkspace());
         Locale userLocale = user.getLocale();
 
-        PartRevision partR = partRevisionDAO.loadPartR(userLocale, pPartRPK);
+        PartRevision partR = loadRevision(userLocale, pPartRPK);
         if (partR.getACL() == null) {
             userManager.checkWorkspaceWriteAccess(pPartRPK.getWorkspaceId());
         }
@@ -594,7 +597,7 @@ public class ProductManagerBean implements IProductManagerLocal {
         User user = userManager.checkWorkspaceReadAccess(pPartRPK.getPartMaster().getWorkspace());
         Locale userLocale = user.getLocale();
 
-        PartRevision partR = partRevisionDAO.loadPartR(userLocale, pPartRPK);
+        PartRevision partR = loadRevision(userLocale, pPartRPK);
         if (partR.getACL() == null) {
             userManager.checkWorkspaceWriteAccess(pPartRPK.getWorkspaceId());
         }
@@ -665,7 +668,7 @@ public class ProductManagerBean implements IProductManagerLocal {
         Locale userLocale = user.getLocale();
         checkNameFileValidity(pName, userLocale);
 
-        PartRevision partR = partRevisionDAO.loadPartR(userLocale, pPartIPK.getPartRevision());
+        PartRevision partR = loadRevision(userLocale, pPartIPK.getPartRevision());
         PartIteration partI = partR.getIteration(pPartIPK.getIteration());
 
         if (isCheckoutByUser(user, partR) && partR.getLastIteration().equals(partI)) {
@@ -714,6 +717,10 @@ public class ProductManagerBean implements IProductManagerLocal {
 
     }
 
+    private PartRevision loadRevision(Locale userLocale, PartRevisionKey partRevisionKey) throws PartRevisionNotFoundException {
+        return Optional.of(partRevisionDAO.loadPartR(userLocale, partRevisionKey)).orElseThrow(() -> new PartRevisionNotFoundException(userLocale, partRevisionKey));
+    }
+
     @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
     @Override
     public BinaryResource saveGeometryInPartIteration(PartIterationKey pPartIPK, String pName, int quality, long pSize, double[] box) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, NotAllowedException, PartRevisionNotFoundException, FileAlreadyExistsException, CreationException, WorkspaceNotEnabledException {
@@ -721,7 +728,7 @@ public class ProductManagerBean implements IProductManagerLocal {
         Locale userLocale = user.getLocale();
         checkNameFileValidity(pName, userLocale);
 
-        PartRevision partR = partRevisionDAO.loadPartR(userLocale, pPartIPK.getPartRevision());
+        PartRevision partR = loadRevision(userLocale, pPartIPK.getPartRevision());
         PartIteration partI = partR.getIteration(pPartIPK.getIteration());
         if (isCheckoutByUser(user, partR) && partR.getLastIteration().equals(partI)) {
             Geometry geometryBinaryResource = null;
@@ -760,7 +767,7 @@ public class ProductManagerBean implements IProductManagerLocal {
         Locale userLocale = user.getLocale();
         checkNameFileValidity(pName, userLocale);
 
-        PartRevision partR = partRevisionDAO.loadPartR(userLocale, pPartIPK.getPartRevision());
+        PartRevision partR = loadRevision(userLocale, pPartIPK.getPartRevision());
         PartIteration partI = partR.getIteration(pPartIPK.getIteration());
         if (isCheckoutByUser(user, partR) && partR.getLastIteration().equals(partI)) {
             BinaryResource binaryResource = null;
@@ -833,7 +840,7 @@ public class ProductManagerBean implements IProductManagerLocal {
         User user = userManager.checkWorkspaceReadAccess(pKey.getWorkspaceId());
         Locale userLocale = user.getLocale();
 
-        PartRevision partRev = partRevisionDAO.loadPartR(userLocale, pKey.getPartRevision());
+        PartRevision partRev = loadRevision(userLocale, pKey.getPartRevision());
         if (partRev.getACL() == null) {
             userManager.checkWorkspaceWriteAccess(pKey.getWorkspaceId());
         }
@@ -980,7 +987,7 @@ public class ProductManagerBean implements IProductManagerLocal {
 
         User user = checkPartRevisionReadAccess(pPartRPK);
 
-        PartRevision partR = partRevisionDAO.loadPartR(user.getLocale(), pPartRPK);
+        PartRevision partR = loadRevision(user.getLocale(), pPartRPK);
 
         if (isCheckoutByAnotherUser(user, partR)) {
             em.detach(partR);
@@ -1041,7 +1048,7 @@ public class ProductManagerBean implements IProductManagerLocal {
         User user = userManager.checkWorkspaceWriteAccess(partRKey.getPartMaster().getWorkspace());
         Locale userLocale = user.getLocale();
 
-        PartRevision partR = partRevisionDAO.loadPartR(userLocale, partRKey);
+        PartRevision partR = loadRevision(userLocale, partRKey);
 
         //Check access rights on partR
         if (!hasPartRevisionWriteAccess(user, partR)) {
@@ -1096,7 +1103,7 @@ public class ProductManagerBean implements IProductManagerLocal {
         User user = userManager.checkWorkspaceReadAccess(workspaceId);
         Locale userLocale = user.getLocale();
 
-        PartRevision partRevision = partRevisionDAO.loadPartR(userLocale, revisionKey);
+        PartRevision partRevision = loadRevision(userLocale, revisionKey);
 
         if (isAuthor(user, partRevision) || user.isAdministrator()) {
 
@@ -1119,7 +1126,7 @@ public class ProductManagerBean implements IProductManagerLocal {
         User user = userManager.checkWorkspaceReadAccess(revisionKey.getPartMaster().getWorkspace());
         Locale userLocale = user.getLocale();
 
-        PartRevision partRevision = partRevisionDAO.loadPartR(userLocale, revisionKey);
+        PartRevision partRevision = loadRevision(userLocale, revisionKey);
 
         if (isAuthor(user, partRevision) || user.isAdministrator()) {
             ACL acl = partRevision.getACL();
@@ -1326,7 +1333,7 @@ public class ProductManagerBean implements IProductManagerLocal {
         User user = checkPartRevisionWriteAccess(revisionKey);
 
         Locale userLocale = user.getLocale();
-        PartRevision partRevision = partRevisionDAO.loadPartR(userLocale, revisionKey);
+        PartRevision partRevision = loadRevision(userLocale, revisionKey);
 
         Set<Tag> tags = new HashSet<>();
         if (pTags != null) {
@@ -1435,7 +1442,7 @@ public class ProductManagerBean implements IProductManagerLocal {
         User user = checkPartRevisionWriteAccess(pRevisionKey);                                                         // Check if the user can write the part
         Locale userLocale = user.getLocale();
 
-        PartRevision partRevision = partRevisionDAO.loadPartR(userLocale, pRevisionKey);
+        PartRevision partRevision = loadRevision(userLocale, pRevisionKey);
 
         if (partRevision.isCheckedOut()) {
             throw new NotAllowedException(userLocale, "NotAllowedException46");
@@ -1459,7 +1466,7 @@ public class ProductManagerBean implements IProductManagerLocal {
         User user = checkPartRevisionWriteAccess(pRevisionKey);                                                         // Check if the user can write the part
         Locale userLocale = user.getLocale();
 
-        PartRevision partRevision = partRevisionDAO.loadPartR(userLocale, pRevisionKey);
+        PartRevision partRevision = loadRevision(userLocale, pRevisionKey);
 
         if (!partRevision.isReleased()) {
             throw new NotAllowedException(userLocale, "NotAllowedException36");
@@ -1491,7 +1498,7 @@ public class ProductManagerBean implements IProductManagerLocal {
     @Override
     public List<ProductBaseline> findBaselinesWherePartRevisionHasIterations(PartRevisionKey partRevisionKey) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, PartRevisionNotFoundException, WorkspaceNotEnabledException {
         User user = userManager.checkWorkspaceReadAccess(partRevisionKey.getPartMaster().getWorkspace());
-        PartRevision partRevision = partRevisionDAO.loadPartR(user.getLocale(), partRevisionKey);
+        PartRevision partRevision = loadRevision(user.getLocale(), partRevisionKey);
         return productBaselineDAO.findBaselineWherePartRevisionHasIterations(partRevision);
     }
 
@@ -2069,7 +2076,7 @@ public class ProductManagerBean implements IProductManagerLocal {
         User user = userManager.checkWorkspaceReadAccess(partRevisionKey.getPartMaster().getWorkspace());
         Locale userLocale = user.getLocale();
 
-        PartRevision partR = partRevisionDAO.loadPartR(userLocale, partRevisionKey);
+        PartRevision partR = loadRevision(userLocale, partRevisionKey);
         if (!hasPartOrWorkspaceWriteAccess(user, partR)) {
             throw new AccessRightException(userLocale, user);
         }
@@ -2140,7 +2147,7 @@ public class ProductManagerBean implements IProductManagerLocal {
         User user = userManager.checkWorkspaceWriteAccess(revisionKey.getPartMaster().getWorkspace());
         Locale userLocale = user.getLocale();
 
-        PartRevision originalPartR = partRevisionDAO.loadPartR(userLocale, revisionKey);
+        PartRevision originalPartR = loadRevision(userLocale, revisionKey);
 
         if (originalPartR.isCheckedOut()) {
             throw new NotAllowedException(userLocale, "NotAllowedException40");
@@ -3696,7 +3703,7 @@ public class ProductManagerBean implements IProductManagerLocal {
             return user;
         }
         Locale userLocale = user.getLocale();
-        PartRevision partRevision = partRevisionDAO.loadPartR(userLocale, partRevisionKey);
+        PartRevision partRevision = loadRevision(userLocale, partRevisionKey);
         if (partRevision.getACL() == null) {                                                                                // Check if the part haven't ACL
             return userManager.checkWorkspaceWriteAccess(workspaceId);
         }
