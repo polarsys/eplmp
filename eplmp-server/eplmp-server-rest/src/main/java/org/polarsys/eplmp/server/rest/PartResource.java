@@ -646,7 +646,6 @@ public class PartResource {
         return Response.noContent().build();
     }
 
-    // Todo : refactor to only one method with the one above. Use a query param to set on/off public sharing
     @PUT
     @ApiOperation(value = "Un-publish part revision",
             response = Response.class)

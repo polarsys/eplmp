@@ -277,7 +277,7 @@ public class PartsResource {
     public Response runCustomQuery(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = false, value = "Save the query flag", defaultValue = "false") @QueryParam("save") boolean save,
-            @ApiParam(required = false, value = "Choose export type", defaultValue = "json") @QueryParam("export") String exportType,
+            @ApiParam(required = false, value = "Choose export type", defaultValue = "JSON") @QueryParam("export") String exportType,
             @ApiParam(required = true, value = "Query to run") QueryDTO queryDTO)
             throws EntityNotFoundException, UserNotActiveException, AccessRightException, CreationException,
             EntityAlreadyExistsException, EntityConstraintException, NotAllowedException, WorkspaceNotEnabledException {
@@ -350,10 +350,9 @@ public class PartsResource {
 
     }
 
-    // TODO : set the right response class, and use it from generated API
     @POST
     @ApiOperation(value = "Run and export a custom query",
-            response = Response.class)
+            response = File.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of PartIterationDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
@@ -366,7 +365,7 @@ public class PartsResource {
     public Response exportCustomQuery(
             @Context HttpServletRequest request,
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
-            @ApiParam(required = false, value = "Choose export type", defaultValue = "json") @QueryParam("export") String exportType,
+            @ApiParam(required = false, value = "Choose export type", defaultValue = "JSON") @QueryParam("export") String exportType,
             @ApiParam(required = true, value = "Query to export") QueryDTO queryDTO)
             throws EntityNotFoundException, EntityConstraintException, NotAllowedException,
             UserNotActiveException, WorkspaceNotEnabledException {
@@ -377,10 +376,9 @@ public class PartsResource {
         return export(workspaceId, query, request, exportType, locale);
     }
 
-    // TODO : set the right response class, and use it from generated API
     @GET
     @ApiOperation(value = "Run and export an existing query",
-            response = Response.class)
+            response = File.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful export"),
             @ApiResponse(code = 401, message = "Unauthorized"),
@@ -394,7 +392,7 @@ public class PartsResource {
             @Context HttpServletRequest request,
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Query id") @PathParam("queryId") int queryId,
-            @ApiParam(required = true, value = "Choose export type", defaultValue = "json") @PathParam("export") String exportType)
+            @ApiParam(required = true, value = "Choose export type", defaultValue = "JSON") @PathParam("export") String exportType)
             throws EntityNotFoundException, UserNotActiveException, AccessRightException, CreationException,
             EntityAlreadyExistsException, EntityConstraintException, NotAllowedException, WorkspaceNotEnabledException {
 

@@ -10,21 +10,21 @@
   *******************************************************************************/
 package org.polarsys.eplmp.server.rest;
 
+import io.swagger.annotations.*;
+import org.dozer.DozerBeanMapperSingletonWrapper;
+import org.dozer.Mapper;
+import org.polarsys.eplmp.core.admin.WorkspaceBackOptions;
 import org.polarsys.eplmp.core.admin.WorkspaceFrontOptions;
 import org.polarsys.eplmp.core.common.*;
 import org.polarsys.eplmp.core.document.DocumentRevision;
 import org.polarsys.eplmp.core.exceptions.*;
 import org.polarsys.eplmp.core.exceptions.NotAllowedException;
-import org.polarsys.eplmp.core.admin.WorkspaceBackOptions;
 import org.polarsys.eplmp.core.product.PartRevision;
 import org.polarsys.eplmp.core.security.UserGroupMapping;
 import org.polarsys.eplmp.core.security.WorkspaceUserGroupMembership;
 import org.polarsys.eplmp.core.security.WorkspaceUserMembership;
 import org.polarsys.eplmp.core.services.*;
 import org.polarsys.eplmp.server.rest.dto.*;
-import io.swagger.annotations.*;
-import org.dozer.DozerBeanMapperSingletonWrapper;
-import org.dozer.Mapper;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.security.DeclareRoles;
@@ -33,7 +33,6 @@ import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.json.Json;
 import javax.json.JsonArrayBuilder;
-import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 import javax.ws.rs.*;
 import javax.ws.rs.core.GenericEntity;
@@ -653,10 +652,9 @@ public class WorkspaceResource {
         return diskUsageSpaceDTO;
     }
 
-    // TODO add DTO mapping. (quite tricky as keys are dynamic) find a way to be usable from generated API
     @GET
     @ApiOperation(value = "Get checked out documents stats for workspace",
-            response = String.class,
+            response = CheckedOutStatsResponseDTO.class,
             authorizations = {@Authorization(value = "authorization")})
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of documents stats"),
@@ -666,7 +664,7 @@ public class WorkspaceResource {
     })
     @Path("/{workspaceId}/checked-out-documents-stats")
     @Produces(MediaType.APPLICATION_JSON)
-    public JsonObject getCheckedOutDocumentsStats(
+    public Response getCheckedOutDocumentsStats(
             @ApiParam(value = "Workspace id", required = true) @PathParam("workspaceId") String workspaceId)
             throws EntityNotFoundException, AccessRightException {
 
@@ -689,14 +687,13 @@ public class WorkspaceResource {
             statsByUserBuilder.add(entry.getKey(), entry.getValue().build());
         }
 
-        return statsByUserBuilder.build();
+        return Response.ok().entity(statsByUserBuilder.build()).build();
 
     }
 
-    // TODO add DTO mapping. (quite tricky as keys are dynamic) find a way to be usable from generated API
     @GET
     @ApiOperation(value = "Get checked out parts stats for workspace",
-            response = String.class,
+            response = CheckedOutStatsResponseDTO.class,
             authorizations = {@Authorization(value = "authorization")})
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of parts stats"),
@@ -705,7 +702,7 @@ public class WorkspaceResource {
     })
     @Path("/{workspaceId}/checked-out-parts-stats")
     @Produces(MediaType.APPLICATION_JSON)
-    public JsonObject getCheckedOutPartsStats(
+    public Response getCheckedOutPartsStats(
             @ApiParam(value = "Workspace id", required = true) @PathParam("workspaceId") String workspaceId)
             throws EntityNotFoundException, AccessRightException {
 
@@ -728,13 +725,12 @@ public class WorkspaceResource {
             statsByUserBuilder.add(entry.getKey(), entry.getValue().build());
         }
 
-        return statsByUserBuilder.build();
-
+        return Response.ok().entity(statsByUserBuilder.build()).build();
     }
 
     @GET
     @ApiOperation(value = "Get user stats for workspace",
-            response = String.class,
+            response = UserStatsDTO.class,
             authorizations = {@Authorization(value = "authorization")})
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of users stats"),
@@ -744,7 +740,7 @@ public class WorkspaceResource {
     })
     @Path("/{workspaceId}/users-stats")
     @Produces(MediaType.APPLICATION_JSON)
-    public JsonObject getUsersStats(
+    public UserStatsDTO getUsersStats(
             @ApiParam(value = "Workspace id", required = true) @PathParam("workspaceId") String workspaceId)
             throws EntityNotFoundException, UserNotActiveException, AccessRightException, WorkspaceNotEnabledException {
 
@@ -759,13 +755,17 @@ public class WorkspaceResource {
         int activeGroupsCount = workspaceUserGroupMemberships.length;
         int inactiveGroupsCount = groupsCount - activeGroupsCount;
 
-        return Json.createObjectBuilder()
-                .add("users", usersCount)
-                .add("activeusers", activeUsersCount)
-                .add("inactiveusers", inactiveUsersCount)
-                .add("groups", groupsCount)
-                .add("activegroups", activeGroupsCount)
-                .add("inactivegroups", inactiveGroupsCount).build();
+        UserStatsDTO userStatsDTO = new UserStatsDTO();
+
+        userStatsDTO.setUsers(usersCount);
+        userStatsDTO.setActiveusers(activeUsersCount);
+        userStatsDTO.setInactiveusers(inactiveUsersCount);
+
+        userStatsDTO.setGroups(groupsCount);
+        userStatsDTO.setActivegroups(activeGroupsCount);
+        userStatsDTO.setInactivegroups(inactiveGroupsCount);
+
+        return userStatsDTO;
     }
 
     @GET

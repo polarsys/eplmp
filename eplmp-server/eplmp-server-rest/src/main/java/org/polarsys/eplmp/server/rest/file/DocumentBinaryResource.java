@@ -116,18 +116,20 @@ public class DocumentBinaryResource {
                 fileName = uploadAFile(formPart, docPK);
             }
 
+            if (fileName == null) {
+                return Response.status(Response.Status.BAD_REQUEST).build();
+            }
+
             if (formParts.size() == 1) {
-                // todo prevent NPE for filename
                 return BinaryResourceUpload.tryToRespondCreated(request.getRequestURI() + URLEncoder.encode(fileName, "UTF-8"));
             }
-            return Response.noContent().build();
 
+            return Response.noContent().build();
         } catch (IOException | ServletException | StorageException e) {
             return BinaryResourceUpload.uploadError(e);
         }
     }
 
-    // TODO use uuid as QueryParam
     @GET
     @ApiOperation(value = "Download document file",
             response = File.class)
@@ -210,7 +212,7 @@ public class DocumentBinaryResource {
                 if (!tokenValid) {
                     throw new SharedResourceAccessException();
                 }
-             binaryResource = publicEntityManager.getBinaryResourceForSharedEntity(fullName);
+                binaryResource = publicEntityManager.getBinaryResourceForSharedEntity(fullName);
             } else {
                 if (!canAccess(new DocumentIterationKey(workspaceId, documentId, version, iteration))) {
                     throw new SharedResourceAccessException();

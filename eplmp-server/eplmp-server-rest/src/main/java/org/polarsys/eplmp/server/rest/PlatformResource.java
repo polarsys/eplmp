@@ -14,6 +14,7 @@ package org.polarsys.eplmp.server.rest;
 import io.swagger.annotations.*;
 import org.polarsys.eplmp.core.exceptions.PlatformHealthException;
 import org.polarsys.eplmp.core.services.IPlatformHealthManagerLocal;
+import org.polarsys.eplmp.server.rest.dto.PlatformHealthDTO;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.RequestScoped;
@@ -41,29 +42,23 @@ public class PlatformResource {
     public void init() {
     }
 
-    // TODO: use DTO as response
     @GET
     @Path("health")
     @ApiOperation(value = "Get platform health status",
-            response = String.class,
+            response = PlatformHealthDTO.class,
             authorizations = {})
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Server health is ok. A JSON object is sent in the body"),
             @ApiResponse(code = 500, message = "Server health is ko or partial")
     })
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getPlatformHealthStatus() {
-        try {
-            long before=System.currentTimeMillis();
-            platformHealthManager.runHealthCheck();
-            long after=System.currentTimeMillis();
-            JsonObject result= Json.createObjectBuilder()
-                    .add("status", "ok")
-                    .add("executionTime", after-before)
-                    .build();
-            return Response.ok(result).build();
-        } catch (PlatformHealthException e) {
-            return Response.serverError().build();
-        }
+    public PlatformHealthDTO getPlatformHealthStatus() throws PlatformHealthException {
+        long before=System.currentTimeMillis();
+        platformHealthManager.runHealthCheck();
+        long after=System.currentTimeMillis();
+        PlatformHealthDTO platformHealthDTO = new PlatformHealthDTO();
+        platformHealthDTO.setStatus("ok");
+        platformHealthDTO.setExecutionTime(after-before);
+        return platformHealthDTO;
     }
 }
