@@ -16,6 +16,7 @@ import org.polarsys.eplmp.core.document.DocumentRevision;
 import org.polarsys.eplmp.core.meta.Tag;
 import org.polarsys.eplmp.core.product.PartRevision;
 import org.polarsys.eplmp.core.workflow.Task;
+import org.polarsys.eplmp.core.workflow.WorkspaceWorkflow;
 
 import java.util.Collection;
 
@@ -51,9 +52,13 @@ public interface INotifierLocal {
 
     void sendApproval(String workspaceId, Collection<Task> runningTasks, PartRevision partRevision);
 
+    void sendApproval(String workspaceId, Collection<Task> runningTasks, WorkspaceWorkflow workspaceWorkflow);
+
     void sendPartRevisionWorkflowRelaunchedNotification(String workspaceId, PartRevision partRevision);
 
     void sendDocumentRevisionWorkflowRelaunchedNotification(String workspaceId, DocumentRevision pDocumentRevision);
+
+    void sendWorkspaceWorkflowRelaunchedNotification(String workspaceId, WorkspaceWorkflow workspaceWorkflow);
 
     void sendTaggedNotification(String workspaceId, Collection<User> pSubscribers, DocumentRevision pDocR, Tag pTag);
 

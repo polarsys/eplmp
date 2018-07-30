@@ -31,6 +31,7 @@ public class WorkflowDAO {
 
     public static final String WORKFLOW = "workflow";
     public static final String WORKSPACE = "workspace";
+
     @PersistenceContext
     private EntityManager em;
 
@@ -115,7 +116,7 @@ public class WorkflowDAO {
         removeWorkflowConstraints(workflow);
     }
 
-    private void removeWorkflowConstraints(Workflow pWorkflow) {
+    public void removeWorkflowConstraints(Workflow pWorkflow) {
         if (pWorkflow != null) {
             for (Activity activity : pWorkflow.getActivities()) {
                 activity.setRelaunchActivity(null);
@@ -159,26 +160,40 @@ public class WorkflowDAO {
     }
 
     private void removeWorkflowConstraintsOnWorkspaceWorkflow(Workspace workspace) {
-        TypedQuery<Workflow> query =
-                em.createQuery("SELECT w FROM Workflow w WHERE exists (SELECT ww FROM WorkspaceWorkflow ww where w member of ww.abortedWorkflows or ww.workflow = w AND ww.workspace = :workspace)",
-                        Workflow.class).setParameter(WORKSPACE, workspace);
+        TypedQuery<Workflow> query = em.createQuery("SELECT ww.workflow FROM WorkspaceWorkflow ww WHERE ww.workspace = :workspace AND ww.workflow IS NOT NULL",
+                Workflow.class).setParameter(WORKSPACE, workspace);
+
+        query.getResultList().forEach(this::removeWorkflowConstraints);
+
+        query = em.createQuery("SELECT ww.abortedWorkflows FROM WorkspaceWorkflow ww WHERE ww.workspace = :workspace AND size(ww.abortedWorkflows) > 0",
+                Workflow.class).setParameter(WORKSPACE, workspace);
+
         query.getResultList().forEach(this::removeWorkflowConstraints);
     }
 
     private void removeWorkflowConstraintsOnParts(Workspace workspace) {
-        TypedQuery<Workflow> query =
-                em.createQuery("SELECT w FROM Workflow w WHERE exists (SELECT p FROM PartRevision p where w member of p.abortedWorkflows or p.workflow = w AND p.partMaster.workspace = :workspace)",
-                        Workflow.class).setParameter(WORKSPACE, workspace);
+        TypedQuery<Workflow> query = em.createQuery("SELECT p.workflow FROM PartRevision p WHERE p.partMaster.workspace = :workspace AND p.workflow IS NOT NULL",
+                Workflow.class).setParameter(WORKSPACE, workspace);
+
+        query.getResultList().forEach(this::removeWorkflowConstraints);
+
+        query = em.createQuery("SELECT p.abortedWorkflows FROM PartRevision p WHERE p.partMaster.workspace = :workspace AND size(p.abortedWorkflows) > 0",
+                Workflow.class).setParameter(WORKSPACE, workspace);
+
         query.getResultList().forEach(this::removeWorkflowConstraints);
     }
 
     private void removeWorkflowConstraintsOnDocuments(Workspace workspace) {
-        TypedQuery<Workflow> query =
-                em.createQuery("SELECT w FROM Workflow w WHERE exists (SELECT d FROM DocumentRevision d where w member of d.abortedWorkflows or d.workflow = w AND d.documentMaster.workspace = :workspace)",
-                        Workflow.class).setParameter(WORKSPACE, workspace);
+        TypedQuery<Workflow> query = em.createQuery("SELECT d.workflow FROM DocumentRevision d WHERE d.documentMaster.workspace = :workspace AND d.workflow IS NOT NULL",
+                Workflow.class).setParameter(WORKSPACE, workspace);
+
+        query.getResultList().forEach(this::removeWorkflowConstraints);
+
+        query = em.createQuery("SELECT d.abortedWorkflows FROM DocumentRevision d WHERE d.documentMaster.workspace = :workspace AND size(d.abortedWorkflows) > 0",
+                Workflow.class).setParameter(WORKSPACE, workspace);
+
         query.getResultList().forEach(this::removeWorkflowConstraints);
     }
-
 
 
 }

@@ -12,14 +12,14 @@ package org.polarsys.eplmp.server.rest;
 
 import org.polarsys.eplmp.core.change.ModificationNotification;
 import org.polarsys.eplmp.core.document.DocumentRevision;
+import org.polarsys.eplmp.core.document.DocumentRevisionKey;
 import org.polarsys.eplmp.core.exceptions.*;
 import org.polarsys.eplmp.core.exceptions.NotAllowedException;
 import org.polarsys.eplmp.core.product.PartIterationKey;
 import org.polarsys.eplmp.core.product.PartRevision;
+import org.polarsys.eplmp.core.product.PartRevisionKey;
 import org.polarsys.eplmp.core.security.UserGroupMapping;
-import org.polarsys.eplmp.core.services.IDocumentManagerLocal;
-import org.polarsys.eplmp.core.services.IProductManagerLocal;
-import org.polarsys.eplmp.core.services.ITaskManagerLocal;
+import org.polarsys.eplmp.core.services.*;
 import org.polarsys.eplmp.core.workflow.ActivityKey;
 import org.polarsys.eplmp.core.workflow.TaskKey;
 import org.polarsys.eplmp.core.workflow.TaskWrapper;
@@ -53,8 +53,18 @@ public class TaskResource {
 
     @Inject
     private IDocumentManagerLocal documentService;
+
     @Inject
     private IProductManagerLocal productService;
+
+    @Inject
+    private IDocumentWorkflowManagerLocal documentWorkflowManager;
+
+    @Inject
+    private IPartWorkflowManagerLocal partWorkflowManager;
+
+    @Inject
+    private IWorkflowManagerLocal workflowManager;
 
     @Inject
     private ITaskManagerLocal taskManager;
@@ -237,11 +247,53 @@ public class TaskResource {
             throws EntityNotFoundException, NotAllowedException, UserNotActiveException, AccessRightException, WorkspaceNotEnabledException {
 
         String[] split = taskId.split("-");
+
+        if (split.length != 3) {
+            throw new BadRequestException();
+        }
+
+
         int workflowId = Integer.parseInt(split[0]);
         int step = Integer.parseInt(split[1]);
         int index = Integer.parseInt(split[2]);
 
-        taskManager.processTask(workspaceId, new TaskKey(new ActivityKey(workflowId, step), index), taskProcessDTO.getAction().name(), taskProcessDTO.getComment(), taskProcessDTO.getSignature());
+        TaskWrapper taskWrapper = taskManager.getTask(workspaceId, new TaskKey(new ActivityKey(workflowId, step), index));
+
+        TaskProcessDTO.Action action = taskProcessDTO.getAction();
+        TaskKey taskKey = taskWrapper.getTask().getKey();
+        String comment = taskProcessDTO.getComment();
+        String signature = taskProcessDTO.getSignature();
+
+        switch (taskWrapper.getHolderType()) {
+            case "documents":
+                DocumentRevisionKey documentRevisionKey = new DocumentRevisionKey(taskWrapper.getWorkspaceId(), taskWrapper.getHolderReference(), taskWrapper.getHolderVersion());
+                if (TaskProcessDTO.Action.APPROVE.equals(action)) {
+                    documentWorkflowManager.approveTaskOnDocument(workspaceId, taskKey, documentRevisionKey, comment, signature);
+                } else if (TaskProcessDTO.Action.REJECT.equals(action)) {
+                    documentWorkflowManager.rejectTaskOnDocument(workspaceId, taskKey, documentRevisionKey, comment, signature);
+                } else {
+                    throw new BadRequestException();
+                }
+                break;
+            case "parts":
+                PartRevisionKey partRevisionKey = new PartRevisionKey(taskWrapper.getWorkspaceId(), taskWrapper.getHolderReference(), taskWrapper.getHolderVersion());
+                if (TaskProcessDTO.Action.APPROVE.equals(action)) {
+                    partWorkflowManager.approveTaskOnPart(workspaceId, taskKey, partRevisionKey, comment, signature);
+                } else if (TaskProcessDTO.Action.REJECT.equals(action)) {
+                    partWorkflowManager.rejectTaskOnPart(workspaceId, taskKey, partRevisionKey, comment, signature);
+                }
+                break;
+            case "workspace-workflows":
+                if (TaskProcessDTO.Action.APPROVE.equals(action)) {
+                    workflowManager.approveTaskOnWorkspaceWorkflow(workspaceId, taskKey, comment, signature);
+                } else if (TaskProcessDTO.Action.REJECT.equals(action)) {
+                    workflowManager.rejectTaskOnWorkspaceWorkflow(workspaceId, taskKey, comment, signature);
+                }
+                break;
+            default:
+                throw new ForbiddenException();
+        }
+
         return Response.noContent().build();
     }
 

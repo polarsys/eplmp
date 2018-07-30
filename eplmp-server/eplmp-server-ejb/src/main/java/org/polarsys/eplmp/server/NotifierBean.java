@@ -26,6 +26,7 @@ import org.polarsys.eplmp.core.services.IPlatformOptionsManagerLocal;
 import org.polarsys.eplmp.core.services.IWebhookManagerLocal;
 import org.polarsys.eplmp.core.services.IWorkspaceManagerLocal;
 import org.polarsys.eplmp.core.util.FileIO;
+import org.polarsys.eplmp.core.workflow.WorkspaceWorkflow;
 import org.polarsys.eplmp.i18n.PropertiesLoader;
 import org.polarsys.eplmp.core.workflow.Task;
 import org.polarsys.eplmp.server.hooks.SNSWebhookRunner;
@@ -202,6 +203,21 @@ public class NotifierBean implements INotifierLocal {
 
     @Asynchronous
     @Override
+    public void sendApproval(String workspaceId, Collection<Task> pRunningTasks, WorkspaceWorkflow workspaceWorkflow) {
+
+        LOGGER.info("Sending approval required emails \n\tfor the workspace workflow " + workspaceWorkflow.getId());
+
+        try {
+            for (Task task : pRunningTasks) {
+                sendApproval(task, workspaceWorkflow);
+            }
+        } catch (MessagingException pMEx) {
+            logMessagingException(pMEx);
+        }
+    }
+
+    @Asynchronous
+    @Override
     public void sendPasswordRecovery(Account account, String recoveryUUID) {
 
         LOGGER.info("Sending recovery message \n\tfor the user which login is " + account.getLogin());
@@ -288,8 +304,18 @@ public class NotifierBean implements INotifierLocal {
         sendWorkflowRelaunchedNotification(adminUser, documentRevision);
 
         if (!admin.getLogin().equals(author.getLogin())) {
-            sendWorkflowRelaunchedNotification(adminUser, documentRevision);
+            sendWorkflowRelaunchedNotification(author, documentRevision);
         }
+    }
+
+    @Asynchronous
+    @Override
+    public void sendWorkspaceWorkflowRelaunchedNotification(String workspaceId, WorkspaceWorkflow workspaceWorkflow) {
+        Workspace workspace = workspaceWorkflow.getWorkspace();
+        Account admin = workspace.getAdmin();
+        User adminUser = new User(workspace, admin);
+        // Mail workspace admin
+        sendWorkflowRelaunchedNotification(adminUser, workspaceWorkflow);
     }
 
     @Asynchronous
@@ -473,6 +499,19 @@ public class NotifierBean implements INotifierLocal {
         }
     }
 
+    private void sendApproval(Task task, WorkspaceWorkflow workspaceWorkflow) throws MessagingException {
+
+        LOGGER.info("Sending approval required emails \n\tfor the workspace workflow " + workspaceWorkflow.getId());
+
+        Set<User> workers = new HashSet<>();
+        workers.addAll(task.getAssignedUsers());
+        task.getAssignedGroups().forEach(g -> workers.addAll(g.getUsers()));
+
+        for (User worker : workers) {
+            sendApprovalToUser(worker, task, workspaceWorkflow);
+        }
+    }
+
 
     private void sendApprovalToUser(User worker, Task task, DocumentRevision pDocumentRevision) throws MessagingException {
 
@@ -505,6 +544,19 @@ public class NotifierBean implements INotifierLocal {
         sendMessage(worker, "Approval_title", "Approval_part_text", args);
     }
 
+    private void sendApprovalToUser(User worker, Task pTask, WorkspaceWorkflow workspaceWorkflow) throws MessagingException {
+
+        LOGGER.info("Sending approval email \n\tfor the workspace workflow " + workspaceWorkflow.getId() + " to user: " + worker.getLogin());
+
+        Object[] args = {
+                pTask.getTitle(),
+                pTask.getInstructions() == null ? "-" : pTask.getInstructions(),
+                getTaskUrl(pTask, workspaceWorkflow.getWorkspaceId())
+        };
+
+        sendMessage(worker, "Approval_title", "Approval_workspace_workflow_text", args);
+    }
+
 
     private void sendWorkflowRelaunchedNotification(User user, PartRevision partRevision) {
         Object[] args = {
@@ -513,7 +565,7 @@ public class NotifierBean implements INotifierLocal {
                 partRevision.getWorkflow().getLifeCycleState()
         };
         try {
-            sendMessage(user, "PartRevision_workflow_relaunched_title", "PartRevision_workflow_relaunched_text", args);
+            sendMessage(user, "Workflow_relaunched_title", "PartRevision_workflow_relaunched_text", args);
         } catch (MessagingException pMEx) {
             logMessagingException(pMEx);
         }
@@ -527,7 +579,20 @@ public class NotifierBean implements INotifierLocal {
                 documentRevision.getWorkflow().getLifeCycleState()
         };
         try {
-            sendMessage(user, "DocumentRevision_workflow_relaunched_title", "DocumentRevision_workflow_relaunched_text", args);
+            sendMessage(user, "Workflow_relaunched_title", "DocumentRevision_workflow_relaunched_text", args);
+        } catch (MessagingException pMEx) {
+            logMessagingException(pMEx);
+        }
+    }
+
+
+    private void sendWorkflowRelaunchedNotification(User user, WorkspaceWorkflow workspaceWorkflow) {
+        Object[] args = {
+                user.getWorkspace().getId(),
+                workspaceWorkflow.getWorkflow().getLifeCycleState()
+        };
+        try {
+            sendMessage(user, "Workflow_relaunched_title", "WorkspaceWorkflow_workflow_relaunched_text", args);
         } catch (MessagingException pMEx) {
             logMessagingException(pMEx);
         }

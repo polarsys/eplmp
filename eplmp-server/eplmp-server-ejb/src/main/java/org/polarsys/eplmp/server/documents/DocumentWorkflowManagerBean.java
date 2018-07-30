@@ -195,6 +195,7 @@ public class DocumentWorkflowManagerBean implements IDocumentWorkflowManagerLoca
 
         // Move aborted workflow in docR list
         workflow.abort();
+        workflowDAO.removeWorkflowConstraints(workflow);
         docR.addAbortedWorkflows(workflow);
         // Set new workflow on document
         docR.setWorkflow(relaunchedWorkflow);

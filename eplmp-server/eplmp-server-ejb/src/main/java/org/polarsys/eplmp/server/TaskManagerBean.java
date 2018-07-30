@@ -16,6 +16,7 @@ import org.polarsys.eplmp.core.document.DocumentRevision;
 import org.polarsys.eplmp.core.document.DocumentRevisionKey;
 import org.polarsys.eplmp.core.exceptions.*;
 import org.polarsys.eplmp.core.product.PartRevision;
+import org.polarsys.eplmp.core.product.PartRevisionKey;
 import org.polarsys.eplmp.core.security.UserGroupMapping;
 import org.polarsys.eplmp.core.services.*;
 import org.polarsys.eplmp.core.workflow.*;
@@ -106,46 +107,6 @@ public class TaskManagerBean implements ITaskManagerLocal {
             throw new AccessRightException(userLocale, user);
         }
         return taskWrapper;
-    }
-
-    @Override
-    @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
-    public void processTask(String workspaceId, TaskKey taskKey, String action, String comment, String signature) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, TaskNotFoundException, NotAllowedException, WorkflowNotFoundException, AccessRightException, DocumentRevisionNotFoundException, WorkspaceNotEnabledException {
-        User user = userManager.checkWorkspaceReadAccess(workspaceId);
-        Locale userLocale = user.getLocale();
-        Task task = taskDAO.loadTask(userLocale, taskKey);
-        TaskWrapper taskWrapper = wrapTask(task, workspaceId);
-        if (taskWrapper == null) {
-            throw new AccessRightException(userLocale, user);
-        }
-        switch (taskWrapper.getHolderType()) {
-            case "documents":
-                DocumentRevisionKey documentRevisionKey = new DocumentRevisionKey(taskWrapper.getWorkspaceId(), taskWrapper.getHolderReference(), taskWrapper.getHolderVersion());
-                if ("APPROVE".equals(action)) {
-                    documentWorkflowService.approveTaskOnDocument(workspaceId, taskKey, documentRevisionKey, comment, signature);
-                } else if ("REJECT".equals(action)) {
-                    documentWorkflowService.rejectTaskOnDocument(workspaceId, taskKey, documentRevisionKey, comment, signature);
-                }
-                break;
-            case "parts":
-                if ("APPROVE".equals(action)) {
-                    partWorkflowService.approveTaskOnPart(workspaceId, taskKey, comment, signature);
-                } else if ("reject".equals(action)) {
-                    partWorkflowService.rejectTaskOnPart(workspaceId, taskKey, comment, signature);
-                }
-                break;
-            case "workspace-workflows":
-                if ("APPROVE".equals(action)) {
-                    workflowService.approveTaskOnWorkspaceWorkflow(workspaceId, taskKey, comment, signature);
-                } else if ("REJECT".equals(action)) {
-                    workflowService.rejectTaskOnWorkspaceWorkflow(workspaceId, taskKey, comment, signature);
-                }
-                break;
-            default:
-                // should throw
-                break;
-        }
-
     }
 
     @Override
