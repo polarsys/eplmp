@@ -21,12 +21,12 @@ import org.polarsys.eplmp.core.exceptions.UserGroupNotFoundException;
 import org.polarsys.eplmp.core.security.WorkspaceUserGroupMembership;
 import org.polarsys.eplmp.core.security.WorkspaceUserGroupMembershipKey;
 
-import javax.ejb.Stateless;
+import javax.enterprise.context.RequestScoped;
 import javax.persistence.*;
 import java.util.List;
 import java.util.Locale;
 
-@Stateless(name = "UserGroupDAO")
+@RequestScoped
 public class UserGroupDAO {
 
     public static final String WORKSPACE_ID = "workspaceId";

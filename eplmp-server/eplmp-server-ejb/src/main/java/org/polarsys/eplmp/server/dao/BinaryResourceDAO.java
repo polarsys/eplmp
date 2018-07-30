@@ -22,13 +22,13 @@ import org.polarsys.eplmp.core.product.Geometry;
 import org.polarsys.eplmp.core.product.PartIteration;
 import org.polarsys.eplmp.core.product.PartMasterTemplate;
 
-import javax.ejb.Stateless;
+import javax.enterprise.context.RequestScoped;
 import javax.persistence.*;
 import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-@Stateless(name = "BinaryResourceDAO")
+@RequestScoped
 public class BinaryResourceDAO {
     private static final Logger LOGGER = Logger.getLogger(BinaryResourceDAO.class.getName());
 
@@ -43,7 +43,7 @@ public class BinaryResourceDAO {
 
     public void createBinaryResource(BinaryResource pBinaryResource) throws FileAlreadyExistsException, CreationException {
         try {
-            //the EntityExistsException is thrown only when flush occurs    
+            //the EntityExistsException is thrown only when flush occurs
             em.persist(pBinaryResource);
             em.flush();
         } catch (EntityExistsException pEEEx) {

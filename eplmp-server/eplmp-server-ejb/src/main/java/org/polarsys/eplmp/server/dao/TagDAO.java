@@ -16,12 +16,12 @@ import org.polarsys.eplmp.core.exceptions.TagNotFoundException;
 import org.polarsys.eplmp.core.meta.Tag;
 import org.polarsys.eplmp.core.meta.TagKey;
 
-import javax.ejb.Stateless;
+import javax.enterprise.context.RequestScoped;
 import javax.persistence.*;
 import java.util.List;
 import java.util.Locale;
 
-@Stateless(name = "TagDAO")
+@RequestScoped
 public class TagDAO {
 
     @PersistenceContext

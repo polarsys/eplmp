@@ -16,7 +16,7 @@ import org.polarsys.eplmp.core.change.Milestone;
 import org.polarsys.eplmp.core.exceptions.MilestoneAlreadyExistsException;
 import org.polarsys.eplmp.core.exceptions.MilestoneNotFoundException;
 
-import javax.ejb.Stateless;
+import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
@@ -24,7 +24,7 @@ import javax.persistence.PersistenceContext;
 import java.util.List;
 import java.util.Locale;
 
-@Stateless(name = "MilestoneDAO")
+@RequestScoped
 public class MilestoneDAO {
 
     public static final String WORKSPACE_ID = "workspaceId";

@@ -15,12 +15,12 @@ import org.polarsys.eplmp.core.common.User;
 import org.polarsys.eplmp.core.exceptions.CreationException;
 import org.polarsys.eplmp.core.product.Import;
 
-import javax.ejb.Stateless;
+import javax.enterprise.context.RequestScoped;
 import javax.persistence.*;
 import java.util.List;
 import java.util.Locale;
 
-@Stateless(name = "ImportDAO")
+@RequestScoped
 public class ImportDAO {
 
     @PersistenceContext

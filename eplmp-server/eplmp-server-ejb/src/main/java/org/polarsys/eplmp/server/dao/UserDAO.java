@@ -13,12 +13,12 @@ package org.polarsys.eplmp.server.dao;
 import org.polarsys.eplmp.core.common.User;
 import org.polarsys.eplmp.core.common.UserKey;
 import org.polarsys.eplmp.core.common.Workspace;
-import org.polarsys.eplmp.core.meta.Folder;
 import org.polarsys.eplmp.core.exceptions.*;
+import org.polarsys.eplmp.core.meta.Folder;
 import org.polarsys.eplmp.core.security.WorkspaceUserMembership;
 import org.polarsys.eplmp.core.security.WorkspaceUserMembershipKey;
 
-import javax.ejb.Stateless;
+import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.persistence.*;
 import java.util.List;
@@ -26,7 +26,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.TreeMap;
 
-@Stateless(name = "UserDAO")
+@RequestScoped
 public class UserDAO {
 
     @PersistenceContext

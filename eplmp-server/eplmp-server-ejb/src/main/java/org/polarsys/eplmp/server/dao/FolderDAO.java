@@ -12,13 +12,13 @@
 package org.polarsys.eplmp.server.dao;
 
 import org.polarsys.eplmp.core.document.DocumentRevision;
-import org.polarsys.eplmp.core.meta.Folder;
 import org.polarsys.eplmp.core.exceptions.CreationException;
 import org.polarsys.eplmp.core.exceptions.EntityConstraintException;
 import org.polarsys.eplmp.core.exceptions.FolderAlreadyExistsException;
 import org.polarsys.eplmp.core.exceptions.FolderNotFoundException;
+import org.polarsys.eplmp.core.meta.Folder;
 
-import javax.ejb.Stateless;
+import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.persistence.*;
 import java.util.LinkedList;
@@ -27,7 +27,7 @@ import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-@Stateless(name = "FolderDAO")
+@RequestScoped
 public class FolderDAO {
 
     @PersistenceContext

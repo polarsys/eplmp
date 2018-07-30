@@ -20,14 +20,17 @@ import org.polarsys.eplmp.core.notification.TagUserGroupSubscriptionKey;
 import org.polarsys.eplmp.core.notification.TagUserSubscription;
 import org.polarsys.eplmp.core.notification.TagUserSubscriptionKey;
 
-import javax.ejb.Stateless;
+import javax.enterprise.context.RequestScoped;
 import javax.persistence.*;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
-@Stateless(name = "SubscriptionDAO")
+@RequestScoped
 public class SubscriptionDAO {
     private static final Logger LOGGER = Logger.getLogger(SubscriptionDAO.class.getName());
     public static final String WORKSPACE_ID = "workspaceId";

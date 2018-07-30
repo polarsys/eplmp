@@ -19,12 +19,12 @@ import org.polarsys.eplmp.core.exceptions.CreationException;
 import org.polarsys.eplmp.core.security.Credential;
 import org.polarsys.eplmp.core.security.UserGroupMapping;
 
-import javax.ejb.Stateless;
+import javax.enterprise.context.RequestScoped;
 import javax.persistence.*;
 import java.util.List;
 import java.util.Locale;
 
-@Stateless(name = "AccountDAO")
+@RequestScoped
 public class AccountDAO {
 
     @PersistenceContext

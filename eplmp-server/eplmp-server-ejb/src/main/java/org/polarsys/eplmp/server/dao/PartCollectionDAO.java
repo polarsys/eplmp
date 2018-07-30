@@ -13,13 +13,13 @@ package org.polarsys.eplmp.server.dao;
 
 import org.polarsys.eplmp.core.configuration.PartCollection;
 
-import javax.ejb.Stateless;
+import javax.enterprise.context.RequestScoped;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-@Stateless(name = "PartCollectionDAO")
+@RequestScoped
 public class PartCollectionDAO {
 
     @PersistenceContext

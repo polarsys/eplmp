@@ -16,7 +16,7 @@ import org.polarsys.eplmp.core.exceptions.TaskNotFoundException;
 import org.polarsys.eplmp.core.workflow.Task;
 import org.polarsys.eplmp.core.workflow.TaskKey;
 
-import javax.ejb.Stateless;
+import javax.enterprise.context.RequestScoped;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.Locale;
 
 
-@Stateless(name = "TaskDAO")
+@RequestScoped
 public class TaskDAO {
 
     @PersistenceContext

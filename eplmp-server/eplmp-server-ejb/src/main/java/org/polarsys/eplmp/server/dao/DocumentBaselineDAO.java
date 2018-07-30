@@ -14,7 +14,7 @@ package org.polarsys.eplmp.server.dao;
 import org.polarsys.eplmp.core.configuration.DocumentBaseline;
 import org.polarsys.eplmp.core.exceptions.BaselineNotFoundException;
 
-import javax.ejb.Stateless;
+import javax.enterprise.context.RequestScoped;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import java.util.List;
@@ -27,7 +27,7 @@ import java.util.Locale;
  * @version 2.0, 28/08/14
  * @since   V2.0
  */
-@Stateless(name = "DocumentBaselineDAO")
+@RequestScoped
 public class DocumentBaselineDAO {
 
     @PersistenceContext

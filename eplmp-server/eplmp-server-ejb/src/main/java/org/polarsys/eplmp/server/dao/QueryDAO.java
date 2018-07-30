@@ -17,7 +17,7 @@ import org.polarsys.eplmp.core.query.Query;
 import org.polarsys.eplmp.core.query.QueryContext;
 import org.polarsys.eplmp.core.query.QueryRule;
 
-import javax.ejb.Stateless;
+import javax.enterprise.context.RequestScoped;
 import javax.persistence.*;
 import java.util.List;
 import java.util.Locale;
@@ -28,7 +28,7 @@ import java.util.logging.Logger;
  * @author Morgan Guimard on 09/04/15.
  */
 
-@Stateless(name = "QueryDAO")
+@RequestScoped
 public class QueryDAO {
 
     @PersistenceContext

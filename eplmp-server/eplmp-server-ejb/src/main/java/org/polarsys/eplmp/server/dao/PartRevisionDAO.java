@@ -19,13 +19,13 @@ import org.polarsys.eplmp.core.meta.Tag;
 import org.polarsys.eplmp.core.product.*;
 import org.polarsys.eplmp.core.workflow.Workflow;
 
-import javax.ejb.Stateless;
+import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.persistence.*;
 import java.util.List;
 import java.util.Locale;
 
-@Stateless(name = "PartRevisionDAO")
+@RequestScoped
 public class PartRevisionDAO {
 
     public static final String WORKSPACE_ID = "workspaceId";

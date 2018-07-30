@@ -15,9 +15,12 @@ import org.polarsys.eplmp.core.exceptions.CreationException;
 import org.polarsys.eplmp.core.exceptions.WorkflowModelAlreadyExistsException;
 import org.polarsys.eplmp.core.exceptions.WorkflowModelNotFoundException;
 import org.polarsys.eplmp.core.product.PartMasterTemplate;
-import org.polarsys.eplmp.core.workflow.*;
+import org.polarsys.eplmp.core.workflow.ActivityModel;
+import org.polarsys.eplmp.core.workflow.TaskModel;
+import org.polarsys.eplmp.core.workflow.WorkflowModel;
+import org.polarsys.eplmp.core.workflow.WorkflowModelKey;
 
-import javax.ejb.Stateless;
+import javax.enterprise.context.RequestScoped;
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -26,7 +29,7 @@ import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-@Stateless(name = "WorkflowModelDAO")
+@RequestScoped
 public class WorkflowModelDAO {
 
     private static final Logger LOGGER = Logger.getLogger(WorkflowModelDAO.class.getName());

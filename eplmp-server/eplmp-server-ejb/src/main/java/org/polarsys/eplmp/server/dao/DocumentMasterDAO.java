@@ -15,7 +15,7 @@ import org.polarsys.eplmp.core.document.DocumentRevision;
 import org.polarsys.eplmp.core.exceptions.CreationException;
 import org.polarsys.eplmp.core.exceptions.DocumentMasterAlreadyExistsException;
 
-import javax.ejb.Stateless;
+import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.persistence.EntityExistsException;
 import javax.persistence.EntityManager;
@@ -29,7 +29,7 @@ import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-@Stateless(name = "DocumentMasterDAO")
+@RequestScoped
 public class DocumentMasterDAO {
     private static final Logger LOGGER = Logger.getLogger(DocumentMasterDAO.class.getName());
 

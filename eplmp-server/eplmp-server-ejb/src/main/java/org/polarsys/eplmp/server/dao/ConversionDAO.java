@@ -16,11 +16,11 @@ import org.polarsys.eplmp.core.product.Conversion;
 import org.polarsys.eplmp.core.product.PartIteration;
 import org.polarsys.eplmp.core.product.PartRevision;
 
-import javax.ejb.Stateless;
+import javax.enterprise.context.RequestScoped;
 import javax.persistence.*;
 import java.util.Locale;
 
-@Stateless(name = "ConversionDAO")
+@RequestScoped
 public class ConversionDAO {
 
     @PersistenceContext

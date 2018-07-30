@@ -17,14 +17,14 @@ import org.polarsys.eplmp.core.exceptions.GCMAccountAlreadyExistsException;
 import org.polarsys.eplmp.core.exceptions.GCMAccountNotFoundException;
 import org.polarsys.eplmp.core.gcm.GCMAccount;
 
-import javax.ejb.Stateless;
+import javax.enterprise.context.RequestScoped;
 import javax.persistence.EntityExistsException;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceException;
 import java.util.Locale;
 
-@Stateless(name = "GCMAccountDAO")
+@RequestScoped
 public class GCMAccountDAO {
 
     @PersistenceContext
