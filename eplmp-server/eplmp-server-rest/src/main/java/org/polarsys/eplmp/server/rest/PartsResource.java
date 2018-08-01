@@ -311,8 +311,8 @@ public class PartsResource {
             @ApiParam(required = true, value = "Baseline id") @PathParam("baselineId") int baselineId)
             throws EntityNotFoundException, UserNotActiveException, WorkspaceNotEnabledException {
 
-        ProductStructureFilter filter = filterService.getBaselinePSFilter(baselineId);
         PartMaster partMaster = productService.getPartMaster(new PartMasterKey(workspaceId, partNumber));
+        ProductStructureFilter filter = filterService.getBaselinePSFilter(baselineId);
         List<PartIteration> partIterations = filter.filter(partMaster);
         if (!partIterations.isEmpty()) {
             return Response.ok().entity(Tools.mapPartIterationToPartIterationDTO(partIterations.get(0))).build();

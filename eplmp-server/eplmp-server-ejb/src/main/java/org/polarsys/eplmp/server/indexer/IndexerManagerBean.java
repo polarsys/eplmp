@@ -263,11 +263,6 @@ public class IndexerManagerBean implements IIndexerManagerLocal {
     @RolesAllowed({UserGroupMapping.ADMIN_ROLE_ID})
     public void indexAllWorkspacesData() throws AccountNotFoundException {
         Account account = accountManager.getMyAccount();
-        doIndexAllWorkspacesData(account);
-    }
-
-    @Asynchronous
-    private void doIndexAllWorkspacesData(Account account) {
         for (Workspace workspace : workspaceDAO.getAll()) {
             doIndexWorkspaceData(account, workspace.getId());
         }

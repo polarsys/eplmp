@@ -347,8 +347,7 @@ public class WorkflowManagerBean implements IWorkflowManagerLocal {
         workflowDAO.createWorkflow(workspaceWorkflow.getWorkflow());
         workflowDAO.createWorkspaceWorkflow(workspaceWorkflow);
 
-        //fixme
-        //mailer.sendApproval(runningTasks, docR);
+        notifier.sendApproval(workspaceId, runningTasks, workspaceWorkflow);
 
         return workspaceWorkflow;
     }

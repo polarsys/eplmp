@@ -23,6 +23,7 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceException;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -78,10 +79,8 @@ public class DocumentMasterDAO {
     public Long getCountByWorkspace(String workspaceId) {
         CriteriaBuilder cb = em.getCriteriaBuilder();
         CriteriaQuery<Long> countQuery = cb.createQuery(Long.class);
-        countQuery.select(cb.count(countQuery.from(DocumentMaster.class)));
-        // TODO : fixme
-        //Root<DocumentMaster> dm = countQuery.from(DocumentMaster.class);
-        //countQuery.select(cb.count(dm)).where(cb.equal(dm.get("workspace").get("id"), workspaceId));
+        Root<DocumentMaster> dm = countQuery.from(DocumentMaster.class);
+        countQuery.select(cb.count(dm)).where(cb.equal(dm.get("workspace").get("id"), workspaceId));
         return em.createQuery(countQuery).getSingleResult();
     }
 }

@@ -23,6 +23,7 @@ import javax.inject.Inject;
 import javax.persistence.*;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -152,8 +153,8 @@ public class PartMasterDAO {
     public Long getCountByWorkspace(String workspaceId) {
         CriteriaBuilder cb = em.getCriteriaBuilder();
         CriteriaQuery<Long> countQuery = cb.createQuery(Long.class);
-        countQuery.select(cb.count(countQuery.from(PartMaster.class)));
-        // TODO fixme (no usage of workspaceId)
+        Root<PartMaster> pm = countQuery.from(PartMaster.class);
+        countQuery.select(cb.count(pm)).where(cb.equal(pm.get("workspace").get("id"), workspaceId));
         return em.createQuery(countQuery).getSingleResult();
     }
 }

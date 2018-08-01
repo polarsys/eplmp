@@ -3775,4 +3775,3 @@ public class ProductManagerBean implements IProductManagerLocal {
 }
 //TODO when using layers and markers, check for concordance
 //TODO add a method to update a marker
-//TODO use dozer

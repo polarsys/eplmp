@@ -51,8 +51,7 @@ public class PSFilterManagerBean implements IPSFilterManagerLocal {
     @Override
     public ProductStructureFilter getBaselinePSFilter(int baselineId) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, BaselineNotFoundException, WorkspaceNotEnabledException {
         ProductBaseline productBaseline = productBaselineDAO.loadBaseline(baselineId);
-        // todo: check why this is commented
-        //User user = userManager.checkWorkspaceReadAccess(productBaseline.getConfigurationItem().getWorkspaceId());
+        userManager.checkWorkspaceReadAccess(productBaseline.getConfigurationItem().getWorkspaceId());
         return new ProductBaselineConfigSpec(productBaseline);
     }
 

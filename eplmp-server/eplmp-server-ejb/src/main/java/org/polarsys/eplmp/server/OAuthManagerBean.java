@@ -57,13 +57,11 @@ public class OAuthManagerBean implements IOAuthManagerLocal {
 
     @Override
     public List<OAuthProvider> getProviders() {
-        // todo use language if authenticated
         return oAuthProviderDAO.getProviders();
     }
 
     @Override
     public OAuthProvider getProvider(int id) throws OAuthProviderNotFoundException {
-        // todo use language if authenticated
         return oAuthProviderDAO.findProvider(id);
     }
 
