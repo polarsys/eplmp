@@ -19,13 +19,13 @@ import org.polarsys.eplmp.core.meta.Tag;
 import org.polarsys.eplmp.core.product.*;
 import org.polarsys.eplmp.core.workflow.Workflow;
 
-import javax.ejb.Stateless;
+import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.persistence.*;
 import java.util.List;
-import java.util.Locale;
 
-@Stateless(name = "PartRevisionDAO")
+
+@RequestScoped
 public class PartRevisionDAO {
 
     public static final String WORKSPACE_ID = "workspaceId";
@@ -44,19 +44,11 @@ public class PartRevisionDAO {
     @Inject
     private WorkflowDAO workflowDAO;
 
-    private Locale mLocale;
-
     public PartRevisionDAO() {
-        mLocale = Locale.getDefault();
     }
 
     public PartRevision loadPartR(PartRevisionKey pKey) {
         return em.find(PartRevision.class, pKey);
-    }
-
-    public PartRevision loadPartR(Locale pLocale, PartRevisionKey pKey) {
-        mLocale = pLocale;
-        return loadPartR(pKey);
     }
 
     public void updateRevision(PartRevision pPartR) {
@@ -68,8 +60,8 @@ public class PartRevisionDAO {
         workflowDAO.removeWorkflowConstraints(pPartR);
         em.flush();
         conversionDAO.removePartRevisionConversions(pPartR);
-        for(PartIteration partIteration:pPartR.getPartIterations()){
-            for(PartUsageLink partUsageLink:partIteration.getComponents()){
+        for (PartIteration partIteration : pPartR.getPartIterations()) {
+            for (PartUsageLink partUsageLink : partIteration.getComponents()) {
                 em.remove(partUsageLink);
             }
         }
@@ -104,7 +96,7 @@ public class PartRevisionDAO {
     }
 
     public int getTotalNumberOfParts(String pWorkspaceId) {
-        return ((Number)em.createNamedQuery("PartRevision.countByWorkspace")
+        return ((Number) em.createNamedQuery("PartRevision.countByWorkspace")
                 .setParameter(WORKSPACE_ID, pWorkspaceId)
                 .getSingleResult()).intValue();
     }
@@ -131,23 +123,17 @@ public class PartRevisionDAO {
             em.persist(partR);
             em.flush();
         } catch (EntityExistsException pEEEx) {
-            throw new PartRevisionAlreadyExistsException(mLocale, partR);
+            throw new PartRevisionAlreadyExistsException(partR);
         } catch (PersistenceException pPEx) {
             //EntityExistsException is case sensitive
             //whereas MySQL is not thus PersistenceException could be
             //thrown instead of EntityExistsException
-            throw new CreationException(mLocale);
+            throw new CreationException("");
         }
     }
 
-    public void createPartR(Locale pLocale, PartRevision partR) throws PartRevisionAlreadyExistsException, CreationException {
-        mLocale = pLocale;
-        createPartR(partR);
-    }
-
-
     public List<PartRevision> findPartsRevisionsWithReferenceOrNameLike(String pWorkspaceId, String reference, int maxResults) {
-        return em.createNamedQuery("PartRevision.findByReferenceOrName",PartRevision.class)
+        return em.createNamedQuery("PartRevision.findByReferenceOrName", PartRevision.class)
                 .setParameter(WORKSPACE_ID, pWorkspaceId)
                 .setParameter("partNumber", "%" + reference + "%")
                 .setParameter("partName", "%" + reference + "%")
@@ -170,7 +156,7 @@ public class PartRevisionDAO {
         try {
             return em.createNamedQuery("PartRevision.findByWorkflow", PartRevision.class).
                     setParameter("workflow", workflow).getSingleResult();
-        }catch(NoResultException e){
+        } catch (NoResultException e) {
             return null;
         }
     }

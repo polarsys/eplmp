@@ -11,14 +11,14 @@
 
 package org.polarsys.eplmp.server.indexer;
 
-import org.polarsys.eplmp.core.query.DocumentSearchQuery;
-import org.polarsys.eplmp.core.query.PartSearchQuery;
-import org.polarsys.eplmp.core.query.SearchQuery;
 import org.apache.lucene.search.join.ScoreMode;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.NestedQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
+import org.polarsys.eplmp.core.query.DocumentSearchQuery;
+import org.polarsys.eplmp.core.query.PartSearchQuery;
+import org.polarsys.eplmp.core.query.SearchQuery;
 
 import java.util.ArrayList;
 import java.util.List;

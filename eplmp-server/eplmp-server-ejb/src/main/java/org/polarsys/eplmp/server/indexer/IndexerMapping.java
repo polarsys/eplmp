@@ -10,6 +10,8 @@
   *******************************************************************************/
 package org.polarsys.eplmp.server.indexer;
 
+import org.apache.commons.io.IOUtils;
+import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.polarsys.eplmp.core.common.User;
 import org.polarsys.eplmp.core.document.DocumentIteration;
 import org.polarsys.eplmp.core.document.DocumentIterationKey;
@@ -23,8 +25,6 @@ import org.polarsys.eplmp.core.product.PartIterationKey;
 import org.polarsys.eplmp.core.product.PartMaster;
 import org.polarsys.eplmp.core.product.PartRevision;
 import org.polarsys.eplmp.core.workflow.Workflow;
-import org.apache.commons.io.IOUtils;
-import org.elasticsearch.common.xcontent.XContentBuilder;
 
 import java.io.IOException;
 import java.io.InputStream;

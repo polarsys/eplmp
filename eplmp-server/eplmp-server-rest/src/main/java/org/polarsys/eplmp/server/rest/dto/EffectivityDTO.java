@@ -11,10 +11,10 @@
 
 package org.polarsys.eplmp.server.rest.dto;
 
-import org.polarsys.eplmp.core.product.ConfigurationItemKey;
-import org.polarsys.eplmp.core.product.TypeEffectivity;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import org.polarsys.eplmp.core.product.ConfigurationItemKey;
+import org.polarsys.eplmp.core.product.TypeEffectivity;
 
 import javax.xml.bind.annotation.XmlRootElement;
 import java.io.Serializable;

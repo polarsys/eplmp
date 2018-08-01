@@ -11,8 +11,8 @@
 
 package org.polarsys.eplmp.server.auth.jwt;
 
-import org.polarsys.eplmp.core.security.UserGroupMapping;
 import org.jose4j.jwt.JwtClaims;
+import org.polarsys.eplmp.core.security.UserGroupMapping;
 
 /**
  * This JWTokenUserGroupMapping class wraps tokens decoded data

@@ -11,6 +11,10 @@
 
 package org.polarsys.eplmp.server.rest.file;
 
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.*;
 import org.polarsys.eplmp.core.common.BinaryResource;
 import org.polarsys.eplmp.core.document.DocumentMasterTemplateKey;
 import org.polarsys.eplmp.core.services.IBinaryStorageManagerLocal;
@@ -18,10 +22,6 @@ import org.polarsys.eplmp.core.services.IDocumentManagerLocal;
 import org.polarsys.eplmp.core.services.IOnDemandConverterManagerLocal;
 import org.polarsys.eplmp.server.util.PartImpl;
 import org.polarsys.eplmp.server.util.ResourceUtil;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.Part;

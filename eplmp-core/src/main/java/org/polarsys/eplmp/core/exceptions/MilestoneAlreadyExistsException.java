@@ -12,7 +12,7 @@
 package org.polarsys.eplmp.core.exceptions;
 
 import java.text.MessageFormat;
-import java.util.Locale;
+
 
 /**
  *
@@ -21,18 +21,8 @@ import java.util.Locale;
 public class MilestoneAlreadyExistsException extends EntityAlreadyExistsException {
     private final String mTitle;
 
-
-    public MilestoneAlreadyExistsException(String pMessage) {
-        super(pMessage);
-        mTitle=null;
-    }
-
-    public MilestoneAlreadyExistsException(Locale pLocale, String pLogin) {
-        this(pLocale, pLogin, null);
-    }
-
-    public MilestoneAlreadyExistsException(Locale pLocale, String pTitle, Throwable pCause) {
-        super(pLocale, pCause);
+    public MilestoneAlreadyExistsException(String pTitle, Throwable pCause) {
+        super(pCause);
         mTitle=pTitle;
     }
 

@@ -10,6 +10,7 @@
   *******************************************************************************/
 package org.polarsys.eplmp.server;
 
+import org.polarsys.eplmp.core.admin.WorkspaceBackOptions;
 import org.polarsys.eplmp.core.common.Account;
 import org.polarsys.eplmp.core.common.User;
 import org.polarsys.eplmp.core.common.Workspace;
@@ -19,16 +20,15 @@ import org.polarsys.eplmp.core.hooks.SNSWebhookApp;
 import org.polarsys.eplmp.core.hooks.SimpleWebhookApp;
 import org.polarsys.eplmp.core.hooks.Webhook;
 import org.polarsys.eplmp.core.meta.Tag;
-import org.polarsys.eplmp.core.admin.WorkspaceBackOptions;
 import org.polarsys.eplmp.core.product.PartRevision;
 import org.polarsys.eplmp.core.services.INotifierLocal;
 import org.polarsys.eplmp.core.services.IPlatformOptionsManagerLocal;
 import org.polarsys.eplmp.core.services.IWebhookManagerLocal;
 import org.polarsys.eplmp.core.services.IWorkspaceManagerLocal;
 import org.polarsys.eplmp.core.util.FileIO;
+import org.polarsys.eplmp.core.workflow.Task;
 import org.polarsys.eplmp.core.workflow.WorkspaceWorkflow;
 import org.polarsys.eplmp.i18n.PropertiesLoader;
-import org.polarsys.eplmp.core.workflow.Task;
 import org.polarsys.eplmp.server.hooks.SNSWebhookRunner;
 import org.polarsys.eplmp.server.hooks.SimpleWebhookRunner;
 import org.polarsys.eplmp.server.hooks.WebhookRunner;
@@ -377,14 +377,11 @@ public class NotifierBean implements INotifierLocal {
     @Asynchronous
     @Override
     public void sendCredential(Account account) {
-
-        Locale locale = new Locale(account.getLanguage());
-
         String accountDisabledMessage = "";
         if (!account.isEnabled()) {
             switch (platformOptionsManager.getWorkspaceCreationStrategy()) {
                 case ADMIN_VALIDATION:
-                    accountDisabledMessage = getString("SignUp_AccountDisabled_text", locale);
+                    accountDisabledMessage = getString("SignUp_AccountDisabled_text", account.getLocale());
                     break;
             }
         }
@@ -406,9 +403,9 @@ public class NotifierBean implements INotifierLocal {
 
         LOGGER.info("Sending state notification emails \n\tfor the document " + pDocumentRevision.getLastIteration() + " to user " + pSubscriber.getLogin());
 
-        Locale locale = new Locale(pSubscriber.getLanguage());
         String stateName = pDocumentRevision.getLifeCycleState();
-        stateName = (stateName != null && !stateName.isEmpty()) ? stateName : getString("FinalState_name", locale);
+        stateName = (stateName != null && !stateName.isEmpty()) ? stateName : getString("FinalState_name",
+                pSubscriber.getLocale());
 
         Object[] args = {
                 pDocumentRevision,
@@ -649,7 +646,7 @@ public class NotifierBean implements INotifierLocal {
     // Direct account message
     // Only emails should be sent
     private void sendMessage(Account account, String subjectKey, String contentKey, Object[] contentArgs) throws MessagingException {
-        Locale locale = new Locale(account.getLanguage());
+        Locale locale = account.getLocale();
         String subject = getSubject(subjectKey, locale);
         String content = format(contentKey, contentArgs, locale);
         String name = account.getName();

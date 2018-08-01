@@ -11,15 +11,15 @@
 
 package org.polarsys.eplmp.server.util;
 
+import org.junit.rules.TestRule;
+import org.junit.runner.Description;
+import org.junit.runners.model.Statement;
 import org.polarsys.eplmp.core.common.Account;
 import org.polarsys.eplmp.core.common.User;
 import org.polarsys.eplmp.core.common.Workspace;
 import org.polarsys.eplmp.core.configuration.ProductBaselineType;
 import org.polarsys.eplmp.core.meta.RevisionStatus;
 import org.polarsys.eplmp.core.product.*;
-import org.junit.rules.TestRule;
-import org.junit.runner.Description;
-import org.junit.runners.model.Statement;
 
 import java.util.ArrayList;
 import java.util.Date;

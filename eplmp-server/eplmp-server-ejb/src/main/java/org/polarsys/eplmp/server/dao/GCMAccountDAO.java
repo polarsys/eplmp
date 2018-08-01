@@ -17,29 +17,26 @@ import org.polarsys.eplmp.core.exceptions.GCMAccountAlreadyExistsException;
 import org.polarsys.eplmp.core.exceptions.GCMAccountNotFoundException;
 import org.polarsys.eplmp.core.gcm.GCMAccount;
 
-import javax.ejb.Stateless;
+import javax.enterprise.context.RequestScoped;
 import javax.persistence.EntityExistsException;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceException;
-import java.util.Locale;
 
-@Stateless(name = "GCMAccountDAO")
+
+@RequestScoped
 public class GCMAccountDAO {
 
     @PersistenceContext
     private EntityManager em;
 
-    private Locale mLocale;
-
     public GCMAccountDAO() {
-        mLocale=Locale.getDefault();
     }
 
     public GCMAccount loadGCMAccount(Account pAccount) throws GCMAccountNotFoundException {
         GCMAccount gcmAccount = em.find(GCMAccount.class, pAccount.getLogin());
         if(gcmAccount == null){
-            throw new GCMAccountNotFoundException(mLocale,pAccount.getLogin());
+            throw new GCMAccountNotFoundException(pAccount.getLogin());
         }
         return gcmAccount;
     }
@@ -48,28 +45,19 @@ public class GCMAccountDAO {
         return gcmAccount != null;
     }
 
-    public GCMAccount loadGCMAccount(Locale pLocale, Account pAccount) throws GCMAccountNotFoundException {
-        mLocale = pLocale;
-        return loadGCMAccount(pAccount);
-    }
-
     public void createGCMAccount(GCMAccount pGMCAccount) throws GCMAccountAlreadyExistsException, CreationException {
         try{
             //the EntityExistsException is thrown only when flush occurs
             em.persist(pGMCAccount);
             em.flush();
         }catch(EntityExistsException pEEEx){
-            throw new GCMAccountAlreadyExistsException(mLocale, pGMCAccount.getAccount().getLogin());
+            throw new GCMAccountAlreadyExistsException(pGMCAccount.getAccount().getLogin());
         }catch(PersistenceException pPEx){
             //EntityExistsException is case sensitive
             //whereas MySQL is not thus PersistenceException could be
             //thrown instead of EntityExistsException
-            throw new CreationException(mLocale);
+            throw new CreationException("");
         }
-    }
-    public void createGCMAccount(Locale pLocale, GCMAccount pGMCAccount) throws GCMAccountAlreadyExistsException, CreationException {
-        mLocale = pLocale;
-        createGCMAccount(pGMCAccount);
     }
 
     public void deleteGCMAccount(GCMAccount gcmAccount){

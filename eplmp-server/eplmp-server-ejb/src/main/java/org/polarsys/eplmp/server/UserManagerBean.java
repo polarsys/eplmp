@@ -13,7 +13,9 @@ package org.polarsys.eplmp.server;
 import org.polarsys.eplmp.core.common.*;
 import org.polarsys.eplmp.core.exceptions.*;
 import org.polarsys.eplmp.core.security.*;
-import org.polarsys.eplmp.core.services.*;
+import org.polarsys.eplmp.core.services.IContextManagerLocal;
+import org.polarsys.eplmp.core.services.INotifierLocal;
+import org.polarsys.eplmp.core.services.IUserManagerLocal;
 import org.polarsys.eplmp.server.dao.*;
 import org.polarsys.eplmp.server.events.*;
 
@@ -27,7 +29,6 @@ import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import java.util.List;
-import java.util.Locale;
 import java.util.stream.Stream;
 
 @DeclareRoles({UserGroupMapping.REGULAR_USER_ROLE_ID, UserGroupMapping.ADMIN_ROLE_ID})
@@ -71,20 +72,18 @@ public class UserManagerBean implements IUserManagerLocal {
     @Inject
     private PasswordRecoveryRequestDAO passwordRecoveryRequestDAO;
 
-
     @RolesAllowed({UserGroupMapping.REGULAR_USER_ROLE_ID, UserGroupMapping.ADMIN_ROLE_ID})
     @Override
     public void addUserInGroup(UserGroupKey pGroupKey, String pLogin) throws AccessRightException, UserGroupNotFoundException, AccountNotFoundException, WorkspaceNotFoundException, UserAlreadyExistsException, FolderAlreadyExistsException, CreationException {
-        Account account = checkAdmin(pGroupKey.getWorkspaceId());
-        Locale locale = new Locale(account.getLanguage());
+        checkAdmin(pGroupKey.getWorkspaceId());
         User userToAdd = em.find(User.class, new UserKey(pGroupKey.getWorkspaceId(), pLogin));
         if (userToAdd == null) {
             Account userAccount = accountDAO.loadAccount(pLogin);
             Workspace workspace = em.getReference(Workspace.class, pGroupKey.getWorkspaceId());
             userToAdd = new User(workspace, userAccount);
-            userDAO.createUser(locale, userToAdd);
+            userDAO.createUser(userToAdd);
         }
-        UserGroup group = userGroupDAO.loadUserGroup(locale, pGroupKey);
+        UserGroup group = userGroupDAO.loadUserGroup(pGroupKey);
 
         userDAO.removeUserMembership(new WorkspaceUserMembershipKey(pGroupKey.getWorkspaceId(), pGroupKey.getWorkspaceId(), pLogin));
         group.addUser(userToAdd);
@@ -93,14 +92,13 @@ public class UserManagerBean implements IUserManagerLocal {
     @RolesAllowed({UserGroupMapping.REGULAR_USER_ROLE_ID, UserGroupMapping.ADMIN_ROLE_ID})
     @Override
     public void addUserInWorkspace(String pWorkspaceId, String pLogin) throws AccessRightException, AccountNotFoundException, WorkspaceNotFoundException, UserAlreadyExistsException, FolderAlreadyExistsException, CreationException {
-        Account account = checkAdmin(pWorkspaceId);
-        Locale locale = new Locale(account.getLanguage());
+        checkAdmin(pWorkspaceId);
         User userToAdd = em.find(User.class, new UserKey(pWorkspaceId, pLogin));
         Workspace workspace = em.getReference(Workspace.class, pWorkspaceId);
         if (userToAdd == null) {
             Account userAccount = accountDAO.loadAccount(pLogin);
             userToAdd = new User(workspace, userAccount);
-            userDAO.createUser(locale, userToAdd);
+            userDAO.createUser(userToAdd);
         }
         userDAO.addUserMembership(workspace, userToAdd);
     }
@@ -109,11 +107,10 @@ public class UserManagerBean implements IUserManagerLocal {
     @Override
     public Workspace removeUser(String pWorkspaceId, String login) throws UserNotFoundException, AccessRightException, AccountNotFoundException, WorkspaceNotFoundException, EntityConstraintException {
         Account account = accountDAO.loadAccount(contextManager.getCallerPrincipalLogin());
-        Locale locale = new Locale(account.getLanguage());
-        Workspace workspace = workspaceDAO.loadWorkspace(locale, pWorkspaceId);
+        Workspace workspace = workspaceDAO.loadWorkspace(pWorkspaceId);
         checkAdmin(workspace, account);
 
-        User user = userDAO.loadUser(locale, new UserKey(pWorkspaceId, login));
+        User user = userDAO.loadUser(new UserKey(pWorkspaceId, login));
 
         userEvent.select(new AnnotationLiteral<Removed>() {
         }).fire(new UserEvent(user));
@@ -125,9 +122,8 @@ public class UserManagerBean implements IUserManagerLocal {
     @RolesAllowed({UserGroupMapping.REGULAR_USER_ROLE_ID, UserGroupMapping.ADMIN_ROLE_ID})
     @Override
     public void removeUserFromGroup(UserGroupKey pGroupKey, String[] pLogins) throws AccessRightException, UserGroupNotFoundException, AccountNotFoundException, WorkspaceNotFoundException {
-        Account account = checkAdmin(pGroupKey.getWorkspaceId());
-        Locale locale = new Locale(account.getLanguage());
-        UserGroup group = userGroupDAO.loadUserGroup(locale, pGroupKey);
+        checkAdmin(pGroupKey.getWorkspaceId());
+        UserGroup group = userGroupDAO.loadUserGroup(pGroupKey);
         for (String login : pLogins) {
             User userToRemove = em.getReference(User.class, new UserKey(pGroupKey.getWorkspaceId(), login));
             group.removeUser(userToRemove);
@@ -137,9 +133,8 @@ public class UserManagerBean implements IUserManagerLocal {
     @RolesAllowed({UserGroupMapping.REGULAR_USER_ROLE_ID, UserGroupMapping.ADMIN_ROLE_ID})
     @Override
     public UserGroup removeUserFromGroup(UserGroupKey pGroupKey, String login) throws AccessRightException, UserGroupNotFoundException, AccountNotFoundException, WorkspaceNotFoundException {
-        Account account = checkAdmin(pGroupKey.getWorkspaceId());
-        Locale locale = new Locale(account.getLanguage());
-        UserGroup group = userGroupDAO.loadUserGroup(locale, pGroupKey);
+        checkAdmin(pGroupKey.getWorkspaceId());
+        UserGroup group = userGroupDAO.loadUserGroup(pGroupKey);
         User userToRemove = em.getReference(User.class, new UserKey(pGroupKey.getWorkspaceId(), login));
         group.removeUser(userToRemove);
         return group;
@@ -148,10 +143,9 @@ public class UserManagerBean implements IUserManagerLocal {
     @RolesAllowed({UserGroupMapping.REGULAR_USER_ROLE_ID, UserGroupMapping.ADMIN_ROLE_ID})
     @Override
     public UserGroup createUserGroup(String pId, Workspace pWorkspace) throws UserGroupAlreadyExistsException, AccessRightException, AccountNotFoundException, CreationException {
-        Account account = checkAdmin(pWorkspace);
+        checkAdmin(pWorkspace);
         UserGroup groupToCreate = new UserGroup(pWorkspace, pId);
-        Locale locale = new Locale(account.getLanguage());
-        userGroupDAO.createUserGroup(locale, groupToCreate);
+        userGroupDAO.createUserGroup(groupToCreate);
         userGroupDAO.addUserGroupMembership(pWorkspace, groupToCreate);
         return groupToCreate;
     }
@@ -179,9 +173,7 @@ public class UserManagerBean implements IUserManagerLocal {
     @Override
     public UserGroup getUserGroup(UserGroupKey pKey) throws WorkspaceNotFoundException, UserGroupNotFoundException, UserNotFoundException, UserNotActiveException, AccountNotFoundException, WorkspaceNotEnabledException {
         if (contextManager.isCallerInRole(UserGroupMapping.ADMIN_ROLE_ID)) {
-            Account account = accountDAO.loadAccount(contextManager.getCallerPrincipalLogin());
-            Locale locale = new Locale(account.getLanguage());
-            return userGroupDAO.loadUserGroup(locale, pKey);
+            return userGroupDAO.loadUserGroup(pKey);
         } else {
             checkWorkspaceReadAccess(pKey.getWorkspaceId());
             return userGroupDAO.loadUserGroup(pKey);
@@ -214,7 +206,8 @@ public class UserManagerBean implements IUserManagerLocal {
         List<UserGroup> userGroups = userGroupDAO.getUserGroups(pWorkspaceId, user);
         WorkspaceUserGroupMembership[] workspaceUserGroupMembership = new WorkspaceUserGroupMembership[userGroups.size()];
         for (int i = 0; i < userGroups.size(); i++) {
-            workspaceUserGroupMembership[i] = userGroupDAO.loadUserGroupMembership(user.getLocale(), new WorkspaceUserGroupMembershipKey(pWorkspaceId, pWorkspaceId, userGroups.get(i).getId()));
+            workspaceUserGroupMembership[i] = userGroupDAO.loadUserGroupMembership(
+                    new WorkspaceUserGroupMembershipKey(pWorkspaceId, pWorkspaceId, userGroups.get(i).getId()));
         }
         return workspaceUserGroupMembership;
     }
@@ -257,9 +250,9 @@ public class UserManagerBean implements IUserManagerLocal {
     @RolesAllowed({UserGroupMapping.REGULAR_USER_ROLE_ID, UserGroupMapping.ADMIN_ROLE_ID})
     @Override
     public WorkspaceUserGroupMembership grantGroupAccess(String pWorkspaceId, String groupId, boolean pReadOnly) throws AccessRightException, AccountNotFoundException, WorkspaceNotFoundException, UserGroupNotFoundException {
-        Account account = checkAdmin(pWorkspaceId);
-        Locale locale = new Locale(account.getLanguage());
-        WorkspaceUserGroupMembership ms = userGroupDAO.loadUserGroupMembership(locale, new WorkspaceUserGroupMembershipKey(pWorkspaceId, pWorkspaceId, groupId));
+        checkAdmin(pWorkspaceId);
+        WorkspaceUserGroupMembership ms = userGroupDAO.loadUserGroupMembership(
+                new WorkspaceUserGroupMembershipKey(pWorkspaceId, pWorkspaceId, groupId));
         if (ms != null) {
             ms.setReadOnly(pReadOnly);
         }
@@ -270,10 +263,9 @@ public class UserManagerBean implements IUserManagerLocal {
     @RolesAllowed({UserGroupMapping.REGULAR_USER_ROLE_ID, UserGroupMapping.ADMIN_ROLE_ID})
     @Override
     public void grantGroupAccess(String pWorkspaceId, String[] pGroupIds, boolean pReadOnly) throws AccessRightException, AccountNotFoundException, WorkspaceNotFoundException, UserGroupNotFoundException {
-        Account account = checkAdmin(pWorkspaceId);
-        Locale locale = new Locale(account.getLanguage());
+        checkAdmin(pWorkspaceId);
         for (String id : pGroupIds) {
-            WorkspaceUserGroupMembership ms = userGroupDAO.loadUserGroupMembership(locale, new WorkspaceUserGroupMembershipKey(pWorkspaceId, pWorkspaceId, id));
+            WorkspaceUserGroupMembership ms = userGroupDAO.loadUserGroupMembership(new WorkspaceUserGroupMembershipKey(pWorkspaceId, pWorkspaceId, id));
             if (ms != null) {
                 ms.setReadOnly(pReadOnly);
             }
@@ -352,14 +344,12 @@ public class UserManagerBean implements IUserManagerLocal {
     @RolesAllowed({UserGroupMapping.REGULAR_USER_ROLE_ID, UserGroupMapping.ADMIN_ROLE_ID})
     @Override
     public void removeUsers(String pWorkspaceId, String[] pLogins) throws UserNotFoundException, AccessRightException, AccountNotFoundException, WorkspaceNotFoundException, EntityConstraintException {
-        Account account = checkAdmin(pWorkspaceId);
-        Locale locale = new Locale(account.getLanguage());
-
+        checkAdmin(pWorkspaceId);
         for (String login : pLogins) {
-            User user = userDAO.loadUser(locale, new UserKey(pWorkspaceId, login));
+            User user = userDAO.loadUser(new UserKey(pWorkspaceId, login));
             userEvent.select(new AnnotationLiteral<Removed>() {
             }).fire(new UserEvent(user));
-            userDAO.removeUser(locale, user);
+            userDAO.removeUser(user);
         }
 
     }
@@ -375,17 +365,16 @@ public class UserManagerBean implements IUserManagerLocal {
     @RolesAllowed({UserGroupMapping.REGULAR_USER_ROLE_ID, UserGroupMapping.ADMIN_ROLE_ID})
     @Override
     public void removeUserGroups(String pWorkspaceId, String[] pIds) throws UserGroupNotFoundException, AccessRightException, AccountNotFoundException, WorkspaceNotFoundException, EntityConstraintException {
-        Account account = checkAdmin(pWorkspaceId);
-        Locale locale = new Locale(account.getLanguage());
+        checkAdmin(pWorkspaceId);
         for (String id : pIds) {
             UserGroupKey userGroupKey = new UserGroupKey(pWorkspaceId, id);
             if (userGroupDAO.hasACLConstraint(userGroupKey)) {
-                throw new EntityConstraintException(locale, "EntityConstraintException11");
+                throw new EntityConstraintException("EntityConstraintException11");
             }
-            UserGroup group = userGroupDAO.loadUserGroup(locale, userGroupKey);
+            UserGroup group = userGroupDAO.loadUserGroup(userGroupKey);
             groupEvent.select(new AnnotationLiteral<Removed>() {
             }).fire(new UserGroupEvent(group));
-            userGroupDAO.removeUserGroup(locale, group);
+            userGroupDAO.removeUserGroup(group);
         }
     }
 
@@ -412,16 +401,15 @@ public class UserManagerBean implements IUserManagerLocal {
         WorkspaceUserMembership userMS = userDAO.loadUserMembership(new WorkspaceUserMembershipKey(pWorkspaceId, pWorkspaceId, login));
         Workspace wks = workspaceDAO.loadWorkspace(pWorkspaceId);
         User user = userDAO.loadUser(new UserKey(pWorkspaceId, login));
-        Locale userLocale = user.getLocale();
 
         if (!wks.isEnabled()) {
-            throw new WorkspaceNotEnabledException(userLocale, pWorkspaceId);
+            throw new WorkspaceNotEnabledException(pWorkspaceId);
         } else if (userMS != null) {
             user = userMS.getMember();
         } else if (!wks.getAdmin().getLogin().equals(login)) {
             WorkspaceUserGroupMembership[] groupMS = userGroupDAO.getUserGroupMemberships(pWorkspaceId, user);
             if (groupMS.length == 0) {
-                throw new UserNotActiveException(userLocale, login);
+                throw new UserNotActiveException(login);
             }
         }
 
@@ -438,7 +426,7 @@ public class UserManagerBean implements IUserManagerLocal {
 
         User user = userDAO.loadUser(new UserKey(pWorkspaceId, login));
         if (!hasWorkspaceWriteAccess(user, pWorkspaceId)) {
-            throw new AccessRightException(user.getLocale(), user);
+            throw new AccessRightException(user);
         }
         workspaceAccessEvent.select(new AnnotationLiteral<Write>() {
         }).fire(new WorkspaceAccessEvent(user));
@@ -453,7 +441,7 @@ public class UserManagerBean implements IUserManagerLocal {
 
         Workspace wks = workspaceDAO.loadWorkspace(pWorkspaceId);
         if (!wks.isEnabled()) {
-            throw new WorkspaceNotEnabledException(user.getLocale(), pWorkspaceId);
+            throw new WorkspaceNotEnabledException(pWorkspaceId);
         }
         if (!wks.getAdmin().getLogin().equals(login)) {
             WorkspaceUserMembership userMS = userDAO.loadUserMembership(new WorkspaceUserMembershipKey(pWorkspaceId, pWorkspaceId, login));
@@ -512,15 +500,14 @@ public class UserManagerBean implements IUserManagerLocal {
     @Override
     public Account checkAdmin(String pWorkspaceId) throws AccessRightException, AccountNotFoundException, WorkspaceNotFoundException {
         Account account = accountDAO.loadAccount(contextManager.getCallerPrincipalLogin());
-        Locale locale = new Locale(account.getLanguage());
-        Workspace wks = workspaceDAO.loadWorkspace(locale, pWorkspaceId);
+        Workspace wks = workspaceDAO.loadWorkspace(pWorkspaceId);
         checkAdmin(wks, account);
         return account;
     }
 
     private void checkAdmin(Workspace workspace, Account account) throws AccessRightException {
         if (!contextManager.isCallerInRole(UserGroupMapping.ADMIN_ROLE_ID) && !workspace.getAdmin().equals(account)) {
-            throw new AccessRightException(new Locale(account.getLanguage()), account);
+            throw new AccessRightException(account);
         }
     }
 

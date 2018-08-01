@@ -14,7 +14,7 @@ package org.polarsys.eplmp.core.exceptions;
 import org.polarsys.eplmp.core.workflow.WorkflowModel;
 
 import java.text.MessageFormat;
-import java.util.Locale;
+
 
 /**
  *
@@ -29,12 +29,12 @@ public class WorkflowModelAlreadyExistsException extends EntityAlreadyExistsExce
         mWorkflowModel=null;
     }
     
-    public WorkflowModelAlreadyExistsException(Locale pLocale, WorkflowModel pWorkflowModel) {
-        this(pLocale, pWorkflowModel, null);
+    public WorkflowModelAlreadyExistsException(WorkflowModel pWorkflowModel) {
+        this(pWorkflowModel, null);
     }
 
-    public WorkflowModelAlreadyExistsException(Locale pLocale, WorkflowModel pWorkflowModel, Throwable pCause) {
-        super(pLocale, pCause);
+    public WorkflowModelAlreadyExistsException(WorkflowModel pWorkflowModel, Throwable pCause) {
+        super( pCause);
         mWorkflowModel=pWorkflowModel;
     }
 

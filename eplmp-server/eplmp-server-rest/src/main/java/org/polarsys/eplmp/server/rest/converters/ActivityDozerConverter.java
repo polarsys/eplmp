@@ -11,15 +11,15 @@
 
 package org.polarsys.eplmp.server.rest.converters;
 
+import org.dozer.DozerBeanMapperSingletonWrapper;
+import org.dozer.DozerConverter;
+import org.dozer.Mapper;
 import org.polarsys.eplmp.core.workflow.Activity;
 import org.polarsys.eplmp.core.workflow.ParallelActivity;
 import org.polarsys.eplmp.core.workflow.SequentialActivity;
 import org.polarsys.eplmp.core.workflow.Task;
 import org.polarsys.eplmp.server.rest.dto.ActivityDTO;
 import org.polarsys.eplmp.server.rest.dto.TaskDTO;
-import org.dozer.DozerBeanMapperSingletonWrapper;
-import org.dozer.DozerConverter;
-import org.dozer.Mapper;
 
 import java.util.ArrayList;
 import java.util.List;

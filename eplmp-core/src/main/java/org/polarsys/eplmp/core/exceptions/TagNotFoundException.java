@@ -14,7 +14,7 @@ package org.polarsys.eplmp.core.exceptions;
 import org.polarsys.eplmp.core.meta.TagKey;
 
 import java.text.MessageFormat;
-import java.util.Locale;
+
 
 /**
  *
@@ -28,8 +28,8 @@ public class TagNotFoundException extends EntityNotFoundException {
         mTagKey=null;
     }
     
-    public TagNotFoundException(Locale pLocale, TagKey pTagKey) {
-        super(pLocale);
+    public TagNotFoundException(TagKey pTagKey) {
+        super();
         mTagKey=pTagKey;
     }
 

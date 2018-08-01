@@ -18,6 +18,8 @@ import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
 
 /**
+ * Custom 404 response
+ *
  * @author Morgan Guimard
  */
 @Provider

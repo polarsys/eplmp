@@ -12,7 +12,6 @@
 package org.polarsys.eplmp.server.ws.collaborative;
 
 
-import org.polarsys.eplmp.server.ws.WebSocketMessage;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -20,6 +19,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.polarsys.eplmp.server.ws.WebSocketMessage;
 
 import javax.json.Json;
 import javax.json.JsonObject;

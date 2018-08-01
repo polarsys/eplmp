@@ -10,6 +10,9 @@
   *******************************************************************************/
 package org.polarsys.eplmp.server.rest;
 
+import io.swagger.annotations.*;
+import org.dozer.DozerBeanMapperSingletonWrapper;
+import org.dozer.Mapper;
 import org.polarsys.eplmp.core.configuration.DocumentBaseline;
 import org.polarsys.eplmp.core.configuration.DocumentCollection;
 import org.polarsys.eplmp.core.document.DocumentRevisionKey;
@@ -19,11 +22,8 @@ import org.polarsys.eplmp.core.security.UserGroupMapping;
 import org.polarsys.eplmp.core.services.IDocumentBaselineManagerLocal;
 import org.polarsys.eplmp.server.rest.dto.baseline.BaselinedDocumentDTO;
 import org.polarsys.eplmp.server.rest.dto.baseline.DocumentBaselineDTO;
-import org.polarsys.eplmp.server.rest.util.FileDownloadTools;
 import org.polarsys.eplmp.server.rest.util.DocumentBaselineFileExport;
-import io.swagger.annotations.*;
-import org.dozer.DozerBeanMapperSingletonWrapper;
-import org.dozer.Mapper;
+import org.polarsys.eplmp.server.rest.util.FileDownloadTools;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.security.DeclareRoles;

@@ -90,13 +90,12 @@ public class ProductBaselineManagerBean implements IProductBaselineManagerLocal 
     public ProductBaseline createBaseline(ConfigurationItemKey ciKey, String name, ProductBaselineType pType, String description, List<PartIterationKey> partIterationKeys, List<String> substituteLinks, List<String> optionalUsageLinks) throws UserNotFoundException, AccessRightException, WorkspaceNotFoundException, ConfigurationItemNotFoundException, NotAllowedException, EntityConstraintException, PartMasterNotFoundException, CreationException, BaselineNotFoundException, PathToPathLinkAlreadyExistsException, WorkspaceNotEnabledException {
 
         User user = userManager.checkWorkspaceWriteAccess(ciKey.getWorkspace());
-        Locale userLocale = user.getLocale();
 
         if (null == name || name.isEmpty()) {
-            throw new NotAllowedException(userLocale, "NotAllowedException61");
+            throw new NotAllowedException("NotAllowedException61");
         }
 
-        ConfigurationItem configurationItem = configurationItemDAO.loadConfigurationItem(userLocale, ciKey);
+        ConfigurationItem configurationItem = configurationItemDAO.loadConfigurationItem(ciKey);
 
         List<PartIteration> partIterations = new ArrayList<>();
         for (PartIterationKey piKey : partIterationKeys) {
@@ -110,22 +109,22 @@ public class ProductBaselineManagerBean implements IProductBaselineManagerLocal 
         psFilterVisitor.visit(user, filter, configurationItem.getDesignItem(), -1, new PSFilterVisitorCallbacks() {
             @Override
             public void onIndeterminateVersion(PartMaster partMaster, List<PartIteration> partIterations) throws NotAllowedException {
-                throw new NotAllowedException(userLocale, "NotAllowedException48");
+                throw new NotAllowedException("NotAllowedException48");
             }
 
             @Override
             public void onUnresolvedVersion(PartMaster partMaster) throws NotAllowedException {
-                throw new NotAllowedException(userLocale, "NotAllowedException49");
+                throw new NotAllowedException("NotAllowedException49");
             }
 
             @Override
             public void onIndeterminatePath(List<PartLink> pCurrentPath, List<PartIteration> pCurrentPathPartIterations) throws NotAllowedException {
-                throw new NotAllowedException(userLocale, "NotAllowedException50");
+                throw new NotAllowedException("NotAllowedException50");
             }
 
             @Override
             public void onUnresolvedPath(List<PartLink> pCurrentPath, List<PartIteration> partIterations) throws NotAllowedException {
-                throw new NotAllowedException(userLocale, "NotAllowedException51");
+                throw new NotAllowedException("NotAllowedException51");
             }
 
             @Override
@@ -174,13 +173,13 @@ public class ProductBaselineManagerBean implements IProductBaselineManagerLocal 
         baseline.getSubstituteLinks().addAll(filter.getRetainedSubstituteLinks());
         baseline.getOptionalUsageLinks().addAll(filter.getRetainedOptionalUsageLinks());
 
-        productBaselineDAO.createBaseline(userLocale, baseline);
+        productBaselineDAO.createBaseline(baseline);
 
         // Copy PathToPathLink list to baseline
         List<PathToPathLink> links = pathToPathLinkDAO.getPathToPathLinkFromPathList(configurationItem, visitedPaths);
         for (PathToPathLink link : links) {
             PathToPathLink clone = link.clone();
-            pathToPathLinkDAO.createPathToPathLink(userLocale, clone);
+            pathToPathLinkDAO.createPathToPathLink(clone);
             baseline.addPathToPathLink(clone);
         }
 
@@ -205,15 +204,14 @@ public class ProductBaselineManagerBean implements IProductBaselineManagerLocal 
     @Override
     public void deleteBaseline(String pWorkspaceId, int baselineId) throws UserNotFoundException, AccessRightException, WorkspaceNotFoundException, BaselineNotFoundException, UserNotActiveException, EntityConstraintException, WorkspaceNotEnabledException {
 
-        User user = userManager.checkWorkspaceReadAccess(pWorkspaceId);
-        Locale userLocale = user.getLocale();
+        userManager.checkWorkspaceReadAccess(pWorkspaceId);
 
-        ProductBaseline productBaseline = productBaselineDAO.loadBaseline(userLocale, baselineId);
+        ProductBaseline productBaseline = productBaselineDAO.loadBaseline(baselineId);
 
         userManager.checkWorkspaceWriteAccess(productBaseline.getConfigurationItem().getWorkspaceId());
 
         if (productInstanceIterationDAO.isBaselinedUsed(productBaseline)) {
-            throw new EntityConstraintException(userLocale, "EntityConstraintException16");
+            throw new EntityConstraintException("EntityConstraintException16");
         }
 
         productBaselineDAO.deleteBaseline(productBaseline);
@@ -251,7 +249,7 @@ public class ProductBaselineManagerBean implements IProductBaselineManagerLocal 
     public List<PathChoice> getBaselineCreationPathChoices(ConfigurationItemKey ciKey, ProductBaselineType type) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, ConfigurationItemNotFoundException, PartMasterNotFoundException, NotAllowedException, EntityConstraintException, WorkspaceNotEnabledException {
 
         User user = userManager.checkWorkspaceReadAccess(ciKey.getWorkspace());
-        ConfigurationItem configurationItem = configurationItemDAO.loadConfigurationItem(user.getLocale(), ciKey);
+        ConfigurationItem configurationItem = configurationItemDAO.loadConfigurationItem(ciKey);
 
         ProductStructureFilter filter;
 
@@ -319,7 +317,7 @@ public class ProductBaselineManagerBean implements IProductBaselineManagerLocal 
 
         User user = userManager.checkWorkspaceReadAccess(ciKey.getWorkspace());
 
-        ConfigurationItem configurationItem = configurationItemDAO.loadConfigurationItem(user.getLocale(), ciKey);
+        ConfigurationItem configurationItem = configurationItemDAO.loadConfigurationItem(ciKey);
 
         Set<PartIteration> parts = new HashSet<>();
 
@@ -371,8 +369,7 @@ public class ProductBaselineManagerBean implements IProductBaselineManagerLocal 
     public ProductConfiguration createProductConfiguration(ConfigurationItemKey ciKey, String name, String description, List<String> substituteLinks, List<String> optionalUsageLinks, Map<String, String> aclUserEntries, Map<String, String> aclUserGroupEntries) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, ConfigurationItemNotFoundException, CreationException, AccessRightException, WorkspaceNotEnabledException {
         User user = userManager.checkWorkspaceWriteAccess(ciKey.getWorkspace());
 
-        Locale userLocale = user.getLocale();
-        ConfigurationItem configurationItem = configurationItemDAO.loadConfigurationItem(userLocale, ciKey);
+        ConfigurationItem configurationItem = configurationItemDAO.loadConfigurationItem(ciKey);
 
         ProductConfiguration productConfiguration = new ProductConfiguration(user, configurationItem, name, description, null);
 
@@ -383,7 +380,7 @@ public class ProductBaselineManagerBean implements IProductBaselineManagerLocal 
         productConfiguration.setOptionalUsageLinks(new HashSet<>(optionalUsageLinks));
         productConfiguration.setSubstituteLinks(new HashSet<>(substituteLinks));
 
-        productConfigurationDAO.createProductConfiguration(userLocale, productConfiguration);
+        productConfigurationDAO.createProductConfiguration(productConfiguration);
         return productConfiguration;
     }
 
@@ -430,12 +427,19 @@ public class ProductBaselineManagerBean implements IProductBaselineManagerLocal 
 
     @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
     @Override
-    public ProductConfiguration getProductConfiguration(ConfigurationItemKey ciKey, int productConfigurationId) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, ProductConfigurationNotFoundException, AccessRightException, WorkspaceNotEnabledException {
+    public ProductConfiguration getProductConfiguration(ConfigurationItemKey ciKey, int productConfigurationId)
+            throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, ProductConfigurationNotFoundException, AccessRightException, WorkspaceNotEnabledException {
+
         User user = userManager.checkWorkspaceReadAccess(ciKey.getWorkspace());
-        ProductConfiguration productConfiguration = productConfigurationDAO.getProductConfiguration(user.getLocale(), productConfigurationId);
+
+        ProductConfiguration productConfiguration = productConfigurationDAO.getProductConfiguration(productConfigurationId);
 
         String workspaceId = productConfiguration.getConfigurationItem().getWorkspace().getId();
-        user = userManager.checkWorkspaceReadAccess(workspaceId);
+
+        if (!workspaceId.equals(ciKey.getWorkspace())) {
+            throw new AccessRightException(user);
+        }
+
         checkProductConfigurationReadAccess(workspaceId, productConfiguration, user);
 
         return productConfiguration;
@@ -445,10 +449,14 @@ public class ProductBaselineManagerBean implements IProductBaselineManagerLocal 
     @Override
     public ProductConfiguration updateProductConfiguration(ConfigurationItemKey ciKey, int productConfigurationId, String name, String description, List<String> substituteLinks, List<String> optionalUsageLinks) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, ProductConfigurationNotFoundException, AccessRightException, WorkspaceNotEnabledException {
         User user = userManager.checkWorkspaceReadAccess(ciKey.getWorkspace());
-        ProductConfiguration productConfiguration = productConfigurationDAO.getProductConfiguration(user.getLocale(), productConfigurationId);
+        ProductConfiguration productConfiguration = productConfigurationDAO.getProductConfiguration(productConfigurationId);
 
         String workspaceId = productConfiguration.getConfigurationItem().getWorkspace().getId();
-        user = userManager.checkWorkspaceReadAccess(workspaceId);
+
+        if (!workspaceId.equals(ciKey.getWorkspace())) {
+            throw new AccessRightException(user);
+        }
+
         checkProductConfigurationWriteAccess(workspaceId, productConfiguration, user);
 
         productConfiguration.setName(name);
@@ -463,10 +471,14 @@ public class ProductBaselineManagerBean implements IProductBaselineManagerLocal 
     @Override
     public void deleteProductConfiguration(ConfigurationItemKey ciKey, int productConfigurationId) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, ProductConfigurationNotFoundException, AccessRightException, WorkspaceNotEnabledException {
         User user = userManager.checkWorkspaceReadAccess(ciKey.getWorkspace());
-        ProductConfiguration productConfiguration = productConfigurationDAO.getProductConfiguration(user.getLocale(), productConfigurationId);
+        ProductConfiguration productConfiguration = productConfigurationDAO.getProductConfiguration(productConfigurationId);
 
         String workspaceId = productConfiguration.getConfigurationItem().getWorkspace().getId();
-        user = userManager.checkWorkspaceReadAccess(workspaceId);
+
+        if (!workspaceId.equals(ciKey.getWorkspace())) {
+            throw new AccessRightException(user);
+        }
+
         checkProductConfigurationWriteAccess(workspaceId, productConfiguration, user);
 
         productConfigurationDAO.deleteProductConfiguration(productConfiguration);
@@ -479,10 +491,13 @@ public class ProductBaselineManagerBean implements IProductBaselineManagerLocal 
         // Check the read access to the workspace
         User user = userManager.checkWorkspaceReadAccess(ciKey.getWorkspace());
 
-        ProductConfiguration productConfiguration = productConfigurationDAO.getProductConfiguration(user.getLocale(), productConfigurationId);
+        ProductConfiguration productConfiguration = productConfigurationDAO.getProductConfiguration(productConfigurationId);
 
         String workspaceId = productConfiguration.getConfigurationItem().getWorkspaceId();
-        user = userManager.checkWorkspaceReadAccess(workspaceId);
+
+        if (!workspaceId.equals(ciKey.getWorkspace())) {
+            throw new AccessRightException(user);
+        }
 
         checkProductConfigurationWriteAccess(workspaceId, productConfiguration, user);
 
@@ -507,7 +522,7 @@ public class ProductBaselineManagerBean implements IProductBaselineManagerLocal 
             return user;
         } else {
             // Else throw a AccessRightException
-            throw new AccessRightException(user.getLocale(), user);
+            throw new AccessRightException(user);
         }
     }
 
@@ -525,7 +540,7 @@ public class ProductBaselineManagerBean implements IProductBaselineManagerLocal 
             return user;
         } else {
             // Else throw a AccessRightException
-            throw new AccessRightException(user.getLocale(), user);
+            throw new AccessRightException(user);
         }
     }
 
@@ -535,10 +550,13 @@ public class ProductBaselineManagerBean implements IProductBaselineManagerLocal 
 
         User user = userManager.checkWorkspaceReadAccess(ciKey.getWorkspace());
 
-        ProductConfiguration productConfiguration = productConfigurationDAO.getProductConfiguration(user.getLocale(), productConfigurationId);
+        ProductConfiguration productConfiguration = productConfigurationDAO.getProductConfiguration(productConfigurationId);
 
         String workspaceId = productConfiguration.getConfigurationItem().getWorkspaceId();
-        user = userManager.checkWorkspaceReadAccess(workspaceId);
+
+        if (!workspaceId.equals(ciKey.getWorkspace())) {
+            throw new AccessRightException(user);
+        }
 
         checkProductConfigurationWriteAccess(workspaceId, productConfiguration, user);
 
@@ -553,25 +571,24 @@ public class ProductBaselineManagerBean implements IProductBaselineManagerLocal 
     @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
     @Override
     public List<PartRevision> getObsoletePartRevisionsInBaseline(String workspaceId, int baselineId) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, BaselineNotFoundException, WorkspaceNotEnabledException {
-        User user = userManager.checkWorkspaceReadAccess(workspaceId);
-        ProductBaseline baseline = productBaselineDAO.loadBaseline(user.getLocale(), baselineId);
+        userManager.checkWorkspaceReadAccess(workspaceId);
+        ProductBaseline baseline = productBaselineDAO.loadBaseline(baselineId);
         return productBaselineDAO.findObsoletePartsInBaseline(workspaceId, baseline);
     }
 
     @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
     @Override
     public List<PathToPathLink> getPathToPathLinkFromSourceAndTarget(String workspaceId, String configurationItemId, int baselineId, String sourcePath, String targetPath) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, BaselineNotFoundException, WorkspaceNotEnabledException {
-        User user = userManager.checkWorkspaceReadAccess(workspaceId);
-        ProductBaseline baseline = productBaselineDAO.loadBaseline(user.getLocale(), baselineId);
+        userManager.checkWorkspaceReadAccess(workspaceId);
+        ProductBaseline baseline = productBaselineDAO.loadBaseline(baselineId);
         return pathToPathLinkDAO.getPathToPathLinkFromSourceAndTarget(baseline, sourcePath, targetPath);
     }
 
     @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
     @Override
     public List<String> getPathToPathLinkTypes(String workspaceId, String configurationItemId, int baselineId) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, BaselineNotFoundException, WorkspaceNotEnabledException {
-
-        User user = userManager.checkWorkspaceReadAccess(workspaceId);
-        ProductBaseline baseline = productBaselineDAO.loadBaseline(user.getLocale(), baselineId);
+        userManager.checkWorkspaceReadAccess(workspaceId);
+        ProductBaseline baseline = productBaselineDAO.loadBaseline(baselineId);
         return pathToPathLinkDAO.getDistinctPathToPathLinkTypes(baseline);
     }
 

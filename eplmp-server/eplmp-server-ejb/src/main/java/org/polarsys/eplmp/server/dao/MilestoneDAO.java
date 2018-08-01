@@ -16,15 +16,15 @@ import org.polarsys.eplmp.core.change.Milestone;
 import org.polarsys.eplmp.core.exceptions.MilestoneAlreadyExistsException;
 import org.polarsys.eplmp.core.exceptions.MilestoneNotFoundException;
 
-import javax.ejb.Stateless;
+import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 import java.util.List;
-import java.util.Locale;
 
-@Stateless(name = "MilestoneDAO")
+
+@RequestScoped
 public class MilestoneDAO {
 
     public static final String WORKSPACE_ID = "workspaceId";
@@ -35,10 +35,7 @@ public class MilestoneDAO {
     @Inject
     private ACLDAO aclDAO;
 
-    private Locale mLocale;
-
     public MilestoneDAO() {
-        mLocale = Locale.getDefault();
     }
 
 
@@ -51,15 +48,10 @@ public class MilestoneDAO {
     public Milestone loadMilestone(int pId) throws MilestoneNotFoundException {
         Milestone milestone = em.find(Milestone.class, pId);
         if (milestone == null) {
-            throw new MilestoneNotFoundException(mLocale, pId);
+            throw new MilestoneNotFoundException(pId);
         } else {
             return milestone;
         }
-    }
-
-    public Milestone loadMilestone(Locale pLocale, int pId) throws MilestoneNotFoundException {
-        mLocale = pLocale;
-        return loadMilestone(pId);
     }
 
     public Milestone loadMilestone(String pTitle, String pWorkspace) throws MilestoneNotFoundException {
@@ -68,20 +60,15 @@ public class MilestoneDAO {
                 .setParameter(WORKSPACE_ID, pWorkspace)
                 .getSingleResult();
         if (milestone == null) {
-            throw new MilestoneNotFoundException(mLocale, pTitle);
+            throw new MilestoneNotFoundException(pTitle);
         } else {
             return milestone;
         }
     }
 
-    public Milestone loadMilestone(Locale pLocale, String pTitle, String pWorkspace) throws MilestoneNotFoundException {
-        mLocale = pLocale;
-        return loadMilestone(pTitle, pWorkspace);
-    }
-
     public void createMilestone(Milestone pMilestone) throws MilestoneAlreadyExistsException {
         if(!this.checkTitleUniqueness(pMilestone.getTitle(),pMilestone.getWorkspace().getId()))
-            throw new MilestoneAlreadyExistsException(mLocale,pMilestone.getTitle());
+            throw new MilestoneAlreadyExistsException(pMilestone.getTitle(), null);
 
         if(pMilestone.getACL()!=null) {
             aclDAO.createACL(pMilestone.getACL());
@@ -89,11 +76,6 @@ public class MilestoneDAO {
 
         em.persist(pMilestone);
         em.flush();
-    }
-
-    public void createMilestone(Locale pLocale, Milestone pMilestone) throws MilestoneAlreadyExistsException {
-        mLocale = pLocale;
-        createMilestone(pMilestone);
     }
 
     public void deleteMilestone(Milestone pMilestone) {

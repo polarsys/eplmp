@@ -18,20 +18,20 @@ import org.polarsys.eplmp.core.product.PartMaster;
 import org.polarsys.eplmp.core.product.PartMasterKey;
 import org.polarsys.eplmp.core.product.PartRevision;
 
-import javax.ejb.Stateless;
+import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.persistence.*;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import java.util.List;
-import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-@Stateless(name = "PartMasterDAO")
+@RequestScoped
 public class PartMasterDAO {
 
     public static final String WORKSPACE_ID = "workspaceId";
+
     @PersistenceContext
     private EntityManager em;
 
@@ -41,25 +41,18 @@ public class PartMasterDAO {
     @Inject
     private WorkflowDAO workflowDAO;
 
-    private Locale mLocale;
     private static final Logger LOGGER = Logger.getLogger(PartMasterDAO.class.getName());
 
     public PartMasterDAO() {
-        mLocale = Locale.getDefault();
     }
 
     public PartMaster loadPartM(PartMasterKey pKey) throws PartMasterNotFoundException {
         PartMaster partM = em.find(PartMaster.class, pKey);
         if (partM == null) {
-            throw new PartMasterNotFoundException(mLocale, pKey.getNumber());
+            throw new PartMasterNotFoundException(pKey.getNumber());
         } else {
             return partM;
         }
-    }
-
-    public PartMaster loadPartM(Locale pLocale, PartMasterKey pKey) throws PartMasterNotFoundException {
-        mLocale = pLocale;
-        return loadPartM(pKey);
     }
 
     public PartMaster getPartMRef(PartMasterKey pKey) throws PartMasterNotFoundException {
@@ -67,13 +60,8 @@ public class PartMasterDAO {
             return em.getReference(PartMaster.class, pKey);
         } catch (EntityNotFoundException pENFEx) {
             LOGGER.log(Level.FINEST,null,pENFEx);
-            throw new PartMasterNotFoundException(mLocale, pKey.getNumber());
+            throw new PartMasterNotFoundException(pKey.getNumber());
         }
-    }
-
-    public PartMaster getPartMRef(Locale pLocale, PartMasterKey pKey) throws PartMasterNotFoundException {
-        mLocale = pLocale;
-        return getPartMRef(pKey);
     }
 
     public void createPartM(PartMaster pPartM) throws PartMasterAlreadyExistsException, CreationException {
@@ -87,19 +75,14 @@ public class PartMasterDAO {
             em.flush();
         } catch (EntityExistsException pEEEx) {
             LOGGER.log(Level.FINEST,null,pEEEx);
-            throw new PartMasterAlreadyExistsException(mLocale, pPartM);
+            throw new PartMasterAlreadyExistsException(pPartM);
         } catch (PersistenceException pPEx) {
             //EntityExistsException is case sensitive
             //whereas MySQL is not thus PersistenceException could be
             //thrown instead of EntityExistsException
             LOGGER.log(Level.FINEST,null,pPEx);
-            throw new CreationException(mLocale);
+            throw new CreationException("");
         }
-    }
-
-    public void createPartM(Locale pLocale, PartMaster pPartM) throws PartMasterAlreadyExistsException, CreationException {
-        mLocale = pLocale;
-        createPartM(pPartM);
     }
 
     public void removePartM(PartMaster pPartM) {
@@ -107,11 +90,6 @@ public class PartMasterDAO {
             partRevisionDAO.removeRevision(partRevision);
         }
         em.remove(pPartM);
-    }
-
-    public void removePartM(Locale pLocale, PartMaster pPartM) {
-        mLocale = pLocale;
-        removePartM(pPartM);
     }
 
     public List<PartMaster> findPartMasters(String workspaceId, String partNumber, String partName, int maxResults){
@@ -175,6 +153,7 @@ public class PartMasterDAO {
         CriteriaBuilder cb = em.getCriteriaBuilder();
         CriteriaQuery<Long> countQuery = cb.createQuery(Long.class);
         countQuery.select(cb.count(countQuery.from(PartMaster.class)));
+        // TODO fixme (no usage of workspaceId)
         return em.createQuery(countQuery).getSingleResult();
     }
 }

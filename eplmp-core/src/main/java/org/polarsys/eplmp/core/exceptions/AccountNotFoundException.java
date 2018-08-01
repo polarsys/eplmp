@@ -12,7 +12,7 @@
 package org.polarsys.eplmp.core.exceptions;
 
 import java.text.MessageFormat;
-import java.util.Locale;
+
 
 /**
  *
@@ -26,13 +26,9 @@ public class AccountNotFoundException extends EntityNotFoundException {
         super(pMessage);
         mLogin=null;
     }
-    
-    public AccountNotFoundException(Locale pLocale, String pLogin) {
-        this(pLocale, pLogin, null);
-    }
 
-    public AccountNotFoundException(Locale pLocale, String pLogin, Throwable pCause) {
-        super(pLocale, pCause);
+    public AccountNotFoundException(String pLogin, Throwable pCause) {
+        super(pCause);
         mLogin=pLogin;
     }
 

@@ -11,11 +11,6 @@
 
 package org.polarsys.eplmp.server.extras;
 
-import org.polarsys.eplmp.core.common.User;
-import org.polarsys.eplmp.core.document.DocumentIteration;
-import org.polarsys.eplmp.core.document.DocumentRevision;
-import org.polarsys.eplmp.core.product.PartIteration;
-import org.polarsys.eplmp.core.product.PartRevision;
 import org.apache.commons.io.IOUtils;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
@@ -25,6 +20,11 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.polarsys.eplmp.core.common.User;
+import org.polarsys.eplmp.core.document.DocumentIteration;
+import org.polarsys.eplmp.core.document.DocumentRevision;
+import org.polarsys.eplmp.core.product.PartIteration;
+import org.polarsys.eplmp.core.product.PartRevision;
 
 import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;

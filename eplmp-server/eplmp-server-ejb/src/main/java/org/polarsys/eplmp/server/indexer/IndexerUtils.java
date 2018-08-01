@@ -11,7 +11,6 @@
 
 package org.polarsys.eplmp.server.indexer;
 
-import org.polarsys.eplmp.core.util.Tools;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
 import org.apache.poi.hslf.extractor.PowerPointExtractor;
@@ -30,6 +29,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.poi.xwpf.extractor.XWPFWordExtractor;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.xmlbeans.XmlException;
+import org.polarsys.eplmp.core.util.Tools;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 

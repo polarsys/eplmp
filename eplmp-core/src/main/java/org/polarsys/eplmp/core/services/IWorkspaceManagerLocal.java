@@ -11,11 +11,11 @@
 
 package org.polarsys.eplmp.core.services;
 
+import org.polarsys.eplmp.core.admin.WorkspaceBackOptions;
 import org.polarsys.eplmp.core.admin.WorkspaceFrontOptions;
 import org.polarsys.eplmp.core.common.Account;
 import org.polarsys.eplmp.core.common.Workspace;
 import org.polarsys.eplmp.core.exceptions.*;
-import org.polarsys.eplmp.core.admin.WorkspaceBackOptions;
 
 /**
  * @author Morgan Guimard

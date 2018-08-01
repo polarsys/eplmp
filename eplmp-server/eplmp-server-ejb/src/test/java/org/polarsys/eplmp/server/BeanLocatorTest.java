@@ -10,11 +10,11 @@
   *******************************************************************************/
 package org.polarsys.eplmp.server;
 
-import org.polarsys.eplmp.server.converters.CADConverter;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mockito.Mockito;
+import org.polarsys.eplmp.server.converters.CADConverter;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;

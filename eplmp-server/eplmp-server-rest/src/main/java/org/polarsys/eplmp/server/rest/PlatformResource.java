@@ -11,7 +11,10 @@
 
 package org.polarsys.eplmp.server.rest;
 
-import io.swagger.annotations.*;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import org.polarsys.eplmp.core.exceptions.PlatformHealthException;
 import org.polarsys.eplmp.core.services.IPlatformHealthManagerLocal;
 import org.polarsys.eplmp.server.rest.dto.PlatformHealthDTO;
@@ -19,13 +22,10 @@ import org.polarsys.eplmp.server.rest.dto.PlatformHealthDTO;
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
-import javax.json.Json;
-import javax.json.JsonObject;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 
 @RequestScoped
 @Api(value = "Platforms", description = "Operations about platform")

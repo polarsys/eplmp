@@ -42,8 +42,6 @@ import javax.ejb.Asynchronous;
 import javax.ejb.Local;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
@@ -57,9 +55,6 @@ import java.util.logging.Logger;
 @Local(IIndexerManagerLocal.class)
 @DeclareRoles({UserGroupMapping.REGULAR_USER_ROLE_ID, UserGroupMapping.ADMIN_ROLE_ID})
 public class IndexerManagerBean implements IIndexerManagerLocal {
-
-    @PersistenceContext
-    private EntityManager em;
 
     @Inject
     private JestClient esClient;
@@ -197,8 +192,7 @@ public class IndexerManagerBean implements IIndexerManagerLocal {
             );
 
         } catch (IOException e) {
-            Account account = accountManager.getMyAccount();
-            throw new NotAllowedException(new Locale(account.getLanguage()), "IndexerNotAvailableForSearch");
+            throw new NotAllowedException("IndexerNotAvailableForSearch");
         }
 
         if (searchResult.isSucceeded()) {
@@ -244,8 +238,7 @@ public class IndexerManagerBean implements IIndexerManagerLocal {
             );
 
         } catch (IOException e) {
-            Account account = accountManager.getMyAccount();
-            throw new NotAllowedException(new Locale(account.getLanguage()), "IndexerNotAvailableForSearch");
+            throw new NotAllowedException("IndexerNotAvailableForSearch");
         }
 
         if (searchResult.isSucceeded()) {
@@ -310,7 +303,7 @@ public class IndexerManagerBean implements IIndexerManagerLocal {
             }
         } catch (IOException e) {
             LOGGER.log(Level.WARNING, "Cannot index the whole workspace: The Elasticsearch server does not seem to respond");
-            mailer.sendBulkIndexationFailure(account, getString("IndexerNotAvailableForRequest", new Locale(account.getLanguage())));
+            mailer.sendBulkIndexationFailure(account, getString("IndexerNotAvailableForRequest", account.getLocale()));
         }
 
     }
@@ -364,7 +357,7 @@ public class IndexerManagerBean implements IIndexerManagerLocal {
         } catch (IOException e) {
             LOGGER.log(Level.WARNING, "Cannot delete index for workspace [" + workspaceId
                     + "]: The Elasticsearch server does not seem to respond. Consider deleting it manually.");
-            mailer.sendWorkspaceIndexationFailure(account, workspaceId, getString("IndexerNotAvailableForRequest", new Locale(account.getLanguage())));
+            mailer.sendWorkspaceIndexationFailure(account, workspaceId, getString("IndexerNotAvailableForRequest", account.getLocale()));
         }
     }
 

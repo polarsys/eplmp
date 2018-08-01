@@ -18,7 +18,6 @@ import org.polarsys.eplmp.core.exceptions.StorageException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Date;
-import java.util.List;
 
 public interface IBinaryStorageManagerLocal {
     InputStream getBinaryResourceInputStream(BinaryResource binaryResource) throws StorageException;

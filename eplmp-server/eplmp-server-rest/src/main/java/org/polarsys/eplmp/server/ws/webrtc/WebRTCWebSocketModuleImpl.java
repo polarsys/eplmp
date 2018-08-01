@@ -19,9 +19,8 @@ import org.polarsys.eplmp.server.ws.chat.Room;
 
 import javax.inject.Inject;
 import javax.websocket.Session;
-import java.util.Arrays;
-import java.util.List;
 import java.util.logging.Logger;
+
 import static org.polarsys.eplmp.server.ws.webrtc.WebSocketUtils.*;
 
 /**

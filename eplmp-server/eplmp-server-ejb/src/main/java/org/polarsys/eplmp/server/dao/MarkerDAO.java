@@ -13,21 +13,18 @@ package org.polarsys.eplmp.server.dao;
 import org.polarsys.eplmp.core.exceptions.MarkerNotFoundException;
 import org.polarsys.eplmp.core.product.Marker;
 
-import javax.ejb.Stateless;
+import javax.enterprise.context.RequestScoped;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import java.util.Locale;
 
-@Stateless(name = "MarkerDAO")
+
+@RequestScoped
 public class MarkerDAO {
 
     @PersistenceContext
     private EntityManager em;
 
-    private Locale mLocale;
-
     public MarkerDAO() {
-        mLocale = Locale.getDefault();
     }
 
     public void createMarker(Marker pMarker) {
@@ -38,15 +35,10 @@ public class MarkerDAO {
     public Marker loadMarker(int pId) throws MarkerNotFoundException {
         Marker marker = em.find(Marker.class, pId);
         if (marker == null) {
-            throw new MarkerNotFoundException(mLocale, pId);
+            throw new MarkerNotFoundException(pId);
         } else {
             return marker;
         }
-    }
-
-    public Marker loadMarker(Locale pLocale, int pId) throws MarkerNotFoundException {
-        mLocale = pLocale;
-        return loadMarker(pId);
     }
 
     public void removeMarker(int pId) throws MarkerNotFoundException {

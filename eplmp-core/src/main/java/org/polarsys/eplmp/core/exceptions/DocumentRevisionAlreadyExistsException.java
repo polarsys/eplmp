@@ -14,7 +14,7 @@ package org.polarsys.eplmp.core.exceptions;
 import org.polarsys.eplmp.core.document.DocumentRevision;
 
 import java.text.MessageFormat;
-import java.util.Locale;
+
 
 /**
  *
@@ -29,12 +29,12 @@ public class DocumentRevisionAlreadyExistsException extends EntityAlreadyExistsE
         mDocR=null;
     }
 
-    public DocumentRevisionAlreadyExistsException(Locale pLocale, DocumentRevision pDocR) {
-        this(pLocale, pDocR, null);
+    public DocumentRevisionAlreadyExistsException(DocumentRevision pDocR) {
+        this(pDocR, null);
     }
 
-    public DocumentRevisionAlreadyExistsException(Locale pLocale, DocumentRevision pDocR, Throwable pCause) {
-        super(pLocale, pCause);
+    public DocumentRevisionAlreadyExistsException(DocumentRevision pDocR, Throwable pCause) {
+        super( pCause);
         mDocR=pDocR;
     }
 

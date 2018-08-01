@@ -11,7 +11,7 @@
 
 package org.polarsys.eplmp.core.exceptions;
 
-import java.util.Locale;
+
 
 /**
  * Created by fredericmaury on 23/11/2016.
@@ -22,12 +22,12 @@ public class UpdateException extends ApplicationException {
         super(pMessage);
     }
 
-    public UpdateException(Locale pLocale) {
-        this(pLocale, null);
+    public UpdateException() {
+        super();
     }
 
-    public UpdateException(Locale pLocale, Throwable pCause) {
-        super(pLocale, pCause);
+    public UpdateException(Throwable pCause) {
+        super( pCause);
     }
 
     @Override

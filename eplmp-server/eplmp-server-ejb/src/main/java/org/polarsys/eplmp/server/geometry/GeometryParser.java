@@ -17,7 +17,6 @@ import de.javagl.obj.ObjReader;
 import de.javagl.obj.ObjUtils;
 
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.nio.FloatBuffer;
 import java.nio.file.Path;

@@ -10,7 +10,6 @@
   *******************************************************************************/
 package org.polarsys.eplmp.server.ws.util;
 
-import org.polarsys.eplmp.server.ws.chat.Room;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -18,6 +17,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Matchers;
 import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.polarsys.eplmp.server.ws.chat.Room;
 
 import javax.websocket.Session;
 import java.security.Principal;

@@ -12,10 +12,13 @@ package org.polarsys.eplmp.server.rest.exceptions.mapper;
 
 import org.polarsys.eplmp.core.exceptions.EntityNotFoundException;
 
+import javax.enterprise.context.RequestScoped;
+import javax.inject.Inject;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
+import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -23,18 +26,22 @@ import java.util.logging.Logger;
  * @author Taylor LABEJOF
  */
 @Provider
+@RequestScoped
 public class NotFoundExceptionMapper implements ExceptionMapper<EntityNotFoundException> {
     private static final Logger LOGGER = Logger.getLogger(NotFoundExceptionMapper.class.getName());
 
     public NotFoundExceptionMapper() {
     }
 
+    @Inject
+    private Locale userLocale;
+
     @Override
     public Response toResponse(EntityNotFoundException e) {
         LOGGER.log(Level.WARNING, e.getMessage());
         LOGGER.log(Level.FINE, null, e);
         return Response.status(Response.Status.NOT_FOUND)
-                .header("Reason-Phrase", e.getMessage())
+                .header("Reason-Phrase", e.getMessage(userLocale))
                 .entity(e.toString())
                 .type(MediaType.TEXT_PLAIN)
                 .build();

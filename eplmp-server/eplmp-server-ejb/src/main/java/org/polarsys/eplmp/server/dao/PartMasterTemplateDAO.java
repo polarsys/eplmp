@@ -17,21 +17,18 @@ import org.polarsys.eplmp.core.meta.ListOfValuesKey;
 import org.polarsys.eplmp.core.product.PartMasterTemplate;
 import org.polarsys.eplmp.core.product.PartMasterTemplateKey;
 
-import javax.ejb.Stateless;
+import javax.enterprise.context.RequestScoped;
 import javax.persistence.*;
 import java.util.List;
-import java.util.Locale;
 
-@Stateless(name = "PartMasterTemplateDAO")
+
+@RequestScoped
 public class PartMasterTemplateDAO {
 
     @PersistenceContext
     private EntityManager em;
 
-    private Locale mLocale;
-
     public PartMasterTemplateDAO() {
-        mLocale = Locale.getDefault();
     }
 
     public PartMasterTemplate removePartMTemplate(PartMasterTemplateKey pKey) throws PartMasterTemplateNotFoundException {
@@ -49,15 +46,10 @@ public class PartMasterTemplateDAO {
             throws PartMasterTemplateNotFoundException {
         PartMasterTemplate template = em.find(PartMasterTemplate.class, pKey);
         if (template == null) {
-            throw new PartMasterTemplateNotFoundException(mLocale, pKey.getId());
+            throw new PartMasterTemplateNotFoundException(pKey.getId());
         } else {
             return template;
         }
-    }
-
-    public PartMasterTemplate loadPartMTemplate(Locale pLocale, PartMasterTemplateKey pKey) throws PartMasterTemplateNotFoundException {
-        mLocale = pLocale;
-        return loadPartMTemplate(pKey);
     }
 
     public void createPartMTemplate(PartMasterTemplate pTemplate) throws PartMasterTemplateAlreadyExistsException, CreationException {
@@ -66,18 +58,13 @@ public class PartMasterTemplateDAO {
             em.persist(pTemplate);
             em.flush();
         } catch (EntityExistsException pEEEx) {
-            throw new PartMasterTemplateAlreadyExistsException(mLocale, pTemplate);
+            throw new PartMasterTemplateAlreadyExistsException(pTemplate);
         } catch (PersistenceException pPEx) {
             //EntityExistsException is case sensitive
             //whereas MySQL is not thus PersistenceException could be
             //thrown instead of EntityExistsException
-            throw new CreationException(mLocale);
+            throw new CreationException("");
         }
-    }
-
-    public void createPartMTemplate(Locale pLocale, PartMasterTemplate pTemplate) throws PartMasterTemplateAlreadyExistsException, CreationException {
-        mLocale = pLocale;
-        createPartMTemplate(pTemplate);
     }
 
     public List<PartMasterTemplate> findAllPartMTemplatesFromLOV(ListOfValuesKey lovKey){

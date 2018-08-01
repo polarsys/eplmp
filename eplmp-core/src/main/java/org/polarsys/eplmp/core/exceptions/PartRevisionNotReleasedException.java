@@ -12,7 +12,7 @@
 package org.polarsys.eplmp.core.exceptions;
 
 import java.text.MessageFormat;
-import java.util.Locale;
+
 
 /**
  *
@@ -21,18 +21,12 @@ import java.util.Locale;
 public class PartRevisionNotReleasedException extends ApplicationException {
     private final String mCIId;
 
-
-    public PartRevisionNotReleasedException(String pMessage) {
-        super(pMessage);
-        mCIId=null;
+    public PartRevisionNotReleasedException(String pCIID) {
+        this(pCIID, null);
     }
 
-    public PartRevisionNotReleasedException(Locale pLocale, String pCIID) {
-        this(pLocale, pCIID, null);
-    }
-
-    public PartRevisionNotReleasedException(Locale pLocale, String pCIId, Throwable pCause) {
-        super(pLocale, pCause);
+    public PartRevisionNotReleasedException(String pCIId, Throwable pCause) {
+        super( pCause);
         mCIId=pCIId;
     }
 

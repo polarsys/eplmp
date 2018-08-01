@@ -16,26 +16,20 @@ import org.polarsys.eplmp.core.exceptions.ConfigurationItemNotFoundException;
 import org.polarsys.eplmp.core.exceptions.CreationException;
 import org.polarsys.eplmp.core.product.*;
 
-import javax.ejb.Stateless;
+import javax.enterprise.context.RequestScoped;
 import javax.persistence.*;
 import java.util.List;
-import java.util.Locale;
 
-@Stateless(name = "ConfigurationItemDAO")
+
+@RequestScoped
 public class ConfigurationItemDAO {
 
     public static final String WORKSPACE_ID = "workspaceId";
+
     @PersistenceContext
     private EntityManager em;
 
-    private Locale mLocale;
-
     public ConfigurationItemDAO() {
-        mLocale = Locale.getDefault();
-    }
-
-    public void updateConfigurationItem(ConfigurationItem pCI) {
-        em.merge(pCI);
     }
 
     public ConfigurationItem removeConfigurationItem(ConfigurationItemKey pKey) throws ConfigurationItemNotFoundException {
@@ -72,15 +66,10 @@ public class ConfigurationItemDAO {
             throws ConfigurationItemNotFoundException {
         ConfigurationItem ci = em.find(ConfigurationItem.class, pKey);
         if (ci == null) {
-            throw new ConfigurationItemNotFoundException(mLocale, pKey.getId());
+            throw new ConfigurationItemNotFoundException(pKey.getId());
         } else {
             return ci;
         }
-    }
-
-    public ConfigurationItem loadConfigurationItem(Locale pLocale, ConfigurationItemKey pKey) throws ConfigurationItemNotFoundException {
-        mLocale = pLocale;
-        return loadConfigurationItem(pKey);
     }
 
     public void createConfigurationItem(ConfigurationItem pCI) throws ConfigurationItemAlreadyExistsException, CreationException {
@@ -89,18 +78,13 @@ public class ConfigurationItemDAO {
             em.persist(pCI);
             em.flush();
         } catch (EntityExistsException pEEEx) {
-            throw new ConfigurationItemAlreadyExistsException(mLocale, pCI);
+            throw new ConfigurationItemAlreadyExistsException(pCI);
         } catch (PersistenceException pPEx) {
             //EntityExistsException is case sensitive
             //whereas MySQL is not thus PersistenceException could be
             //thrown instead of EntityExistsException
-            throw new CreationException(mLocale);
+            throw new CreationException("");
         }
-    }
-
-    public void createConfigurationItem(Locale pLocale, ConfigurationItem pCI) throws ConfigurationItemAlreadyExistsException, CreationException {
-        mLocale = pLocale;
-        createConfigurationItem(pCI);
     }
 
     public List<ConfigurationItem> findConfigurationItemsByDesignItem(PartMaster partMaster) {

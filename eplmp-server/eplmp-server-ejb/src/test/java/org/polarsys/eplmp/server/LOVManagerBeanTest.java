@@ -34,7 +34,7 @@ import static org.mockito.MockitoAnnotations.initMocks;
 /**
  * @author lebeaujulien on 12/03/15.
  */
-public class LOVManagerBeanTest extends LOVManagerBean {
+public class LOVManagerBeanTest {
 
     private static final String WORKSPACE_ID="TestWorkspace";
     private static final String USER_LOGIN="User1";
@@ -47,8 +47,10 @@ public class LOVManagerBeanTest extends LOVManagerBean {
 
     @Mock
     private LOVDAO lovDAO;
+
     @Mock
     private WorkspaceDAO workspaceDAO;
+
     @Mock
     private IUserManagerLocal userManager;
 
@@ -67,7 +69,7 @@ public class LOVManagerBeanTest extends LOVManagerBean {
     public void creationNominal() throws Exception {
         Mockito.when(userManager.checkWorkspaceWriteAccess(workspace.getId())).thenReturn(user);
         Mockito.when(userManager.checkWorkspaceReadAccess(workspace.getId())).thenReturn(user);
-        Mockito.when(workspaceDAO.loadWorkspace(user.getLocale(), workspace.getId())).thenReturn(workspace);
+        Mockito.when(workspaceDAO.loadWorkspace(workspace.getId())).thenReturn(workspace);
 
         List<NameValuePair> possibleValue = new ArrayList<>();
         possibleValue.add(new NameValuePair("first", "value"));

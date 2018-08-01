@@ -11,8 +11,6 @@
 
 package org.polarsys.eplmp.core.exceptions;
 
-import java.util.Locale;
-
 /**
  * Base class for implementing an Exception that represents a failed attempt
  * to retrieve an entity because it has not been found in the persistent store.
@@ -21,15 +19,15 @@ import java.util.Locale;
  */
 public abstract class EntityNotFoundException extends ApplicationException {
 
+    public EntityNotFoundException() {
+        super();
+    }
+
     public EntityNotFoundException(String pMessage) {
         super(pMessage);
     }
 
-    public EntityNotFoundException(Locale pLocale) {
-        super(pLocale);
-    }
-
-    public EntityNotFoundException(Locale pLocale, Throwable pCause) {
-        super(pLocale, pCause);
+    public EntityNotFoundException(Throwable pCause) {
+        super(pCause);
     }
 }

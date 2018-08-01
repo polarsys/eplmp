@@ -11,6 +11,11 @@
 
 package org.polarsys.eplmp.server.rest;
 
+import org.dozer.DozerBeanMapperSingletonWrapper;
+import org.dozer.Mapper;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.*;
 import org.polarsys.eplmp.core.common.Account;
 import org.polarsys.eplmp.core.common.User;
 import org.polarsys.eplmp.core.common.Workspace;
@@ -23,11 +28,6 @@ import org.polarsys.eplmp.core.services.IProductManagerLocal;
 import org.polarsys.eplmp.core.services.IUserManagerLocal;
 import org.polarsys.eplmp.server.rest.dto.*;
 import org.polarsys.eplmp.server.util.ResourceUtil;
-import org.dozer.DozerBeanMapperSingletonWrapper;
-import org.dozer.Mapper;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.*;
 
 import javax.persistence.EntityManager;
 import java.util.ArrayList;

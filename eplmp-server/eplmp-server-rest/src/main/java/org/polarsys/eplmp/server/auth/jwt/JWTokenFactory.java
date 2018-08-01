@@ -11,8 +11,6 @@
 
 package org.polarsys.eplmp.server.auth.jwt;
 
-import org.polarsys.eplmp.core.security.UserGroupMapping;
-import org.polarsys.eplmp.core.sharing.SharedEntity;
 import org.jose4j.jws.AlgorithmIdentifiers;
 import org.jose4j.jws.JsonWebSignature;
 import org.jose4j.jwt.JwtClaims;
@@ -22,6 +20,8 @@ import org.jose4j.jwt.consumer.InvalidJwtException;
 import org.jose4j.jwt.consumer.JwtConsumer;
 import org.jose4j.jwt.consumer.JwtConsumerBuilder;
 import org.jose4j.lang.JoseException;
+import org.polarsys.eplmp.core.security.UserGroupMapping;
+import org.polarsys.eplmp.core.sharing.SharedEntity;
 
 import javax.json.Json;
 import javax.json.JsonObject;

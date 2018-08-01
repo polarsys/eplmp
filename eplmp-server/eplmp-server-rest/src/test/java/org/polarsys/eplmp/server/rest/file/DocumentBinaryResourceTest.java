@@ -12,23 +12,22 @@
 package org.polarsys.eplmp.server.rest.file;
 
 
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.*;
 import org.polarsys.eplmp.core.common.Account;
 import org.polarsys.eplmp.core.common.BinaryResource;
 import org.polarsys.eplmp.core.common.User;
 import org.polarsys.eplmp.core.common.Workspace;
 import org.polarsys.eplmp.core.document.*;
+import org.polarsys.eplmp.core.exceptions.NotAllowedException;
 import org.polarsys.eplmp.core.security.UserGroupMapping;
 import org.polarsys.eplmp.core.services.*;
 import org.polarsys.eplmp.core.sharing.SharedDocument;
 import org.polarsys.eplmp.core.util.Tools;
 import org.polarsys.eplmp.server.auth.AuthConfig;
-import org.polarsys.eplmp.server.rest.exceptions.SharedResourceAccessException;
 import org.polarsys.eplmp.server.util.PartImpl;
 import org.polarsys.eplmp.server.util.ResourceUtil;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.mockito.*;
 
 import javax.ejb.SessionContext;
 import javax.servlet.http.HttpServletRequestWrapper;
@@ -44,9 +43,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 public class DocumentBinaryResourceTest {
@@ -336,7 +333,7 @@ public class DocumentBinaryResourceTest {
         try {
             Response response = documentBinaryResource.downloadDocumentFile(request, ResourceUtil.WORKSPACE_ID, ResourceUtil.DOCUMENT_ID, ResourceUtil.VERSION, ResourceUtil.ITERATION, ResourceUtil.FILENAME1, ResourceUtil.FILE_TYPE, null, ResourceUtil.RANGE, null, null, null);
             assertTrue(false);
-        } catch (SharedResourceAccessException e) {
+        } catch (NotAllowedException e) {
             assertTrue(true);
         }
 

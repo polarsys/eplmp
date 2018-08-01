@@ -11,11 +11,9 @@
 
 package org.polarsys.eplmp.server.importers;
 
-import org.polarsys.eplmp.core.common.User;
 import org.polarsys.eplmp.core.exceptions.*;
 import org.polarsys.eplmp.core.meta.*;
 import org.polarsys.eplmp.core.services.ILOVManagerLocal;
-import org.polarsys.eplmp.core.services.IUserManagerLocal;
 
 import java.text.MessageFormat;
 import java.text.ParseException;
@@ -23,6 +21,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 public class AttributesImporterUtils {
 
@@ -100,26 +99,15 @@ public class AttributesImporterUtils {
         return nameValues;
     }
 
-    public static Locale getUserLocale(IUserManagerLocal userManager, String workspaceId) {
-        try {
-            User user = userManager.whoAmI(workspaceId);
-            return new Locale(user.getLanguage());
-        } catch (WorkspaceNotFoundException | UserNotFoundException | UserNotActiveException | WorkspaceNotEnabledException e) {
-            LOGGER.log(Level.SEVERE, "Could not retrieve user login", e);
-            return Locale.getDefault();
-        }
-    }
-
     public static String createError(Properties properties, String errorKey, Object... params) {
         return MessageFormat.format(properties.getProperty(errorKey), params);
     }
 
     public static List<InstanceAttribute> getInstanceAttributes(Properties properties, List<InstanceAttribute> instanceAttributes, List<String> errors) {
-        List<InstanceAttribute> attributes = new ArrayList<>();
-        for (InstanceAttribute instanceAttribute : instanceAttributes) {
-            attributes.add(createInstanceAttribute(properties, instanceAttribute, errors));
-        }
-        return attributes;
+        return instanceAttributes
+                .stream()
+                .map(instanceAttribute -> createInstanceAttribute(properties, instanceAttribute, errors))
+                .collect(Collectors.toList());
     }
 
 

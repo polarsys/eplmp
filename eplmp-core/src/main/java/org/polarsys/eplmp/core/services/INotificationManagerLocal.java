@@ -18,7 +18,6 @@ import org.polarsys.eplmp.core.notification.TagUserSubscription;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 
 /**
  *

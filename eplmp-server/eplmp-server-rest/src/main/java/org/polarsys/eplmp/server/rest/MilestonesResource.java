@@ -10,6 +10,9 @@
   *******************************************************************************/
 package org.polarsys.eplmp.server.rest;
 
+import io.swagger.annotations.*;
+import org.dozer.DozerBeanMapperSingletonWrapper;
+import org.dozer.Mapper;
 import org.polarsys.eplmp.core.change.ChangeOrder;
 import org.polarsys.eplmp.core.change.ChangeRequest;
 import org.polarsys.eplmp.core.change.Milestone;
@@ -20,9 +23,6 @@ import org.polarsys.eplmp.server.rest.dto.ACLDTO;
 import org.polarsys.eplmp.server.rest.dto.change.ChangeOrderDTO;
 import org.polarsys.eplmp.server.rest.dto.change.ChangeRequestDTO;
 import org.polarsys.eplmp.server.rest.dto.change.MilestoneDTO;
-import io.swagger.annotations.*;
-import org.dozer.DozerBeanMapperSingletonWrapper;
-import org.dozer.Mapper;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.security.DeclareRoles;

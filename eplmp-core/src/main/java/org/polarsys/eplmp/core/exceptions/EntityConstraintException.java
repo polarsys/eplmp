@@ -11,9 +11,6 @@
 
 package org.polarsys.eplmp.core.exceptions;
 
-
-import java.util.Locale;
-
 /**
  *
  * @author Morgan Guimard
@@ -21,13 +18,8 @@ import java.util.Locale;
 public class EntityConstraintException extends ApplicationException{
     private final String mKey;
 
-    public EntityConstraintException(String pMessage) {
-        super(pMessage);
-        mKey=null;
-    }
-
-    public EntityConstraintException(Locale pLocale, String pKey) {
-        super(pLocale);
+    public EntityConstraintException(String pKey) {
+        super();
         mKey=pKey;
     }
 

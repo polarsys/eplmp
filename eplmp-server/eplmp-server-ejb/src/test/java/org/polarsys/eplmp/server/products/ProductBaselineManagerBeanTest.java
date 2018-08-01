@@ -39,7 +39,6 @@ import javax.ejb.SessionContext;
 import javax.persistence.TypedQuery;
 import java.security.Principal;
 import java.util.ArrayList;
-import java.util.Locale;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
@@ -111,7 +110,7 @@ public class ProductBaselineManagerBeanTest {
         // Create Mock ConfigurationItem
         ConfigurationItem configurationItem = new ConfigurationItem(baselineRuleReleased.getUser(), baselineRuleReleased.getWorkspace(), baselineRuleReleased.getConfigurationItemKey().getId(), "description");
         configurationItem.setDesignItem(baselineRuleReleased.getPartMaster());
-        Mockito.when(configurationItemDAO.loadConfigurationItem(new Locale("en"), baselineRuleReleased.getConfigurationItemKey())).thenReturn(configurationItem);
+        Mockito.when(configurationItemDAO.loadConfigurationItem(baselineRuleReleased.getConfigurationItemKey())).thenReturn(configurationItem);
 
         //When
         ProductBaseline baseline = productBaselineService.createBaseline(baselineRuleReleased.getConfigurationItemKey(), baselineRuleReleased.getName(), baselineRuleReleased.getType(), baselineRuleReleased.getDescription(), new ArrayList<>(), baselineRuleReleased.getSubstituteLinks(), baselineRuleReleased.getOptionalUsageLinks());
@@ -142,7 +141,7 @@ public class ProductBaselineManagerBeanTest {
         ConfigurationItem configurationItem = new ConfigurationItem(baselineRuleNotReleased.getUser(), baselineRuleNotReleased.getWorkspace(), baselineRuleNotReleased.getConfigurationItemKey().getId(), "description");
         configurationItem.setDesignItem(baselineRuleNotReleased.getPartMaster());
         Mockito.doThrow(NotAllowedException.class).when(psFilterVisitor).visit(any(), any(), any(PartMaster.class), anyInt(), any());
-        Mockito.when(configurationItemDAO.loadConfigurationItem(new Locale("en"), baselineRuleNotReleased.getConfigurationItemKey())).thenReturn(configurationItem);
+        Mockito.when(configurationItemDAO.loadConfigurationItem(baselineRuleNotReleased.getConfigurationItemKey())).thenReturn(configurationItem);
 
         //When
         productBaselineService.createBaseline(baselineRuleNotReleased.getConfigurationItemKey(), baselineRuleNotReleased.getName(), baselineRuleNotReleased.getType(), baselineRuleNotReleased.getDescription(),new ArrayList<>(), baselineRuleNotReleased.getSubstituteLinks(), baselineRuleNotReleased.getOptionalUsageLinks());
@@ -165,7 +164,7 @@ public class ProductBaselineManagerBeanTest {
         // Create Mock ConfigurationItem
         ConfigurationItem configurationItem = new ConfigurationItem(baselineRuleLatest.getUser(), baselineRuleLatest.getWorkspace(), baselineRuleLatest.getConfigurationItemKey().getId(), "description");
         configurationItem.setDesignItem(baselineRuleLatest.getPartMaster());
-        Mockito.when(configurationItemDAO.loadConfigurationItem(new Locale("en"), baselineRuleLatest.getConfigurationItemKey())).thenReturn(configurationItem);
+        Mockito.when(configurationItemDAO.loadConfigurationItem(baselineRuleLatest.getConfigurationItemKey())).thenReturn(configurationItem);
 
         //When
         ProductBaseline baseline = productBaselineService.createBaseline(baselineRuleLatest.getConfigurationItemKey(), baselineRuleLatest.getName(), baselineRuleLatest.getType(), baselineRuleLatest.getDescription(), new ArrayList<>(), baselineRuleLatest.getSubstituteLinks(), baselineRuleLatest.getOptionalUsageLinks());
@@ -202,7 +201,7 @@ public class ProductBaselineManagerBeanTest {
         // Create Mock ConfigurationItem
         ConfigurationItem configurationItem = new ConfigurationItem(baselineRuleReleased.getUser(), baselineRuleReleased.getWorkspace(), baselineRuleReleased.getConfigurationItemKey().getId(), "description");
         configurationItem.setDesignItem(baselineRuleReleased.getPartMaster());
-        Mockito.when(configurationItemDAO.loadConfigurationItem(new Locale("en"), baselineRuleReleased.getConfigurationItemKey())).thenReturn(configurationItem);
+        Mockito.when(configurationItemDAO.loadConfigurationItem(baselineRuleReleased.getConfigurationItemKey())).thenReturn(configurationItem);
 
         //When
         ProductBaseline baseline = productBaselineService.createBaseline(baselineRuleReleased.getConfigurationItemKey(), baselineRuleReleased.getName(), baselineRuleReleased.getType(), baselineRuleReleased.getDescription(), new ArrayList<>(), baselineRuleReleased.getSubstituteLinks(), baselineRuleReleased.getOptionalUsageLinks());

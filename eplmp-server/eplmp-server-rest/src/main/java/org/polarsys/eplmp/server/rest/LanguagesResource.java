@@ -10,7 +10,10 @@
   *******************************************************************************/
 package org.polarsys.eplmp.server.rest;
 
-import io.swagger.annotations.*;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import org.polarsys.eplmp.i18n.PropertiesLoader;
 
 import javax.enterprise.context.RequestScoped;

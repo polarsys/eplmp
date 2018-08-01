@@ -11,6 +11,9 @@
 
 package org.polarsys.eplmp.server.rest;
 
+import io.swagger.annotations.*;
+import org.dozer.DozerBeanMapperSingletonWrapper;
+import org.dozer.Mapper;
 import org.polarsys.eplmp.core.change.ModificationNotification;
 import org.polarsys.eplmp.core.common.User;
 import org.polarsys.eplmp.core.configuration.ProductStructureFilter;
@@ -31,9 +34,6 @@ import org.polarsys.eplmp.server.rest.collections.QueryResult;
 import org.polarsys.eplmp.server.rest.dto.*;
 import org.polarsys.eplmp.server.rest.file.util.BinaryResourceUpload;
 import org.polarsys.eplmp.server.rest.util.SearchQueryParser;
-import io.swagger.annotations.*;
-import org.dozer.DozerBeanMapperSingletonWrapper;
-import org.dozer.Mapper;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.security.DeclareRoles;
@@ -372,8 +372,7 @@ public class PartsResource {
 
         Query query = mapper.map(queryDTO, Query.class);
         User user = userManager.whoAmI(workspaceId);
-        Locale locale = new Locale(user.getLanguage());
-        return export(workspaceId, query, request, exportType, locale);
+        return export(workspaceId, query, request, exportType, user.getLocale());
     }
 
     @GET
@@ -397,9 +396,8 @@ public class PartsResource {
             EntityAlreadyExistsException, EntityConstraintException, NotAllowedException, WorkspaceNotEnabledException {
 
         User user = userManager.checkWorkspaceReadAccess(workspaceId);
-        Locale locale = new Locale(user != null ? user.getLanguage() : "en");
         Query query = productService.loadQuery(workspaceId, queryId);
-        return export(workspaceId, query, request, exportType, locale);
+        return export(workspaceId, query, request, exportType, user.getLocale());
     }
 
     @DELETE

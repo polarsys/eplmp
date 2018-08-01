@@ -10,10 +10,10 @@
   *******************************************************************************/
 package org.polarsys.eplmp.server.rest;
 
-import io.swagger.annotations.Authorization;
-import org.polarsys.eplmp.core.security.UserGroupMapping;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.Authorization;
+import org.polarsys.eplmp.core.security.UserGroupMapping;
 
 import javax.annotation.security.DeclareRoles;
 import javax.annotation.security.RolesAllowed;

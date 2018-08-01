@@ -15,7 +15,6 @@ import org.polarsys.eplmp.core.common.User;
 import org.polarsys.eplmp.core.document.DocumentIteration;
 import org.polarsys.eplmp.core.exceptions.*;
 import org.polarsys.eplmp.core.product.PartIteration;
-import org.polarsys.eplmp.core.security.UserGroupMapping;
 import org.polarsys.eplmp.core.services.*;
 import org.polarsys.eplmp.server.converters.OnDemandConverter;
 import org.polarsys.eplmp.server.dao.BinaryResourceDAO;
@@ -24,10 +23,7 @@ import javax.ejb.Stateless;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import java.io.InputStream;
-import java.util.Locale;
 
 
 /**
@@ -35,9 +31,6 @@ import java.util.Locale;
  */
 @Stateless(name = "OnDemandConverterBean")
 public class OnDemandConverterBean implements IOnDemandConverterManagerLocal {
-
-    @PersistenceContext
-    private EntityManager em;
 
     @Inject
     private BinaryResourceDAO binaryResourceDAO;
@@ -62,12 +55,11 @@ public class OnDemandConverterBean implements IOnDemandConverterManagerLocal {
     public InputStream getDocumentConvertedResource(String outputFormat, BinaryResource binaryResource)
             throws WorkspaceNotFoundException, UserNotActiveException, UserNotFoundException, ConvertedResourceException, WorkspaceNotEnabledException {
 
-        Locale locale = getCallerLocale(binaryResource);
         DocumentIteration docI = binaryResourceDAO.getDocumentHolder(binaryResource);
         OnDemandConverter selectedOnDemandConverter = selectOnDemandConverter(outputFormat, binaryResource);
-
+        User user = userManager.whoAmI(docI.getWorkspaceId());
         if (selectedOnDemandConverter != null) {
-            return selectedOnDemandConverter.getConvertedResource(outputFormat, binaryResource, docI, locale);
+            return selectedOnDemandConverter.getConvertedResource(outputFormat, binaryResource, docI, user.getLocale());
         }
 
         return null;
@@ -77,12 +69,12 @@ public class OnDemandConverterBean implements IOnDemandConverterManagerLocal {
     public InputStream getPartConvertedResource(String outputFormat, BinaryResource binaryResource)
             throws WorkspaceNotFoundException, UserNotActiveException, UserNotFoundException, ConvertedResourceException, WorkspaceNotEnabledException {
 
-        Locale locale = getCallerLocale(binaryResource);
         PartIteration partIteration = binaryResourceDAO.getPartHolder(binaryResource);
         OnDemandConverter selectedOnDemandConverter = selectOnDemandConverter(outputFormat, binaryResource);
+        User user = userManager.whoAmI(partIteration.getWorkspaceId());
 
         if (selectedOnDemandConverter != null) {
-            return selectedOnDemandConverter.getConvertedResource(outputFormat, binaryResource, partIteration, locale);
+            return selectedOnDemandConverter.getConvertedResource(outputFormat, binaryResource, partIteration, user.getLocale());
         }
 
         return null;
@@ -98,17 +90,4 @@ public class OnDemandConverterBean implements IOnDemandConverterManagerLocal {
         }
         return selectedOnDemandConverter;
     }
-
-    private Locale getCallerLocale(BinaryResource binaryResource) throws UserNotFoundException, WorkspaceNotFoundException, UserNotActiveException, WorkspaceNotEnabledException {
-        Locale locale;
-
-        if (contextManager.isCallerInRole(UserGroupMapping.REGULAR_USER_ROLE_ID)) {
-            User user = userManager.whoAmI(binaryResource.getWorkspaceId());
-            locale = user.getLocale();
-        } else {
-            locale = Locale.getDefault();
-        }
-        return locale;
-    }
-
 }

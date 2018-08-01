@@ -21,36 +21,28 @@ import org.polarsys.eplmp.core.exceptions.UserGroupNotFoundException;
 import org.polarsys.eplmp.core.security.WorkspaceUserGroupMembership;
 import org.polarsys.eplmp.core.security.WorkspaceUserGroupMembershipKey;
 
-import javax.ejb.Stateless;
+import javax.enterprise.context.RequestScoped;
 import javax.persistence.*;
 import java.util.List;
-import java.util.Locale;
 
-@Stateless(name = "UserGroupDAO")
+
+@RequestScoped
 public class UserGroupDAO {
 
     public static final String WORKSPACE_ID = "workspaceId";
     @PersistenceContext
     private EntityManager em;
 
-    private Locale mLocale;
-
     public UserGroupDAO() {
-        mLocale = Locale.getDefault();
     }
 
     public UserGroup loadUserGroup(UserGroupKey pKey) throws UserGroupNotFoundException {
         UserGroup group = em.find(UserGroup.class, pKey);
         if (group == null) {
-            throw new UserGroupNotFoundException(mLocale, pKey);
+            throw new UserGroupNotFoundException(pKey);
         } else {
             return group;
         }
-    }
-
-    public UserGroup loadUserGroup(Locale pLocale, UserGroupKey pKey) throws UserGroupNotFoundException {
-        mLocale = pLocale;
-        return loadUserGroup(pKey);
     }
 
     public WorkspaceUserGroupMembership[] getUserGroupMemberships(String pWorkspaceId, User pUser) {
@@ -80,15 +72,10 @@ public class UserGroupDAO {
     public WorkspaceUserGroupMembership loadUserGroupMembership(WorkspaceUserGroupMembershipKey pKey) throws UserGroupNotFoundException {
         WorkspaceUserGroupMembership workspaceUserGroupMembership = em.find(WorkspaceUserGroupMembership.class, pKey);
         if (workspaceUserGroupMembership == null) {
-            throw new UserGroupNotFoundException(mLocale,new UserGroupKey(pKey.getWorkspaceId(),pKey.getMemberId()));
+            throw new UserGroupNotFoundException(new UserGroupKey(pKey.getWorkspaceId(), pKey.getMemberId()));
         } else {
             return workspaceUserGroupMembership;
         }
-    }
-
-    public WorkspaceUserGroupMembership loadUserGroupMembership(Locale pLocale, WorkspaceUserGroupMembershipKey pKey) throws UserGroupNotFoundException {
-        mLocale = pLocale;
-        return loadUserGroupMembership(pKey);
     }
 
     public void addUserGroupMembership(Workspace pWorkspace, UserGroup pMember) {
@@ -132,40 +119,30 @@ public class UserGroupDAO {
             em.remove(pUserGroup);
             em.flush();
         } catch (PersistenceException pPEx) {
-            throw new EntityConstraintException(mLocale,"EntityConstraintException28");
+            throw new EntityConstraintException("EntityConstraintException28");
         }
     }
 
-    public void removeUserGroup(Locale pLocale, UserGroup pUserGroup) throws EntityConstraintException {
-        mLocale = pLocale;
-        removeUserGroup(pUserGroup);
-    }
-
-    public boolean hasACLConstraint(UserGroupKey pKey){
+    public boolean hasACLConstraint(UserGroupKey pKey) {
         Query query = em.createQuery("SELECT DISTINCT a FROM ACLUserGroupEntry a WHERE a.principal.id = :id AND a.principal.workspaceId = :workspaceId");
-        query.setParameter("id",pKey.getId());
-        query.setParameter(WORKSPACE_ID,pKey.getWorkspaceId());
+        query.setParameter("id", pKey.getId());
+        query.setParameter(WORKSPACE_ID, pKey.getWorkspaceId());
         return !query.getResultList().isEmpty();
     }
-    
+
     public void createUserGroup(UserGroup pUserGroup) throws CreationException, UserGroupAlreadyExistsException {
         try {
             //the EntityExistsException is thrown only when flush occurs
             em.persist(pUserGroup);
             em.flush();
         } catch (EntityExistsException pEEEx) {
-            throw new UserGroupAlreadyExistsException(mLocale, pUserGroup);
+            throw new UserGroupAlreadyExistsException(pUserGroup);
         } catch (PersistenceException pPEx) {
             //EntityExistsException is case sensitive
             //whereas MySQL is not thus PersistenceException could be
             //thrown instead of EntityExistsException
-            throw new CreationException(mLocale);
+            throw new CreationException("");
         }
-    }
-
-    public void createUserGroup(Locale pLocale, UserGroup pUserGroup) throws CreationException, UserGroupAlreadyExistsException {
-        mLocale = pLocale;
-        createUserGroup(pUserGroup);
     }
 
     public List<UserGroup> getUserGroups(String workspaceId, User user) {

@@ -11,11 +11,12 @@
 
 package org.polarsys.eplmp.server;
 
-import org.polarsys.eplmp.core.common.User;
 import org.polarsys.eplmp.core.exceptions.*;
 import org.polarsys.eplmp.core.product.*;
 import org.polarsys.eplmp.core.security.UserGroupMapping;
-import org.polarsys.eplmp.core.services.*;
+import org.polarsys.eplmp.core.services.IEffectivityManagerLocal;
+import org.polarsys.eplmp.core.services.IProductManagerLocal;
+import org.polarsys.eplmp.core.services.IUserManagerLocal;
 import org.polarsys.eplmp.server.dao.ConfigurationItemDAO;
 import org.polarsys.eplmp.server.dao.EffectivityDAO;
 import org.polarsys.eplmp.server.dao.PartRevisionDAO;
@@ -25,10 +26,7 @@ import javax.annotation.security.RolesAllowed;
 import javax.ejb.Local;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import java.util.Date;
-import java.util.Locale;
 import java.util.Set;
 
 @DeclareRoles({UserGroupMapping.REGULAR_USER_ROLE_ID})
@@ -53,25 +51,23 @@ public class EffectivityManagerBean implements IEffectivityManagerLocal {
     @Inject
     private IProductManagerLocal productManager;
 
-
     @Override
     @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
     public SerialNumberBasedEffectivity createSerialNumberBasedEffectivity(String workspaceId, String partNumber, String version, String pName, String pDescription, String pConfigurationItemId, String pStartNumber, String pEndNumber)
             throws EffectivityAlreadyExistsException, CreationException, ConfigurationItemNotFoundException, UserNotFoundException, WorkspaceNotFoundException, WorkspaceNotEnabledException, AccessRightException, PartRevisionNotFoundException, UserNotActiveException {
 
-        User user = userManager.checkWorkspaceWriteAccess(workspaceId);
-        Locale userLocale = user.getLocale();
+        userManager.checkWorkspaceWriteAccess(workspaceId);
 
         // lower range is mandatory, upper range isn't
         if (pStartNumber == null || pStartNumber.isEmpty()) {
-            throw new CreationException(userLocale);
+            throw new CreationException("");
         }
 
         PartRevisionKey partRevisionKey = new PartRevisionKey(workspaceId, partNumber, version);
         ConfigurationItemKey configurationItemKey = new ConfigurationItemKey(workspaceId, pConfigurationItemId);
 
         ConfigurationItem configurationItem =
-                configurationItemDAO.loadConfigurationItem(userLocale, configurationItemKey);
+                configurationItemDAO.loadConfigurationItem(configurationItemKey);
 
         SerialNumberBasedEffectivity serialNumberBasedEffectivity = new SerialNumberBasedEffectivity();
         serialNumberBasedEffectivity.setName(pName);
@@ -81,7 +77,7 @@ public class EffectivityManagerBean implements IEffectivityManagerLocal {
         serialNumberBasedEffectivity.setEndNumber(pEndNumber);
 
 
-        effectivityDAO.createEffectivity(userLocale, serialNumberBasedEffectivity);
+        effectivityDAO.createEffectivity(serialNumberBasedEffectivity);
 
         PartRevision partRevision = productManager.getPartRevision(partRevisionKey);
         Set<Effectivity> effectivities = partRevision.getEffectivities();
@@ -98,12 +94,11 @@ public class EffectivityManagerBean implements IEffectivityManagerLocal {
             String workspaceId, String partNumber, String version, String pName, String pDescription, String pConfigurationItemId, Date pStartDate, Date pEndDate)
             throws EffectivityAlreadyExistsException, CreationException, UserNotFoundException, WorkspaceNotFoundException, WorkspaceNotEnabledException, AccessRightException, PartRevisionNotFoundException, UserNotActiveException, ConfigurationItemNotFoundException {
 
-        User user = userManager.checkWorkspaceWriteAccess(workspaceId);
-        Locale userLocale = user.getLocale();
+        userManager.checkWorkspaceWriteAccess(workspaceId);
 
         // lower range is mandatory, upper range isn't
         if (pStartDate == null) {
-            throw new CreationException(userLocale);
+            throw new CreationException("");
         }
 
         // ConfigurationItem is optional for Date based effectivities
@@ -111,7 +106,7 @@ public class EffectivityManagerBean implements IEffectivityManagerLocal {
 
         if (pConfigurationItemId != null && !pConfigurationItemId.isEmpty()) {
             ConfigurationItemKey configurationItemKey = new ConfigurationItemKey(workspaceId, pConfigurationItemId);
-            configurationItem = configurationItemDAO.loadConfigurationItem(userLocale, configurationItemKey);
+            configurationItem = configurationItemDAO.loadConfigurationItem(configurationItemKey);
         }
 
         DateBasedEffectivity dateBasedEffectivity = new DateBasedEffectivity();
@@ -120,7 +115,7 @@ public class EffectivityManagerBean implements IEffectivityManagerLocal {
         dateBasedEffectivity.setStartDate(pStartDate);
         dateBasedEffectivity.setEndDate(pEndDate);
         dateBasedEffectivity.setConfigurationItem(configurationItem);
-        effectivityDAO.createEffectivity(userLocale, dateBasedEffectivity);
+        effectivityDAO.createEffectivity(dateBasedEffectivity);
 
         PartRevisionKey partRevisionKey = new PartRevisionKey(workspaceId, partNumber, version);
         PartRevision partRevision = productManager.getPartRevision(partRevisionKey);
@@ -137,16 +132,15 @@ public class EffectivityManagerBean implements IEffectivityManagerLocal {
             String workspaceId, String partNumber, String version, String pName, String pDescription, String pConfigurationItemId, String pStartLotId, String pEndLotId) throws UserNotFoundException, WorkspaceNotFoundException, WorkspaceNotEnabledException, AccessRightException, CreationException, EffectivityAlreadyExistsException, ConfigurationItemNotFoundException, PartRevisionNotFoundException, UserNotActiveException {
 
 
-        User user = userManager.checkWorkspaceWriteAccess(workspaceId);
-        Locale userLocale = user.getLocale();
+        userManager.checkWorkspaceWriteAccess(workspaceId);
 
         // lower range is mandatory, upper range isn't
         if (pStartLotId == null || pStartLotId.isEmpty()) {
-            throw new CreationException(userLocale);
+            throw new CreationException("");
         }
 
         ConfigurationItemKey configurationItemKey = new ConfigurationItemKey(workspaceId, pConfigurationItemId);
-        ConfigurationItem configurationItem = configurationItemDAO.loadConfigurationItem(userLocale, configurationItemKey);
+        ConfigurationItem configurationItem = configurationItemDAO.loadConfigurationItem(configurationItemKey);
 
         LotBasedEffectivity lotBasedEffectivity = new LotBasedEffectivity();
         lotBasedEffectivity.setName(pName);
@@ -154,7 +148,7 @@ public class EffectivityManagerBean implements IEffectivityManagerLocal {
         lotBasedEffectivity.setConfigurationItem(configurationItem);
         lotBasedEffectivity.setStartLotId(pStartLotId);
         lotBasedEffectivity.setEndLotId(pEndLotId);
-        effectivityDAO.createEffectivity(userLocale, lotBasedEffectivity);
+        effectivityDAO.createEffectivity(lotBasedEffectivity);
 
         PartRevisionKey partRevisionKey = new PartRevisionKey(workspaceId, partNumber, version);
         PartRevision partRevision = productManager.getPartRevision(partRevisionKey);
@@ -170,11 +164,11 @@ public class EffectivityManagerBean implements IEffectivityManagerLocal {
     @Override
     @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
     public Effectivity getEffectivity(String workspaceId, int pId) throws EffectivityNotFoundException, UserNotFoundException, WorkspaceNotFoundException, UserNotActiveException, WorkspaceNotEnabledException {
-        User user = userManager.checkWorkspaceReadAccess(workspaceId);
+        userManager.checkWorkspaceReadAccess(workspaceId);
         PartRevision partRevision = effectivityDAO.getPartRevisionHolder(pId);
 
         if (partRevision == null || !partRevision.getWorkspaceId().equals(workspaceId)) {
-            throw new EffectivityNotFoundException(user.getLocale(), String.valueOf(pId));
+            throw new EffectivityNotFoundException(String.valueOf(pId));
         }
 
         return partRevision.getEffectivities().stream()
@@ -185,12 +179,12 @@ public class EffectivityManagerBean implements IEffectivityManagerLocal {
     @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
     public Effectivity updateEffectivity(String workspaceId, int pId, String pName, String pDescription) throws EffectivityNotFoundException, UserNotFoundException, WorkspaceNotFoundException, WorkspaceNotEnabledException, AccessRightException {
 
-        User user = userManager.checkWorkspaceWriteAccess(workspaceId);
+        userManager.checkWorkspaceWriteAccess(workspaceId);
 
         PartRevision partRevision = effectivityDAO.getPartRevisionHolder(pId);
 
         if (partRevision == null || !partRevision.getWorkspaceId().equals(workspaceId)) {
-            throw new EffectivityNotFoundException(user.getLocale(), String.valueOf(pId));
+            throw new EffectivityNotFoundException(String.valueOf(pId));
         }
 
         Effectivity effectivity = partRevision.getEffectivities().stream()
@@ -206,18 +200,17 @@ public class EffectivityManagerBean implements IEffectivityManagerLocal {
     @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
     public SerialNumberBasedEffectivity updateSerialNumberBasedEffectivity(String workspaceId, int pId, String pName, String pDescription, String pStartNumber, String pEndNumber) throws EffectivityNotFoundException, UpdateException, UserNotFoundException, WorkspaceNotFoundException, WorkspaceNotEnabledException, AccessRightException, CreationException {
 
-        User user = userManager.checkWorkspaceWriteAccess(workspaceId);
-        Locale userLocale = user.getLocale();
+        userManager.checkWorkspaceWriteAccess(workspaceId);
 
         // lower range is mandatory, upper range isn't
         if (pStartNumber == null || pStartNumber.isEmpty()) {
-            throw new CreationException(userLocale);
+            throw new CreationException("");
         }
 
         PartRevision partRevision = effectivityDAO.getPartRevisionHolder(pId);
 
         if (partRevision == null || !partRevision.getWorkspaceId().equals(workspaceId)) {
-            throw new EffectivityNotFoundException(userLocale, String.valueOf(pId));
+            throw new EffectivityNotFoundException(String.valueOf(pId));
         }
 
         SerialNumberBasedEffectivity effectivity = (SerialNumberBasedEffectivity) partRevision.getEffectivities().stream()
@@ -235,19 +228,17 @@ public class EffectivityManagerBean implements IEffectivityManagerLocal {
     @Override
     @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
     public DateBasedEffectivity updateDateBasedEffectivity(String workspaceId, int pId, String pName, String pDescription, Date pStartDate, Date pEndDate) throws EffectivityNotFoundException, UpdateException, UserNotFoundException, WorkspaceNotFoundException, WorkspaceNotEnabledException, AccessRightException, CreationException {
-
-        User user = userManager.checkWorkspaceWriteAccess(workspaceId);
-        Locale userLocale = user.getLocale();
+        userManager.checkWorkspaceWriteAccess(workspaceId);
 
         // lower range is mandatory, upper range isn't
         if (pStartDate == null) {
-            throw new CreationException(userLocale);
+            throw new CreationException("");
         }
 
         PartRevision partRevision = effectivityDAO.getPartRevisionHolder(pId);
 
         if (partRevision == null || !partRevision.getWorkspaceId().equals(workspaceId)) {
-            throw new EffectivityNotFoundException(userLocale, String.valueOf(pId));
+            throw new EffectivityNotFoundException(String.valueOf(pId));
         }
 
         DateBasedEffectivity effectivity = (DateBasedEffectivity) partRevision.getEffectivities().stream()
@@ -266,18 +257,17 @@ public class EffectivityManagerBean implements IEffectivityManagerLocal {
     @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
     public LotBasedEffectivity updateLotBasedEffectivity(String workspaceId, int pId, String pName, String pDescription, String pStartLotId, String pEndLotId) throws UserNotFoundException, WorkspaceNotFoundException, WorkspaceNotEnabledException, AccessRightException, CreationException, EffectivityNotFoundException {
 
-        User user = userManager.checkWorkspaceWriteAccess(workspaceId);
-        Locale userLocale = user.getLocale();
+        userManager.checkWorkspaceWriteAccess(workspaceId);
 
         // lower range is mandatory, upper range isn't
         if (pStartLotId == null || pStartLotId.isEmpty()) {
-            throw new CreationException(userLocale);
+            throw new CreationException("");
         }
 
         PartRevision partRevision = effectivityDAO.getPartRevisionHolder(pId);
 
         if (partRevision == null || !partRevision.getWorkspaceId().equals(workspaceId)) {
-            throw new EffectivityNotFoundException(userLocale, String.valueOf(pId));
+            throw new EffectivityNotFoundException(String.valueOf(pId));
         }
 
         LotBasedEffectivity effectivity = (LotBasedEffectivity) partRevision.getEffectivities().stream()
@@ -295,8 +285,7 @@ public class EffectivityManagerBean implements IEffectivityManagerLocal {
     @Override
     @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
     public void deleteEffectivity(String workspaceId, String partNumber, String version, int pId) throws EffectivityNotFoundException, UserNotFoundException, WorkspaceNotFoundException, WorkspaceNotEnabledException, AccessRightException, PartRevisionNotFoundException, UserNotActiveException {
-
-        User user = userManager.checkWorkspaceWriteAccess(workspaceId);
+        userManager.checkWorkspaceWriteAccess(workspaceId);
 
         PartRevision partRevision = effectivityDAO.getPartRevisionHolder(pId);
 
@@ -304,7 +293,7 @@ public class EffectivityManagerBean implements IEffectivityManagerLocal {
                 .filter(e -> e.getId() == pId).findFirst().orElse(null);
 
         if (effectivity == null || !partRevision.getWorkspaceId().equals(workspaceId)) {
-            throw new EffectivityNotFoundException(user.getLocale(), String.valueOf(pId));
+            throw new EffectivityNotFoundException(String.valueOf(pId));
         }
 
         partRevisionDAO.removePartRevisionEffectivity(partRevision, effectivity);

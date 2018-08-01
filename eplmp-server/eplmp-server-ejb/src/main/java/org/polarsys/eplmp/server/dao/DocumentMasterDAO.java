@@ -15,7 +15,7 @@ import org.polarsys.eplmp.core.document.DocumentRevision;
 import org.polarsys.eplmp.core.exceptions.CreationException;
 import org.polarsys.eplmp.core.exceptions.DocumentMasterAlreadyExistsException;
 
-import javax.ejb.Stateless;
+import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.persistence.EntityExistsException;
 import javax.persistence.EntityManager;
@@ -25,12 +25,12 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-@Stateless(name = "DocumentMasterDAO")
+@RequestScoped
 public class DocumentMasterDAO {
+
     private static final Logger LOGGER = Logger.getLogger(DocumentMasterDAO.class.getName());
 
     @PersistenceContext
@@ -39,10 +39,7 @@ public class DocumentMasterDAO {
     @Inject
     private DocumentRevisionDAO documentRevisionDAO;
 
-    private Locale mLocale;
-
     public DocumentMasterDAO() {
-        mLocale = Locale.getDefault();
     }
 
     public void createDocM(DocumentMaster pDocumentMaster) throws DocumentMasterAlreadyExistsException, CreationException {
@@ -52,19 +49,14 @@ public class DocumentMasterDAO {
             em.flush();
         } catch (EntityExistsException pEEEx) {
             LOGGER.log(Level.FINER,null,pEEEx);
-            throw new DocumentMasterAlreadyExistsException(mLocale, pDocumentMaster);
+            throw new DocumentMasterAlreadyExistsException(pDocumentMaster);
         } catch (PersistenceException pPEx) {
             //EntityExistsException is case sensitive
             //whereas MySQL is not thus PersistenceException could be
             //thrown instead of EntityExistsException
             LOGGER.log(Level.FINER,null,pPEx);
-            throw new CreationException(mLocale);
+            throw new CreationException("");
         }
-    }
-
-    public void createDocM(Locale pLocale, DocumentMaster pDocumentMaster) throws DocumentMasterAlreadyExistsException, CreationException {
-        mLocale = pLocale;
-        createDocM(pDocumentMaster);
     }
 
     public void removeDocM(DocumentMaster pDocM) {
@@ -73,11 +65,6 @@ public class DocumentMasterDAO {
             documentRevisionDAO.removeRevision(documentRevision);
         }
         em.remove(pDocM);
-    }
-
-    public void removeDocM(Locale pLocale, DocumentMaster pDocM) {
-        mLocale = pLocale;
-        removeDocM(pDocM);
     }
 
     public List<DocumentMaster> getPaginatedByWorkspace(String workspaceId, int limit, int offset) {
@@ -92,6 +79,9 @@ public class DocumentMasterDAO {
         CriteriaBuilder cb = em.getCriteriaBuilder();
         CriteriaQuery<Long> countQuery = cb.createQuery(Long.class);
         countQuery.select(cb.count(countQuery.from(DocumentMaster.class)));
+        // TODO : fixme
+        //Root<DocumentMaster> dm = countQuery.from(DocumentMaster.class);
+        //countQuery.select(cb.count(dm)).where(cb.equal(dm.get("workspace").get("id"), workspaceId));
         return em.createQuery(countQuery).getSingleResult();
     }
 }

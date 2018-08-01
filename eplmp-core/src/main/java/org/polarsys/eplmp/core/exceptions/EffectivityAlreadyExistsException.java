@@ -14,7 +14,7 @@ package org.polarsys.eplmp.core.exceptions;
 import org.polarsys.eplmp.core.product.Effectivity;
 
 import java.text.MessageFormat;
-import java.util.Locale;
+
 
 public class EffectivityAlreadyExistsException extends EntityAlreadyExistsException {
     private Effectivity mEffectivity;
@@ -24,12 +24,12 @@ public class EffectivityAlreadyExistsException extends EntityAlreadyExistsExcept
         mEffectivity=null;
     }
 
-    public EffectivityAlreadyExistsException(Locale pLocale, Effectivity pEffectivity) {
-        this(pLocale, pEffectivity, null);
+    public EffectivityAlreadyExistsException(Effectivity pEffectivity) {
+        this(pEffectivity, null);
     }
 
-    public EffectivityAlreadyExistsException(Locale pLocale, Effectivity pEffectivity, Throwable pCause) {
-        super(pLocale, pCause);
+    public EffectivityAlreadyExistsException(Effectivity pEffectivity, Throwable pCause) {
+        super( pCause);
         mEffectivity=pEffectivity;
     }
 

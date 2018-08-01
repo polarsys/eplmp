@@ -10,6 +10,9 @@
   *******************************************************************************/
 package org.polarsys.eplmp.server.rest;
 
+import io.swagger.annotations.*;
+import org.dozer.DozerBeanMapperSingletonWrapper;
+import org.dozer.Mapper;
 import org.polarsys.eplmp.core.configuration.BaselinedPart;
 import org.polarsys.eplmp.core.configuration.ProductBaseline;
 import org.polarsys.eplmp.core.configuration.ProductBaselineType;
@@ -28,9 +31,6 @@ import org.polarsys.eplmp.server.rest.dto.LightPathToPathLinkDTO;
 import org.polarsys.eplmp.server.rest.dto.PathToPathLinkDTO;
 import org.polarsys.eplmp.server.rest.dto.baseline.BaselinedPartDTO;
 import org.polarsys.eplmp.server.rest.dto.baseline.ProductBaselineDTO;
-import io.swagger.annotations.*;
-import org.dozer.DozerBeanMapperSingletonWrapper;
-import org.dozer.Mapper;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.security.DeclareRoles;

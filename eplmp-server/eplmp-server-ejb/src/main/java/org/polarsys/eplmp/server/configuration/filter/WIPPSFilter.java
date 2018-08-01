@@ -14,7 +14,10 @@ package org.polarsys.eplmp.server.configuration.filter;
 
 import org.polarsys.eplmp.core.common.User;
 import org.polarsys.eplmp.core.configuration.ProductStructureFilter;
-import org.polarsys.eplmp.core.product.*;
+import org.polarsys.eplmp.core.product.PartIteration;
+import org.polarsys.eplmp.core.product.PartLink;
+import org.polarsys.eplmp.core.product.PartMaster;
+import org.polarsys.eplmp.core.product.PartSubstituteLink;
 
 import java.io.Serializable;
 import java.util.ArrayList;

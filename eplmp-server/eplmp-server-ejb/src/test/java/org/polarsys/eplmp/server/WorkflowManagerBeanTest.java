@@ -81,8 +81,8 @@ public class WorkflowManagerBeanTest {
         workflowModel.setAcl(acl);
 
         Mockito.when(userManager.checkWorkspaceReadAccess(WorkflowUtil.WORKSPACE_ID)).thenReturn(user);
-        Mockito.when(workflowModelDAO.loadWorkflowModel(user.getLocale(), workflowModelKey)).thenReturn(workflowModel);
-
+        Mockito.when(workflowModelDAO.loadWorkflowModel(workflowModelKey)).thenReturn(workflowModel);
+        
         //When
         workflowManagerBean.removeACLFromWorkflow(WorkflowUtil.WORKSPACE_ID, WorkflowUtil.WORKFLOW_MODEL_ID);
 
@@ -109,7 +109,7 @@ public class WorkflowManagerBeanTest {
         acl.addEntry(user3, ACLPermission.FULL_ACCESS);
 
         Mockito.when(userManager.checkWorkspaceReadAccess(WorkflowUtil.WORKSPACE_ID)).thenReturn(user);
-        Mockito.when(workflowModelDAO.loadWorkflowModel(user.getLocale(), workflowModelKey)).thenReturn(workflowModel);
+        Mockito.when(workflowModelDAO.loadWorkflowModel(workflowModelKey)).thenReturn(workflowModel);
         Mockito.when(aclFactory.createACL(workspace.getId(), userEntries, null)).thenReturn(acl);
 
         //When
@@ -155,7 +155,7 @@ public class WorkflowManagerBeanTest {
         grpEntries.put(group1.getId(),ACLPermission.FULL_ACCESS.name());
 
         Mockito.when(userManager.checkWorkspaceReadAccess(workspace.getId())).thenReturn(user);
-        Mockito.when(workflowModelDAO.loadWorkflowModel(user.getLocale(), workflowModelKey)).thenReturn(workflowModel);
+        Mockito.when(workflowModelDAO.loadWorkflowModel(workflowModelKey)).thenReturn(workflowModel);
         Mockito.when(aclTypedQuery.setParameter(Matchers.anyString(),Matchers.any())).thenReturn(aclTypedQuery);
         Mockito.when(aclFactory.updateACL(workspace.getId(), acl, userEntries, grpEntries)).thenReturn(expectedAcl);
 

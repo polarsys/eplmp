@@ -17,35 +17,27 @@ import org.polarsys.eplmp.core.exceptions.EffectivityNotFoundException;
 import org.polarsys.eplmp.core.product.Effectivity;
 import org.polarsys.eplmp.core.product.PartRevision;
 
-import javax.ejb.Stateless;
+import javax.enterprise.context.RequestScoped;
 import javax.persistence.*;
 import java.util.List;
-import java.util.Locale;
 
-@Stateless(name = "EffectivityDAO")
+
+@RequestScoped
 public class EffectivityDAO {
 
     @PersistenceContext
     private EntityManager em;
 
-    private Locale mLocale;
-
     public EffectivityDAO() {
-        mLocale = Locale.getDefault();
     }
 
     public Effectivity loadEffectivity(int pId) throws EffectivityNotFoundException {
         Effectivity effectivity = em.find(Effectivity.class, pId);
         if (effectivity == null) {
-            throw new EffectivityNotFoundException(mLocale, String.valueOf(pId));
+            throw new EffectivityNotFoundException(String.valueOf(pId));
         } else {
             return effectivity;
         }
-    }
-
-    public Effectivity loadEffectivity(Locale pLocale, int pId) throws EffectivityNotFoundException {
-        mLocale = pLocale;
-        return loadEffectivity(pId);
     }
 
     public void updateEffectivity(Effectivity effectivity) {
@@ -64,18 +56,13 @@ public class EffectivityDAO {
             em.persist(pEffectivity);
             em.flush();
         } catch (EntityExistsException pEEEx) {
-            throw new EffectivityAlreadyExistsException(mLocale, pEffectivity);
+            throw new EffectivityAlreadyExistsException(pEffectivity);
         } catch (PersistenceException pPEx) {
             //EntityExistsException is case sensitive
             //whereas MySQL is not thus PersistenceException could be
             //thrown instead of EntityExistsException
-            throw new CreationException(mLocale);
+            throw new CreationException("");
         }
-    }
-
-    public void createEffectivity(Locale pLocale, Effectivity pEffectivity) throws EffectivityAlreadyExistsException, CreationException {
-        mLocale = pLocale;
-        createEffectivity(pEffectivity);
     }
 
     public PartRevision getPartRevisionHolder(int pId) {

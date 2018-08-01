@@ -26,26 +26,25 @@ import org.polarsys.eplmp.core.meta.Folder;
 import org.polarsys.eplmp.core.product.PartIteration;
 import org.polarsys.eplmp.core.product.PartMaster;
 import org.polarsys.eplmp.core.product.PartUsageLink;
-import org.polarsys.eplmp.core.services.IBinaryStorageManagerLocal;
 import org.polarsys.eplmp.core.workflow.WorkflowModel;
 import org.polarsys.eplmp.core.workflow.WorkspaceWorkflow;
 
-import javax.ejb.Stateless;
+import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
-import javax.persistence.EntityExistsException;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceException;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Locale;
 
-@Stateless(name = "WorkspaceDAO")
+
+@RequestScoped
 public class WorkspaceDAO {
 
     public static final String WORKSPACE = "workspace";
     public static final String WORKSPACE_ID = "workspaceId";
+
     @PersistenceContext
     private EntityManager em;
 
@@ -59,15 +58,9 @@ public class WorkspaceDAO {
     private WorkflowModelDAO workflowModelDAO;
 
     @Inject
-    private IBinaryStorageManagerLocal storageManager;
-
-    @Inject
     private WorkflowDAO workflowDAO;
 
-    private Locale mLocale;
-
     public WorkspaceDAO() {
-        mLocale = Locale.getDefault();
     }
 
     public void updateWorkspaceFrontOptions(WorkspaceFrontOptions settings){
@@ -91,35 +84,22 @@ public class WorkspaceDAO {
             //the EntityExistsException is thrown only when flush occurs
             em.persist(pWorkspace);
             em.flush();
-            folderDAO.createFolder(mLocale, new Folder(pWorkspace.getId()));
-        } catch (EntityExistsException pEEEx) {
-            throw new WorkspaceAlreadyExistsException(mLocale, pWorkspace);
+            folderDAO.createFolder(new Folder(pWorkspace.getId()));
         } catch (PersistenceException pPEx) {
             //EntityExistsException is case sensitive
             //whereas MySQL is not thus PersistenceException could be
             //thrown instead of EntityExistsException
-            throw new CreationException(mLocale);
+            throw new WorkspaceAlreadyExistsException(pWorkspace);
         }
     }
-
-    public void createWorkspace(Locale pLocale, Workspace pWorkspace) throws WorkspaceAlreadyExistsException, CreationException, FolderAlreadyExistsException {
-        mLocale = pLocale;
-        createWorkspace(pWorkspace);
-    }
-
 
     public Workspace loadWorkspace(String pID) throws WorkspaceNotFoundException {
         Workspace workspace = em.find(Workspace.class, pID);
         if (workspace == null) {
-            throw new WorkspaceNotFoundException(mLocale, pID);
+            throw new WorkspaceNotFoundException(pID);
         } else {
             return workspace;
         }
-    }
-
-    public Workspace loadWorkspace(Locale pLocale, String pID) throws WorkspaceNotFoundException {
-        mLocale = pLocale;
-        return loadWorkspace(pID);
     }
 
     public long getDiskUsageForWorkspace(String pWorkspaceId) {
@@ -482,12 +462,8 @@ public class WorkspaceDAO {
         // Finally delete the workspace
         em.remove(workspace);
 
-        // Delete workspace files
-        storageManager.deleteWorkspaceFolder(workspaceId);
-
         em.flush();
         em.clear();
-
     }
 
     public List<Workspace> getAll() {

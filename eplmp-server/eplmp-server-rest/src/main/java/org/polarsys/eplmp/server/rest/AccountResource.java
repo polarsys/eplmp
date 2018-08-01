@@ -16,7 +16,9 @@ import org.dozer.DozerBeanMapperSingletonWrapper;
 import org.dozer.Mapper;
 import org.polarsys.eplmp.core.common.Account;
 import org.polarsys.eplmp.core.common.Workspace;
-import org.polarsys.eplmp.core.exceptions.*;
+import org.polarsys.eplmp.core.exceptions.CreationException;
+import org.polarsys.eplmp.core.exceptions.EntityAlreadyExistsException;
+import org.polarsys.eplmp.core.exceptions.EntityNotFoundException;
 import org.polarsys.eplmp.core.exceptions.NotAllowedException;
 import org.polarsys.eplmp.core.security.UserGroupMapping;
 import org.polarsys.eplmp.core.services.IAccountManagerLocal;
@@ -44,7 +46,6 @@ import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -117,7 +118,7 @@ public class AccountResource {
         String password = accountDTO.getPassword();
         if (password != null && !password.isEmpty()) {
             if (accountManager.authenticateAccount(contextManager.getCallerPrincipalLogin(), accountDTO.getPassword()) == null) {
-                throw new NotAllowedException(new Locale(accountDTO.getLanguage()), "NotAllowedException68");
+                throw new NotAllowedException("NotAllowedException68");
             }
         } else {
             if (authorizationString == null

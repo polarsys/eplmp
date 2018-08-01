@@ -75,6 +75,7 @@ public class ProductManagerBeanTest {
 
     @Rule
     public CyclicAssemblyRule cyclicAssemblyRule;
+
     @Rule
     public ExpectedException thrown = ExpectedException.none();
 
@@ -92,11 +93,11 @@ public class ProductManagerBeanTest {
         Mockito.when(tagEvent.select(any())).thenReturn(tagEvent);
         Account account = new Account(ProductUtil.USER_2_LOGIN, ProductUtil.USER_2_NAME, ProductUtil.USER_1_MAIL, ProductUtil.USER_1_LANGUAGE, new Date(), null);
         workspace = new Workspace(ProductUtil.WORKSPACE_ID, account, "pDescription", false);
-        user = new User(workspace, new Account(ProductUtil.USER_1_LOGIN , ProductUtil.USER_1_LOGIN, ProductUtil.USER_1_MAIL,ProductUtil.USER_1_LANGUAGE, new Date(), null));
-        user2 = new User(workspace, new Account(ProductUtil.USER_2_LOGIN , ProductUtil.USER_2_LOGIN, ProductUtil.USER_2_MAIL,ProductUtil.USER_2_LANGUAGE, new Date(), null));
+        user = new User(workspace, new Account(ProductUtil.USER_1_LOGIN, ProductUtil.USER_1_LOGIN, ProductUtil.USER_1_MAIL, ProductUtil.USER_1_LANGUAGE, new Date(), null));
+        user2 = new User(workspace, new Account(ProductUtil.USER_2_LOGIN, ProductUtil.USER_2_LOGIN, ProductUtil.USER_2_MAIL, ProductUtil.USER_2_LANGUAGE, new Date(), null));
         partMaster = new PartMaster(workspace, ProductUtil.PART_ID, user);
-        partRevision = new PartRevision(partMaster,ProductUtil.VERSION,user);
-        partIteration = new PartIteration(partRevision, ProductUtil.ITERATION,user);
+        partRevision = new PartRevision(partMaster, ProductUtil.VERSION, user);
+        partIteration = new PartIteration(partRevision, ProductUtil.ITERATION, user);
         ArrayList<PartIteration> iterations = new ArrayList<>();
         iterations.add(partIteration);
 
@@ -104,7 +105,6 @@ public class ProductManagerBeanTest {
         partRevision.setCheckOutUser(user);
         partRevision.setCheckOutDate(new Date());
         partIteration.setPartRevision(partRevision);
-
     }
 
     @Test
@@ -118,24 +118,24 @@ public class ProductManagerBeanTest {
 
         Mockito.when(userManager.checkWorkspaceReadAccess(workspace.getId())).thenReturn(user);
         Mockito.when(userManager.checkWorkspaceWriteAccess(workspace.getId())).thenReturn(user);
-        Mockito.when(partRevisionDAO.loadPartR(user.getLocale(), partRevision.getKey())).thenReturn(partRevision);
+        Mockito.when(partRevisionDAO.loadPartR(partRevision.getKey())).thenReturn(partRevision);
 
         ArrayList<PartUsageLink> partUsageLinks = new ArrayList<>();
         ArrayList<InstanceAttribute> newAttributes = new ArrayList<>();
         ArrayList<InstanceAttributeTemplate> newAttributeTemplates = new ArrayList<>();
         String[] lovNames = new String[0];
 
-        try{
+        try {
             //Test to remove attribute
             productManagerBean.updatePartIteration(partIteration.getKey(), "Iteration note", null, partUsageLinks, newAttributes, newAttributeTemplates, new DocumentRevisionKey[]{}, null, lovNames);
             Assert.fail("updatePartIteration should have raise an exception because we have removed attributes");
-        }catch (NotAllowedException notAllowedException){
-            try{
+        } catch (NotAllowedException notAllowedException) {
+            try {
                 //Test with a swipe of attribute
                 newAttributes.add(new InstanceDateAttribute("Test", new Date(), false));
                 productManagerBean.updatePartIteration(partIteration.getKey(), "Iteration note", null, partUsageLinks, newAttributes, newAttributeTemplates, new DocumentRevisionKey[]{}, null, lovNames);
                 Assert.fail("updateDocument should have raise an exception because we have changed the attribute type attributes");
-            }catch (NotAllowedException notAllowedException2){
+            } catch (NotAllowedException notAllowedException2) {
                 try {
                     //Test without modifying the attribute
                     newAttributes = new ArrayList<>();
@@ -145,12 +145,12 @@ public class ProductManagerBeanTest {
                     newAttributes = new ArrayList<>();
                     newAttributes.add(new InstanceTextAttribute("Test", "newValue", false));
                     productManagerBean.updatePartIteration(partIteration.getKey(), "Iteration note", null, partUsageLinks, newAttributes, newAttributeTemplates, new DocumentRevisionKey[]{}, null, lovNames);
-                } catch (NotAllowedException notAllowedException3){
+                } catch (NotAllowedException notAllowedException3) {
                     Assert.fail("updateDocument shouldn't have raised an exception because we haven't change the number of attribute or the type");
                 }
             }
         }
-        Mockito.verify(indexerManager,Mockito.never()).indexPartIteration(Mockito.any(PartIteration.class));
+        Mockito.verify(indexerManager, Mockito.never()).indexPartIteration(Mockito.any(PartIteration.class));
 
     }
 
@@ -165,14 +165,14 @@ public class ProductManagerBeanTest {
 
         Mockito.when(userManager.checkWorkspaceReadAccess(workspace.getId())).thenReturn(user);
         Mockito.when(userManager.checkWorkspaceWriteAccess(workspace.getId())).thenReturn(user);
-        Mockito.when(partRevisionDAO.loadPartR(user.getLocale(), partRevision.getKey())).thenReturn((partRevision));
+        Mockito.when(partRevisionDAO.loadPartR(partRevision.getKey())).thenReturn((partRevision));
 
         ArrayList<PartUsageLink> partUsageLinks = new ArrayList<>();
         ArrayList<InstanceAttribute> newAttributes = new ArrayList<>();
         ArrayList<InstanceAttributeTemplate> newAttributeTemplates = new ArrayList<>();
         String[] lovNames = new String[0];
 
-        try{
+        try {
             //Test to remove attribute
             productManagerBean.updatePartIteration(partIteration.getKey(), "Iteration note", null, partUsageLinks, newAttributes, newAttributeTemplates, new DocumentRevisionKey[]{}, null, lovNames);
             //Test with a swipe of attribute
@@ -187,10 +187,10 @@ public class ProductManagerBeanTest {
             newAttributes.add(new InstanceTextAttribute("Test", "newValue", false));
             productManagerBean.updatePartIteration(partIteration.getKey(), "Iteration note", null, partUsageLinks, newAttributes, newAttributeTemplates, new DocumentRevisionKey[]{}, null, lovNames);
 
-        }catch (NotAllowedException notAllowedException){
+        } catch (NotAllowedException notAllowedException) {
             Assert.fail("updateDocument shouldn't have raised an exception because the attributes are not frozen");
         }
-        Mockito.verify(indexerManager,Mockito.never()).indexPartIteration(Mockito.any(PartIteration.class));
+        Mockito.verify(indexerManager, Mockito.never()).indexPartIteration(Mockito.any(PartIteration.class));
     }
 
     /**
@@ -205,14 +205,14 @@ public class ProductManagerBeanTest {
     public void addTagToPartWithNoTags() throws UserNotFoundException, WorkspaceNotFoundException, UserNotActiveException, PartRevisionNotFoundException, AccessRightException, WorkspaceNotEnabledException {
         PartRevisionKey partRevisionKey = partRevision.getKey();
 
-        String[]tags = new String[3];
-        tags[0]="Important";
-        tags[1]="ToCheck";
-        tags[2]="ToDelete";
+        String[] tags = new String[3];
+        tags[0] = "Important";
+        tags[1] = "ToCheck";
+        tags[2] = "ToDelete";
 
         Mockito.when(userManager.checkWorkspaceReadAccess(ProductUtil.WORKSPACE_ID)).thenReturn(user);
         Mockito.when(userManager.checkWorkspaceWriteAccess(ProductUtil.WORKSPACE_ID)).thenReturn(user);
-        Mockito.when(partRevisionDAO.loadPartR(user.getLocale(), partRevision.getKey())).thenReturn((partRevision));
+        Mockito.when(partRevisionDAO.loadPartR(partRevision.getKey())).thenReturn((partRevision));
         Mockito.when(tagDAO.findAllTags(user.getWorkspaceId())).thenReturn(new Tag[0]);
 
         PartRevision partRevisionResult = productManagerBean.saveTags(partRevisionKey, tags);
@@ -224,7 +224,7 @@ public class ProductManagerBeanTest {
             Assert.assertEquals(tag.getLabel(), tags[i++]);
         }
 
-        Mockito.verify(indexerManager,Mockito.times(1)).indexPartIteration(Mockito.any(PartIteration.class));
+        Mockito.verify(indexerManager, Mockito.times(1)).indexPartIteration(Mockito.any(PartIteration.class));
     }
 
 
@@ -239,14 +239,14 @@ public class ProductManagerBeanTest {
         Mockito.when(userManager.checkWorkspaceReadAccess(ProductUtil.WORKSPACE_ID)).thenReturn(user);
         Mockito.when(userManager.checkWorkspaceWriteAccess(ProductUtil.WORKSPACE_ID)).thenReturn(user);
         Mockito.when(partRevisionDAO.loadPartR(partRevision.getKey())).thenReturn((partRevision));
-        Mockito.when(partRevisionDAO.loadPartR(user.getLocale(), partRevision.getKey())).thenReturn((partRevision));
+        Mockito.when(partRevisionDAO.loadPartR(partRevision.getKey())).thenReturn((partRevision));
 
         PartRevision partRevisionResult = productManagerBean.removeTag(partRevision.getKey(), "Important");
-        Mockito.verify(indexerManager,Mockito.times(1)).indexPartIteration(partRevisionResult.getLastIteration());
+        Mockito.verify(indexerManager, Mockito.times(1)).indexPartIteration(partRevisionResult.getLastIteration());
         Assert.assertEquals(2, partRevisionResult.getTags().size());
-        Assert.assertFalse(partRevisionResult.getTags().contains(new Tag(workspace,"Important")));
-        Assert.assertTrue(partRevisionResult.getTags().contains(new Tag(workspace,"Urgent")));
-        Assert.assertTrue(partRevisionResult.getTags().contains(new Tag(workspace,"ToRemove")));
+        Assert.assertFalse(partRevisionResult.getTags().contains(new Tag(workspace, "Important")));
+        Assert.assertTrue(partRevisionResult.getTags().contains(new Tag(workspace, "Urgent")));
+        Assert.assertTrue(partRevisionResult.getTags().contains(new Tag(workspace, "ToRemove")));
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -256,12 +256,12 @@ public class ProductManagerBeanTest {
 
         Mockito.when(userManager.checkWorkspaceReadAccess(ProductUtil.WORKSPACE_ID)).thenReturn(user);
         Mockito.when(userManager.checkWorkspaceWriteAccess(ProductUtil.WORKSPACE_ID)).thenReturn(user);
-        Mockito.when(partRevisionDAO.loadPartR(user.getLocale(), partRevisionKey)).thenReturn((partRevision));
+        Mockito.when(partRevisionDAO.loadPartR(partRevisionKey)).thenReturn((partRevision));
 
         try {
-            productManagerBean.saveTags(partRevisionKey,null);
+            productManagerBean.saveTags(partRevisionKey, null);
         } catch (IllegalArgumentException e) {
-            Mockito.verify(indexerManager,Mockito.never()).indexPartIteration(Mockito.any(PartIteration.class));
+            Mockito.verify(indexerManager, Mockito.never()).indexPartIteration(Mockito.any(PartIteration.class));
             throw e;
         }
     }
@@ -273,16 +273,15 @@ public class ProductManagerBeanTest {
         Mockito.doThrow(EntityConstraintException.class).when(psFilterVisitor).visit(any(User.class), any(ProductStructureFilter.class), any(PartMaster.class), Mockito.eq(-1), any(PSFilterVisitorCallbacks.class));
 
         thrown.expect(EntityConstraintException.class);
-        
+
         productManagerBean.checkCyclicAssemblyForPartIteration(cyclicAssemblyRule.getP1().getLastRevision().getLastIteration());
-        Mockito.verify(indexerManager,Mockito.never()).indexPartIteration(Mockito.any(PartIteration.class));
+        Mockito.verify(indexerManager, Mockito.never()).indexPartIteration(Mockito.any(PartIteration.class));
     }
 
     @Test(expected = NotAllowedException.class)
     public void getPartIterationCheckedOutByOther() throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, PartRevisionNotFoundException, AccessRightException, PartIterationNotFoundException, NotAllowedException, WorkspaceNotEnabledException {
         Mockito.when(userManager.checkWorkspaceReadAccess(partRevision.getKey().getPartMaster().getWorkspace())).thenReturn(user2);
-        Mockito.when(partIterationDAO.loadPartI(user2.getLocale(), partIteration.getKey())).thenReturn(partIteration);
-
+        Mockito.when(partIterationDAO.loadPartI(partIteration.getKey())).thenReturn(partIteration);
 
         productManagerBean.getPartIteration(partIteration.getKey());
     }
@@ -291,9 +290,8 @@ public class ProductManagerBeanTest {
     public void updatePartIterationCheckedOutByOther() throws ListOfValuesNotFoundException, PartMasterNotFoundException, EntityConstraintException, WorkspaceNotFoundException, UserNotFoundException, NotAllowedException, UserNotActiveException, PartUsageLinkNotFoundException, AccessRightException, PartRevisionNotFoundException, DocumentRevisionNotFoundException, WorkspaceNotEnabledException, PartIterationNotFoundException {
 
         Mockito.when(userManager.checkWorkspaceReadAccess(partRevision.getKey().getPartMaster().getWorkspace())).thenReturn(user2);
-        Mockito.when(partRevisionDAO.loadPartR(user2.getLocale(), partRevision.getKey())).thenReturn(partRevision);
-
-        productManagerBean.updatePartIteration(partIteration.getKey(), null, null, null, null, null, null,null,null);
+        Mockito.when(partRevisionDAO.loadPartR(partRevision.getKey())).thenReturn(partRevision);
+        productManagerBean.updatePartIteration(partIteration.getKey(), null, null, null, null, null, null, null, null);
     }
 
 }

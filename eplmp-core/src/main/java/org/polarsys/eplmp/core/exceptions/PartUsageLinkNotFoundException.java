@@ -12,7 +12,7 @@
 package org.polarsys.eplmp.core.exceptions;
 
 import java.text.MessageFormat;
-import java.util.Locale;
+
 
 /**
  *
@@ -26,12 +26,12 @@ public class PartUsageLinkNotFoundException extends EntityNotFoundException {
         mPartUsageLink = -1;
     }
 
-    public PartUsageLinkNotFoundException(Locale pLocale, int pPartUsageLink) {
-        this(pLocale, pPartUsageLink, null);
+    public PartUsageLinkNotFoundException(int pPartUsageLink) {
+        this(pPartUsageLink, null);
     }
 
-    public PartUsageLinkNotFoundException(Locale pLocale, int pPartUsageLink, Throwable pCause) {
-        super(pLocale, pCause);
+    public PartUsageLinkNotFoundException(int pPartUsageLink, Throwable pCause) {
+        super( pCause);
         mPartUsageLink=pPartUsageLink;
     }
 

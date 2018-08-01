@@ -25,7 +25,8 @@ import org.polarsys.eplmp.core.services.IContextManagerLocal;
 import org.polarsys.eplmp.core.services.IProductInstanceManagerLocal;
 import org.polarsys.eplmp.core.services.IPublicEntityManagerLocal;
 import org.polarsys.eplmp.server.helpers.Streams;
-import org.polarsys.eplmp.server.rest.exceptions.*;
+import org.polarsys.eplmp.server.rest.exceptions.PreconditionFailedException;
+import org.polarsys.eplmp.server.rest.exceptions.RequestedRangeNotSatisfiableException;
 import org.polarsys.eplmp.server.rest.file.util.BinaryResourceDownloadMeta;
 import org.polarsys.eplmp.server.rest.file.util.BinaryResourceDownloadResponseBuilder;
 import org.polarsys.eplmp.server.rest.file.util.BinaryResourceUpload;
@@ -142,8 +143,8 @@ public class ProductInstanceBinaryResource {
             @ApiParam(required = false, value = "Type") @QueryParam("type") String type,
             @ApiParam(required = false, value = "Output") @QueryParam("output") String output)
             throws EntityNotFoundException, UserNotActiveException, AccessRightException,
-            NotAllowedException, PreconditionFailedException, NotModifiedException,
-            RequestedRangeNotSatisfiableException, UnMatchingUuidException, SharedResourceAccessException, WorkspaceNotEnabledException {
+            NotAllowedException, PreconditionFailedException,
+            RequestedRangeNotSatisfiableException, WorkspaceNotEnabledException {
 
 
         String fullName = workspaceId + "/product-instances/" + serialNumber + "/iterations/" + iteration + "/" + fileName;
@@ -239,8 +240,8 @@ public class ProductInstanceBinaryResource {
             @ApiParam(required = false, value = "Type") @QueryParam("type") String type,
             @ApiParam(required = false, value = "Output") @QueryParam("output") String output)
             throws EntityNotFoundException, UserNotActiveException, AccessRightException,
-            NotAllowedException, PreconditionFailedException, NotModifiedException,
-            RequestedRangeNotSatisfiableException, UnMatchingUuidException, SharedResourceAccessException, WorkspaceNotEnabledException {
+            NotAllowedException, PreconditionFailedException,
+            RequestedRangeNotSatisfiableException, WorkspaceNotEnabledException {
 
 
         String fullName = workspaceId + "/product-instances/" + serialNumber + "/pathdata/" + pathDataId + "/" + fileName;
@@ -290,8 +291,7 @@ public class ProductInstanceBinaryResource {
             @ApiParam(required = false, value = "Type") @QueryParam("type") String type,
             @ApiParam(required = false, value = "Output") @QueryParam("output") String output)
             throws EntityNotFoundException, UserNotActiveException, AccessRightException, NotAllowedException,
-            PreconditionFailedException, NotModifiedException, RequestedRangeNotSatisfiableException,
-            UnMatchingUuidException, SharedResourceAccessException, WorkspaceNotEnabledException {
+            PreconditionFailedException, RequestedRangeNotSatisfiableException, WorkspaceNotEnabledException {
 
 
         String fullName = workspaceId + "/product-instances/" + serialNumber + "/pathdata/" + pathDataId + "/iterations/" + iteration + '/' + fileName;

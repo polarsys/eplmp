@@ -12,7 +12,7 @@
 package org.polarsys.eplmp.core.exceptions;
 
 import java.text.MessageFormat;
-import java.util.Locale;
+
 
 /**
  *
@@ -22,20 +22,14 @@ public class NotAllowedException extends ApplicationException {
     private final String mKey;
     private final String mName;
 
-    public NotAllowedException(String pMessage) {
-        super(pMessage);
-        mKey=null;
-        mName=null;
-    }
-
-    public NotAllowedException(Locale pLocale, String pKey) {
-        super(pLocale);
+    public NotAllowedException(String pKey) {
+        super();
         mKey=pKey;
         mName=null;
     }
 
-    public NotAllowedException(Locale pLocale, String pKey, String pName) {
-        super(pLocale);
+    public NotAllowedException(String pKey, String pName) {
+        super();
         mKey=pKey;
         mName=pName;
     }

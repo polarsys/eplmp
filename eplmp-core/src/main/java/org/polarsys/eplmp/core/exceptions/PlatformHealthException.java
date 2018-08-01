@@ -11,24 +11,20 @@
 
 package org.polarsys.eplmp.core.exceptions;
 
-import java.util.Locale;
+
 
 public class PlatformHealthException extends ApplicationException {
+
+    public PlatformHealthException() {
+        super();
+    }
 
     public PlatformHealthException(String pMessage) {
         super(pMessage);
     }
 
-    public PlatformHealthException(Locale pLocale) {
-        this(pLocale, null);
-    }
-
-    public PlatformHealthException(Locale pLocale, Throwable pCause) {
-        super(pLocale, pCause);
-    }
-
     public PlatformHealthException(Throwable pCause) {
-        super(Locale.getDefault(), pCause);
+        super(pCause);
     }
 
     @Override

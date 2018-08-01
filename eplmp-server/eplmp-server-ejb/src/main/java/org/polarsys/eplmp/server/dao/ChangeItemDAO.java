@@ -15,26 +15,26 @@ import org.polarsys.eplmp.core.change.ChangeItem;
 import org.polarsys.eplmp.core.change.ChangeOrder;
 import org.polarsys.eplmp.core.change.ChangeRequest;
 import org.polarsys.eplmp.core.document.DocumentRevisionKey;
-import org.polarsys.eplmp.core.exceptions.ChangeOrderNotFoundException;
 import org.polarsys.eplmp.core.meta.Folder;
 import org.polarsys.eplmp.core.meta.Tag;
 import org.polarsys.eplmp.core.product.PartRevisionKey;
 
-import javax.ejb.Stateless;
+import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
-@Stateless(name = "ChangeItemDAO")
+
+@RequestScoped
 public class ChangeItemDAO {
 
     private static final String DOCUMENT_MASTER_ID = "documentMasterId";
     private static final String VERSION = "version";
     private static final String PART_MASTER_NUMBER = "partMasterNumber";
     private static final String FOLDER = "folder";
+
     @PersistenceContext
     private EntityManager em;
 
@@ -44,12 +44,9 @@ public class ChangeItemDAO {
     @Inject
     private FolderDAO folderDAO;
 
-    private Locale mLocale;
-
     private static final String WORKSPACE_ID = "workspaceId";
 
     public ChangeItemDAO() {
-        mLocale = Locale.getDefault();
     }
 
 
@@ -73,27 +70,12 @@ public class ChangeItemDAO {
         return  em.find(ChangeIssue.class, pId);
     }
 
-    public ChangeIssue loadChangeIssue(Locale pLocale, int pId) {
-        mLocale = pLocale;
-        return loadChangeIssue(pId);
-    }
-
     public ChangeOrder loadChangeOrder(int pId) {
         return em.find(ChangeOrder.class, pId);
     }
 
-    public ChangeOrder loadChangeOrder(Locale pLocale, int pId) {
-        mLocale = pLocale;
-        return loadChangeOrder(pId);
-    }
-
     public ChangeRequest loadChangeRequest(int pId) {
         return em.find(ChangeRequest.class, pId);
-    }
-
-    public ChangeRequest loadChangeRequest(Locale pLocale, int pId) {
-        mLocale = pLocale;
-        return loadChangeRequest(pId);
     }
 
     public void createChangeItem(ChangeItem pChange) {
@@ -206,23 +188,6 @@ public class ChangeItemDAO {
                 .setParameter(FOLDER, folder)
                 .getResultList());
         return changeItems;
-    }
-
-
-    public boolean hasConstraintsInFolderHierarchy(Folder pFolder) {
-        boolean hasConstraints = false;
-
-        for(Folder subFolder : folderDAO.getSubFolders(pFolder)){
-            hasConstraints |= hasConstraintsInFolderHierarchy(subFolder);
-        }
-
-        return hasConstraints || hasChangeItems(pFolder);
-
-    }
-
-    public boolean hasConstraintsInFolderHierarchy(Locale pLocale, Folder pFolder) {
-        mLocale = pLocale;
-        return hasConstraintsInFolderHierarchy(pFolder);
     }
 
     public boolean hasChangeItems(Folder pFolder) {

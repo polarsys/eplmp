@@ -12,7 +12,7 @@
 package org.polarsys.eplmp.core.exceptions;
 
 import java.text.MessageFormat;
-import java.util.Locale;
+
 
 /**
  *
@@ -26,13 +26,13 @@ public class ChangeIssueNotFoundException extends EntityNotFoundException {
         mChange = -1;
     }
 
-    public ChangeIssueNotFoundException(Locale pLocale, int pChange) {
-        this(pLocale, pChange, null);
+    public ChangeIssueNotFoundException(int pChange, Throwable pCause) {
+        super(pCause);
+        mChange = pChange;
     }
 
-    public ChangeIssueNotFoundException(Locale pLocale, int pChange, Throwable pCause) {
-        super(pLocale, pCause);
-        mChange =pChange;
+    public ChangeIssueNotFoundException(int pChange) {
+        this(pChange, null);
     }
 
     @Override

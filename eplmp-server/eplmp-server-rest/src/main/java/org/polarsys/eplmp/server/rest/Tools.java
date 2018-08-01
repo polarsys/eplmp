@@ -11,6 +11,8 @@
 
 package org.polarsys.eplmp.server.rest;
 
+import org.dozer.DozerBeanMapperSingletonWrapper;
+import org.dozer.Mapper;
 import org.polarsys.eplmp.core.change.ModificationNotification;
 import org.polarsys.eplmp.core.common.User;
 import org.polarsys.eplmp.core.common.UserGroup;
@@ -22,8 +24,6 @@ import org.polarsys.eplmp.core.security.ACLUserEntry;
 import org.polarsys.eplmp.core.security.ACLUserGroupEntry;
 import org.polarsys.eplmp.server.rest.dto.*;
 import org.polarsys.eplmp.server.rest.dto.baseline.*;
-import org.dozer.DozerBeanMapperSingletonWrapper;
-import org.dozer.Mapper;
 
 import java.util.*;
 import java.util.stream.Collectors;

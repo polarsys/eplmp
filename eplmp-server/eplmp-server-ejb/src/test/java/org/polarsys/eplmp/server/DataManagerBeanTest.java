@@ -11,13 +11,13 @@
 
 package org.polarsys.eplmp.server;
 
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 import org.polarsys.eplmp.core.common.BinaryResource;
 import org.polarsys.eplmp.server.storage.StorageProvider;
 import org.polarsys.eplmp.server.storage.filesystem.FileStorageProvider;
 import org.polarsys.eplmp.server.util.DocumentUtil;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
 
 import java.io.BufferedOutputStream;
 import java.util.Date;

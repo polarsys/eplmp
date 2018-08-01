@@ -11,12 +11,12 @@
 
 package org.polarsys.eplmp.server.rest.converters;
 
+import org.dozer.DozerConverter;
 import org.polarsys.eplmp.core.meta.DefaultAttributeTemplate;
 import org.polarsys.eplmp.core.meta.InstanceAttributeTemplate;
 import org.polarsys.eplmp.core.meta.ListOfValuesAttributeTemplate;
 import org.polarsys.eplmp.core.product.PartNumberAttributeTemplate;
 import org.polarsys.eplmp.server.rest.dto.InstanceAttributeTemplateDTO;
-import org.dozer.DozerConverter;
 
 /**
  * @author Florent Garin

@@ -12,7 +12,7 @@
 package org.polarsys.eplmp.core.exceptions;
 
 import java.text.MessageFormat;
-import java.util.Locale;
+
 
 /**
  *
@@ -21,24 +21,23 @@ import java.util.Locale;
 public class BaselineNotFoundException extends EntityNotFoundException {
     private final int mBaseline;
 
-
     public BaselineNotFoundException(String pMessage) {
         super(pMessage);
         mBaseline = -1;
     }
 
-    public BaselineNotFoundException(Locale pLocale, int pBaseline) {
-        this(pLocale, pBaseline, null);
+    public BaselineNotFoundException(int pBaseline) {
+        this(pBaseline, null);
     }
 
-    public BaselineNotFoundException(Locale pLocale, int pBaseline, Throwable pCause) {
-        super(pLocale, pCause);
-        mBaseline=pBaseline;
+    public BaselineNotFoundException(int pBaseline, Throwable pCause) {
+        super(pCause);
+        mBaseline = pBaseline;
     }
 
     @Override
     public String getLocalizedMessage() {
         String message = getBundleDefaultMessage();
-        return MessageFormat.format(message,mBaseline);
+        return MessageFormat.format(message, mBaseline);
     }
 }

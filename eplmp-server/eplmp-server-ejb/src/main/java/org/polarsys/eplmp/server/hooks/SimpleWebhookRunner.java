@@ -10,9 +10,6 @@
   *******************************************************************************/
 package org.polarsys.eplmp.server.hooks;
 
-import org.polarsys.eplmp.core.hooks.SimpleWebhookApp;
-import org.polarsys.eplmp.core.hooks.Webhook;
-import org.polarsys.eplmp.server.converters.ConverterUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -23,6 +20,9 @@ import org.apache.http.client.methods.RequestBuilder;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.polarsys.eplmp.core.hooks.SimpleWebhookApp;
+import org.polarsys.eplmp.core.hooks.Webhook;
+import org.polarsys.eplmp.server.converters.ConverterUtils;
 
 import javax.json.Json;
 import javax.json.JsonObjectBuilder;

@@ -15,48 +15,40 @@ import org.polarsys.eplmp.core.common.User;
 import org.polarsys.eplmp.core.exceptions.CreationException;
 import org.polarsys.eplmp.core.product.Import;
 
-import javax.ejb.Stateless;
+import javax.enterprise.context.RequestScoped;
 import javax.persistence.*;
 import java.util.List;
-import java.util.Locale;
 
-@Stateless(name = "ImportDAO")
+
+@RequestScoped
 public class ImportDAO {
 
     @PersistenceContext
     private EntityManager em;
 
-    private Locale mLocale;
-
     public ImportDAO() {
-        mLocale=Locale.getDefault();
     }
 
-    public void createImport(Import pImportToPersist) throws  CreationException {
-        try{
+    public void createImport(Import pImportToPersist) throws CreationException {
+        try {
             //the EntityExistsException is thrown only when flush occurs
             em.persist(pImportToPersist);
             em.flush();
-        } catch(PersistenceException pPEx){
+        } catch (PersistenceException pPEx) {
             //EntityExistsException is case sensitive
             //whereas MySQL is not thus PersistenceException could be
             //thrown instead of EntityExistsException
-            throw new CreationException(mLocale);
+            throw new CreationException("");
         }
-    }
-
-    public void createImport(Locale pLocale, Import pImportToPersist) throws  CreationException {
-        mLocale = pLocale;
-        createImport(pImportToPersist);
     }
 
     public Import findImport(User user, String id) {
         TypedQuery<Import> query = em.createQuery("SELECT DISTINCT i FROM Import i WHERE i.id = :id AND i.user = :user", Import.class);
         query.setParameter("user", user);
         query.setParameter("id", id);
-        try{
+        try {
             return query.getSingleResult();
-        }catch(NoResultException e){
+        } catch (NoResultException e) {
             return null;
         }
     }

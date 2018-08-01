@@ -14,7 +14,7 @@ package org.polarsys.eplmp.core.exceptions;
 import org.polarsys.eplmp.core.meta.Folder;
 
 import java.text.MessageFormat;
-import java.util.Locale;
+
 
 /**
  *
@@ -22,19 +22,18 @@ import java.util.Locale;
  */
 public class FolderAlreadyExistsException extends EntityAlreadyExistsException {
     private final Folder mFolder;
-    
-    
+
     public FolderAlreadyExistsException(String pMessage) {
         super(pMessage);
         mFolder=null;
     }
     
-    public FolderAlreadyExistsException(Locale pLocale, Folder pFolder) {
-        this(pLocale, pFolder, null);
+    public FolderAlreadyExistsException(Folder pFolder) {
+        this(pFolder, null);
     }
 
-    public FolderAlreadyExistsException(Locale pLocale, Folder pFolder, Throwable pCause) {
-        super(pLocale, pCause);
+    public FolderAlreadyExistsException(Folder pFolder, Throwable pCause) {
+        super( pCause);
         mFolder=pFolder;
     }
 

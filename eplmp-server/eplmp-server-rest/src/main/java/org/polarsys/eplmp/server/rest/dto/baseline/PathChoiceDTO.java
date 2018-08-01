@@ -11,9 +11,9 @@
 
 package org.polarsys.eplmp.server.rest.dto.baseline;
 
-import org.polarsys.eplmp.server.rest.dto.PartUsageLinkDTO;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import org.polarsys.eplmp.server.rest.dto.PartUsageLinkDTO;
 
 import javax.xml.bind.annotation.XmlRootElement;
 import java.io.Serializable;

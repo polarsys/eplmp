@@ -13,10 +13,8 @@ package org.polarsys.eplmp.server;
 import org.polarsys.eplmp.core.common.User;
 import org.polarsys.eplmp.core.document.DocumentIteration;
 import org.polarsys.eplmp.core.document.DocumentRevision;
-import org.polarsys.eplmp.core.document.DocumentRevisionKey;
 import org.polarsys.eplmp.core.exceptions.*;
 import org.polarsys.eplmp.core.product.PartRevision;
-import org.polarsys.eplmp.core.product.PartRevisionKey;
 import org.polarsys.eplmp.core.security.UserGroupMapping;
 import org.polarsys.eplmp.core.services.*;
 import org.polarsys.eplmp.core.workflow.*;
@@ -32,10 +30,7 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import java.util.List;
-import java.util.Locale;
 import java.util.Objects;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -100,11 +95,10 @@ public class TaskManagerBean implements ITaskManagerLocal {
     @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
     public TaskWrapper getTask(String workspaceId, TaskKey taskKey) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, TaskNotFoundException, AccessRightException, WorkspaceNotEnabledException {
         User user = userManager.checkWorkspaceReadAccess(workspaceId);
-        Locale userLocale = user.getLocale();
-        Task task = taskDAO.loadTask(userLocale, taskKey);
+        Task task = taskDAO.loadTask(taskKey);
         TaskWrapper taskWrapper = wrapTask(task, workspaceId);
         if (taskWrapper == null) {
-            throw new AccessRightException(userLocale, user);
+            throw new AccessRightException(user);
         }
         return taskWrapper;
     }
@@ -112,12 +106,11 @@ public class TaskManagerBean implements ITaskManagerLocal {
     @Override
     public void checkTask(String workspaceId, TaskKey taskKey) throws UserNotFoundException, WorkspaceNotFoundException, UserNotActiveException, WorkspaceNotEnabledException, TaskNotFoundException, WorkflowNotFoundException, NotAllowedException {
         User user = userManager.checkWorkspaceReadAccess(workspaceId);
-        Locale userLocale = user.getLocale();
-        Task task = taskDAO.loadTask(userLocale, taskKey);
+        Task task = taskDAO.loadTask(taskKey);
         Workflow workflow = task.getActivity().getWorkflow();
         DocumentRevision docR = workflowDAO.getDocumentTarget(workflow);
         if (docR == null) {
-            throw new WorkflowNotFoundException(userLocale, workflow.getId());
+            throw new WorkflowNotFoundException(workflow.getId());
         }
         DocumentIteration doc = docR.getLastIteration();
         if (em.createNamedQuery("findLogByDocumentAndUserAndEvent").
@@ -128,7 +121,7 @@ public class TaskManagerBean implements ITaskManagerLocal {
                 setParameter("documentIteration", doc.getIteration()).
                 setParameter("event", "DOWNLOAD").
                 getResultList().isEmpty()) {
-            throw new NotAllowedException(userLocale, "NotAllowedException10");
+            throw new NotAllowedException("NotAllowedException10");
         }
     }
 
@@ -137,7 +130,6 @@ public class TaskManagerBean implements ITaskManagerLocal {
         TaskWrapper taskWrapper = new TaskWrapper(task, workspaceId);
 
         DocumentRevision documentRevision = documentRevisionDAO.getWorkflowHolder(task.getActivity().getWorkflow());
-
         if (documentRevision != null) {
             taskWrapper.setHolderType("documents");
             taskWrapper.setHolderReference(documentRevision.getDocumentMasterId());
@@ -145,8 +137,8 @@ public class TaskManagerBean implements ITaskManagerLocal {
             taskWrapper.setTask(documentRevision.getWorkflow().getTasks().stream().filter(pTask -> pTask.getKey().equals(task.getKey())).findFirst().get());
             return taskWrapper;
         }
-        PartRevision partRevision = partRevisionDAO.getWorkflowHolder(task.getActivity().getWorkflow());
 
+        PartRevision partRevision = partRevisionDAO.getWorkflowHolder(task.getActivity().getWorkflow());
         if (partRevision != null) {
             taskWrapper.setHolderType("parts");
             taskWrapper.setHolderReference(partRevision.getPartNumber());

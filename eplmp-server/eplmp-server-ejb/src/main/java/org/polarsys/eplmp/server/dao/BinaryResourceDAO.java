@@ -22,50 +22,37 @@ import org.polarsys.eplmp.core.product.Geometry;
 import org.polarsys.eplmp.core.product.PartIteration;
 import org.polarsys.eplmp.core.product.PartMasterTemplate;
 
-import javax.ejb.Stateless;
+import javax.enterprise.context.RequestScoped;
 import javax.persistence.*;
-import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-@Stateless(name = "BinaryResourceDAO")
+@RequestScoped
 public class BinaryResourceDAO {
+
     private static final Logger LOGGER = Logger.getLogger(BinaryResourceDAO.class.getName());
 
     @PersistenceContext
     private EntityManager em;
 
-    private Locale mLocale;
-
     public BinaryResourceDAO() {
-        mLocale = Locale.getDefault();
     }
 
     public void createBinaryResource(BinaryResource pBinaryResource) throws FileAlreadyExistsException, CreationException {
         try {
-            //the EntityExistsException is thrown only when flush occurs    
+            //the EntityExistsException is thrown only when flush occurs
             em.persist(pBinaryResource);
             em.flush();
         } catch (EntityExistsException pEEEx) {
-            LOGGER.log(Level.FINER,null,pEEEx);
-            throw new FileAlreadyExistsException(mLocale, pBinaryResource);
+            LOGGER.log(Level.FINER, null, pEEEx);
+            throw new FileAlreadyExistsException(pBinaryResource);
         } catch (PersistenceException pPEx) {
             //EntityExistsException is case sensitive
             //whereas MySQL is not thus PersistenceException could be
             //thrown instead of EntityExistsException
-            LOGGER.log(Level.FINER,null,pPEx);
-            throw new CreationException(mLocale);
+            LOGGER.log(Level.FINER, null, pPEx);
+            throw new CreationException("");
         }
-    }
-
-    public void createBinaryResource(Locale pLocale, BinaryResource pBinaryResource) throws FileAlreadyExistsException, CreationException {
-        mLocale = pLocale;
-        createBinaryResource(pBinaryResource);
-    }
-
-    public void removeBinaryResource(String pFullName) throws FileNotFoundException {
-        BinaryResource file = loadBinaryResource(pFullName);
-        em.remove(file);
     }
 
     public void removeBinaryResource(BinaryResource pBinaryResource) {
@@ -75,8 +62,8 @@ public class BinaryResourceDAO {
 
     public BinaryResource loadBinaryResource(String pFullName) throws FileNotFoundException {
         BinaryResource file = em.find(BinaryResource.class, pFullName);
-        if(null == file){
-            throw new FileNotFoundException(mLocale,pFullName);
+        if (null == file) {
+            throw new FileNotFoundException(pFullName);
         }
         return file;
     }
@@ -85,44 +72,40 @@ public class BinaryResourceDAO {
         return em.find(BinaryResource.class, pFullName) != null;
     }
 
-    public BinaryResource loadBinaryResource(Locale pLocale, String pFullName) throws FileNotFoundException {
-        mLocale = pLocale;
-        return loadBinaryResource(pFullName);
-    }
-
     public PartIteration getPartHolder(BinaryResource pBinaryResource) {
         TypedQuery<PartIteration> query;
         String fileType = pBinaryResource.getFileType();
-        if(pBinaryResource instanceof Geometry){
+        if (pBinaryResource instanceof Geometry) {
             query = em.createQuery("SELECT p FROM PartIteration p WHERE :binaryResource MEMBER OF p.geometries", PartIteration.class);
-        }else if("nativecad".equals(fileType)){
+        } else if ("nativecad".equals(fileType)) {
             query = em.createQuery("SELECT p FROM PartIteration p WHERE p.nativeCADFile = :binaryResource", PartIteration.class);
-        }else{
+        } else {
             query = em.createQuery("SELECT p FROM PartIteration p WHERE :binaryResource MEMBER OF p.attachedFiles", PartIteration.class);
         }
         try {
             return query.setParameter("binaryResource", pBinaryResource).getSingleResult();
         } catch (NoResultException pNREx) {
-            LOGGER.log(Level.FINER,null,pNREx);
+            LOGGER.log(Level.FINER, null, pNREx);
             return null;
         }
     }
-    
+
     public DocumentIteration getDocumentHolder(BinaryResource pBinaryResource) {
         TypedQuery<DocumentIteration> query = em.createQuery("SELECT d FROM DocumentIteration d WHERE :binaryResource MEMBER OF d.attachedFiles", DocumentIteration.class);
         try {
             return query.setParameter("binaryResource", pBinaryResource).getSingleResult();
         } catch (NoResultException pNREx) {
-            LOGGER.log(Level.FINER,null,pNREx);
+            LOGGER.log(Level.FINER, null, pNREx);
             return null;
         }
     }
+
     public ProductInstanceIteration getProductInstanceIterationHolder(BinaryResource pBinaryResource) {
         TypedQuery<ProductInstanceIteration> query = em.createQuery("SELECT d FROM ProductInstanceIteration d WHERE :binaryResource MEMBER OF d.attachedFiles", ProductInstanceIteration.class);
         try {
             return query.setParameter("binaryResource", pBinaryResource).getSingleResult();
         } catch (NoResultException pNREx) {
-            LOGGER.log(Level.FINER,null,pNREx);
+            LOGGER.log(Level.FINER, null, pNREx);
             return null;
         }
     }
@@ -132,7 +115,7 @@ public class BinaryResourceDAO {
         try {
             return query.setParameter("binaryResource", pBinaryResource).getSingleResult();
         } catch (NoResultException pNREx) {
-            LOGGER.log(Level.FINER,null,pNREx);
+            LOGGER.log(Level.FINER, null, pNREx);
             return null;
         }
     }
@@ -143,7 +126,7 @@ public class BinaryResourceDAO {
         try {
             return query.setParameter("binaryResource", pBinaryResource).getSingleResult();
         } catch (NoResultException pNREx) {
-            LOGGER.log(Level.FINER,null,pNREx);
+            LOGGER.log(Level.FINER, null, pNREx);
             return null;
         }
     }
@@ -153,7 +136,7 @@ public class BinaryResourceDAO {
         try {
             return query.setParameter("binaryResource", pBinaryResource).getSingleResult();
         } catch (NoResultException pNREx) {
-            LOGGER.log(Level.FINER,null,pNREx);
+            LOGGER.log(Level.FINER, null, pNREx);
             return null;
         }
     }
@@ -163,21 +146,9 @@ public class BinaryResourceDAO {
         try {
             return query.setParameter("name", workspaceId + "/parts/%/nativecad/" + cadFileName).getSingleResult();
         } catch (NoResultException pNREx) {
-            LOGGER.log(Level.FINER,null,pNREx);
+            LOGGER.log(Level.FINER, null, pNREx);
             return null;
         }
-    }
-
-
-
-    private boolean isNativeCADFile(String pFullName){
-        String[] parts = pFullName.split("/");
-        return parts.length==7 && "nativecad".equals(parts[5]);
-    }
-
-    private boolean isAttachedFile(String pFullName) {
-        String[] parts = pFullName.split("/");
-        return parts.length==7 && "attachedfiles".equals(parts[5]);
     }
 
 }

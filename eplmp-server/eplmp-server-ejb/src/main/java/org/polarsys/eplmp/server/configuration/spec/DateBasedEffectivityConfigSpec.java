@@ -13,7 +13,9 @@
 package org.polarsys.eplmp.server.configuration.spec;
 
 import org.polarsys.eplmp.core.configuration.ProductConfiguration;
-import org.polarsys.eplmp.core.product.*;
+import org.polarsys.eplmp.core.product.ConfigurationItem;
+import org.polarsys.eplmp.core.product.DateBasedEffectivity;
+import org.polarsys.eplmp.core.product.Effectivity;
 
 import java.util.Date;
 /**

@@ -17,26 +17,22 @@ import org.polarsys.eplmp.core.configuration.ProductInstanceIteration;
 import org.polarsys.eplmp.core.configuration.ProductInstanceIterationKey;
 import org.polarsys.eplmp.core.exceptions.ProductInstanceIterationNotFoundException;
 
-import javax.ejb.Stateless;
+import javax.enterprise.context.RequestScoped;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import java.util.List;
-import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-@Stateless(name = "ProductInstanceIterationDAO")
+@RequestScoped
 public class ProductInstanceIterationDAO {
 
     @PersistenceContext
     private EntityManager em;
 
-    private Locale mLocale;
-
     private static final Logger LOGGER = Logger.getLogger(ProductInstanceIterationDAO.class.getName());
 
     public ProductInstanceIterationDAO() {
-        mLocale = Locale.getDefault();
     }
 
     public void createProductInstanceIteration(ProductInstanceIteration productInstanceIteration){
@@ -52,15 +48,10 @@ public class ProductInstanceIterationDAO {
     public ProductInstanceIteration loadProductInstanceIteration(ProductInstanceIterationKey pId) throws ProductInstanceIterationNotFoundException {
         ProductInstanceIteration productInstanceIteration = em.find(ProductInstanceIteration.class, pId);
         if (productInstanceIteration == null) {
-            throw new ProductInstanceIterationNotFoundException(mLocale, pId);
+            throw new ProductInstanceIterationNotFoundException(pId);
         } else {
             return productInstanceIteration;
         }
-    }
-
-    public ProductInstanceIteration loadProductInstanceIteration(Locale pLocale, ProductInstanceIterationKey pId) throws ProductInstanceIterationNotFoundException {
-        mLocale = pLocale;
-        return loadProductInstanceIteration(pId);
     }
 
     public List<BaselinedPart> findBaselinedPartWithReferenceLike(int collectionId, String q, int maxResults) {

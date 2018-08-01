@@ -12,7 +12,6 @@
 package org.polarsys.eplmp.core.security;
 
 import org.polarsys.eplmp.core.util.HashUtils;
-import org.polarsys.eplmp.core.util.Tools;
 
 import javax.persistence.NamedQuery;
 import javax.persistence.Table;

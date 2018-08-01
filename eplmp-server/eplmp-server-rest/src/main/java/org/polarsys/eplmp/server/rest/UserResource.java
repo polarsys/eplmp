@@ -10,9 +10,15 @@
   *******************************************************************************/
 package org.polarsys.eplmp.server.rest;
 
+import io.swagger.annotations.*;
+import org.dozer.DozerBeanMapperSingletonWrapper;
+import org.dozer.Mapper;
 import org.polarsys.eplmp.core.common.User;
 import org.polarsys.eplmp.core.common.Workspace;
-import org.polarsys.eplmp.core.exceptions.*;
+import org.polarsys.eplmp.core.exceptions.AccessRightException;
+import org.polarsys.eplmp.core.exceptions.EntityNotFoundException;
+import org.polarsys.eplmp.core.exceptions.UserNotActiveException;
+import org.polarsys.eplmp.core.exceptions.WorkspaceNotEnabledException;
 import org.polarsys.eplmp.core.notification.TagUserSubscription;
 import org.polarsys.eplmp.core.security.UserGroupMapping;
 import org.polarsys.eplmp.core.services.INotificationManagerLocal;
@@ -20,9 +26,6 @@ import org.polarsys.eplmp.core.services.IUserManagerLocal;
 import org.polarsys.eplmp.core.services.IWorkspaceManagerLocal;
 import org.polarsys.eplmp.server.rest.dto.TagSubscriptionDTO;
 import org.polarsys.eplmp.server.rest.dto.UserDTO;
-import io.swagger.annotations.*;
-import org.dozer.DozerBeanMapperSingletonWrapper;
-import org.dozer.Mapper;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.security.DeclareRoles;

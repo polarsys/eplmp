@@ -11,7 +11,6 @@
 package org.polarsys.eplmp.server.rest.file.util;
 
 import org.polarsys.eplmp.server.rest.exceptions.RequestedRangeNotSatisfiableException;
-import org.polarsys.eplmp.server.rest.file.util.BinaryResourceDownloadMeta;
 
 import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.EntityTag;

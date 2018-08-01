@@ -11,12 +11,12 @@
 
 package org.polarsys.eplmp.server.rest.dto.product;
 
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import org.polarsys.eplmp.server.rest.dto.ACLDTO;
 import org.polarsys.eplmp.server.rest.dto.BinaryResourceDTO;
 import org.polarsys.eplmp.server.rest.dto.DocumentRevisionDTO;
 import org.polarsys.eplmp.server.rest.dto.InstanceAttributeDTO;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
 
 import javax.xml.bind.annotation.XmlRootElement;
 import java.io.Serializable;

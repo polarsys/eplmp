@@ -14,7 +14,7 @@ package org.polarsys.eplmp.core.exceptions;
 import org.polarsys.eplmp.core.configuration.ProductInstanceMasterKey;
 
 import java.text.MessageFormat;
-import java.util.Locale;
+
 
 /**
  *
@@ -28,12 +28,12 @@ public class ProductInstanceMasterNotFoundException extends EntityNotFoundExcept
         mProductInstanceMaster=null;
     }
 
-    public ProductInstanceMasterNotFoundException(Locale pLocale, ProductInstanceMasterKey pProductInstanceMaster) {
-        this(pLocale, pProductInstanceMaster, null);
+    public ProductInstanceMasterNotFoundException(ProductInstanceMasterKey pProductInstanceMaster) {
+        this(pProductInstanceMaster, null);
     }
 
-    public ProductInstanceMasterNotFoundException(Locale pLocale, ProductInstanceMasterKey pProductInstanceMaster, Throwable pCause) {
-        super(pLocale, pCause);
+    public ProductInstanceMasterNotFoundException(ProductInstanceMasterKey pProductInstanceMaster, Throwable pCause) {
+        super( pCause);
         mProductInstanceMaster=pProductInstanceMaster;
     }
 

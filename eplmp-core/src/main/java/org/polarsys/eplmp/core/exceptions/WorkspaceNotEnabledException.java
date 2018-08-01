@@ -12,7 +12,7 @@
 package org.polarsys.eplmp.core.exceptions;
 
 import java.text.MessageFormat;
-import java.util.Locale;
+
 
 /**
  *
@@ -21,17 +21,12 @@ import java.util.Locale;
 public class WorkspaceNotEnabledException extends ApplicationException {
     private final String mID;
 
-    public WorkspaceNotEnabledException(String pMessage) {
-        super(pMessage);
-        mID=null;
+    public WorkspaceNotEnabledException(String pID) {
+        this(pID, null);
     }
 
-    public WorkspaceNotEnabledException(Locale pLocale, String pID) {
-        this(pLocale, pID, null);
-    }
-
-    public WorkspaceNotEnabledException(Locale pLocale, String pID, Throwable pCause) {
-        super(pLocale, pCause);
+    public WorkspaceNotEnabledException(String pID, Throwable pCause) {
+        super( pCause);
         mID=pID;
     }
 

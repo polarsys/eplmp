@@ -11,8 +11,8 @@
 
 package org.polarsys.eplmp.server.rest.converters;
 
-import org.polarsys.eplmp.core.common.BinaryResource;
 import org.dozer.DozerConverter;
+import org.polarsys.eplmp.core.common.BinaryResource;
 
 /**
  * @author Florent Garin

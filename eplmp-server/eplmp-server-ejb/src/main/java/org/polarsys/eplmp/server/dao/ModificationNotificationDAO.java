@@ -14,17 +14,18 @@ import org.polarsys.eplmp.core.change.ModificationNotification;
 import org.polarsys.eplmp.core.product.PartIterationKey;
 import org.polarsys.eplmp.core.product.PartRevisionKey;
 
-import javax.ejb.Stateless;
+import javax.enterprise.context.RequestScoped;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import java.util.List;
 
-@Stateless(name = "ModificationNotificationDAO")
+@RequestScoped
 public class ModificationNotificationDAO {
 
     public static final String WORKSPACE_ID = "workspaceId";
     public static final String PART_NUMBER = "partNumber";
     public static final String VERSION = "version";
+
     @PersistenceContext
     private EntityManager em;
 

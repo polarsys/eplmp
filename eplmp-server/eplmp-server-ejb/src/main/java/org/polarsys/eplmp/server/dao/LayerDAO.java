@@ -14,23 +14,20 @@ import org.polarsys.eplmp.core.exceptions.LayerNotFoundException;
 import org.polarsys.eplmp.core.product.ConfigurationItemKey;
 import org.polarsys.eplmp.core.product.Layer;
 
-import javax.ejb.Stateless;
+import javax.enterprise.context.RequestScoped;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
 import java.util.List;
-import java.util.Locale;
 
-@Stateless(name = "LayerDAO")
+
+@RequestScoped
 public class LayerDAO {
 
     @PersistenceContext
     private EntityManager em;
-
-    private Locale mLocale;
     
     public LayerDAO() {
-        mLocale = Locale.getDefault();
     }
 
     public List<Layer> findAllLayers(ConfigurationItemKey pKey) {
@@ -43,15 +40,10 @@ public class LayerDAO {
     public Layer loadLayer(int pId) throws LayerNotFoundException {
         Layer layer = em.find(Layer.class, pId);
         if (layer == null) {
-            throw new LayerNotFoundException(mLocale, pId);
+            throw new LayerNotFoundException(pId);
         } else {
             return layer;
         }
-    }
-
-    public Layer loadLayer(Locale pLocale, int pId) throws LayerNotFoundException{
-        mLocale = pLocale;
-        return loadLayer(pId);
     }
 
     public void createLayer(Layer pLayer) {

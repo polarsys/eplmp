@@ -15,14 +15,14 @@ import org.polarsys.eplmp.core.exceptions.PartIterationNotFoundException;
 import org.polarsys.eplmp.core.meta.ListOfValuesKey;
 import org.polarsys.eplmp.core.product.*;
 
-import javax.ejb.Stateless;
+import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import java.util.List;
-import java.util.Locale;
 
-@Stateless(name = "PartIterationDAO")
+
+@RequestScoped
 public class PartIterationDAO {
 
     @PersistenceContext
@@ -31,34 +31,22 @@ public class PartIterationDAO {
     @Inject
     private ConversionDAO conversionDAO;
 
-    private Locale mLocale;
-
     public PartIterationDAO() {
-        mLocale = Locale.getDefault();
     }
 
     public PartIteration loadPartI(PartIterationKey pKey) throws PartIterationNotFoundException {
         PartIteration partI = em.find(PartIteration.class, pKey);
         if (partI == null) {
-            throw new PartIterationNotFoundException(mLocale, pKey);
+            throw new PartIterationNotFoundException(pKey);
         } else {
             return partI;
         }
     }
 
-    public PartIteration loadPartI(Locale pLocale, PartIterationKey pKey) throws PartIterationNotFoundException {
-        mLocale = pLocale;
-        return loadPartI(pKey);
-    }
-    
-    public void updateIteration(PartIteration pPartI){
-        em.merge(pPartI);
-    }
-
-    public void removeIteration(PartIteration pPartI){
+    public void removeIteration(PartIteration pPartI) {
         conversionDAO.removePartIterationConversion(pPartI);
-        for(PartUsageLink partUsageLink:pPartI.getComponents()){
-            if(!partLinkIsUsedInPreviousIteration(partUsageLink,pPartI)){
+        for (PartUsageLink partUsageLink : pPartI.getComponents()) {
+            if (!partLinkIsUsedInPreviousIteration(partUsageLink, pPartI)) {
                 em.remove(partUsageLink);
             }
         }
@@ -67,15 +55,15 @@ public class PartIterationDAO {
 
     public boolean partLinkIsUsedInPreviousIteration(PartUsageLink partUsageLink, PartIteration partIte) {
         int iteration = partIte.getIteration();
-        if(iteration == 1){
+        if (iteration == 1) {
             return false;
         }
-        PartIteration previousIteration = partIte.getPartRevision().getIteration(iteration-1);
+        PartIteration previousIteration = partIte.getPartRevision().getIteration(iteration - 1);
         return previousIteration.getComponents().contains(partUsageLink);
     }
 
     public List<PartIteration> findUsedByAsComponent(PartMasterKey pPart) {
-        return findUsedByAsComponent(em.getReference(PartMaster.class,pPart));
+        return findUsedByAsComponent(em.getReference(PartMaster.class, pPart));
     }
 
     public List<PartIteration> findUsedByAsComponent(PartMaster pPart) {
@@ -84,7 +72,7 @@ public class PartIterationDAO {
     }
 
     public List<PartIteration> findUsedByAsSubstitute(PartMasterKey pPart) {
-        return findUsedByAsSubstitute(em.getReference(PartMaster.class,pPart));
+        return findUsedByAsSubstitute(em.getReference(PartMaster.class, pPart));
     }
 
     public List<PartIteration> findUsedByAsSubstitute(PartMaster pPart) {

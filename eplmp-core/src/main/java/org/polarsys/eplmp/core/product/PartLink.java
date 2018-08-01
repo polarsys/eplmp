@@ -10,7 +10,6 @@
   *******************************************************************************/
 package org.polarsys.eplmp.core.product;
 
-import java.io.Serializable;
 import java.util.List;
 
 /**

@@ -17,8 +17,8 @@ import org.polarsys.eplmp.core.document.DocumentRevision;
 import org.polarsys.eplmp.core.exceptions.*;
 import org.polarsys.eplmp.core.meta.Tag;
 import org.polarsys.eplmp.core.product.PartRevision;
-import org.polarsys.eplmp.core.services.INotifierLocal;
 import org.polarsys.eplmp.core.services.INotificationManagerLocal;
+import org.polarsys.eplmp.core.services.INotifierLocal;
 import org.polarsys.eplmp.server.events.*;
 
 import javax.enterprise.context.RequestScoped;

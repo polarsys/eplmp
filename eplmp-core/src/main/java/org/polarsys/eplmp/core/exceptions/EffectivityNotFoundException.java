@@ -12,7 +12,7 @@
 package org.polarsys.eplmp.core.exceptions;
 
 import java.text.MessageFormat;
-import java.util.Locale;
+
 
 /**
  * @author Frédéric Maury
@@ -20,17 +20,12 @@ import java.util.Locale;
 public class EffectivityNotFoundException extends EntityNotFoundException {
     private String mId;
 
-    public EffectivityNotFoundException(String pMessage) {
-        super(pMessage);
-        mId = null;
+    public EffectivityNotFoundException(String pId) {
+        this(pId, null);
     }
 
-    public EffectivityNotFoundException(Locale pLocale, String pId) {
-        this(pLocale, pId, null);
-    }
-
-    public EffectivityNotFoundException(Locale pLocale, String pId, Throwable pCause) {
-        super(pLocale, pCause);
+    public EffectivityNotFoundException(String pId, Throwable pCause) {
+        super( pCause);
         mId = pId;
     }
 

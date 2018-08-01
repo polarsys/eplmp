@@ -20,7 +20,7 @@ import org.polarsys.eplmp.core.query.Query;
 import org.polarsys.eplmp.core.query.QueryRule;
 
 import javax.annotation.PostConstruct;
-import javax.ejb.Stateless;
+import javax.enterprise.context.RequestScoped;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
@@ -37,7 +37,7 @@ import java.util.stream.Collectors;
  * @author Morgan Guimard on 09/04/15.
  */
 
-@Stateless(name = "PathDataQueryDAO")
+@RequestScoped
 public class PathDataQueryDAO {
 
     private static final String STRING = "string";

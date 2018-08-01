@@ -12,17 +12,17 @@
 package org.polarsys.eplmp.core.exceptions;
 
 import java.text.MessageFormat;
-import java.util.Locale;
+
 
 public class MarkerNotFoundException extends EntityNotFoundException {
     private final int mMarker;
 
-    public MarkerNotFoundException(Locale pLocale, int pMarker) {
-        this(pLocale, pMarker, null);
+    public MarkerNotFoundException(int pMarker) {
+        this(pMarker, null);
     }
 
-    public MarkerNotFoundException(Locale pLocale, int pMarker, Throwable pCause) {
-        super(pLocale, pCause);
+    public MarkerNotFoundException(int pMarker, Throwable pCause) {
+        super( pCause);
         mMarker = pMarker;
     }
 

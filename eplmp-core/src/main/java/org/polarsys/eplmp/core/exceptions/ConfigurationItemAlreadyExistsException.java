@@ -15,7 +15,7 @@ package org.polarsys.eplmp.core.exceptions;
 import org.polarsys.eplmp.core.product.ConfigurationItem;
 
 import java.text.MessageFormat;
-import java.util.Locale;
+
 
 /**
  *
@@ -30,12 +30,12 @@ public class ConfigurationItemAlreadyExistsException extends EntityAlreadyExists
         mConfigurationItem = null;
     }
 
-    public ConfigurationItemAlreadyExistsException(Locale pLocale, ConfigurationItem pConfigurationItem) {
-        this(pLocale, pConfigurationItem, null);
+    public ConfigurationItemAlreadyExistsException(ConfigurationItem pConfigurationItem) {
+        this(pConfigurationItem, null);
     }
 
-    public ConfigurationItemAlreadyExistsException(Locale pLocale, ConfigurationItem pConfigurationItem, Throwable pCause) {
-        super(pLocale, pCause);
+    public ConfigurationItemAlreadyExistsException(ConfigurationItem pConfigurationItem, Throwable pCause) {
+        super(pCause);
         mConfigurationItem=pConfigurationItem;
     }
 

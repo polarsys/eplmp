@@ -10,7 +10,6 @@
   *******************************************************************************/
 package org.polarsys.eplmp.server;
 
-import org.polarsys.eplmp.core.common.User;
 import org.polarsys.eplmp.core.common.Workspace;
 import org.polarsys.eplmp.core.document.DocumentMasterTemplate;
 import org.polarsys.eplmp.core.exceptions.*;
@@ -29,10 +28,7 @@ import javax.annotation.security.RolesAllowed;
 import javax.ejb.Local;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import java.util.List;
-import java.util.Locale;
 
 /**
  * @author Lebeau Julien on 03/03/15.
@@ -70,14 +66,13 @@ public class LOVManagerBean implements ILOVManagerLocal {
     @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
     @Override
     public ListOfValues findLov(ListOfValuesKey lovKey) throws ListOfValuesNotFoundException, UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, WorkspaceNotEnabledException {
-        User user = userManager.checkWorkspaceReadAccess(lovKey.getWorkspaceId());
-        return lovDAO.loadLOV(user.getLocale(), lovKey);
+        userManager.checkWorkspaceReadAccess(lovKey.getWorkspaceId());
+        return lovDAO.loadLOV(lovKey);
     }
 
     @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
     @Override
     public void createLov(String workspaceId, String name, List<NameValuePair> nameValuePairList) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, AccessRightException, ListOfValuesAlreadyExistsException, CreationException, WorkspaceNotEnabledException {
-        User user = userManager.checkWorkspaceReadAccess(workspaceId);
         userManager.checkWorkspaceWriteAccess(workspaceId);
 
         if (name == null || name.trim().isEmpty()) {
@@ -88,31 +83,29 @@ public class LOVManagerBean implements ILOVManagerLocal {
             throw new CreationException("LOVPossibleValueException");
         }
 
-        Locale userLocale = user.getLocale();
-        Workspace workspace = workspaceDAO.loadWorkspace(userLocale, workspaceId);
+        Workspace workspace = workspaceDAO.loadWorkspace(workspaceId);
 
         ListOfValues lov = new ListOfValues(workspace, name);
         lov.setValues(nameValuePairList);
 
-        lovDAO.createLOV(userLocale, lov);
+        lovDAO.createLOV(lov);
     }
 
     @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
     @Override
     public void deleteLov(ListOfValuesKey lovKey) throws ListOfValuesNotFoundException, UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, AccessRightException, EntityConstraintException, WorkspaceNotEnabledException {
-        User user = userManager.checkWorkspaceReadAccess(lovKey.getWorkspaceId());
+        userManager.checkWorkspaceReadAccess(lovKey.getWorkspaceId());
         userManager.checkWorkspaceWriteAccess(lovKey.getWorkspaceId());
-        Locale userLocale = user.getLocale();
 
         if (isLovUsedInDocumentMasterTemplate(lovKey)) {
-            throw new EntityConstraintException(userLocale, "EntityConstraintException14");
+            throw new EntityConstraintException("EntityConstraintException14");
         }
 
         if (isLovUsedInPartMasterTemplate(lovKey)) {
-            throw new EntityConstraintException(userLocale, "EntityConstraintException15");
+            throw new EntityConstraintException("EntityConstraintException15");
         }
 
-        ListOfValues lov = lovDAO.loadLOV(userLocale, lovKey);
+        ListOfValues lov = lovDAO.loadLOV(lovKey);
         lovDAO.deleteLOV(lov);
     }
 

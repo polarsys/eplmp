@@ -14,7 +14,7 @@ package org.polarsys.eplmp.core.exceptions;
 import org.polarsys.eplmp.core.common.User;
 
 import java.text.MessageFormat;
-import java.util.Locale;
+
 
 /**
  *
@@ -30,12 +30,12 @@ public class UserAlreadyExistsException extends EntityAlreadyExistsException {
     }
     
     
-    public UserAlreadyExistsException(Locale pLocale, User pUser) {
-        this(pLocale, pUser, null);
+    public UserAlreadyExistsException(User pUser) {
+        this(pUser, null);
     }
 
-    public UserAlreadyExistsException(Locale pLocale, User pUser, Throwable pCause) {
-        super(pLocale, pCause);
+    public UserAlreadyExistsException(User pUser, Throwable pCause) {
+        super( pCause);
         mUser=pUser;
     }
 

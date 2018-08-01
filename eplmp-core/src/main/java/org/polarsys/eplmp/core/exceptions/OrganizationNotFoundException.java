@@ -12,7 +12,7 @@
 package org.polarsys.eplmp.core.exceptions;
 
 import java.text.MessageFormat;
-import java.util.Locale;
+
 
 /**
  *
@@ -21,17 +21,12 @@ import java.util.Locale;
 public class OrganizationNotFoundException extends EntityNotFoundException {
     private final String mName;
 
-    public OrganizationNotFoundException(String pMessage) {
-        super(pMessage);
-        mName=null;
+    public OrganizationNotFoundException(String pName) {
+        this(pName, null);
     }
 
-    public OrganizationNotFoundException(Locale pLocale, String pName) {
-        this(pLocale, pName, null);
-    }
-
-    public OrganizationNotFoundException(Locale pLocale, String pName, Throwable pCause) {
-        super(pLocale, pCause);
+    public OrganizationNotFoundException(String pName, Throwable pCause) {
+        super( pCause);
         mName=pName;
     }
 

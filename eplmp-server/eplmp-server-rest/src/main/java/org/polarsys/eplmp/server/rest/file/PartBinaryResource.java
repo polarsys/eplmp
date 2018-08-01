@@ -26,7 +26,9 @@ import org.polarsys.eplmp.core.util.FileIO;
 import org.polarsys.eplmp.core.util.HashUtils;
 import org.polarsys.eplmp.server.auth.AuthConfig;
 import org.polarsys.eplmp.server.auth.jwt.JWTokenFactory;
-import org.polarsys.eplmp.server.rest.exceptions.*;
+import org.polarsys.eplmp.server.rest.exceptions.FileConversionException;
+import org.polarsys.eplmp.server.rest.exceptions.PreconditionFailedException;
+import org.polarsys.eplmp.server.rest.exceptions.RequestedRangeNotSatisfiableException;
 import org.polarsys.eplmp.server.rest.file.util.BinaryResourceDownloadMeta;
 import org.polarsys.eplmp.server.rest.file.util.BinaryResourceDownloadResponseBuilder;
 import org.polarsys.eplmp.server.rest.file.util.BinaryResourceUpload;
@@ -207,8 +209,7 @@ public class PartBinaryResource {
             @ApiParam(required = false, value = "Password for private resource") @HeaderParam("password") String password,
             @ApiParam(required = false, value = "Shared entity token") @QueryParam("token") String accessToken)
             throws EntityNotFoundException, UserNotActiveException, AccessRightException, NotAllowedException,
-            PreconditionFailedException, NotModifiedException, RequestedRangeNotSatisfiableException,
-            UnMatchingUuidException, SharedResourceAccessException, WorkspaceNotEnabledException {
+            PreconditionFailedException, RequestedRangeNotSatisfiableException, WorkspaceNotEnabledException {
         return downloadPartFile(request, workspaceId, partNumber, version, iteration, null, fileName, type, output, range, uuid, password, accessToken);
     }
 
@@ -238,8 +239,7 @@ public class PartBinaryResource {
             @ApiParam(required = false, value = "Password for private resource") @HeaderParam("password") String password,
             @ApiParam(required = false, value = "Shared entity token") @QueryParam("token") String accessToken)
             throws EntityNotFoundException, UserNotActiveException, AccessRightException, NotAllowedException,
-            PreconditionFailedException, NotModifiedException, RequestedRangeNotSatisfiableException,
-            UnMatchingUuidException, SharedResourceAccessException, WorkspaceNotEnabledException {
+            PreconditionFailedException, RequestedRangeNotSatisfiableException, WorkspaceNotEnabledException {
 
         BinaryResource binaryResource;
         String decodedFileName = fileName;
@@ -267,7 +267,7 @@ public class PartBinaryResource {
             if (accessToken != null && !accessToken.isEmpty()) {
                 String decodedUUID = JWTokenFactory.validateSharedResourceToken(authConfig.getJWTKey(), accessToken);
                 if (null == decodedUUID || !decodedUUID.equals(sharedEntity.getUuid())) {
-                    throw new SharedResourceAccessException();
+                    throw new NotAllowedException("NotAllowedException73");
                 }
             } else {
                 // Check uuid & access right
@@ -295,12 +295,12 @@ public class PartBinaryResource {
                 String decodedEntityKey = JWTokenFactory.validateEntityToken(authConfig.getJWTKey(), accessToken);
                 boolean tokenValid = new PartRevisionKey(workspaceId, partNumber, version).toString().equals(decodedEntityKey);
                 if (!tokenValid) {
-                    throw new SharedResourceAccessException();
+                    throw new NotAllowedException("NotAllowedException73");
                 }
                 binaryResource = publicEntityManager.getBinaryResourceForSharedEntity(fullName);
             } else {
                 if (!canAccess(new PartIterationKey(workspaceId, partNumber, version, iteration))) {
-                    throw new SharedResourceAccessException();
+                    throw new NotAllowedException("NotAllowedException73");
                 }
                 binaryResource = getBinaryResource(fullName);
                 PartRevision partRevision = productService.getPartRevision(new PartRevisionKey(workspaceId, partNumber, version));
@@ -367,9 +367,9 @@ public class PartBinaryResource {
     }
 
     private void checkUuidValidity(SharedEntity sharedEntity, String workspaceId, String partNumber, String version, int iteration, String password)
-            throws UnMatchingUuidException, SharedResourceAccessException, NotAllowedException {
+            throws NotAllowedException {
         if (!(sharedEntity instanceof SharedPart)) {
-            throw new UnMatchingUuidException();
+            throw new NotAllowedException("NotAllowedException73");
         }
 
         checkUuidExpiredDate(sharedEntity);
@@ -382,28 +382,28 @@ public class PartBinaryResource {
                 !partRevision.getPartMasterNumber().equals(partNumber) ||
                 !partRevision.getVersion().equals(version) ||
                 (null != lastCheckedInIteration && lastCheckedInIteration.getIteration() < iteration)) {
-            throw new UnMatchingUuidException();
+            throw new NotAllowedException("NotAllowedException73");
         }
     }
 
-    private void checkUuidPassword(SharedEntity sharedEntity, String password) throws SharedResourceAccessException {
+    private void checkUuidPassword(SharedEntity sharedEntity, String password) throws NotAllowedException {
         String entityPassword = sharedEntity.getPassword();
         if (entityPassword != null && !entityPassword.isEmpty()) {
             try {
                 if (password == null || password.isEmpty() || !entityPassword.equals(HashUtils.md5Sum(password))) {
-                    throw new SharedResourceAccessException();
+                    throw new NotAllowedException("NotAllowedException73");
                 }
             } catch (NoSuchAlgorithmException | UnsupportedEncodingException e) {
-                throw new SharedResourceAccessException();
+                throw new NotAllowedException("NotAllowedException73");
             }
         }
     }
 
-    private void checkUuidExpiredDate(SharedEntity sharedEntity) throws SharedResourceAccessException {
+    private void checkUuidExpiredDate(SharedEntity sharedEntity) throws NotAllowedException {
         // Check shared entity expired
         if (sharedEntity.getExpireDate() != null && sharedEntity.getExpireDate().getTime() < new Date().getTime()) {
             shareService.deleteSharedEntityIfExpired(sharedEntity);
-            throw new SharedResourceAccessException();
+            throw new NotAllowedException("NotAllowedException73");
         }
     }
 

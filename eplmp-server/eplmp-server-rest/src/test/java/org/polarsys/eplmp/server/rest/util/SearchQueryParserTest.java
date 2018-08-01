@@ -2,11 +2,11 @@ package org.polarsys.eplmp.server.rest.util;
 
 import org.junit.Test;
 
-import static org.polarsys.eplmp.core.query.SearchQuery.*;
-
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
+import static org.polarsys.eplmp.core.query.SearchQuery.AbstractAttributeQuery;
+import static org.polarsys.eplmp.core.query.SearchQuery.TextAttributeQuery;
 
 public class SearchQueryParserTest {
 

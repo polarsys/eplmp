@@ -13,7 +13,7 @@ package org.polarsys.eplmp.core.exceptions;
 import org.polarsys.eplmp.core.workflow.RoleKey;
 
 import java.text.MessageFormat;
-import java.util.Locale;
+
 
 
 /**
@@ -27,8 +27,8 @@ public class RoleNotFoundException extends EntityNotFoundException {
         mRoleKey=null;
     }
 
-    public RoleNotFoundException(Locale pLocale, RoleKey pRoleKey) {
-        super(pLocale);
+    public RoleNotFoundException(RoleKey pRoleKey) {
+        super();
         mRoleKey=pRoleKey;
     }
 

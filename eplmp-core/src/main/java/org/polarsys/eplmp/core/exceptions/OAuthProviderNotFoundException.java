@@ -12,7 +12,7 @@
 package org.polarsys.eplmp.core.exceptions;
 
 import java.text.MessageFormat;
-import java.util.Locale;
+
 
 /**
  * @author Morgan Guimard
@@ -20,18 +20,12 @@ import java.util.Locale;
 public class OAuthProviderNotFoundException extends EntityNotFoundException {
     private final Integer mId;
 
-
-    public OAuthProviderNotFoundException(String pMessage) {
-        super(pMessage);
-        mId = null;
+    public OAuthProviderNotFoundException(int id) {
+        this(id, null);
     }
 
-    public OAuthProviderNotFoundException(Locale pLocale, int id) {
-        this(pLocale, id, null);
-    }
-
-    public OAuthProviderNotFoundException(Locale pLocale, int id, Throwable pCause) {
-        super(pLocale, pCause);
+    public OAuthProviderNotFoundException(int id, Throwable pCause) {
+        super( pCause);
         mId = id;
     }
 

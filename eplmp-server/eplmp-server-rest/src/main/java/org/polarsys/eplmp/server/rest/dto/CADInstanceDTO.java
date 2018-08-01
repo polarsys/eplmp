@@ -10,9 +10,9 @@
   *******************************************************************************/
 package org.polarsys.eplmp.server.rest.dto;
 
-import org.polarsys.eplmp.core.product.RotationType;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import org.polarsys.eplmp.core.product.RotationType;
 
 import javax.xml.bind.annotation.XmlRootElement;
 import java.io.Serializable;

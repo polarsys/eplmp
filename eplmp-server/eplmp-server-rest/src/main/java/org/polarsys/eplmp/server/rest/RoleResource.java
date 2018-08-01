@@ -11,6 +11,9 @@
 package org.polarsys.eplmp.server.rest;
 
 
+import io.swagger.annotations.*;
+import org.dozer.DozerBeanMapperSingletonWrapper;
+import org.dozer.Mapper;
 import org.polarsys.eplmp.core.exceptions.*;
 import org.polarsys.eplmp.core.security.UserGroupMapping;
 import org.polarsys.eplmp.core.services.IWorkflowManagerLocal;
@@ -19,9 +22,6 @@ import org.polarsys.eplmp.core.workflow.RoleKey;
 import org.polarsys.eplmp.server.rest.dto.RoleDTO;
 import org.polarsys.eplmp.server.rest.dto.UserDTO;
 import org.polarsys.eplmp.server.rest.dto.UserGroupDTO;
-import io.swagger.annotations.*;
-import org.dozer.DozerBeanMapperSingletonWrapper;
-import org.dozer.Mapper;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.security.DeclareRoles;

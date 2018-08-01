@@ -11,25 +11,24 @@
 
 package org.polarsys.eplmp.server.rest.file;
 
-import org.polarsys.eplmp.core.common.Account;
-import org.polarsys.eplmp.core.common.BinaryResource;
-import org.polarsys.eplmp.core.common.User;
-import org.polarsys.eplmp.core.common.Workspace;
-import org.polarsys.eplmp.core.product.*;
-import org.polarsys.eplmp.core.security.UserGroupMapping;
-import org.polarsys.eplmp.core.services.*;
-import org.polarsys.eplmp.core.sharing.SharedPart;
-import org.polarsys.eplmp.server.rest.exceptions.SharedResourceAccessException;
-import org.polarsys.eplmp.server.rest.file.util.BinaryResourceBinaryStreamingOutput;
-import org.polarsys.eplmp.server.util.PartImpl;
-import org.polarsys.eplmp.server.util.ResourceUtil;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.polarsys.eplmp.core.common.Account;
+import org.polarsys.eplmp.core.common.BinaryResource;
+import org.polarsys.eplmp.core.common.User;
+import org.polarsys.eplmp.core.common.Workspace;
+import org.polarsys.eplmp.core.exceptions.NotAllowedException;
+import org.polarsys.eplmp.core.product.*;
+import org.polarsys.eplmp.core.security.UserGroupMapping;
+import org.polarsys.eplmp.core.services.*;
+import org.polarsys.eplmp.core.sharing.SharedPart;
+import org.polarsys.eplmp.server.rest.file.util.BinaryResourceBinaryStreamingOutput;
+import org.polarsys.eplmp.server.util.PartImpl;
+import org.polarsys.eplmp.server.util.ResourceUtil;
 
 import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.Part;
@@ -40,7 +39,10 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.net.URLEncoder;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.List;
 
 import static org.junit.Assert.*;
 import static org.mockito.MockitoAnnotations.initMocks;
@@ -335,7 +337,7 @@ public class PartBinaryResourceTest {
                     ResourceUtil.PART_NUMBER, ResourceUtil.VERSION, ResourceUtil.ITERATION, "attached-files",
                     ResourceUtil.TEST_PART_FILENAME1, ResourceUtil.FILE_TYPE, null, ResourceUtil.RANGE, null, null, null);
             assertTrue(false);
-        } catch (SharedResourceAccessException e) {
+        } catch (NotAllowedException e) {
             assertTrue(true);
         }
 

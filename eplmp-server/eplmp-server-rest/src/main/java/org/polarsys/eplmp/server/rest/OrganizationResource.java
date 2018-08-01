@@ -11,6 +11,9 @@
 
 package org.polarsys.eplmp.server.rest;
 
+import io.swagger.annotations.*;
+import org.dozer.DozerBeanMapperSingletonWrapper;
+import org.dozer.Mapper;
 import org.polarsys.eplmp.core.common.Account;
 import org.polarsys.eplmp.core.common.Organization;
 import org.polarsys.eplmp.core.exceptions.*;
@@ -21,9 +24,6 @@ import org.polarsys.eplmp.core.services.IOrganizationManagerLocal;
 import org.polarsys.eplmp.server.rest.dto.AccountDTO;
 import org.polarsys.eplmp.server.rest.dto.OrganizationDTO;
 import org.polarsys.eplmp.server.rest.dto.UserDTO;
-import io.swagger.annotations.*;
-import org.dozer.DozerBeanMapperSingletonWrapper;
-import org.dozer.Mapper;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.security.DeclareRoles;

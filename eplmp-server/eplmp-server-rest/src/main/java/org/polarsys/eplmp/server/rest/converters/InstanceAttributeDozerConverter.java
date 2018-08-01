@@ -11,15 +11,15 @@
 
 package org.polarsys.eplmp.server.rest.converters;
 
+import org.dozer.DozerBeanMapperSingletonWrapper;
+import org.dozer.DozerConverter;
+import org.dozer.Mapper;
 import org.polarsys.eplmp.core.meta.*;
 import org.polarsys.eplmp.core.product.InstancePartNumberAttribute;
 import org.polarsys.eplmp.core.product.PartMasterKey;
 import org.polarsys.eplmp.core.util.DateUtils;
 import org.polarsys.eplmp.server.rest.dto.InstanceAttributeDTO;
 import org.polarsys.eplmp.server.rest.dto.NameValuePairDTO;
-import org.dozer.DozerBeanMapperSingletonWrapper;
-import org.dozer.DozerConverter;
-import org.dozer.Mapper;
 
 import java.util.ArrayList;
 import java.util.Date;

@@ -12,7 +12,7 @@
 package org.polarsys.eplmp.core.exceptions;
 
 import java.text.MessageFormat;
-import java.util.Locale;
+
 
 /**
  *
@@ -27,12 +27,12 @@ public class ProductConfigurationNotFoundException extends EntityNotFoundExcepti
         mProductConfigurationId = -1;
     }
 
-    public ProductConfigurationNotFoundException(Locale pLocale, int pProductConfigurationId) {
-        this(pLocale, pProductConfigurationId, null);
+    public ProductConfigurationNotFoundException(int pProductConfigurationId) {
+        this(pProductConfigurationId, null);
     }
 
-    public ProductConfigurationNotFoundException(Locale pLocale, int pProductConfigurationId, Throwable pCause) {
-        super(pLocale, pCause);
+    public ProductConfigurationNotFoundException(int pProductConfigurationId, Throwable pCause) {
+        super( pCause);
         mProductConfigurationId =pProductConfigurationId;
     }
 

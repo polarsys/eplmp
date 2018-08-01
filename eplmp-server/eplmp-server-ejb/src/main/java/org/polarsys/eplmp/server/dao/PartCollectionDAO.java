@@ -13,13 +13,13 @@ package org.polarsys.eplmp.server.dao;
 
 import org.polarsys.eplmp.core.configuration.PartCollection;
 
-import javax.ejb.Stateless;
+import javax.enterprise.context.RequestScoped;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-@Stateless(name = "PartCollectionDAO")
+@RequestScoped
 public class PartCollectionDAO {
 
     @PersistenceContext
@@ -27,12 +27,12 @@ public class PartCollectionDAO {
 
     private static final Logger LOGGER = Logger.getLogger(PartCollectionDAO.class.getName());
 
-    public void createPartCollection(PartCollection partCollection){
+    public void createPartCollection(PartCollection partCollection) {
         try {
             em.persist(partCollection);
             em.flush();
-        }catch (Exception e){
-            LOGGER.log(Level.SEVERE,"Fail to create a collection of parts",e);
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Fail to create a collection of parts", e);
         }
     }
 }

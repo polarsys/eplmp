@@ -10,6 +10,9 @@
   *******************************************************************************/
 package org.polarsys.eplmp.server.rest;
 
+import io.swagger.annotations.*;
+import org.dozer.DozerBeanMapperSingletonWrapper;
+import org.dozer.Mapper;
 import org.polarsys.eplmp.core.common.BinaryResource;
 import org.polarsys.eplmp.core.configuration.*;
 import org.polarsys.eplmp.core.document.DocumentRevisionKey;
@@ -29,9 +32,6 @@ import org.polarsys.eplmp.server.rest.dto.product.ProductInstanceCreationDTO;
 import org.polarsys.eplmp.server.rest.dto.product.ProductInstanceIterationDTO;
 import org.polarsys.eplmp.server.rest.dto.product.ProductInstanceMasterDTO;
 import org.polarsys.eplmp.server.rest.file.util.BinaryResourceUpload;
-import io.swagger.annotations.*;
-import org.dozer.DozerBeanMapperSingletonWrapper;
-import org.dozer.Mapper;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.security.DeclareRoles;

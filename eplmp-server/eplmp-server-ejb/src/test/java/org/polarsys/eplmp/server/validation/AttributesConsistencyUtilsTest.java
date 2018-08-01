@@ -11,12 +11,15 @@
 
 package org.polarsys.eplmp.server.validation;
 
-import org.polarsys.eplmp.core.meta.*;
 import junit.framework.TestCase;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
+import org.polarsys.eplmp.core.meta.DefaultAttributeTemplate;
+import org.polarsys.eplmp.core.meta.InstanceAttribute;
+import org.polarsys.eplmp.core.meta.InstanceAttributeTemplate;
+import org.polarsys.eplmp.core.meta.InstanceTextAttribute;
 
 import java.util.ArrayList;
 import java.util.Arrays;

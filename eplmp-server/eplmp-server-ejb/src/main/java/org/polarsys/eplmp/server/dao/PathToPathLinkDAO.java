@@ -21,11 +21,10 @@ import org.polarsys.eplmp.core.product.PartLink;
 import org.polarsys.eplmp.core.product.PartUsageLink;
 import org.polarsys.eplmp.core.product.PathToPathLink;
 
-import javax.ejb.Stateless;
+import javax.enterprise.context.RequestScoped;
 import javax.persistence.*;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -34,7 +33,7 @@ import java.util.logging.Logger;
  * @author morgan on 29/04/15.
  */
 
-@Stateless(name = "PathToPathLinkDAO")
+@RequestScoped
 public class PathToPathLinkDAO {
 
     private static final Logger LOGGER = Logger.getLogger(PathToPathLinkDAO.class.getName());
@@ -47,10 +46,7 @@ public class PathToPathLinkDAO {
     @PersistenceContext
     private EntityManager em;
 
-    private Locale mLocale;
-
     public PathToPathLinkDAO() {
-        mLocale = Locale.getDefault();
     }
 
     public void createPathToPathLink(PathToPathLink pPathToPathLink) throws CreationException, PathToPathLinkAlreadyExistsException {
@@ -61,19 +57,14 @@ public class PathToPathLinkDAO {
             em.flush();
         } catch (EntityExistsException pEEEx) {
             LOGGER.log(Level.FINEST,null,pEEEx);
-            throw new PathToPathLinkAlreadyExistsException(mLocale, pPathToPathLink);
+            throw new PathToPathLinkAlreadyExistsException(pPathToPathLink);
         } catch (PersistenceException pPEx) {
             LOGGER.log(Level.FINEST,null,pPEx);
             //EntityExistsException is case sensitive
             //whereas MySQL is not thus PersistenceException could be
             //thrown instead of EntityExistsException
-            throw new CreationException(mLocale);
+            throw new CreationException("");
         }
-    }
-
-    public void createPathToPathLink(Locale pLocale, PathToPathLink pPathToPathLink) throws CreationException, PathToPathLinkAlreadyExistsException {
-        this.mLocale = pLocale;
-        createPathToPathLink(pPathToPathLink);
     }
 
     public PathToPathLink loadPathToPathLink(int pPathToPathLinkId) throws PathToPathLinkNotFoundException {
@@ -81,12 +72,7 @@ public class PathToPathLinkDAO {
         if(pathToPathLink != null){
             return pathToPathLink;
         }
-        throw new PathToPathLinkNotFoundException(mLocale, pPathToPathLinkId);
-    }
-
-    public PathToPathLink loadPathToPathLink(Locale pLocale, int pPathToPathLinkId) throws PathToPathLinkNotFoundException {
-        this.mLocale = pLocale;
-        return loadPathToPathLink(pPathToPathLinkId);
+        throw new PathToPathLinkNotFoundException(pPathToPathLinkId);
     }
 
     public void removePathToPathLink(PathToPathLink pathToPathLink) {

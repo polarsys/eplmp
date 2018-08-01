@@ -12,7 +12,7 @@
 package org.polarsys.eplmp.core.exceptions;
 
 import java.text.MessageFormat;
-import java.util.Locale;
+
 
 /**
  *
@@ -21,12 +21,12 @@ import java.util.Locale;
 public class GCMAccountAlreadyExistsException extends EntityAlreadyExistsException {
     private final String mLogin;
 
-    public GCMAccountAlreadyExistsException(Locale pLocale, String pLogin) {
-        this(pLocale, pLogin, null);
+    public GCMAccountAlreadyExistsException(String pLogin) {
+        this(pLogin, null);
     }
 
-    public GCMAccountAlreadyExistsException(Locale pLocale, String pLogin, Throwable pCause) {
-        super(pLocale, pCause);
+    public GCMAccountAlreadyExistsException(String pLogin, Throwable pCause) {
+        super( pCause);
         mLogin=pLogin;
     }
 

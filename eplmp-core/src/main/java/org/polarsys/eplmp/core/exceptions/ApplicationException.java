@@ -1,13 +1,13 @@
 /*******************************************************************************
-  * Copyright (c) 2017 DocDoku.
-  * All rights reserved. This program and the accompanying materials
-  * are made available under the terms of the Eclipse Public License v1.0
-  * which accompanies this distribution, and is available at
-  * http://www.eclipse.org/legal/epl-v10.html
-  *
-  * Contributors:
-  *    DocDoku - initial API and implementation
-  *******************************************************************************/
+ * Copyright (c) 2017 DocDoku.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ * <p/>
+ * Contributors:
+ * DocDoku - initial API and implementation
+ *******************************************************************************/
 
 package org.polarsys.eplmp.core.exceptions;
 
@@ -24,30 +24,23 @@ import java.util.Properties;
 public abstract class ApplicationException extends Exception {
 
     private static final String BUNDLE_BASE_NAME = "/org/polarsys/eplmp/core/i18n/LocalStrings";
+
     private Properties properties;
+
+    public ApplicationException() {
+        super();
+    }
 
     public ApplicationException(String pMessage) {
         super(pMessage);
-        loadFile(Locale.getDefault());
+    }
+
+    public ApplicationException(Throwable pCause) {
+        super(pCause);
     }
 
     public ApplicationException(String pMessage, Throwable pCause) {
         super(pMessage, pCause);
-        loadFile(Locale.getDefault());
-    }
-
-    public ApplicationException(Locale pLocale) {
-        super();
-        loadFile(pLocale);
-    }
-
-    public ApplicationException(Locale pLocale, Throwable pCause) {
-        super(pCause);
-        loadFile(pLocale);
-    }
-
-    public void setLocale(Locale pLocale) {
-        loadFile(pLocale);
     }
 
     protected String getBundleDefaultMessage() {
@@ -55,7 +48,15 @@ public abstract class ApplicationException extends Exception {
     }
 
     protected String getBundleMessage(String pKey) {
+        if (null == properties) {
+            setLocale(new Locale("en"));
+        }
         return properties.getProperty(pKey);
+    }
+
+    public String getMessage(Locale locale){
+        properties = PropertiesLoader.loadLocalizedProperties(locale, BUNDLE_BASE_NAME, getClass());
+        return getMessage();
     }
 
     @Override
@@ -72,7 +73,7 @@ public abstract class ApplicationException extends Exception {
         return getMessage();
     }
 
-    private void loadFile(Locale locale) {
+    private void setLocale(Locale locale) {
         properties = PropertiesLoader.loadLocalizedProperties(locale, BUNDLE_BASE_NAME, getClass());
     }
 }

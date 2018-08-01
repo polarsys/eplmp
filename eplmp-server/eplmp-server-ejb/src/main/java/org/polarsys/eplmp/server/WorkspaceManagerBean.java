@@ -1,23 +1,23 @@
 /*******************************************************************************
-  * Copyright (c) 2017 DocDoku.
-  * All rights reserved. This program and the accompanying materials
-  * are made available under the terms of the Eclipse Public License v1.0
-  * which accompanies this distribution, and is available at
-  * http://www.eclipse.org/legal/epl-v10.html
-  *
-  * Contributors:
-  *    DocDoku - initial API and implementation
-  *******************************************************************************/
+ * Copyright (c) 2017 DocDoku.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ * <p/>
+ * Contributors:
+ * DocDoku - initial API and implementation
+ *******************************************************************************/
 package org.polarsys.eplmp.server;
 
 
 import org.polarsys.eplmp.core.admin.OperationSecurityStrategy;
+import org.polarsys.eplmp.core.admin.WorkspaceBackOptions;
 import org.polarsys.eplmp.core.admin.WorkspaceFrontOptions;
 import org.polarsys.eplmp.core.common.Account;
 import org.polarsys.eplmp.core.common.User;
 import org.polarsys.eplmp.core.common.Workspace;
 import org.polarsys.eplmp.core.exceptions.*;
-import org.polarsys.eplmp.core.admin.WorkspaceBackOptions;
 import org.polarsys.eplmp.core.security.UserGroupMapping;
 import org.polarsys.eplmp.core.services.*;
 import org.polarsys.eplmp.core.util.NamingConvention;
@@ -33,9 +33,7 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import java.io.IOException;
 import java.util.Arrays;
-import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -71,6 +69,9 @@ public class WorkspaceManagerBean implements IWorkspaceManagerLocal {
     @Inject
     private IPlatformOptionsManagerLocal platformOptionsManager;
 
+    @Inject
+    private IBinaryStorageManagerLocal storageManager;
+
     private static final Logger LOGGER = Logger.getLogger(WorkspaceManagerBean.class.getName());
 
     @RolesAllowed(UserGroupMapping.ADMIN_ROLE_ID)
@@ -98,6 +99,7 @@ public class WorkspaceManagerBean implements IWorkspaceManagerLocal {
         Account admin = workspace.getAdmin();
         try {
             workspaceDAO.removeWorkspace(workspace);
+            storageManager.deleteWorkspaceFolder(workspaceId);
             indexerManager.deleteWorkspaceIndex(workspaceId);
             mailerManager.sendWorkspaceDeletionNotification(admin, workspaceId);
         } catch (ApplicationException e) {
@@ -121,13 +123,13 @@ public class WorkspaceManagerBean implements IWorkspaceManagerLocal {
         if (contextManager.isCallerInRole(UserGroupMapping.ADMIN_ROLE_ID) || workspace.getAdmin().getLogin().equals(contextManager.getCallerPrincipalLogin())) {
             User[] users = userManager.getUsers(workspaceId);
             if (Arrays.stream(users).noneMatch(u -> u.getLogin().equals(login))) {
-                User user = userManager.whoAmI(workspaceId);
-                throw new NotAllowedException(user.getLocale(), "NotAllowedException70");
+
+                throw new NotAllowedException("NotAllowedException70");
             }
             workspace.setAdmin(account);
         } else {
             User user = userManager.whoAmI(workspaceId);
-            throw new AccessRightException(user.getLocale(), user);
+            throw new AccessRightException(user);
         }
 
         return workspace;
@@ -145,22 +147,21 @@ public class WorkspaceManagerBean implements IWorkspaceManagerLocal {
     @RolesAllowed({UserGroupMapping.REGULAR_USER_ROLE_ID, UserGroupMapping.ADMIN_ROLE_ID})
     @Override
     public Workspace createWorkspace(String pID, Account pAdmin, String pDescription, boolean pFolderLocked) throws WorkspaceAlreadyExistsException, FolderAlreadyExistsException, UserAlreadyExistsException, CreationException, NotAllowedException {
-        Locale locale = new Locale(pAdmin.getLanguage());
         if (!NamingConvention.correct(pID)) {
-            throw new NotAllowedException(locale, "NotAllowedException9", pID);
+            throw new NotAllowedException("NotAllowedException9", pID);
         }
         OperationSecurityStrategy workspaceCreationStrategy = platformOptionsManager.getWorkspaceCreationStrategy();
         Workspace workspace = new Workspace(pID, pAdmin, pDescription, pFolderLocked);
         workspace.setEnabled(workspaceCreationStrategy.equals(OperationSecurityStrategy.NONE));
         workspaceDAO.createWorkspace(workspace);
         User userToCreate = new User(workspace, pAdmin);
-        userDAO.createUser(locale, userToCreate);
+        userDAO.createUser(userToCreate);
         userDAO.addUserMembership(workspace, userToCreate);
 
         try {
             indexerManager.createWorkspaceIndex(pID);
         } catch (Exception e) { // TODO review exception thrown
-            throw new WorkspaceAlreadyExistsException(locale, workspace);
+            throw new WorkspaceAlreadyExistsException(workspace);
         }
 
         return workspace;
@@ -173,15 +174,12 @@ public class WorkspaceManagerBean implements IWorkspaceManagerLocal {
 
         if (contextManager.isCallerInRole(UserGroupMapping.ADMIN_ROLE_ID)) {
             return workspaceDAO.loadWorkspace(workspaceId);
-        }else {
+        } else {
             userManager.checkWorkspaceReadAccess(workspaceId);
         }
 
         String login = contextManager.getCallerPrincipalLogin();
-
         User[] users = userDAO.getUsers(login);
-        Account account = accountDAO.loadAccount(login);
-        Locale locale = new Locale(account.getLanguage());
 
         Workspace workspace = null;
         for (User user : users) {
@@ -192,7 +190,7 @@ public class WorkspaceManagerBean implements IWorkspaceManagerLocal {
         }
 
         if (workspace == null) {
-            throw new WorkspaceNotFoundException(locale, workspaceId);
+            throw new WorkspaceNotFoundException(workspaceId);
         }
 
         return workspace;
@@ -207,15 +205,13 @@ public class WorkspaceManagerBean implements IWorkspaceManagerLocal {
         WorkspaceFrontOptions settings = workspaceDAO.loadWorkspaceFrontOptions(workspaceId);
         if (contextManager.isCallerInRole(UserGroupMapping.ADMIN_ROLE_ID)) {
             return settings;
-        }else{
+        } else {
             userManager.checkWorkspaceReadAccess(workspaceId);
         }
 
         String login = contextManager.getCallerPrincipalLogin();
 
         User[] users = userDAO.getUsers(login);
-        Account account = accountDAO.loadAccount(login);
-        Locale locale = new Locale(account.getLanguage());
 
         Workspace workspace = null;
         for (User user : users) {
@@ -226,7 +222,7 @@ public class WorkspaceManagerBean implements IWorkspaceManagerLocal {
         }
 
         if (workspace == null) {
-            throw new WorkspaceNotFoundException(locale, workspaceId);
+            throw new WorkspaceNotFoundException(workspaceId);
         }
         return settings;
     }
@@ -235,22 +231,18 @@ public class WorkspaceManagerBean implements IWorkspaceManagerLocal {
     @Override
     public void updateWorkspaceFrontOptions(WorkspaceFrontOptions pWorkspaceFrontOptions) throws AccessRightException, AccountNotFoundException, WorkspaceNotFoundException {
         String workspaceId = pWorkspaceFrontOptions.getWorkspace().getId();
-        Account account = userManager.checkAdmin(workspaceId);
-        Locale locale = new Locale(account.getLanguage());
-        Workspace workspace = workspaceDAO.loadWorkspace(locale, workspaceId);
+        userManager.checkAdmin(workspaceId);
+        Workspace workspace = workspaceDAO.loadWorkspace(workspaceId);
         pWorkspaceFrontOptions.setWorkspace(workspace);
         workspaceDAO.updateWorkspaceFrontOptions(pWorkspaceFrontOptions);
     }
 
     @RolesAllowed({UserGroupMapping.REGULAR_USER_ROLE_ID, UserGroupMapping.ADMIN_ROLE_ID})
     public Workspace updateWorkspace(String workspaceId, String description, boolean isFolderLocked) throws AccessRightException, AccountNotFoundException, WorkspaceNotFoundException {
-        Account account = userManager.checkAdmin(workspaceId);
-        Locale locale = new Locale(account.getLanguage());
-        Workspace workspace = workspaceDAO.loadWorkspace(locale, workspaceId);
-
+        userManager.checkAdmin(workspaceId);
+        Workspace workspace = workspaceDAO.loadWorkspace(workspaceId);
         workspace.setDescription(description);
         workspace.setFolderLocked(isFolderLocked);
-
         return workspace;
     }
 
@@ -258,9 +250,7 @@ public class WorkspaceManagerBean implements IWorkspaceManagerLocal {
     @RolesAllowed({UserGroupMapping.REGULAR_USER_ROLE_ID, UserGroupMapping.ADMIN_ROLE_ID})
     public void updateWorkspaceBackOptions(WorkspaceBackOptions pWorkspaceBackOptions) throws WorkspaceNotFoundException, AccountNotFoundException, AccessRightException {
         String workspaceId = pWorkspaceBackOptions.getWorkspace().getId();
-        Account account = userManager.checkAdmin(workspaceId);
-        Locale locale = new Locale(account.getLanguage());
-        Workspace workspace = workspaceDAO.loadWorkspace(locale, workspaceId);
+        Workspace workspace = workspaceDAO.loadWorkspace(workspaceId);
         pWorkspaceBackOptions.setWorkspace(workspace);
         workspaceDAO.updateWorkspaceBackOptions(pWorkspaceBackOptions);
     }

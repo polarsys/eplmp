@@ -35,7 +35,6 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import java.util.Collection;
 import java.util.List;
-import java.util.Locale;
 
 @DeclareRoles({UserGroupMapping.REGULAR_USER_ROLE_ID, UserGroupMapping.ADMIN_ROLE_ID})
 @Local(IDocumentWorkflowManagerLocal.class)
@@ -70,11 +69,10 @@ public class DocumentWorkflowManagerBean implements IDocumentWorkflowManagerLoca
     @Override
     public Workflow getCurrentWorkflow(DocumentRevisionKey documentRevisionKey) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, DocumentRevisionNotFoundException, AccessRightException, WorkflowNotFoundException, WorkspaceNotEnabledException {
         User user = userManager.checkWorkspaceReadAccess(documentRevisionKey.getDocumentMaster().getWorkspace());
-        Locale userLocale = user.getLocale();
         if (!documentManager.canUserAccess(user, documentRevisionKey)) {
-            throw new AccessRightException(userLocale, user);
+            throw new AccessRightException(user);
         }
-        DocumentRevision docR = documentRevisionDAO.loadDocR(userLocale, documentRevisionKey);
+        DocumentRevision docR = documentRevisionDAO.loadDocR(documentRevisionKey);
         return docR.getWorkflow();
     }
 
@@ -82,12 +80,11 @@ public class DocumentWorkflowManagerBean implements IDocumentWorkflowManagerLoca
     @Override
     public Workflow[] getAbortedWorkflow(DocumentRevisionKey documentRevisionKey) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, DocumentRevisionNotFoundException, AccessRightException, WorkspaceNotEnabledException {
         User user = userManager.checkWorkspaceReadAccess(documentRevisionKey.getDocumentMaster().getWorkspace());
-        Locale userLocale = user.getLocale();
         if (!documentManager.canUserAccess(user, documentRevisionKey)) {
-            throw new AccessRightException(userLocale, user);
+            throw new AccessRightException(user);
         }
 
-        DocumentRevision docR = documentRevisionDAO.loadDocR(userLocale, documentRevisionKey);
+        DocumentRevision docR = documentRevisionDAO.loadDocR(documentRevisionKey);
         List<Workflow> abortedWorkflowList = docR.getAbortedWorkflows();
         return abortedWorkflowList.toArray(new Workflow[abortedWorkflowList.size()]);
     }
@@ -167,23 +164,22 @@ public class DocumentWorkflowManagerBean implements IDocumentWorkflowManagerLoca
      * @throws NotAllowedException       If you can not make this task
      */
     private DocumentRevision checkTaskAccess(User user, Task task) throws WorkflowNotFoundException, NotAllowedException {
-        Locale userLocale = user.getLocale();
         Workflow workflow = task.getActivity().getWorkflow();
         DocumentRevision docR = workflowDAO.getDocumentTarget(workflow);
         if (docR == null) {
-            throw new WorkflowNotFoundException(userLocale, workflow.getId());
+            throw new WorkflowNotFoundException(workflow.getId());
         }
         if (!task.isInProgress()) {
-            throw new NotAllowedException(userLocale, "NotAllowedException15");
+            throw new NotAllowedException("NotAllowedException15");
         }
         if (!task.isPotentialWorker(user)) {
-            throw new NotAllowedException(userLocale, "NotAllowedException14");
+            throw new NotAllowedException("NotAllowedException14");
         }
         if (!workflow.getRunningTasks().contains(task)) {
-            throw new NotAllowedException(userLocale, "NotAllowedException15");
+            throw new NotAllowedException("NotAllowedException15");
         }
         if (docR.isCheckedOut()) {
-            throw new NotAllowedException(userLocale, "NotAllowedException16");
+            throw new NotAllowedException("NotAllowedException16");
         }
         return docR;
     }

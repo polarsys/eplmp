@@ -12,7 +12,10 @@
 package org.polarsys.eplmp.core.services;
 
 import org.polarsys.eplmp.core.exceptions.*;
-import org.polarsys.eplmp.core.product.*;
+import org.polarsys.eplmp.core.product.DateBasedEffectivity;
+import org.polarsys.eplmp.core.product.Effectivity;
+import org.polarsys.eplmp.core.product.LotBasedEffectivity;
+import org.polarsys.eplmp.core.product.SerialNumberBasedEffectivity;
 
 import java.util.Date;
 

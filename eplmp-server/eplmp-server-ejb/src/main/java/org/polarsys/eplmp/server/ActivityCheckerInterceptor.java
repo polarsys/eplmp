@@ -11,7 +11,6 @@
 package org.polarsys.eplmp.server;
 
 import org.polarsys.eplmp.core.services.ITaskManagerLocal;
-import org.polarsys.eplmp.core.services.IUserManagerLocal;
 import org.polarsys.eplmp.core.workflow.TaskKey;
 
 import javax.inject.Inject;

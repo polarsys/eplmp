@@ -67,7 +67,7 @@ public class NotificationManagerBean implements INotificationManagerLocal {
     public TagUserSubscription subscribeToTagEvent(String pWorkspaceId, String pLabel, boolean pOnIterationChange, boolean pOnStateChange) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, TagNotFoundException, WorkspaceNotEnabledException {
         User user = userManager.checkWorkspaceReadAccess(pWorkspaceId);
         TagUserSubscription subscription = new TagUserSubscription(
-                tagDAO.loadTag(user.getLocale(), new TagKey(pWorkspaceId, pLabel)),
+                tagDAO.loadTag(new TagKey(pWorkspaceId, pLabel)),
                 user,
                 pOnIterationChange, pOnStateChange);
         return subscriptionDAO.saveTagUserSubscription(subscription);
@@ -85,17 +85,16 @@ public class NotificationManagerBean implements INotificationManagerLocal {
     @Override
     public TagUserSubscription createOrUpdateTagUserSubscription(String pWorkspaceId, String pLogin, String pLabel, boolean pOnIterationChange, boolean pOnStateChange) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, AccessRightException, TagNotFoundException, WorkspaceNotEnabledException {
         User user = userManager.checkWorkspaceReadAccess(pWorkspaceId);
-        Locale userLocale = user.getLocale();
         // Check if it is the workspace's administrator
         if (user.isAdministrator()) {
             TagUserSubscription subscription = new TagUserSubscription(
-                    tagDAO.loadTag(userLocale, new TagKey(pWorkspaceId, pLabel)),
-                    userDAO.loadUser(userLocale, new UserKey(pWorkspaceId, pLogin)),
+                    tagDAO.loadTag(new TagKey(pWorkspaceId, pLabel)),
+                    userDAO.loadUser(new UserKey(pWorkspaceId, pLogin)),
                     pOnIterationChange, pOnStateChange);
             return subscriptionDAO.saveTagUserSubscription(subscription);
         } else {
             // Else throw a AccessRightException
-            throw new AccessRightException(userLocale, user);
+            throw new AccessRightException(user);
         }
     }
 
@@ -103,17 +102,16 @@ public class NotificationManagerBean implements INotificationManagerLocal {
     @Override
     public TagUserGroupSubscription createOrUpdateTagUserGroupSubscription(String pWorkspaceId, String pId, String pLabel, boolean pOnIterationChange, boolean pOnStateChange) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, AccessRightException, TagNotFoundException, UserGroupNotFoundException, WorkspaceNotEnabledException {
         User user = userManager.checkWorkspaceReadAccess(pWorkspaceId);
-        Locale userLocale = user.getLocale();
         // Check if it is the workspace's administrator
         if (user.isAdministrator()) {
             TagUserGroupSubscription subscription = new TagUserGroupSubscription(
-                    tagDAO.loadTag(userLocale, new TagKey(pWorkspaceId, pLabel)),
-                    userGroupDAO.loadUserGroup(userLocale, new UserGroupKey(pWorkspaceId, pId)),
+                    tagDAO.loadTag(new TagKey(pWorkspaceId, pLabel)),
+                    userGroupDAO.loadUserGroup(new UserGroupKey(pWorkspaceId, pId)),
                     pOnIterationChange, pOnStateChange);
             return subscriptionDAO.saveTagUserGroupSubscription(subscription);
         } else {
             // Else throw a AccessRightException
-            throw new AccessRightException(userLocale, user);
+            throw new AccessRightException(user);
         }
     }
 
@@ -126,7 +124,7 @@ public class NotificationManagerBean implements INotificationManagerLocal {
             subscriptionDAO.removeTagUserSubscription(new TagUserSubscriptionKey(pWorkspaceId, pLogin, pLabel));
         } else {
             // Else throw a AccessRightException
-            throw new AccessRightException(user.getLocale(), user);
+            throw new AccessRightException(user);
         }
     }
 
@@ -134,13 +132,12 @@ public class NotificationManagerBean implements INotificationManagerLocal {
     @Override
     public void removeAllTagSubscriptions(String pWorkspaceId, String pLabel) throws TagNotFoundException, AccessRightException, UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, WorkspaceNotEnabledException {
         User user = userManager.checkWorkspaceReadAccess(pWorkspaceId);
-        Locale userLocale = user.getLocale();
         // Check if it is the workspace's administrator
         if (user.isAdministrator()) {
-            subscriptionDAO.removeAllTagSubscriptions(tagDAO.loadTag(userLocale, new TagKey(pWorkspaceId, pLabel)));
+            subscriptionDAO.removeAllTagSubscriptions(tagDAO.loadTag(new TagKey(pWorkspaceId, pLabel)));
         } else {
             // Else throw a AccessRightException
-            throw new AccessRightException(userLocale, user);
+            throw new AccessRightException(user);
         }
     }
 
@@ -148,13 +145,12 @@ public class NotificationManagerBean implements INotificationManagerLocal {
     @Override
     public void removeAllTagUserSubscriptions(String pWorkspaceId, String pLogin) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, AccessRightException, WorkspaceNotEnabledException {
         User user = userManager.checkWorkspaceReadAccess(pWorkspaceId);
-        Locale userLocale = user.getLocale();
         // Check if it is the workspace's administrator
         if (user.isAdministrator()) {
-            subscriptionDAO.removeAllTagSubscriptions(userDAO.loadUser(userLocale, new UserKey(pWorkspaceId, pLogin)));
+            subscriptionDAO.removeAllTagSubscriptions(userDAO.loadUser(new UserKey(pWorkspaceId, pLogin)));
         } else {
             // Else throw a AccessRightException
-            throw new AccessRightException(userLocale, user);
+            throw new AccessRightException(user);
         }
     }
 
@@ -162,13 +158,12 @@ public class NotificationManagerBean implements INotificationManagerLocal {
     @Override
     public void removeAllTagUserGroupSubscriptions(String pWorkspaceId, String pGroupId) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, UserGroupNotFoundException, AccessRightException, WorkspaceNotEnabledException {
         User user = userManager.checkWorkspaceReadAccess(pWorkspaceId);
-        Locale userLocale = user.getLocale();
         // Check if it is the workspace's administrator
         if (user.isAdministrator()) {
-            subscriptionDAO.removeAllTagSubscriptions(userGroupDAO.loadUserGroup(userLocale, new UserGroupKey(pWorkspaceId, pGroupId)));
+            subscriptionDAO.removeAllTagSubscriptions(userGroupDAO.loadUserGroup(new UserGroupKey(pWorkspaceId, pGroupId)));
         } else {
             // Else throw a AccessRightException
-            throw new AccessRightException(userLocale, user);
+            throw new AccessRightException(user);
         }
     }
 
@@ -176,13 +171,12 @@ public class NotificationManagerBean implements INotificationManagerLocal {
     @Override
     public void removeAllSubscriptions(String pWorkspaceId, String pLogin) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, AccessRightException, WorkspaceNotEnabledException {
         User user = userManager.checkWorkspaceReadAccess(pWorkspaceId);
-        Locale userLocale = user.getLocale();
         // Check if it is the workspace's administrator
         if (user.isAdministrator()) {
-            subscriptionDAO.removeAllSubscriptions(userDAO.loadUser(userLocale, new UserKey(pWorkspaceId, pLogin)));
+            subscriptionDAO.removeAllSubscriptions(userDAO.loadUser(new UserKey(pWorkspaceId, pLogin)));
         } else {
             // Else throw a AccessRightException
-            throw new AccessRightException(userLocale, user);
+            throw new AccessRightException(user);
         }
     }
 
@@ -195,7 +189,7 @@ public class NotificationManagerBean implements INotificationManagerLocal {
             subscriptionDAO.removeTagUserGroupSubscription(new TagUserGroupSubscriptionKey(pWorkspaceId, pId, pLabel));
         } else {
             // Else throw a AccessRightException
-            throw new AccessRightException(user.getLocale(), user);
+            throw new AccessRightException(user);
         }
     }
 
@@ -203,13 +197,12 @@ public class NotificationManagerBean implements INotificationManagerLocal {
     @Override
     public List<TagUserGroupSubscription> getTagUserGroupSubscriptionsByGroup(String pWorkspaceId, String pId) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, AccessRightException, UserGroupNotFoundException, WorkspaceNotEnabledException {
         User user = userManager.checkWorkspaceReadAccess(pWorkspaceId);
-        Locale userLocale = user.getLocale();
         // Check if it is the workspace's administrator
         if (user.isAdministrator()) {
-            return subscriptionDAO.getTagUserGroupSubscriptionsByGroup(userGroupDAO.loadUserGroup(userLocale, new UserGroupKey(pWorkspaceId, pId)));
+            return subscriptionDAO.getTagUserGroupSubscriptionsByGroup(userGroupDAO.loadUserGroup(new UserGroupKey(pWorkspaceId, pId)));
         } else {
             // Else throw a AccessRightException
-            throw new AccessRightException(userLocale, user);
+            throw new AccessRightException(user);
         }
     }
 
@@ -217,13 +210,12 @@ public class NotificationManagerBean implements INotificationManagerLocal {
     @Override
     public List<TagUserSubscription> getTagUserSubscriptionsByUser(String pWorkspaceId, String pLogin) throws AccessRightException, UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, WorkspaceNotEnabledException {
         User user = userManager.checkWorkspaceReadAccess(pWorkspaceId);
-        Locale userLocale = user.getLocale();
         // Check if it is the workspace's administrator
         if (user.isAdministrator()) {
-            return subscriptionDAO.getTagUserSubscriptionsByUser(userDAO.loadUser(userLocale, new UserKey(pWorkspaceId, pLogin)));
+            return subscriptionDAO.getTagUserSubscriptionsByUser(userDAO.loadUser(new UserKey(pWorkspaceId, pLogin)));
         } else {
             // Else throw a AccessRightException
-            throw new AccessRightException(userLocale, user);
+            throw new AccessRightException(user);
         }
     }
 
@@ -231,7 +223,6 @@ public class NotificationManagerBean implements INotificationManagerLocal {
     @Override
     public Collection<User> getSubscribersForTag(String pWorkspaceId, String pLabel) {
         Set<User> users=new HashSet<>();
-
 
         List<User> listUsers = em.createNamedQuery("TagUserSubscription.findSubscribersByTags", User.class)
                 .setParameter("workspaceId", pWorkspaceId)

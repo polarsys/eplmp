@@ -12,7 +12,7 @@
 package org.polarsys.eplmp.core.exceptions;
 
 import java.text.MessageFormat;
-import java.util.Locale;
+
 
 /**
  *
@@ -21,17 +21,12 @@ import java.util.Locale;
 public class ConfigurationItemNotFoundException extends EntityNotFoundException {
     private final String mCIId;
 
-    public ConfigurationItemNotFoundException(String pMessage) {
-        super(pMessage);
-        mCIId = null;
+    public ConfigurationItemNotFoundException(String pCIID) {
+        this(pCIID, null);
     }
 
-    public ConfigurationItemNotFoundException(Locale pLocale, String pCIID) {
-        this(pLocale, pCIID, null);
-    }
-
-    public ConfigurationItemNotFoundException(Locale pLocale, String pCIId, Throwable pCause) {
-        super(pLocale, pCause);
+    public ConfigurationItemNotFoundException(String pCIId, Throwable pCause) {
+        super(pCause);
         mCIId=pCIId;
     }
 

@@ -17,36 +17,28 @@ import org.polarsys.eplmp.core.common.ProvidedAccount;
 import org.polarsys.eplmp.core.exceptions.OAuthProviderNotFoundException;
 import org.polarsys.eplmp.core.exceptions.ProvidedAccountNotFoundException;
 
-import javax.ejb.Stateless;
+import javax.enterprise.context.RequestScoped;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 import java.util.List;
-import java.util.Locale;
 
-@Stateless(name = "OAuthProviderDAO")
+
+@RequestScoped
 public class OAuthProviderDAO {
 
     @PersistenceContext
     private EntityManager em;
 
-    private Locale mLocale;
-
     public OAuthProviderDAO() {
-        mLocale = Locale.getDefault();
     }
 
     public OAuthProvider findProvider(int pId) throws OAuthProviderNotFoundException {
         OAuthProvider oAuthProvider = em.find(OAuthProvider.class, pId);
         if (oAuthProvider == null) {
-            throw new OAuthProviderNotFoundException(mLocale, pId);
+            throw new OAuthProviderNotFoundException(pId);
         }
         return oAuthProvider;
-    }
-
-    public OAuthProvider findProvider(Locale pLocale, int pId) throws OAuthProviderNotFoundException{
-        mLocale = pLocale;
-        return findProvider(pId);
     }
 
     public void createProvider(OAuthProvider oAuthProvider) {
@@ -73,7 +65,7 @@ public class OAuthProviderDAO {
                     .setParameter("sub", sub)
                     .getSingleResult();
         } catch (NoResultException e) {
-            throw new ProvidedAccountNotFoundException(Locale.getDefault(), sub);
+            throw new ProvidedAccountNotFoundException(sub);
         }
     }
 
@@ -83,7 +75,7 @@ public class OAuthProviderDAO {
                     .setParameter("account", account)
                     .getSingleResult();
         } catch (NoResultException e) {
-            throw new ProvidedAccountNotFoundException(Locale.getDefault(), account.getLogin());
+            throw new ProvidedAccountNotFoundException(account.getLogin());
         }
     }
 

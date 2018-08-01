@@ -11,12 +11,11 @@
 
 package org.polarsys.eplmp.server.rest.dto;
 
-import java.io.Serializable;
-
-import javax.xml.bind.annotation.XmlRootElement;
-
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+
+import javax.xml.bind.annotation.XmlRootElement;
+import java.io.Serializable;
 
 @XmlRootElement
 @ApiModel(value = "AccountDTO", description = "This class is the representation of an {@link org.polarsys.eplmp.core.common.Account} entity")

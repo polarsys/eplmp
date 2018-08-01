@@ -16,20 +16,17 @@ import org.polarsys.eplmp.core.product.Conversion;
 import org.polarsys.eplmp.core.product.PartIteration;
 import org.polarsys.eplmp.core.product.PartRevision;
 
-import javax.ejb.Stateless;
+import javax.enterprise.context.RequestScoped;
 import javax.persistence.*;
-import java.util.Locale;
 
-@Stateless(name = "ConversionDAO")
+
+@RequestScoped
 public class ConversionDAO {
 
     @PersistenceContext
     private EntityManager em;
 
-    private Locale mLocale;
-
     public ConversionDAO() {
-        mLocale=Locale.getDefault();
     }
 
     public void createConversion(Conversion conversion) throws  CreationException {
@@ -41,14 +38,9 @@ public class ConversionDAO {
             //EntityExistsException is case sensitive
             //whereas MySQL is not thus PersistenceException could be
             //thrown instead of EntityExistsException
-            throw new CreationException(mLocale);
+            throw new CreationException("");
         }
     }
-    public void createConversion(Locale pLocale, Conversion conversion) throws  CreationException {
-        this.mLocale = pLocale;
-        createConversion(conversion);
-    }
-
 
     public Conversion findConversion(PartIteration partIteration) {
         TypedQuery<Conversion> query = em.createQuery("SELECT DISTINCT c FROM Conversion c WHERE c.partIteration = :partIteration", Conversion.class);

@@ -14,7 +14,7 @@ package org.polarsys.eplmp.core.exceptions;
 import org.polarsys.eplmp.core.common.Organization;
 
 import java.text.MessageFormat;
-import java.util.Locale;
+
 
 /**
  *
@@ -29,12 +29,12 @@ public class OrganizationAlreadyExistsException extends EntityAlreadyExistsExcep
         mOrganization=null;
     }
 
-    public OrganizationAlreadyExistsException(Locale pLocale, Organization pOrganization) {
-        this(pLocale, pOrganization, null);
+    public OrganizationAlreadyExistsException(Organization pOrganization) {
+        this(pOrganization, null);
     }
 
-    public OrganizationAlreadyExistsException(Locale pLocale, Organization pOrganization, Throwable pCause) {
-        super(pLocale, pCause);
+    public OrganizationAlreadyExistsException(Organization pOrganization, Throwable pCause) {
+        super( pCause);
         mOrganization=pOrganization;
     }
 

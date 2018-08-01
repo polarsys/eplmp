@@ -10,11 +10,14 @@
   *******************************************************************************/
 package org.polarsys.eplmp.server.rest;
 
+import io.swagger.annotations.*;
+import org.dozer.DozerBeanMapperSingletonWrapper;
+import org.dozer.Mapper;
 import org.polarsys.eplmp.core.change.ModificationNotification;
-import org.polarsys.eplmp.core.common.*;
-import org.polarsys.eplmp.core.configuration.ProductStructureFilter;
+import org.polarsys.eplmp.core.common.BinaryResource;
 import org.polarsys.eplmp.core.configuration.ProductBaseline;
 import org.polarsys.eplmp.core.configuration.ProductInstanceMaster;
+import org.polarsys.eplmp.core.configuration.ProductStructureFilter;
 import org.polarsys.eplmp.core.document.DocumentRevisionKey;
 import org.polarsys.eplmp.core.exceptions.*;
 import org.polarsys.eplmp.core.exceptions.NotAllowedException;
@@ -22,8 +25,11 @@ import org.polarsys.eplmp.core.meta.InstanceAttribute;
 import org.polarsys.eplmp.core.meta.InstanceAttributeTemplate;
 import org.polarsys.eplmp.core.meta.Tag;
 import org.polarsys.eplmp.core.product.*;
-import org.polarsys.eplmp.core.security.*;
-import org.polarsys.eplmp.core.services.*;
+import org.polarsys.eplmp.core.security.UserGroupMapping;
+import org.polarsys.eplmp.core.services.IConverterManagerLocal;
+import org.polarsys.eplmp.core.services.IProductInstanceManagerLocal;
+import org.polarsys.eplmp.core.services.IProductManagerLocal;
+import org.polarsys.eplmp.core.services.IWorkspaceManagerLocal;
 import org.polarsys.eplmp.core.sharing.SharedPart;
 import org.polarsys.eplmp.core.util.FileIO;
 import org.polarsys.eplmp.core.workflow.Workflow;
@@ -31,9 +37,6 @@ import org.polarsys.eplmp.server.rest.collections.VirtualInstanceCollection;
 import org.polarsys.eplmp.server.rest.dto.*;
 import org.polarsys.eplmp.server.rest.dto.baseline.ProductBaselineDTO;
 import org.polarsys.eplmp.server.rest.dto.product.ProductInstanceMasterDTO;
-import io.swagger.annotations.*;
-import org.dozer.DozerBeanMapperSingletonWrapper;
-import org.dozer.Mapper;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.security.DeclareRoles;

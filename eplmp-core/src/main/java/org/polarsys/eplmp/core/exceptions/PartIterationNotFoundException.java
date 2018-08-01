@@ -16,7 +16,7 @@ import org.polarsys.eplmp.core.common.Version;
 import org.polarsys.eplmp.core.product.PartIterationKey;
 
 import java.text.MessageFormat;
-import java.util.Locale;
+
 
 /**
  *
@@ -34,24 +34,24 @@ public class PartIterationNotFoundException extends EntityNotFoundException {
         mPartIIteration=-1;
     }
 
-    public PartIterationNotFoundException(Locale pLocale, PartIterationKey pPartIPK) {
-        this(pLocale, pPartIPK, null);
+    public PartIterationNotFoundException(PartIterationKey pPartIPK) {
+        this(pPartIPK, null);
     }
 
-    public PartIterationNotFoundException(Locale pLocale, PartIterationKey pPartIPK, Throwable pCause) {
-        this(pLocale, pPartIPK.getPartMasterNumber(), pPartIPK.getPartRevision().getVersion(), pPartIPK.getIteration(), pCause);
+    public PartIterationNotFoundException(PartIterationKey pPartIPK, Throwable pCause) {
+        this(pPartIPK.getPartMasterNumber(), pPartIPK.getPartRevision().getVersion(), pPartIPK.getIteration(), pCause);
     }
 
-    public PartIterationNotFoundException(Locale pLocale, String pPartMNumber, Version pPartRVersion, int pPartIIteration) {
-        this(pLocale, pPartMNumber, pPartRVersion.toString(), pPartIIteration, null);
+    public PartIterationNotFoundException(String pPartMNumber, Version pPartRVersion, int pPartIIteration) {
+        this(pPartMNumber, pPartRVersion.toString(), pPartIIteration, null);
     }
 
-    public PartIterationNotFoundException(Locale pLocale, String pPartMNumber, String pPartRStringVersion, int pPartIIteration) {
-        this(pLocale, pPartMNumber, pPartRStringVersion, pPartIIteration, null);
+    public PartIterationNotFoundException(String pPartMNumber, String pPartRStringVersion, int pPartIIteration) {
+        this(pPartMNumber, pPartRStringVersion, pPartIIteration, null);
     }
 
-    public PartIterationNotFoundException(Locale pLocale, String pPartMNumber, String pPartRStringVersion, int pPartIIteration, Throwable pCause) {
-        super(pLocale, pCause);
+    public PartIterationNotFoundException(String pPartMNumber, String pPartRStringVersion, int pPartIIteration, Throwable pCause) {
+        super( pCause);
         mPartMNumber=pPartMNumber;
         mPartRStringVersion=pPartRStringVersion;
         mPartIIteration=pPartIIteration;

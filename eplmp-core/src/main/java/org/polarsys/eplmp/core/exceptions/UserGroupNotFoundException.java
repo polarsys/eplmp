@@ -15,7 +15,7 @@ package org.polarsys.eplmp.core.exceptions;
 import org.polarsys.eplmp.core.common.UserGroupKey;
 
 import java.text.MessageFormat;
-import java.util.Locale;
+
 
 /**
  *
@@ -29,8 +29,8 @@ public class UserGroupNotFoundException extends EntityNotFoundException {
         mKey=null;
     }
     
-    public UserGroupNotFoundException(Locale pLocale, UserGroupKey pKey) {
-        super(pLocale);
+    public UserGroupNotFoundException(UserGroupKey pKey) {
+        super();
         mKey=pKey;
     }
     

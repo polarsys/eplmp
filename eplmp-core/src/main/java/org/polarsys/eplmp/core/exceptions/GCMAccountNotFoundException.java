@@ -12,7 +12,7 @@
 package org.polarsys.eplmp.core.exceptions;
 
 import java.text.MessageFormat;
-import java.util.Locale;
+
 
 /**
  *
@@ -21,13 +21,12 @@ import java.util.Locale;
 public class GCMAccountNotFoundException extends EntityNotFoundException {
     private final String mLogin;
 
-
-    public GCMAccountNotFoundException(Locale pLocale, String pLogin) {
-        this(pLocale, pLogin, null);
+    public GCMAccountNotFoundException(String pLogin) {
+        this(pLogin, null);
     }
 
-    public GCMAccountNotFoundException(Locale pLocale, String pLogin, Throwable pCause) {
-        super(pLocale, pCause);
+    public GCMAccountNotFoundException(String pLogin, Throwable pCause) {
+        super( pCause);
         mLogin=pLogin;
     }
 

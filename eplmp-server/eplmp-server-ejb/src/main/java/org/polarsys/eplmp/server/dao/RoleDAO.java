@@ -19,47 +19,38 @@ import org.polarsys.eplmp.core.exceptions.RoleNotFoundException;
 import org.polarsys.eplmp.core.workflow.Role;
 import org.polarsys.eplmp.core.workflow.RoleKey;
 
-import javax.ejb.Stateless;
+import javax.enterprise.context.RequestScoped;
 import javax.persistence.EntityExistsException;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceException;
 import java.util.List;
-import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
  * @author Morgan Guimard
  */
-@Stateless(name = "RoleDAO")
+@RequestScoped
 public class RoleDAO {
 
     @PersistenceContext
     private EntityManager em;
 
-    private Locale mLocale;
-
     private static final Logger LOGGER = Logger.getLogger(RoleDAO.class.getName());
 
     public RoleDAO() {
-        mLocale=Locale.getDefault();
     }
 
     public Role loadRole(RoleKey pRoleKey) throws RoleNotFoundException {
 
         Role role = em.find(Role.class, pRoleKey);
         if (role == null) {
-            throw new RoleNotFoundException(mLocale, pRoleKey);
+            throw new RoleNotFoundException(pRoleKey);
         } else {
             return role;
         }
 
-    }
-
-    public Role loadRole(Locale pLocale, RoleKey pRoleKey) throws RoleNotFoundException {
-        mLocale = pLocale;
-        return loadRole(pRoleKey);
     }
 
     public List<Role> findRolesInWorkspace(String pWorkspaceId){
@@ -72,16 +63,11 @@ public class RoleDAO {
             em.flush();
         } catch (EntityExistsException pEEEx) {
             LOGGER.log(Level.FINEST,null,pEEEx);
-            throw new RoleAlreadyExistsException(mLocale, pRole);
+            throw new RoleAlreadyExistsException(pRole);
         } catch (PersistenceException pPEx) {
             LOGGER.log(Level.FINEST,null,pPEx);
-            throw new CreationException(mLocale);
+            throw new CreationException("");
         }
-    }
-
-    public void createRole(Locale pLocale, Role pRole) throws CreationException, RoleAlreadyExistsException {
-        mLocale = pLocale;
-        createRole(pRole);
     }
 
     public void deleteRole(Role pRole){

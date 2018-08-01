@@ -14,14 +14,14 @@ package org.polarsys.eplmp.server.dao;
 import org.polarsys.eplmp.core.configuration.PathDataIteration;
 import org.polarsys.eplmp.core.configuration.ProductInstanceIteration;
 
-import javax.ejb.Stateless;
+import javax.enterprise.context.RequestScoped;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-@Stateless(name = "PathDataIterationDAO")
+@RequestScoped
 public class PathDataIterationDAO {
 
     @PersistenceContext

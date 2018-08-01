@@ -30,7 +30,6 @@ import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import java.util.List;
-import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -88,8 +87,8 @@ public class OAuthManagerBean implements IOAuthManagerLocal {
                                         String secret, String scope, String responseType, String authorizationEndpoint)
             throws AccountNotFoundException, OAuthProviderNotFoundException {
 
-        Account adminAccount = accountManager.getMyAccount();
-        OAuthProvider oAuthProvider = oAuthProviderDAO.findProvider(adminAccount.getLocale(), id);
+
+        OAuthProvider oAuthProvider = oAuthProviderDAO.findProvider(id);
         oAuthProvider.setName(name);
         oAuthProvider.setAuthority(authority);
         oAuthProvider.setEnabled(enabled);

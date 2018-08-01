@@ -14,7 +14,7 @@ package org.polarsys.eplmp.core.exceptions;
 import org.polarsys.eplmp.core.common.User;
 
 import java.text.MessageFormat;
-import java.util.Locale;
+
 
 /**
  *
@@ -22,18 +22,13 @@ import java.util.Locale;
  */
 public class UserNotActiveException extends ApplicationException {
     private final String mName;
-    
-    public UserNotActiveException(String pMessage) {
-        super(pMessage);
-        mName=null;
-    }
-    
-    public UserNotActiveException(Locale pLocale, User pUser) {
-        this(pLocale, pUser.toString());
+
+    public UserNotActiveException(User pUser) {
+        this(pUser.toString());
     }
 
-    public UserNotActiveException(Locale pLocale, String pName) {
-        super(pLocale);
+    public UserNotActiveException(String pName) {
+        super();
         mName=pName;
     }
     

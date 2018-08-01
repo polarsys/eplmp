@@ -11,6 +11,9 @@
 
 package org.polarsys.eplmp.server.rest;
 
+import io.swagger.annotations.*;
+import org.dozer.DozerBeanMapperSingletonWrapper;
+import org.dozer.Mapper;
 import org.polarsys.eplmp.core.exceptions.*;
 import org.polarsys.eplmp.core.hooks.SNSWebhookApp;
 import org.polarsys.eplmp.core.hooks.SimpleWebhookApp;
@@ -20,9 +23,6 @@ import org.polarsys.eplmp.core.security.UserGroupMapping;
 import org.polarsys.eplmp.core.services.IWebhookManagerLocal;
 import org.polarsys.eplmp.server.rest.dto.WebhookAppParameterDTO;
 import org.polarsys.eplmp.server.rest.dto.WebhookDTO;
-import io.swagger.annotations.*;
-import org.dozer.DozerBeanMapperSingletonWrapper;
-import org.dozer.Mapper;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.security.DeclareRoles;

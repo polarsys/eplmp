@@ -10,6 +10,9 @@
   *******************************************************************************/
 package org.polarsys.eplmp.server.rest;
 
+import io.swagger.annotations.*;
+import org.dozer.DozerBeanMapperSingletonWrapper;
+import org.dozer.Mapper;
 import org.polarsys.eplmp.core.change.ChangeIssue;
 import org.polarsys.eplmp.core.document.DocumentIterationKey;
 import org.polarsys.eplmp.core.exceptions.*;
@@ -21,9 +24,6 @@ import org.polarsys.eplmp.core.services.IChangeManagerLocal;
 import org.polarsys.eplmp.server.rest.dto.*;
 import org.polarsys.eplmp.server.rest.dto.change.ChangeIssueDTO;
 import org.polarsys.eplmp.server.rest.dto.change.ChangeItemDTO;
-import io.swagger.annotations.*;
-import org.dozer.DozerBeanMapperSingletonWrapper;
-import org.dozer.Mapper;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.security.DeclareRoles;
@@ -34,7 +34,10 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 @RequestScoped
 @Api(hidden = true, value = "issues", description = "Operations about issues",

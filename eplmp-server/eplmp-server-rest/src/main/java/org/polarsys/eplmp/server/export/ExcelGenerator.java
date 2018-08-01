@@ -11,6 +11,11 @@
 
 package org.polarsys.eplmp.server.export;
 
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.dozer.DozerBeanMapperSingletonWrapper;
+import org.dozer.Mapper;
 import org.polarsys.eplmp.core.common.User;
 import org.polarsys.eplmp.core.configuration.PathDataIteration;
 import org.polarsys.eplmp.core.document.DocumentLink;
@@ -28,11 +33,6 @@ import org.polarsys.eplmp.core.util.Tools;
 import org.polarsys.eplmp.server.helpers.LangHelper;
 import org.polarsys.eplmp.server.rest.collections.QueryResult;
 import org.polarsys.eplmp.server.rest.dto.InstanceAttributeDTO;
-import org.apache.poi.ss.usermodel.*;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.dozer.DozerBeanMapperSingletonWrapper;
-import org.dozer.Mapper;
 
 import java.io.File;
 import java.io.FileOutputStream;

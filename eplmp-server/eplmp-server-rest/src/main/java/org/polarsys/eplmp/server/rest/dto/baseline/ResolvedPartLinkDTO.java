@@ -11,10 +11,10 @@
 
 package org.polarsys.eplmp.server.rest.dto.baseline;
 
-import org.polarsys.eplmp.server.rest.dto.LightPartLinkDTO;
-import org.polarsys.eplmp.server.rest.dto.PartIterationDTO;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import org.polarsys.eplmp.server.rest.dto.LightPartLinkDTO;
+import org.polarsys.eplmp.server.rest.dto.PartIterationDTO;
 
 import javax.xml.bind.annotation.XmlRootElement;
 import java.io.Serializable;

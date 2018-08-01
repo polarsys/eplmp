@@ -72,7 +72,7 @@ public class OfficeOnDemandConverter implements OnDemandConverter {
 
             return inputStream;
         } catch (StorageException | IOException e) {
-            throw new ConvertedResourceException(locale, e);
+            throw new ConvertedResourceException(e);
         }
     }
 
@@ -91,7 +91,7 @@ public class OfficeOnDemandConverter implements OnDemandConverter {
 
             return inputStream;
         } catch (StorageException | IOException e) {
-            throw new ConvertedResourceException(locale, e);
+            throw new ConvertedResourceException(e);
         }
     }
 

@@ -24,7 +24,6 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -77,7 +76,7 @@ public class PlatformHealthManagerBean implements IPlatformHealthManagerLocal {
         String officeHome = null;
         try {
             officeHome = officeConfig.getOfficeHome();
-        }catch (Exception e) {
+        } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Office properties object not accessible", e);
             check = false;
         }
@@ -101,7 +100,7 @@ public class PlatformHealthManagerBean implements IPlatformHealthManagerLocal {
 
         try {
             Integer officePort = officeConfig.getOfficePort();
-        }catch (Exception e) {
+        } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Office port incorrectly set", e);
             check = false;
         }
@@ -135,7 +134,7 @@ public class PlatformHealthManagerBean implements IPlatformHealthManagerLocal {
 
         if (!check) {
             LOGGER.log(Level.SEVERE, "Health check didn't pass");
-            throw new PlatformHealthException(Locale.getDefault());
+            throw new PlatformHealthException();
         }
 
     }

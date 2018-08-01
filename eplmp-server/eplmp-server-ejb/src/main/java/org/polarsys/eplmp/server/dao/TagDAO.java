@@ -16,21 +16,18 @@ import org.polarsys.eplmp.core.exceptions.TagNotFoundException;
 import org.polarsys.eplmp.core.meta.Tag;
 import org.polarsys.eplmp.core.meta.TagKey;
 
-import javax.ejb.Stateless;
+import javax.enterprise.context.RequestScoped;
 import javax.persistence.*;
 import java.util.List;
-import java.util.Locale;
 
-@Stateless(name = "TagDAO")
+
+@RequestScoped
 public class TagDAO {
 
     @PersistenceContext
     private EntityManager em;
 
-    private Locale mLocale;
-
     public TagDAO() {
-        mLocale = Locale.getDefault();
     }
 
     public Tag[] findAllTags(String pWorkspaceId) {
@@ -45,40 +42,23 @@ public class TagDAO {
         return tags;
     }
 
-    public void deleteOrphanTags(String pWorkspaceId) {
-        TypedQuery<Tag> query = em.createQuery("SELECT t FROM Tag t WHERE t.workspaceId = :workspaceId AND t.label <> ALL (SELECT t2.label FROM DocumentMaster m, IN (m.tags) t2 WHERE t2.workspaceId = :workspaceId)", Tag.class);
-        List<Tag> tags = query.setParameter("workspaceId", pWorkspaceId).getResultList();
-        for (Tag t : tags) {
-            em.remove(t);
-        }
-    }
-
     public void removeTag(TagKey pTagKey) throws TagNotFoundException {
         Tag tag = em.find(Tag.class, pTagKey);
         if (tag == null) {
-            throw new TagNotFoundException(mLocale, pTagKey);
+            throw new TagNotFoundException(pTagKey);
         } else {
             em.remove(tag);
         }
     }
 
-    public void removeTag(Locale pLocale, TagKey pTagKey) throws TagNotFoundException {
-        mLocale = pLocale;
-        removeTag(pTagKey);
-    }
 
     public Tag loadTag(TagKey pTagKey) throws TagNotFoundException {
         Tag tag = em.find(Tag.class,pTagKey);
         if (tag == null) {
-            throw new TagNotFoundException(mLocale, pTagKey);
+            throw new TagNotFoundException(pTagKey);
         } else {
             return tag;
         }
-    }
-
-    public Tag loadTag(Locale pLocale, TagKey pTagKey) throws TagNotFoundException {
-        mLocale = pLocale;
-        return loadTag(pTagKey);
     }
 
     public void createTag(Tag pTag) throws CreationException, TagAlreadyExistsException {
@@ -92,20 +72,15 @@ public class TagDAO {
             em.flush();
         } catch (EntityExistsException pEEEx) {
             if(!silent) {
-                throw new TagAlreadyExistsException(mLocale, pTag);
+                throw new TagAlreadyExistsException(pTag);
             }
         } catch (PersistenceException pPEx) {
             //EntityExistsException is case sensitive
             //whereas MySQL is not thus PersistenceException could be
             //thrown instead of EntityExistsException
             if(!silent) {
-                throw new CreationException(mLocale);
+                throw new CreationException("");
             }
         }
-    }
-
-    public void createTag(Locale pLocale, Tag pTag) throws CreationException, TagAlreadyExistsException {
-        mLocale = pLocale;
-        createTag(pTag, false);
     }
 }

@@ -18,8 +18,6 @@ import org.polarsys.eplmp.server.dao.SharedEntityDAO;
 import javax.ejb.Local;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import java.util.Date;
 
 /**
@@ -29,9 +27,6 @@ import java.util.Date;
 @Local(IShareManagerLocal.class)
 @Stateless(name = "ShareManagerBean")
 public class ShareManagerBean implements IShareManagerLocal {
-
-    @PersistenceContext
-    private EntityManager em;
 
     @Inject
     private SharedEntityDAO sharedEntityDAO;
@@ -43,7 +38,6 @@ public class ShareManagerBean implements IShareManagerLocal {
 
     @Override
     public void deleteSharedEntityIfExpired(SharedEntity pSharedEntity) {
-
         // insure the entity is really expired
         if(pSharedEntity.getExpireDate() != null){
             Date now = new Date();

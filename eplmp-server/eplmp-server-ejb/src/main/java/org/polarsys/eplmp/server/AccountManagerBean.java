@@ -33,8 +33,6 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import java.util.Date;
 import java.util.List;
-import java.util.Locale;
-import java.util.logging.Logger;
 
 @DeclareRoles({UserGroupMapping.REGULAR_USER_ROLE_ID, UserGroupMapping.ADMIN_ROLE_ID})
 @Local(IAccountManagerLocal.class)
@@ -64,8 +62,6 @@ public class AccountManagerBean implements IAccountManagerLocal {
 
     @Inject
     private ConfigManager configManager;
-
-    private static final Logger LOGGER = Logger.getLogger(AccountManagerBean.class.getName());
 
     public AccountManagerBean() {
     }
@@ -97,7 +93,7 @@ public class AccountManagerBean implements IAccountManagerLocal {
         Date now = new Date();
         Account account = new Account(pLogin, pName, pEmail, pLanguage, now, pTimeZone);
         account.setEnabled(registrationStrategy.equals(OperationSecurityStrategy.NONE));
-        accountDAO.createAccount(new Locale(pLanguage), account, pPassword, configManager.getDigestAlgorithm());
+        accountDAO.createAccount(account, pPassword, configManager.getDigestAlgorithm());
         mailer.sendCredential(account);
         return account;
     }
@@ -136,7 +132,7 @@ public class AccountManagerBean implements IAccountManagerLocal {
         Account account = accountDAO.loadAccount(contextManager.getCallerPrincipalLogin());
 
         if (!contextManager.isCallerInRole(UserGroupMapping.ADMIN_ROLE_ID) && !pOrganization.getOwner().equals(account)) {
-            throw new AccessRightException(new Locale(account.getLanguage()), account);
+            throw new AccessRightException(account);
         }
 
         return account;
@@ -151,7 +147,7 @@ public class AccountManagerBean implements IAccountManagerLocal {
         Organization organization = organizationDAO.loadOrganization(pOrganizationName);
 
         if (!contextManager.isCallerInRole(UserGroupMapping.ADMIN_ROLE_ID) && !organization.getOwner().equals(account)) {
-            throw new AccessRightException(new Locale(account.getLanguage()), account);
+            throw new AccessRightException(account);
         }
 
         return account;
@@ -162,13 +158,11 @@ public class AccountManagerBean implements IAccountManagerLocal {
     public void setGCMAccount(String gcmId) throws AccountNotFoundException, GCMAccountAlreadyExistsException, CreationException, GCMAccountNotFoundException {
         String callerLogin = contextManager.getCallerPrincipalLogin();
         Account account = getAccount(callerLogin);
-
-        Locale accountLocale = account.getLocale();
         if (gcmAccountDAO.hasGCMAccount(account)) {
-            GCMAccount gcmAccount = gcmAccountDAO.loadGCMAccount(accountLocale, account);
+            GCMAccount gcmAccount = gcmAccountDAO.loadGCMAccount(account);
             gcmAccount.setGcmId(gcmId);
         } else {
-            gcmAccountDAO.createGCMAccount(accountLocale, new GCMAccount(account, gcmId));
+            gcmAccountDAO.createGCMAccount(new GCMAccount(account, gcmId));
         }
 
     }
@@ -178,7 +172,7 @@ public class AccountManagerBean implements IAccountManagerLocal {
     public void deleteGCMAccount() throws AccountNotFoundException, GCMAccountNotFoundException {
         String callerLogin = contextManager.getCallerPrincipalLogin();
         Account account = getAccount(callerLogin);
-        GCMAccount gcmAccount = gcmAccountDAO.loadGCMAccount(account.getLocale(), account);
+        GCMAccount gcmAccount = gcmAccountDAO.loadGCMAccount(account);
         gcmAccountDAO.deleteGCMAccount(gcmAccount);
     }
 
@@ -209,8 +203,7 @@ public class AccountManagerBean implements IAccountManagerLocal {
             account.setEnabled(enabled);
             return account;
         } else {
-            Account callerAccount = getMyAccount();
-            throw new NotAllowedException(new Locale(callerAccount.getLanguage()), "NotAllowedException67");
+            throw new NotAllowedException("NotAllowedException67");
         }
     }
 

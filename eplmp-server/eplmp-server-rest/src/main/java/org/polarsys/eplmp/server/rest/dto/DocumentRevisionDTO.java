@@ -11,9 +11,9 @@
 
 package org.polarsys.eplmp.server.rest.dto;
 
-import org.polarsys.eplmp.core.meta.RevisionStatus;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import org.polarsys.eplmp.core.meta.RevisionStatus;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;

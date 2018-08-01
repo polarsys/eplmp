@@ -65,7 +65,7 @@ public class DocumentBaselineManagerBean implements IDocumentBaselineManagerLoca
         documentBaselineDAO.createBaseline(baseline);
         snapshotDocuments(baseline, workspaceId, documentRevisionKeys);
         if (baseline.getDocumentCollection().getBaselinedDocuments().isEmpty()) {
-            throw new NotAllowedException(user.getLocale(), "NotAllowedException66");
+            throw new NotAllowedException("NotAllowedException66");
         }
         return baseline;
     }
@@ -80,7 +80,7 @@ public class DocumentBaselineManagerBean implements IDocumentBaselineManagerLoca
     @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
     @Override
     public void deleteBaseline(String workspaceId, int baselineId) throws UserNotFoundException, AccessRightException, WorkspaceNotFoundException, BaselineNotFoundException, UserNotActiveException, WorkspaceNotEnabledException {
-        User user = userManager.checkWorkspaceWriteAccess(workspaceId);
+        userManager.checkWorkspaceWriteAccess(workspaceId);
         DocumentBaseline documentBaseline = getBaselineLight(workspaceId, baselineId);
         documentBaselineDAO.deleteBaseline(documentBaseline);
     }
@@ -88,15 +88,15 @@ public class DocumentBaselineManagerBean implements IDocumentBaselineManagerLoca
     @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
     @Override
     public DocumentBaseline getBaselineLight(String workspaceId, int baselineId) throws BaselineNotFoundException, UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, WorkspaceNotEnabledException {
-        User user = userManager.checkWorkspaceReadAccess(workspaceId);
-        return documentBaselineDAO.loadBaseline(user.getLocale(), baselineId);
+        userManager.checkWorkspaceReadAccess(workspaceId);
+        return documentBaselineDAO.loadBaseline(baselineId);
     }
 
     @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
     @Override
     public DocumentCollection getACLFilteredDocumentCollection(String workspaceId, int baselineId) throws BaselineNotFoundException, UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, WorkspaceNotEnabledException {
         User user = userManager.checkWorkspaceReadAccess(workspaceId);
-        DocumentBaseline documentBaseline = documentBaselineDAO.loadBaseline(user.getLocale(), baselineId);
+        DocumentBaseline documentBaseline = documentBaselineDAO.loadBaseline(baselineId);
         DocumentCollection filteredDocumentCollection = new DocumentCollection();
 
         for (Map.Entry<BaselinedDocumentKey, BaselinedDocument> map : documentBaseline.getDocumentCollection().getBaselinedDocuments().entrySet()) {

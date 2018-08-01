@@ -14,7 +14,7 @@ package org.polarsys.eplmp.core.exceptions;
 import org.polarsys.eplmp.core.configuration.ProductInstanceIterationKey;
 
 import java.text.MessageFormat;
-import java.util.Locale;
+
 
 /**
  *
@@ -28,12 +28,12 @@ public class ProductInstanceIterationNotFoundException extends EntityNotFoundExc
         mProductInstanceIteration=null;
     }
 
-    public ProductInstanceIterationNotFoundException(Locale pLocale, ProductInstanceIterationKey pProductInstanceMaster) {
-        this(pLocale, pProductInstanceMaster, null);
+    public ProductInstanceIterationNotFoundException(ProductInstanceIterationKey pProductInstanceMaster) {
+        this(pProductInstanceMaster, null);
     }
 
-    public ProductInstanceIterationNotFoundException(Locale pLocale, ProductInstanceIterationKey pProductInstanceMaster, Throwable pCause) {
-        super(pLocale, pCause);
+    public ProductInstanceIterationNotFoundException(ProductInstanceIterationKey pProductInstanceMaster, Throwable pCause) {
+        super( pCause);
         mProductInstanceIteration=pProductInstanceMaster;
     }
 

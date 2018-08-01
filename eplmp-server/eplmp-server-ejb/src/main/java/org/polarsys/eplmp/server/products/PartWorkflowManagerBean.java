@@ -36,7 +36,6 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import java.util.Collection;
 import java.util.List;
-import java.util.Locale;
 
 @DeclareRoles({UserGroupMapping.REGULAR_USER_ROLE_ID, UserGroupMapping.ADMIN_ROLE_ID})
 @Local(IPartWorkflowManagerLocal.class)
@@ -68,12 +67,12 @@ public class PartWorkflowManagerBean implements IPartWorkflowManagerLocal {
     @Override
     public Workflow getCurrentWorkflow(PartRevisionKey partRevisionKey) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, PartRevisionNotFoundException, AccessRightException, WorkspaceNotEnabledException {
         User user = userManager.checkWorkspaceReadAccess(partRevisionKey.getPartMaster().getWorkspace());
-        Locale userLocale = user.getLocale();
+
         if (!productManager.canUserAccess(user, partRevisionKey)) {
-            throw new AccessRightException(userLocale, user);
+            throw new AccessRightException(user);
         }
 
-        PartRevision partR = partRevisionDAO.loadPartR(userLocale, partRevisionKey);
+        PartRevision partR = partRevisionDAO.loadPartR(partRevisionKey);
         return partR.getWorkflow();
     }
 
@@ -81,12 +80,12 @@ public class PartWorkflowManagerBean implements IPartWorkflowManagerLocal {
     @Override
     public Workflow[] getAbortedWorkflow(PartRevisionKey partRevisionKey) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, PartRevisionNotFoundException, AccessRightException, WorkspaceNotEnabledException {
         User user = userManager.checkWorkspaceReadAccess(partRevisionKey.getPartMaster().getWorkspace());
-        Locale userLocale = user.getLocale();
+
         if (!productManager.canUserAccess(user, partRevisionKey)) {
-            throw new AccessRightException(userLocale, user);
+            throw new AccessRightException(user);
         }
 
-        PartRevision partR = partRevisionDAO.loadPartR(userLocale, partRevisionKey);
+        PartRevision partR = partRevisionDAO.loadPartR(partRevisionKey);
         List<Workflow> abortedWorkflowList = partR.getAbortedWorkflows();
 
         return abortedWorkflowList.toArray(new Workflow[abortedWorkflowList.size()]);
@@ -152,23 +151,22 @@ public class PartWorkflowManagerBean implements IPartWorkflowManagerLocal {
      * @throws NotAllowedException       If you can not make this task
      */
     private PartRevision checkTaskAccess(User user, Task task) throws WorkflowNotFoundException, NotAllowedException {
-        Locale userLocale = user.getLocale();
         Workflow workflow = task.getActivity().getWorkflow();
         PartRevision partR = workflowDAO.getPartTarget(workflow);
         if (partR == null) {
-            throw new WorkflowNotFoundException(userLocale, workflow.getId());
+            throw new WorkflowNotFoundException(workflow.getId());
         }
         if (!task.isInProgress()) {
-            throw new NotAllowedException(userLocale, "NotAllowedException15");
+            throw new NotAllowedException("NotAllowedException15");
         }
         if (!task.isPotentialWorker(user)) {
-            throw new NotAllowedException(userLocale, "NotAllowedException14");
+            throw new NotAllowedException("NotAllowedException14");
         }
         if (!workflow.getRunningTasks().contains(task)) {
-            throw new NotAllowedException(userLocale, "NotAllowedException15");
+            throw new NotAllowedException("NotAllowedException15");
         }
         if (partR.isCheckedOut()) {
-            throw new NotAllowedException(userLocale, "NotAllowedException17");
+            throw new NotAllowedException("NotAllowedException17");
         }
         return partR;
     }

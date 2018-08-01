@@ -12,7 +12,7 @@
 package org.polarsys.eplmp.core.exceptions;
 
 import java.text.MessageFormat;
-import java.util.Locale;
+
 
 /**
  *
@@ -27,12 +27,12 @@ public class ChangeOrderNotFoundException extends EntityNotFoundException {
         mChange = -1;
     }
 
-    public ChangeOrderNotFoundException(Locale pLocale, int pChange) {
-        this(pLocale, pChange, null);
+    public ChangeOrderNotFoundException(int pChange) {
+        this(pChange, null);
     }
 
-    public ChangeOrderNotFoundException(Locale pLocale, int pChange, Throwable pCause) {
-        super(pLocale, pCause);
+    public ChangeOrderNotFoundException(int pChange, Throwable pCause) {
+        super(pCause);
         mChange =pChange;
     }
 

@@ -13,20 +13,19 @@ package org.polarsys.eplmp.server.dao;
 import org.polarsys.eplmp.core.common.User;
 import org.polarsys.eplmp.core.common.UserKey;
 import org.polarsys.eplmp.core.common.Workspace;
-import org.polarsys.eplmp.core.meta.Folder;
 import org.polarsys.eplmp.core.exceptions.*;
+import org.polarsys.eplmp.core.meta.Folder;
 import org.polarsys.eplmp.core.security.WorkspaceUserMembership;
 import org.polarsys.eplmp.core.security.WorkspaceUserMembershipKey;
 
-import javax.ejb.Stateless;
+import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.persistence.*;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.TreeMap;
 
-@Stateless(name = "UserDAO")
+@RequestScoped
 public class UserDAO {
 
     @PersistenceContext
@@ -41,24 +40,16 @@ public class UserDAO {
     @Inject
     private UserGroupDAO userGroupDAO;
 
-    private Locale mLocale;
-
     public UserDAO() {
-        mLocale = Locale.getDefault();
     }
 
     public User loadUser(UserKey pUserKey) throws UserNotFoundException {
         User user = em.find(User.class, pUserKey);
         if (user == null) {
-            throw new UserNotFoundException(mLocale, pUserKey.getAccount());
+            throw new UserNotFoundException(pUserKey.getAccount());
         } else {
             return user;
         }
-    }
-
-    public User loadUser(Locale pLocale, UserKey pUserKey) throws UserNotFoundException {
-        mLocale = pLocale;
-        return loadUser(pUserKey);
     }
 
     public WorkspaceUserMembership loadUserMembership(WorkspaceUserMembershipKey pKey) {
@@ -78,10 +69,6 @@ public class UserDAO {
         if (ms != null) {
             em.remove(ms);
         }
-    }
-
-    public void updateUser(User pUser) {
-        em.merge(pUser);
     }
 
     public User[] findAllUsers(String pWorkspaceId) {
@@ -115,13 +102,8 @@ public class UserDAO {
             em.remove(pUser);
             em.flush();
         } catch (PersistenceException pPEx) {
-            throw new EntityConstraintException(mLocale,"EntityConstraintException27");
+            throw new EntityConstraintException("EntityConstraintException27");
         }
-    }
-
-    public void removeUser(Locale pLocale, User pUser) throws EntityConstraintException {
-        mLocale = pLocale;
-        removeUser(pUser);
     }
 
     public void createUser(User pUser) throws UserAlreadyExistsException, FolderAlreadyExistsException, CreationException {
@@ -129,20 +111,15 @@ public class UserDAO {
             //the EntityExistsException is thrown only when flush occurs
             em.persist(pUser);
             em.flush();
-            folderDAO.createFolder(mLocale, new Folder(pUser.getWorkspaceId() + "/~" + pUser.getLogin()));
+            folderDAO.createFolder(new Folder(pUser.getWorkspaceId() + "/~" + pUser.getLogin()));
         } catch (EntityExistsException pEEEx) {
-            throw new UserAlreadyExistsException(mLocale, pUser);
+            throw new UserAlreadyExistsException(pUser);
         } catch (PersistenceException pPEx) {
             //EntityExistsException is case sensitive
             //whereas MySQL is not thus PersistenceException could be
             //thrown instead of EntityExistsException
-            throw new CreationException(mLocale);
+            throw new CreationException("");
         }
-    }
-
-    public void createUser(Locale pLocale, User pUser) throws UserAlreadyExistsException, FolderAlreadyExistsException, CreationException {
-        mLocale = pLocale;
-        createUser(pUser);
     }
 
     public User[] getUsers(String pLogin) {
@@ -157,15 +134,14 @@ public class UserDAO {
         return users;
     }
 
-    public User[]
-    findReachableUsersForCaller(String callerLogin) {
+    public User[] findReachableUsersForCaller(String callerLogin) {
 
-        Map<String,User> users = new TreeMap<>();
+        Map<String, User> users = new TreeMap<>();
 
         List<String> listWorkspaceId = em.createQuery("SELECT u.workspaceId FROM User u WHERE u.login = :login", String.class)
                 .setParameter("login", callerLogin).getResultList();
 
-        if(!listWorkspaceId.isEmpty()){
+        if (!listWorkspaceId.isEmpty()) {
 
             List<User> listUsers = em.createQuery("SELECT u FROM User u where u.workspaceId IN :workspacesId", User.class)
                     .setParameter("workspacesId", listWorkspaceId).getResultList();
@@ -173,19 +149,17 @@ public class UserDAO {
             for (User user : listUsers) {
                 String loginUser = user.getLogin();
                 if (!users.keySet().contains(loginUser)) {
-                    users.put(loginUser,user);
+                    users.put(loginUser, user);
                 }
             }
 
         }
 
-
         return users.values().toArray(new User[0]);
-
     }
 
-    public boolean hasCommonWorkspace(String userLogin1, String userLogin2){
-        return ! em.createNamedQuery("findCommonWorkspacesForGivenUsers").
+    public boolean hasCommonWorkspace(String userLogin1, String userLogin2) {
+        return !em.createNamedQuery("findCommonWorkspacesForGivenUsers").
                 setParameter("userLogin1", userLogin1).
                 setParameter("userLogin2", userLogin2).
                 getResultList().

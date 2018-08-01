@@ -11,6 +11,8 @@
 
 package org.polarsys.eplmp.server.rest.util;
 
+import org.dozer.DozerBeanMapperSingletonWrapper;
+import org.dozer.Mapper;
 import org.polarsys.eplmp.core.configuration.ProductStructureFilter;
 import org.polarsys.eplmp.core.exceptions.*;
 import org.polarsys.eplmp.core.meta.InstanceAttribute;
@@ -20,8 +22,6 @@ import org.polarsys.eplmp.core.util.Tools;
 import org.polarsys.eplmp.server.rest.collections.InstanceCollection;
 import org.polarsys.eplmp.server.rest.collections.VirtualInstanceCollection;
 import org.polarsys.eplmp.server.rest.dto.InstanceAttributeDTO;
-import org.dozer.DozerBeanMapperSingletonWrapper;
-import org.dozer.Mapper;
 
 import javax.json.stream.JsonGenerator;
 import javax.vecmath.Matrix3d;

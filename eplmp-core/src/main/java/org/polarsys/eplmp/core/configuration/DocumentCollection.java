@@ -11,8 +11,8 @@
 package org.polarsys.eplmp.core.configuration;
 
 import org.polarsys.eplmp.core.common.User;
-import org.polarsys.eplmp.core.document.DocumentRevision;
 import org.polarsys.eplmp.core.document.DocumentIteration;
+import org.polarsys.eplmp.core.document.DocumentRevision;
 import org.polarsys.eplmp.core.document.DocumentRevisionKey;
 
 import javax.persistence.*;
