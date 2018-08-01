@@ -27,7 +27,6 @@ import javax.naming.NamingException;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.ext.Provider;
-import java.util.Arrays;
 import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -36,8 +35,8 @@ import java.util.logging.Logger;
 @RequestScoped
 public class LocaleProvider {
 
-    public final static String DEFAULT_LANGUAGE = "en";
-    public final static Locale DEFAULT = new Locale(DEFAULT_LANGUAGE);
+    private static final String DEFAULT_LANGUAGE = "en";
+    private static final Locale DEFAULT = new Locale(DEFAULT_LANGUAGE);
     private static final Logger LOGGER = Logger.getLogger(LocaleProvider.class.getName());
 
     @Context
@@ -78,7 +77,7 @@ public class LocaleProvider {
     private Locale defaults() {
         Locale locale = httpRequest.getLocale();
         String language = locale.getLanguage();
-        return Arrays.asList(PropertiesLoader.SUPPORTED_LANGUAGES).contains(language) ? new Locale(language) : DEFAULT;
+        return PropertiesLoader.getSupportedLanguages().contains(language) ? new Locale(language) : DEFAULT;
     }
 
 }

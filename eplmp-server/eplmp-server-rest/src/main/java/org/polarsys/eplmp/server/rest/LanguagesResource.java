@@ -44,9 +44,7 @@ public class LanguagesResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response getLanguages() {
         JsonArrayBuilder arrayBuilder = Json.createArrayBuilder();
-        for (String lang : PropertiesLoader.SUPPORTED_LANGUAGES) {
-            arrayBuilder.add(lang);
-        }
+        PropertiesLoader.getSupportedLanguages().forEach(arrayBuilder::add);
         return Response.ok().entity(arrayBuilder.build()).build();
     }
 

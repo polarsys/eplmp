@@ -34,7 +34,7 @@ public class SerialNumberBasedEffectivityConfigSpec extends EffectivityConfigSpe
      */
     private String number;
 
-    private final static Comparator<CharSequence> STRING_COMPARATOR = new AlphanumericComparator();
+    private static final Comparator<CharSequence> STRING_COMPARATOR = new AlphanumericComparator();
 
 
     public SerialNumberBasedEffectivityConfigSpec(String number, ConfigurationItem configurationItem) {

@@ -47,7 +47,7 @@ import java.util.logging.Logger;
 @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
 public class TagResource {
 
-    private final static Logger LOGGER = Logger.getLogger(TagResource.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(TagResource.class.getName());
 
     @Inject
     private IDocumentManagerLocal documentService;

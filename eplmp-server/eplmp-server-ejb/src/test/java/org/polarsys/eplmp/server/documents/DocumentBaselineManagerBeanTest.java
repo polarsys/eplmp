@@ -46,7 +46,7 @@ import java.util.Properties;
 @RunWith(MockitoJUnitRunner.class)
 public class DocumentBaselineManagerBeanTest {
 
-    private final static String PROPERTIES_BASE_NAME = "/org/polarsys/eplmp/core/i18n/LocalStrings";
+    private static final String PROPERTIES_BASE_NAME = "/org/polarsys/eplmp/core/i18n/LocalStrings";
 
     @Mock
     private WorkspaceDAO workspaceDAO;
