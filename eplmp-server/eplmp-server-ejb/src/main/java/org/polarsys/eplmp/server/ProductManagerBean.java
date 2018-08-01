@@ -1785,7 +1785,9 @@ public class ProductManagerBean implements IProductManagerLocal {
 
         List<InstanceAttributeTemplate> attrs = new ArrayList<>();
         for (int i = 0; i < pAttributeTemplates.size(); i++) {
-            pAttributeTemplates.get(i).setLocked(attributesLocked);
+            if(attributesLocked) {
+                pAttributeTemplates.get(i).setLocked(true);
+            }
             attrs.add(pAttributeTemplates.get(i));
             if (pAttributeTemplates.get(i) instanceof ListOfValuesAttributeTemplate) {
                 ListOfValuesAttributeTemplate lovAttr = (ListOfValuesAttributeTemplate) pAttributeTemplates.get(i);
