@@ -18,7 +18,7 @@ import java.net.URI;
  * CADConverter Extension point interface for 3D files conversion.
  *
  * Converters are supposed to be (standalone) remote EJB module that can be
- * deployed independently of DocdokuPLM application.
+ * deployed independently of EPLMP application.
  */
 @Remote
 public interface CADConverter {
