@@ -104,6 +104,10 @@ public class DocumentTemplateBinaryResource {
                 documentService.saveFileInTemplate(templatePK, fileName, length);
             }
 
+            if (fileName == null){
+                return Response.status(Response.Status.BAD_REQUEST).build();
+            }
+
             if (formParts.size() == 1) {
                 return BinaryResourceUpload.tryToRespondCreated(request.getRequestURI() + URLEncoder.encode(fileName, "UTF-8"));
             }
