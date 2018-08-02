@@ -188,7 +188,9 @@ public class EffectivityManagerBean implements IEffectivityManagerLocal {
         }
 
         Effectivity effectivity = partRevision.getEffectivities().stream()
-                .filter(e -> e.getId() == pId).findFirst().orElse(null);
+                .filter(e -> e.getId() == pId)
+                .findFirst()
+                .orElseThrow(() -> new EffectivityNotFoundException(String.valueOf(pId)));
 
         effectivity.setName(pName);
         effectivity.setDescription(pDescription);
@@ -214,7 +216,8 @@ public class EffectivityManagerBean implements IEffectivityManagerLocal {
         }
 
         SerialNumberBasedEffectivity effectivity = (SerialNumberBasedEffectivity) partRevision.getEffectivities().stream()
-                .filter(e -> e.getId() == pId).findFirst().orElse(null);
+                .filter(e -> e.getId() == pId).findFirst()
+                .orElseThrow(() -> new EffectivityNotFoundException(String.valueOf(pId)));
 
         effectivity.setName(pName);
         effectivity.setDescription(pDescription);
@@ -242,7 +245,8 @@ public class EffectivityManagerBean implements IEffectivityManagerLocal {
         }
 
         DateBasedEffectivity effectivity = (DateBasedEffectivity) partRevision.getEffectivities().stream()
-                .filter(e -> e.getId() == pId).findFirst().orElse(null);
+                .filter(e -> e.getId() == pId).findFirst()
+                .orElseThrow(() -> new EffectivityNotFoundException(String.valueOf(pId)));
 
         effectivity.setName(pName);
         effectivity.setDescription(pDescription);
@@ -271,7 +275,8 @@ public class EffectivityManagerBean implements IEffectivityManagerLocal {
         }
 
         LotBasedEffectivity effectivity = (LotBasedEffectivity) partRevision.getEffectivities().stream()
-                .filter(e -> e.getId() == pId).findFirst().orElse(null);
+                .filter(e -> e.getId() == pId).findFirst()
+                .orElseThrow(() -> new EffectivityNotFoundException(String.valueOf(pId)));
 
         effectivity.setName(pName);
         effectivity.setDescription(pDescription);
@@ -290,7 +295,8 @@ public class EffectivityManagerBean implements IEffectivityManagerLocal {
         PartRevision partRevision = effectivityDAO.getPartRevisionHolder(pId);
 
         Effectivity effectivity = partRevision.getEffectivities().stream()
-                .filter(e -> e.getId() == pId).findFirst().orElse(null);
+                .filter(e -> e.getId() == pId).findFirst()
+                .orElseThrow(() -> new EffectivityNotFoundException(String.valueOf(pId)));
 
         if (effectivity == null || !partRevision.getWorkspaceId().equals(workspaceId)) {
             throw new EffectivityNotFoundException(String.valueOf(pId));

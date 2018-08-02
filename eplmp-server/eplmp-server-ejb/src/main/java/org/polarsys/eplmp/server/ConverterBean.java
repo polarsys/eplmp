@@ -41,6 +41,7 @@ import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.DoubleStream;
+import java.util.stream.Stream;
 
 /**
  * CAD File converter
@@ -171,18 +172,26 @@ public class ConverterBean implements IConverterManagerLocal {
             } catch (Exception e) {
                 LOGGER.log(Level.WARNING, e.getMessage(), e);
             } finally {
-                Files.list(tempDir).forEach(p -> {
-                    try {
-                        Files.delete(p);
-                    } catch (IOException e) {
-                        LOGGER.warning("Unable to delete " + p.getFileName());
-                    }
-                });
+                deleteTempDirectory(tempDir);
             }
         } finally {
             Files.deleteIfExists(tempDir);
         }
         return result;
+    }
+
+    private void deleteTempDirectory(Path tempDir) {
+        try (Stream<Path> s = Files.list(tempDir)) {
+            s.forEach((path) -> {
+                try {
+                    Files.delete(path);
+                } catch (IOException e) {
+                    LOGGER.warning("Unable to delete " + path.getFileName());
+                }
+            });
+        } catch (IOException e) {
+            LOGGER.warning("Unable to delete " + tempDir.getFileName());
+        }
     }
 
     private boolean handleConvertedFile(ConversionResult conversionResult, PartIterationKey pPartIPK, Path tempDir) {
@@ -307,12 +316,12 @@ public class ConverterBean implements IConverterManagerLocal {
         Path executable = Paths.get(decimater);
         if (!executable.toFile().exists()) {
             LOGGER.log(Level.WARNING, "Cannot decimate file \"{0}\", decimater \"{1}\" is not available",
-                    new Object[] {file.getFileName(), decimater});
+                    new Object[]{file.getFileName(), decimater});
             return false;
         }
         if (!Files.isExecutable(executable)) {
             LOGGER.log(Level.WARNING, "Cannot decimate file \"{0}\", decimater \"{1}\" has no execution rights",
-                    new Object[] {file.getFileName(), decimater});
+                    new Object[]{file.getFileName(), decimater});
             return false;
         }
 

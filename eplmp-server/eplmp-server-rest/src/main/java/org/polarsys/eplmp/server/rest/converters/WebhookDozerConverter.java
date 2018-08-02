@@ -31,11 +31,11 @@ public class WebhookDozerConverter extends DozerConverter<Webhook, WebhookDTO> {
     }
 
     @Override
-    public WebhookDTO convertTo(Webhook webhook, WebhookDTO webhookDTO) {
+    public WebhookDTO convertTo(Webhook webhook, WebhookDTO pWebhookDTO) {
 
         if (webhook != null) {
             List<WebhookAppParameterDTO> parameters=new ArrayList<>();
-            webhookDTO = new WebhookDTO(webhook.getId(),webhook.getName(), webhook.isActive(),parameters,webhook.getAppName());
+            WebhookDTO webhookDTO = new WebhookDTO(webhook.getId(),webhook.getName(), webhook.isActive(),parameters,webhook.getAppName());
 
             WebhookApp app = webhook.getWebhookApp();
             if(app instanceof SimpleWebhookApp){

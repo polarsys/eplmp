@@ -30,9 +30,9 @@ public class AclDozerConverter extends DozerConverter<ACL, ACLDTO> {
     }
 
     @Override
-    public ACLDTO convertTo(ACL acl, ACLDTO aclDTO) {
+    public ACLDTO convertTo(ACL acl, ACLDTO pAclDTO) {
 
-        aclDTO = new ACLDTO();
+        ACLDTO aclDTO = new ACLDTO();
 
         if (acl != null) {
 
