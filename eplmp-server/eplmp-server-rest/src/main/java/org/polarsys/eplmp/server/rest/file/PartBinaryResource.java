@@ -61,10 +61,7 @@ import java.util.logging.Logger;
 public class PartBinaryResource {
 
     private static final Logger LOGGER = Logger.getLogger(PartBinaryResource.class.getName());
-    public static final String NATIVE_CAD_SUBTYPE = "nativecad";
-    public static final String ATTACHED_FILES_SUBTYPE = "attachedfiles";
     private static final String UTF8_ENCODING = "UTF-8";
-
 
     @Inject
     private IBinaryStorageManagerLocal storageManager;
@@ -98,7 +95,7 @@ public class PartBinaryResource {
             @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
-    @Path("/{iteration}/" + NATIVE_CAD_SUBTYPE)
+    @Path("/{iteration}/" + PartIteration.NATIVE_CAD_SUBTYPE)
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @RolesAllowed({UserGroupMapping.REGULAR_USER_ROLE_ID})
     public Response uploadNativeCADFile(
@@ -146,7 +143,7 @@ public class PartBinaryResource {
             @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
-    @Path("/{iteration}/" + ATTACHED_FILES_SUBTYPE)
+    @Path("/{iteration}/" + PartIteration.ATTACHED_FILES_SUBTYPE)
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @RolesAllowed({UserGroupMapping.REGULAR_USER_ROLE_ID})
     public Response uploadAttachedFiles(
@@ -167,10 +164,10 @@ public class PartBinaryResource {
 
             for (Part formPart : formParts) {
                 fileName = Normalizer.normalize(formPart.getSubmittedFileName(), Normalizer.Form.NFC);
-                BinaryResource binaryResource = productService.saveFileInPartIteration(partPK, fileName, ATTACHED_FILES_SUBTYPE, 0);
+                BinaryResource binaryResource = productService.saveFileInPartIteration(partPK, fileName, PartIteration.ATTACHED_FILES_SUBTYPE, 0);
                 OutputStream outputStream = storageManager.getBinaryResourceOutputStream(binaryResource);
                 long length = BinaryResourceUpload.uploadBinary(outputStream, formPart);
-                productService.saveFileInPartIteration(partPK, fileName, ATTACHED_FILES_SUBTYPE, length);
+                productService.saveFileInPartIteration(partPK, fileName, PartIteration.ATTACHED_FILES_SUBTYPE, length);
             }
 
             if (formParts.size() == 1) {
@@ -322,7 +319,7 @@ public class PartBinaryResource {
         boolean isToBeCached = !isWorkingCopy;
 
         try {
-            if (ATTACHED_FILES_SUBTYPE.equals(subType) && output != null && !output.isEmpty()) {
+            if (PartIteration.ATTACHED_FILES_SUBTYPE.equals(subType) && output != null && !output.isEmpty()) {
                 binaryContentInputStream = getConvertedBinaryResource(binaryResource, output);
                 if (range == null || range.isEmpty()) {
                     binaryResourceDownloadMeta.setLength(0);

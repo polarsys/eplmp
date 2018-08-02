@@ -1554,7 +1554,7 @@ public class ProductManagerBean implements IProductManagerLocal {
 
             storageManager.renameFile(file, pNewName);
 
-            if ("nativecad".equals(pSubType)) {
+            if (PartIteration.NATIVE_CAD_SUBTYPE.equals(pSubType)) {
                 partIteration.setNativeCADFile(null);
             } else {
                 partIteration.removeAttachedFile(file);
@@ -1565,7 +1565,7 @@ public class ProductManagerBean implements IProductManagerLocal {
 
             binaryResourceDAO.createBinaryResource(newFile);
 
-            if ("nativecad".equals(pSubType)) {
+            if (PartIteration.NATIVE_CAD_SUBTYPE.equals(pSubType)) {
                 partIteration.setNativeCADFile(newFile);
             } else {
                 partIteration.addAttachedFile(newFile);
@@ -1632,7 +1632,7 @@ public class ProductManagerBean implements IProductManagerLocal {
         if (isCheckoutByUser(user, partR) && partR.getLastIteration().equals(partIteration)) {
             BinaryResource file = binaryResourceDAO.loadBinaryResource(pName);
 
-            if ("nativecad".equals(pSubType)) {
+            if (PartIteration.NATIVE_CAD_SUBTYPE.equals(pSubType)) {
                 partIteration.setNativeCADFile(null);
             } else {
                 partIteration.removeAttachedFile(file);

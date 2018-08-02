@@ -77,7 +77,7 @@ public class BinaryResourceDAO {
         String fileType = pBinaryResource.getFileType();
         if (pBinaryResource instanceof Geometry) {
             query = em.createQuery("SELECT p FROM PartIteration p WHERE :binaryResource MEMBER OF p.geometries", PartIteration.class);
-        } else if ("nativecad".equals(fileType)) {
+        } else if (PartIteration.NATIVE_CAD_SUBTYPE.equals(fileType)) {
             query = em.createQuery("SELECT p FROM PartIteration p WHERE p.nativeCADFile = :binaryResource", PartIteration.class);
         } else {
             query = em.createQuery("SELECT p FROM PartIteration p WHERE :binaryResource MEMBER OF p.attachedFiles", PartIteration.class);

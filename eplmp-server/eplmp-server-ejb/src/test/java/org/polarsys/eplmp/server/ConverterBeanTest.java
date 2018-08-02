@@ -79,7 +79,7 @@ public class ConverterBeanTest {
                 .thenReturn(lod);
         when(storage.getBinaryResourceOutputStream(lod)).thenReturn(new ByteArrayOutputStream());
 
-        when(product.saveFileInPartIteration(eq(ipk), anyString(), eq("attachedfiles"), anyLong()))
+        when(product.saveFileInPartIteration(eq(ipk), anyString(), eq(PartIteration.ATTACHED_FILES_SUBTYPE), anyLong()))
                 .thenReturn(attachedFile, attachedFile);
         when(product.getPartIteration(eq(ipk)))
                 .thenReturn(partIter);
@@ -107,7 +107,7 @@ public class ConverterBeanTest {
         verify(conv).convert(any(URI.class), any(URI.class));
         verify(product).saveGeometryInPartIteration(eq(ipk), anyString(), anyInt(), anyLong(), any(double[].class));
         verify(storage).getBinaryResourceOutputStream(lod);
-        verify(product, times(2)).saveFileInPartIteration(eq(ipk), anyString(), eq("attachedfiles"), anyLong());
+        verify(product, times(2)).saveFileInPartIteration(eq(ipk), anyString(), eq(PartIteration.ATTACHED_FILES_SUBTYPE), anyLong());
         verify(storage, times(2)).getBinaryResourceOutputStream(attachedFile);
     }
 

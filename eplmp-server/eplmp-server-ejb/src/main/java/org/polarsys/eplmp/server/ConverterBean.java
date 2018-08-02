@@ -378,7 +378,7 @@ public class ConverterBean implements IConverterManagerLocal {
     private void saveAttachedFile(PartIterationKey partIPK, Path file) {
         try {
             BinaryResource binaryResource = productService.saveFileInPartIteration(partIPK,
-                    file.getFileName().toString(), "attachedfiles", Files.size(file));
+                    file.getFileName().toString(), PartIteration.ATTACHED_FILES_SUBTYPE, Files.size(file));
             try (OutputStream os = storageManager.getBinaryResourceOutputStream(binaryResource)) {
                 Files.copy(file, os);
                 LOGGER.log(Level.INFO, "Attached file copied");

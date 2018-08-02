@@ -41,7 +41,10 @@ import java.util.*;
 })
 @Entity
 public class PartIteration implements Serializable, FileHolder, Comparable<PartIteration>, Cloneable {
-    
+
+    public static final String NATIVE_CAD_SUBTYPE = "nativecad";
+    public static final String ATTACHED_FILES_SUBTYPE = "attachedfiles";
+
     @Id
     @ManyToOne(optional=false, fetch=FetchType.EAGER)
     @JoinColumns({
