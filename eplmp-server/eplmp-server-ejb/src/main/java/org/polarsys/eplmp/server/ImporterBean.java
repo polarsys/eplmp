@@ -26,6 +26,7 @@ import javax.annotation.PostConstruct;
 import javax.ejb.AsyncResult;
 import javax.ejb.Asynchronous;
 import javax.ejb.Stateless;
+import javax.faces.application.Application;
 import javax.inject.Inject;
 import java.io.File;
 import java.util.*;
@@ -399,20 +400,20 @@ public class ImporterBean implements IImporterManagerLocal {
 
         try {
             bulkPartUpdate(listParts, workspaceId, autoCheckout, autoCheckin, permissiveUpdate, errors, warnings);
-        } catch (Exception e) {
+        } catch (ApplicationException e) {
             LOGGER.log(Level.WARNING, null, e);
             errors.add("Unhandled exception");
         }
         return new ImportResult(partImporterResult.getImportedFile(), warnings, errors);
     }
 
-    public void bulkPartUpdate(List<PartToImport> parts, String workspaceId, boolean autoCheckout, boolean autoCheckin, boolean permissive, List<String> errors, List<String> warnings) throws Exception {
+    public void bulkPartUpdate(List<PartToImport> parts, String workspaceId, boolean autoCheckout, boolean autoCheckin, boolean permissive, List<String> errors, List<String> warnings) throws ApplicationException {
 
         LOGGER.log(Level.INFO, "Bulk parts update");
         User user = userManager.checkWorkspaceReadAccess(workspaceId);
 
-        boolean errorOccured = false;
-        Exception exception = null;
+        boolean errorOccurred = false;
+        ApplicationException exception = null;
 
         for (PartToImport part : parts) {
             PartIteration partIteration = part.getPartIteration();
@@ -451,7 +452,7 @@ public class ImporterBean implements IImporterManagerLocal {
             } catch (CreationException | PartMasterNotFoundException | EntityConstraintException | UserNotFoundException | WorkspaceNotFoundException | UserNotActiveException | PartUsageLinkNotFoundException | PartRevisionNotFoundException | AccessRightException | FileAlreadyExistsException e) {
                 LOGGER.log(Level.WARNING, null, e);
                 errors.add(e.getLocalizedMessage() + ": " + partIteration.getNumber());
-                errorOccured = true;
+                errorOccurred = true;
                 exception = e;
 
             } catch (NotAllowedException e) {
@@ -460,7 +461,7 @@ public class ImporterBean implements IImporterManagerLocal {
                     warnings.add(e.getLocalizedMessage());
                 } else {
                     errors.add(e.getLocalizedMessage());
-                    errorOccured = true;
+                    errorOccurred = true;
                     exception = e;
                 }
             }
@@ -468,7 +469,7 @@ public class ImporterBean implements IImporterManagerLocal {
 
         LOGGER.log(Level.INFO, "Bulk parts update finished");
 
-        if (errorOccured) {
+        if (errorOccurred) {
             throw exception;
         }
     }
@@ -731,7 +732,8 @@ public class ImporterBean implements IImporterManagerLocal {
         return null;
     }
 
-    private PartMaster getOrCreatePartMaster(Properties properties, List<String> errors, String workspaceId, Set<PartRevisionKey> toCheckin, String partNumber, PartToImport bomRow, String revisionNote, boolean autoCheckin) throws UserNotFoundException, WorkspaceNotFoundException, UserNotActiveException, WorkspaceNotEnabledException, PartMasterNotFoundException, PartMasterAlreadyExistsException, PartMasterTemplateNotFoundException, FileAlreadyExistsException, NotAllowedException, UserGroupNotFoundException, RoleNotFoundException, WorkflowModelNotFoundException, AccessRightException, CreationException, PartRevisionNotFoundException, ListOfValuesNotFoundException, DocumentRevisionNotFoundException, PartUsageLinkNotFoundException, EntityConstraintException {
+    private PartMaster getOrCreatePartMaster(Properties properties, List<String> errors, String workspaceId, Set<PartRevisionKey> toCheckin, String partNumber, PartToImport bomRow, String revisionNote, boolean autoCheckin)
+            throws UserNotFoundException, WorkspaceNotFoundException, UserNotActiveException, WorkspaceNotEnabledException, PartMasterNotFoundException, PartMasterAlreadyExistsException, PartMasterTemplateNotFoundException, FileAlreadyExistsException, NotAllowedException, UserGroupNotFoundException, RoleNotFoundException, WorkflowModelNotFoundException, AccessRightException, CreationException, PartRevisionNotFoundException, ListOfValuesNotFoundException, DocumentRevisionNotFoundException, PartUsageLinkNotFoundException, EntityConstraintException {
 
         PartMaster partMaster;
         PartMasterKey partMasterKey = new PartMasterKey(workspaceId, partNumber);
