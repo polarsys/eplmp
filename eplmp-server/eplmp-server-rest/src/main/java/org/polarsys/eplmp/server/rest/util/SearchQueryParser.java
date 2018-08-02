@@ -88,28 +88,28 @@ public class SearchQueryParser {
                         try {
                             pCreationDateFrom = DateUtils.parse(value);
                         } catch (ParseException e) {
-                            LOGGER.log(Level.FINEST, null, e);
+                            LOGGER.log(Level.WARNING, null, e);
                         }
                         break;
                     case "createdTo":
                         try {
                             pCreationDateTo = DateUtils.parse(value);
                         } catch (ParseException e) {
-                            LOGGER.log(Level.FINEST, null, e);
+                            LOGGER.log(Level.WARNING, null, e);
                         }
                         break;
                     case "modifiedFrom":
                         try {
                             pModificationDateFrom = DateUtils.parse(value);
                         } catch (ParseException e) {
-                            LOGGER.log(Level.FINEST, null, e);
+                            LOGGER.log(Level.WARNING, null, e);
                         }
                         break;
                     case "modifiedTo":
                         try {
                             pModificationDateTo = DateUtils.parse(value);
                         } catch (ParseException e) {
-                            LOGGER.log(Level.FINEST, null, e);
+                            LOGGER.log(Level.WARNING, null, e);
                         }
                         break;
                     case "tags":
@@ -188,28 +188,28 @@ public class SearchQueryParser {
                         try {
                             pCreationDateFrom = DateUtils.parse(value);
                         } catch (ParseException e) {
-                            LOGGER.log(Level.FINEST, null, e);
+                            LOGGER.log(Level.WARNING, null, e);
                         }
                         break;
                     case "createdTo":
                         try {
                             pCreationDateTo = DateUtils.parse(value);
                         } catch (ParseException e) {
-                            LOGGER.log(Level.FINEST, null, e);
+                            LOGGER.log(Level.WARNING, null, e);
                         }
                         break;
                     case "modifiedFrom":
                         try {
                             pModificationDateFrom = DateUtils.parse(value);
                         } catch (ParseException e) {
-                            LOGGER.log(Level.FINEST, null, e);
+                            LOGGER.log(Level.WARNING, null, e);
                         }
                         break;
                     case "modifiedTo":
                         try {
                             pModificationDateTo = DateUtils.parse(value);
                         } catch (ParseException e) {
-                            LOGGER.log(Level.FINEST, null, e);
+                            LOGGER.log(Level.WARNING, null, e);
                         }
                         break;
                     case "tags":
