@@ -111,6 +111,7 @@ public class DocumentTemplateBinaryResource {
             if (formParts.size() == 1) {
                 return BinaryResourceUpload.tryToRespondCreated(request.getRequestURI() + URLEncoder.encode(fileName, "UTF-8"));
             }
+
             return Response.noContent().build();
 
         } catch (IOException | ServletException | StorageException e) {
