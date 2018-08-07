@@ -21,7 +21,6 @@ import org.polarsys.eplmp.server.dao.ACLDAO;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -31,7 +30,7 @@ import java.util.Map;
 @Stateless(name = "ACLFactory")
 public class ACLFactory {
 
-    @PersistenceContext
+    @Inject
     private EntityManager em;
 
     @Inject

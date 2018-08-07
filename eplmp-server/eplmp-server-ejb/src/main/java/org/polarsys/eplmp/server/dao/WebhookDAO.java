@@ -15,15 +15,15 @@ import org.polarsys.eplmp.core.exceptions.WebhookNotFoundException;
 import org.polarsys.eplmp.core.hooks.Webhook;
 
 import javax.enterprise.context.RequestScoped;
+import javax.inject.Inject;
 import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import java.util.List;
 
 
 @RequestScoped
 public class WebhookDAO {
 
-    @PersistenceContext
+    @Inject
     private EntityManager em;
 
     public WebhookDAO() {

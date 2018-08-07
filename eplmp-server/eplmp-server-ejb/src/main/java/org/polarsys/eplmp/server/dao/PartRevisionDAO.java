@@ -29,7 +29,7 @@ import java.util.List;
 public class PartRevisionDAO {
 
     public static final String WORKSPACE_ID = "workspaceId";
-    @PersistenceContext
+    @Inject
     private EntityManager em;
 
     @Inject

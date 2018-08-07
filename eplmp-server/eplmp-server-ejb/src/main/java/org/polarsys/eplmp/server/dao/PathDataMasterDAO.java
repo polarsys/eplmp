@@ -17,16 +17,16 @@ import org.polarsys.eplmp.core.configuration.ProductInstanceMaster;
 import org.polarsys.eplmp.core.exceptions.PathDataMasterNotFoundException;
 
 import javax.enterprise.context.RequestScoped;
+import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
-import javax.persistence.PersistenceContext;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 @RequestScoped
 public class PathDataMasterDAO {
 
-    @PersistenceContext
+    @Inject
     private EntityManager em;
 
     private static final Logger LOGGER = Logger.getLogger(PathDataMasterDAO.class.getName());

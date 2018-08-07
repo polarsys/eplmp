@@ -15,8 +15,8 @@ import org.polarsys.eplmp.core.configuration.PathDataIteration;
 import org.polarsys.eplmp.core.configuration.ProductInstanceIteration;
 
 import javax.enterprise.context.RequestScoped;
+import javax.inject.Inject;
 import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -24,7 +24,7 @@ import java.util.logging.Logger;
 @RequestScoped
 public class PathDataIterationDAO {
 
-    @PersistenceContext
+    @Inject
     private EntityManager em;
 
     private static final Logger LOGGER = Logger.getLogger(PathDataIterationDAO.class.getName());

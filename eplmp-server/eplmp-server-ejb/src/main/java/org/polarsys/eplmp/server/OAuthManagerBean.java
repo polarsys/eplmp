@@ -28,7 +28,6 @@ import javax.ejb.Local;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -43,7 +42,7 @@ public class OAuthManagerBean implements IOAuthManagerLocal {
 
     private static final Logger LOGGER = Logger.getLogger(OAuthManagerBean.class.getName());
 
-    @PersistenceContext
+    @Inject
     private EntityManager em;
 
     @Inject

@@ -18,13 +18,17 @@ import org.polarsys.eplmp.core.exceptions.OrganizationAlreadyExistsException;
 import org.polarsys.eplmp.core.exceptions.OrganizationNotFoundException;
 
 import javax.enterprise.context.RequestScoped;
-import javax.persistence.*;
+import javax.inject.Inject;
+import javax.persistence.EntityExistsException;
+import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
+import javax.persistence.PersistenceException;
 
 
 @RequestScoped
 public class OrganizationDAO {
 
-    @PersistenceContext
+    @Inject
     private EntityManager em;
 
     public OrganizationDAO() {

@@ -29,7 +29,6 @@ import javax.ejb.Local;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import java.util.Objects;
 import java.util.stream.Stream;
 
@@ -41,7 +40,7 @@ import java.util.stream.Stream;
 @Stateless(name = "TaskManagerBean")
 public class TaskManagerBean implements ITaskManagerLocal {
 
-    @PersistenceContext
+    @Inject
     private EntityManager em;
 
     @Inject

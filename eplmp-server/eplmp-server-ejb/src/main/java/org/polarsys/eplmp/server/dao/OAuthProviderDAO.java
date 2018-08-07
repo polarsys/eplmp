@@ -18,16 +18,16 @@ import org.polarsys.eplmp.core.exceptions.OAuthProviderNotFoundException;
 import org.polarsys.eplmp.core.exceptions.ProvidedAccountNotFoundException;
 
 import javax.enterprise.context.RequestScoped;
+import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
-import javax.persistence.PersistenceContext;
 import java.util.List;
 
 
 @RequestScoped
 public class OAuthProviderDAO {
 
-    @PersistenceContext
+    @Inject
     private EntityManager em;
 
     public OAuthProviderDAO() {

@@ -22,7 +22,11 @@ import org.polarsys.eplmp.core.product.PartUsageLink;
 import org.polarsys.eplmp.core.product.PathToPathLink;
 
 import javax.enterprise.context.RequestScoped;
-import javax.persistence.*;
+import javax.inject.Inject;
+import javax.persistence.EntityExistsException;
+import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
+import javax.persistence.PersistenceException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -43,7 +47,7 @@ public class PathToPathLinkDAO {
     public static final String SOURCE = "source";
     public static final String TARGET = "target";
 
-    @PersistenceContext
+    @Inject
     private EntityManager em;
 
     public PathToPathLinkDAO() {

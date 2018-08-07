@@ -21,7 +21,11 @@ import org.polarsys.eplmp.core.workflow.WorkflowModel;
 import org.polarsys.eplmp.core.workflow.WorkflowModelKey;
 
 import javax.enterprise.context.RequestScoped;
-import javax.persistence.*;
+import javax.inject.Inject;
+import javax.persistence.EntityExistsException;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceException;
+import javax.persistence.TypedQuery;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -34,7 +38,7 @@ public class WorkflowModelDAO {
     private static final Logger LOGGER = Logger.getLogger(WorkflowModelDAO.class.getName());
     public static final String WORKSPACE_ID = "workspaceId";
 
-    @PersistenceContext
+    @Inject
     private EntityManager em;
 
     public WorkflowModelDAO(){

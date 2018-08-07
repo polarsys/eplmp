@@ -27,7 +27,6 @@ import javax.enterprise.event.Event;
 import javax.enterprise.util.AnnotationLiteral;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -36,7 +35,7 @@ import java.util.stream.Stream;
 @Stateless(name = "UserManagerBean")
 public class UserManagerBean implements IUserManagerLocal {
 
-    @PersistenceContext
+    @Inject
     private EntityManager em;
 
     @Inject

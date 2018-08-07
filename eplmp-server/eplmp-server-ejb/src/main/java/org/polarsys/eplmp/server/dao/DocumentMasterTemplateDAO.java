@@ -18,14 +18,18 @@ import org.polarsys.eplmp.core.exceptions.DocumentMasterTemplateNotFoundExceptio
 import org.polarsys.eplmp.core.meta.ListOfValuesKey;
 
 import javax.enterprise.context.RequestScoped;
-import javax.persistence.*;
+import javax.inject.Inject;
+import javax.persistence.EntityExistsException;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceException;
+import javax.persistence.TypedQuery;
 import java.util.List;
 
 
 @RequestScoped
 public class DocumentMasterTemplateDAO {
 
-    @PersistenceContext
+    @Inject
     private EntityManager em;
 
     public DocumentMasterTemplateDAO() {

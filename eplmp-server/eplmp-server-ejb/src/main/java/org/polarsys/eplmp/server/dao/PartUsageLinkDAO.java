@@ -19,7 +19,6 @@ import org.polarsys.eplmp.core.product.PartUsageLink;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,7 +26,7 @@ import java.util.List;
 @RequestScoped
 public class PartUsageLinkDAO {
 
-    @PersistenceContext
+    @Inject
     private EntityManager em;
 
     @Inject

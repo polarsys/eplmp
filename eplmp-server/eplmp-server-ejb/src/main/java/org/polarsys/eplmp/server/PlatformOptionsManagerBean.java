@@ -20,8 +20,8 @@ import javax.annotation.security.DeclareRoles;
 import javax.annotation.security.RolesAllowed;
 import javax.ejb.Local;
 import javax.ejb.Stateless;
+import javax.inject.Inject;
 import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -36,7 +36,7 @@ public class PlatformOptionsManagerBean implements IPlatformOptionsManagerLocal 
 
     private static final Logger LOGGER = Logger.getLogger(PlatformOptionsManagerBean.class.getName());
 
-    @PersistenceContext
+    @Inject
     private EntityManager em;
 
     @Override

@@ -19,9 +19,9 @@ import org.polarsys.eplmp.core.workflow.WorkspaceWorkflow;
 import org.polarsys.eplmp.core.workflow.WorkspaceWorkflowKey;
 
 import javax.enterprise.context.RequestScoped;
+import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
-import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
 import java.util.ArrayList;
 import java.util.List;
@@ -32,7 +32,7 @@ public class WorkflowDAO {
     public static final String WORKFLOW = "workflow";
     public static final String WORKSPACE = "workspace";
 
-    @PersistenceContext
+    @Inject
     private EntityManager em;
 
     public void createWorkflow(Workflow pWf) {

@@ -18,8 +18,8 @@ import org.polarsys.eplmp.core.configuration.ProductInstanceIterationKey;
 import org.polarsys.eplmp.core.exceptions.ProductInstanceIterationNotFoundException;
 
 import javax.enterprise.context.RequestScoped;
+import javax.inject.Inject;
 import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -27,7 +27,7 @@ import java.util.logging.Logger;
 @RequestScoped
 public class ProductInstanceIterationDAO {
 
-    @PersistenceContext
+    @Inject
     private EntityManager em;
 
     private static final Logger LOGGER = Logger.getLogger(ProductInstanceIterationDAO.class.getName());

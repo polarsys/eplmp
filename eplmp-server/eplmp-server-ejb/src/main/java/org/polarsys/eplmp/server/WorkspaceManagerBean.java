@@ -32,7 +32,6 @@ import javax.ejb.Local;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -42,7 +41,7 @@ import java.util.logging.Logger;
 @Stateless(name = "WorkspaceManagerBean")
 public class WorkspaceManagerBean implements IWorkspaceManagerLocal {
 
-    @PersistenceContext
+    @Inject
     private EntityManager em;
 
     @Inject

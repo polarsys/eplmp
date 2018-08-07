@@ -19,8 +19,8 @@ import org.polarsys.eplmp.core.security.Credential;
 import org.polarsys.eplmp.core.security.UserGroupMapping;
 
 import javax.enterprise.context.RequestScoped;
+import javax.inject.Inject;
 import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceException;
 import javax.persistence.TypedQuery;
 import java.util.List;
@@ -29,8 +29,9 @@ import java.util.List;
 @RequestScoped
 public class AccountDAO {
 
-    @PersistenceContext
+    @Inject
     private EntityManager em;
+    //private EntityManager em;
 
     public AccountDAO() {
     }

@@ -15,8 +15,8 @@ import org.polarsys.eplmp.core.product.PartIterationKey;
 import org.polarsys.eplmp.core.product.PartRevisionKey;
 
 import javax.enterprise.context.RequestScoped;
+import javax.inject.Inject;
 import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import java.util.List;
 
 @RequestScoped
@@ -26,7 +26,7 @@ public class ModificationNotificationDAO {
     public static final String PART_NUMBER = "partNumber";
     public static final String VERSION = "version";
 
-    @PersistenceContext
+    @Inject
     private EntityManager em;
 
     public void removeModificationNotifications(PartIterationKey pPartIPK){

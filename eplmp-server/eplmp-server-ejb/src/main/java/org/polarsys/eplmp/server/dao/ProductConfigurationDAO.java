@@ -17,8 +17,8 @@ import org.polarsys.eplmp.core.exceptions.ProductConfigurationNotFoundException;
 import org.polarsys.eplmp.core.product.ConfigurationItemKey;
 
 import javax.enterprise.context.RequestScoped;
+import javax.inject.Inject;
 import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceException;
 import java.util.List;
 import java.util.logging.Level;
@@ -27,7 +27,7 @@ import java.util.logging.Logger;
 @RequestScoped
 public class ProductConfigurationDAO {
 
-    @PersistenceContext
+    @Inject
     private EntityManager em;
 
     private static final Logger LOGGER = Logger.getLogger(ProductConfigurationDAO.class.getName());

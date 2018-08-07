@@ -23,6 +23,7 @@ import org.polarsys.eplmp.core.product.PartIteration;
 import org.polarsys.eplmp.core.product.PartMasterTemplate;
 
 import javax.enterprise.context.RequestScoped;
+import javax.inject.Inject;
 import javax.persistence.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -32,7 +33,7 @@ public class BinaryResourceDAO {
 
     private static final Logger LOGGER = Logger.getLogger(BinaryResourceDAO.class.getName());
 
-    @PersistenceContext
+    @Inject
     private EntityManager em;
 
     public BinaryResourceDAO() {
