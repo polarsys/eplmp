@@ -18,7 +18,11 @@ import org.polarsys.eplmp.core.query.QueryContext;
 import org.polarsys.eplmp.core.query.QueryRule;
 
 import javax.enterprise.context.RequestScoped;
-import javax.persistence.*;
+import javax.inject.Inject;
+import javax.persistence.EntityExistsException;
+import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
+import javax.persistence.PersistenceException;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -30,7 +34,7 @@ import java.util.logging.Logger;
 @RequestScoped
 public class QueryDAO {
 
-    @PersistenceContext
+    @Inject
     private EntityManager em;
 
 

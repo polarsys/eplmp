@@ -19,9 +19,9 @@ import org.polarsys.eplmp.core.sharing.SharedEntity;
 import org.polarsys.eplmp.core.sharing.SharedPart;
 
 import javax.enterprise.context.RequestScoped;
+import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
-import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
 
 
@@ -32,7 +32,7 @@ import javax.persistence.TypedQuery;
 @RequestScoped
 public class SharedEntityDAO {
 
-    @PersistenceContext
+    @Inject
     private EntityManager em;
 
     public SharedEntityDAO() {

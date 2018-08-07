@@ -14,9 +14,9 @@ package org.polarsys.eplmp.server.dao;
 import org.polarsys.eplmp.core.meta.InstanceAttribute;
 
 import javax.enterprise.context.RequestScoped;
+import javax.inject.Inject;
 import javax.persistence.EntityExistsException;
 import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -25,7 +25,7 @@ import java.util.logging.Logger;
 public class InstanceAttributeDAO {
     private static final Logger LOGGER = Logger.getLogger(InstanceAttributeDAO.class.getName());
 
-    @PersistenceContext
+    @Inject
     private EntityManager em;
 
     public void createAttribute(InstanceAttribute pAttr){

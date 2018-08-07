@@ -20,7 +20,6 @@ import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
-import javax.persistence.PersistenceContext;
 import java.util.List;
 
 
@@ -29,7 +28,8 @@ public class MilestoneDAO {
 
     public static final String WORKSPACE_ID = "workspaceId";
     public static final String MILESTONE_ID = "milestoneId";
-    @PersistenceContext
+
+    @Inject
     private EntityManager em;
 
     @Inject

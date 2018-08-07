@@ -21,7 +21,6 @@ import org.polarsys.eplmp.core.product.PartRevision;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceException;
 import java.util.List;
 import java.util.logging.Level;
@@ -32,7 +31,7 @@ public class ProductBaselineDAO {
 
     public static final String WORKSPACE_ID = "workspaceId";
 
-    @PersistenceContext
+    @Inject
     private EntityManager em;
 
     @Inject

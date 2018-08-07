@@ -26,7 +26,6 @@ import javax.annotation.PostConstruct;
 import javax.ejb.AsyncResult;
 import javax.ejb.Asynchronous;
 import javax.ejb.Stateless;
-import javax.faces.application.Application;
 import javax.inject.Inject;
 import java.io.File;
 import java.util.*;

@@ -20,7 +20,10 @@ import org.polarsys.eplmp.core.meta.Folder;
 
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
-import javax.persistence.*;
+import javax.persistence.EntityExistsException;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceException;
+import javax.persistence.TypedQuery;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Level;
@@ -29,7 +32,7 @@ import java.util.logging.Logger;
 @RequestScoped
 public class FolderDAO {
 
-    @PersistenceContext
+    @Inject
     private EntityManager em;
 
     @Inject

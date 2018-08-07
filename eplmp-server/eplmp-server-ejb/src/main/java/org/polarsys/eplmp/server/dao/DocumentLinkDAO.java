@@ -19,9 +19,9 @@ import org.polarsys.eplmp.core.document.DocumentRevision;
 import org.polarsys.eplmp.core.product.PartIteration;
 
 import javax.enterprise.context.RequestScoped;
+import javax.inject.Inject;
 import javax.persistence.EntityExistsException;
 import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import java.util.List;
 
 @RequestScoped
@@ -29,7 +29,7 @@ public class DocumentLinkDAO {
 
     public static final String DOCUMENT_REVISION = "documentRevision";
 
-    @PersistenceContext
+    @Inject
     private EntityManager em;
 
     public void createLink(DocumentLink pLink){

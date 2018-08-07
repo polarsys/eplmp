@@ -15,14 +15,14 @@ import org.polarsys.eplmp.core.exceptions.PasswordRecoveryRequestNotFoundExcepti
 import org.polarsys.eplmp.core.security.PasswordRecoveryRequest;
 
 import javax.enterprise.context.RequestScoped;
+import javax.inject.Inject;
 import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 
 
 @RequestScoped
 public class PasswordRecoveryRequestDAO {
 
-    @PersistenceContext
+    @Inject
     private EntityManager em;
 
     public PasswordRecoveryRequestDAO() {

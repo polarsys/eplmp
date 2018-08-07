@@ -20,7 +20,10 @@ import org.polarsys.eplmp.core.security.WorkspaceUserMembershipKey;
 
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
-import javax.persistence.*;
+import javax.persistence.EntityExistsException;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceException;
+import javax.persistence.Query;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -28,7 +31,7 @@ import java.util.TreeMap;
 @RequestScoped
 public class UserDAO {
 
-    @PersistenceContext
+    @Inject
     private EntityManager em;
 
     @Inject

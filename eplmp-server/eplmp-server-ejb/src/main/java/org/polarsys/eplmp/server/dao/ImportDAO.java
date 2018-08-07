@@ -16,14 +16,18 @@ import org.polarsys.eplmp.core.exceptions.CreationException;
 import org.polarsys.eplmp.core.product.Import;
 
 import javax.enterprise.context.RequestScoped;
-import javax.persistence.*;
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
+import javax.persistence.PersistenceException;
+import javax.persistence.TypedQuery;
 import java.util.List;
 
 
 @RequestScoped
 public class ImportDAO {
 
-    @PersistenceContext
+    @Inject
     private EntityManager em;
 
     public ImportDAO() {

@@ -18,6 +18,7 @@ import org.polarsys.eplmp.core.product.Effectivity;
 import org.polarsys.eplmp.core.product.PartRevision;
 
 import javax.enterprise.context.RequestScoped;
+import javax.inject.Inject;
 import javax.persistence.*;
 import java.util.List;
 
@@ -25,7 +26,7 @@ import java.util.List;
 @RequestScoped
 public class EffectivityDAO {
 
-    @PersistenceContext
+    @Inject
     private EntityManager em;
 
     public EffectivityDAO() {

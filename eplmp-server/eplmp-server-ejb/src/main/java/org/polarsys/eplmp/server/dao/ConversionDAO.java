@@ -17,13 +17,17 @@ import org.polarsys.eplmp.core.product.PartIteration;
 import org.polarsys.eplmp.core.product.PartRevision;
 
 import javax.enterprise.context.RequestScoped;
-import javax.persistence.*;
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
+import javax.persistence.PersistenceException;
+import javax.persistence.TypedQuery;
 
 
 @RequestScoped
 public class ConversionDAO {
 
-    @PersistenceContext
+    @Inject
     private EntityManager em;
 
     public ConversionDAO() {

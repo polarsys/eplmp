@@ -21,9 +21,9 @@ import org.polarsys.eplmp.core.exceptions.ProductInstanceMasterNotFoundException
 import org.polarsys.eplmp.core.product.PartRevision;
 
 import javax.enterprise.context.RequestScoped;
+import javax.inject.Inject;
 import javax.persistence.EntityExistsException;
 import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceException;
 import java.util.List;
 
@@ -31,7 +31,7 @@ import java.util.List;
 @RequestScoped
 public class ProductInstanceMasterDAO {
 
-    @PersistenceContext
+    @Inject
     private EntityManager em;
 
     public ProductInstanceMasterDAO() {

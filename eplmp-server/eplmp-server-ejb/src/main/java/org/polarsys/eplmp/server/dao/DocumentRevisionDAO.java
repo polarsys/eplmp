@@ -33,7 +33,7 @@ public class DocumentRevisionDAO {
     public static final String WORKSPACE_ID = "workspaceId";
     public static final String EXCLUDED_FOLDERS = "excludedFolders";
 
-    @PersistenceContext
+    @Inject
     private EntityManager em;
 
     @Inject

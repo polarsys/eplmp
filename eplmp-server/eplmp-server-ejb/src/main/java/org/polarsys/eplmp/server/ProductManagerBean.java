@@ -52,7 +52,6 @@ import javax.enterprise.util.AnnotationLiteral;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
-import javax.persistence.PersistenceContext;
 import java.text.ParseException;
 import java.util.*;
 import java.util.logging.Level;
@@ -64,7 +63,7 @@ import java.util.stream.Collectors;
 @Stateless(name = "ProductManagerBean")
 public class ProductManagerBean implements IProductManagerLocal {
 
-    @PersistenceContext
+    @Inject
     private EntityManager em;
 
     @Inject

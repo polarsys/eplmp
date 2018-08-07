@@ -14,15 +14,15 @@ package org.polarsys.eplmp.server.dao;
 import org.polarsys.eplmp.core.configuration.PartCollection;
 
 import javax.enterprise.context.RequestScoped;
+import javax.inject.Inject;
 import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 @RequestScoped
 public class PartCollectionDAO {
 
-    @PersistenceContext
+    @Inject
     private EntityManager em;
 
     private static final Logger LOGGER = Logger.getLogger(PartCollectionDAO.class.getName());

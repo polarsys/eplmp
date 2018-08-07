@@ -9,22 +9,25 @@
   *    DocDoku - initial API and implementation
   *******************************************************************************/
 
-package org.polarsys.eplmp.server.dao;
+package org.polarsys.eplmp.server;
 
-import org.polarsys.eplmp.core.document.DocumentIteration;
-
-import javax.enterprise.context.RequestScoped;
-import javax.inject.Inject;
+import javax.ejb.Singleton;
+import javax.enterprise.inject.Produces;
 import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 
+/**
+ * Provides EntityManager injection point
+ * */
+@Singleton
+public class EntityManagerProducer {
 
-@RequestScoped
-public class DocumentDAO {
-
-    @Inject
+    @PersistenceContext
     private EntityManager em;
 
-    public void removeDoc(DocumentIteration pDoc){
-        em.remove(pDoc);
+    @Produces
+    public  EntityManager create(){
+      return em;
     }
+
 }

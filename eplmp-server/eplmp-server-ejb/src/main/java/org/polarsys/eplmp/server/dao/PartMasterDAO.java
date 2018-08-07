@@ -33,7 +33,7 @@ public class PartMasterDAO {
 
     public static final String WORKSPACE_ID = "workspaceId";
 
-    @PersistenceContext
+    @Inject
     private EntityManager em;
 
     @Inject

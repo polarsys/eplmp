@@ -14,14 +14,14 @@ import org.polarsys.eplmp.core.exceptions.MarkerNotFoundException;
 import org.polarsys.eplmp.core.product.Marker;
 
 import javax.enterprise.context.RequestScoped;
+import javax.inject.Inject;
 import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 
 
 @RequestScoped
 public class MarkerDAO {
 
-    @PersistenceContext
+    @Inject
     private EntityManager em;
 
     public MarkerDAO() {

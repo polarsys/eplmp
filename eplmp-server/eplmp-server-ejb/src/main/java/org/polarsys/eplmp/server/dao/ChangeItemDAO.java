@@ -22,7 +22,6 @@ import org.polarsys.eplmp.core.product.PartRevisionKey;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,7 +34,7 @@ public class ChangeItemDAO {
     private static final String PART_MASTER_NUMBER = "partMasterNumber";
     private static final String FOLDER = "folder";
 
-    @PersistenceContext
+    @Inject
     private EntityManager em;
 
     @Inject

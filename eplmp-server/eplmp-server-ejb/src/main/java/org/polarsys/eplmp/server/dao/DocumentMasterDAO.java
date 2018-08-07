@@ -19,7 +19,6 @@ import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.persistence.EntityExistsException;
 import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceException;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -34,7 +33,7 @@ public class DocumentMasterDAO {
 
     private static final Logger LOGGER = Logger.getLogger(DocumentMasterDAO.class.getName());
 
-    @PersistenceContext
+    @Inject
     private EntityManager em;
 
     @Inject

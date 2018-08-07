@@ -18,14 +18,18 @@ import org.polarsys.eplmp.core.product.PartMasterTemplate;
 import org.polarsys.eplmp.core.product.PartMasterTemplateKey;
 
 import javax.enterprise.context.RequestScoped;
-import javax.persistence.*;
+import javax.inject.Inject;
+import javax.persistence.EntityExistsException;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceException;
+import javax.persistence.TypedQuery;
 import java.util.List;
 
 
 @RequestScoped
 public class PartMasterTemplateDAO {
 
-    @PersistenceContext
+    @Inject
     private EntityManager em;
 
     public PartMasterTemplateDAO() {

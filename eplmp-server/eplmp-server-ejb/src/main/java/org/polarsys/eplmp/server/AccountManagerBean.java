@@ -30,7 +30,6 @@ import javax.ejb.Local;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import java.util.Date;
 import java.util.List;
 
@@ -39,7 +38,7 @@ import java.util.List;
 @Stateless(name = "AccountManagerBean")
 public class AccountManagerBean implements IAccountManagerLocal {
 
-    @PersistenceContext
+    @Inject
     private EntityManager em;
 
     @Inject

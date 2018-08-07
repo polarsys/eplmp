@@ -22,6 +22,7 @@ import org.polarsys.eplmp.core.security.WorkspaceUserGroupMembership;
 import org.polarsys.eplmp.core.security.WorkspaceUserGroupMembershipKey;
 
 import javax.enterprise.context.RequestScoped;
+import javax.inject.Inject;
 import javax.persistence.*;
 import java.util.List;
 
@@ -30,7 +31,8 @@ import java.util.List;
 public class UserGroupDAO {
 
     public static final String WORKSPACE_ID = "workspaceId";
-    @PersistenceContext
+
+    @Inject
     private EntityManager em;
 
     public UserGroupDAO() {

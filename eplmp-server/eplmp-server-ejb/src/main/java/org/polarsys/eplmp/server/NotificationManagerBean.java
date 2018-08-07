@@ -33,7 +33,6 @@ import javax.ejb.Local;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import java.util.*;
 
 /**
@@ -44,7 +43,7 @@ import java.util.*;
 @Stateless(name = "NotificationManagerBean")
 public class NotificationManagerBean implements INotificationManagerLocal {
 
-    @PersistenceContext
+    @Inject
     private EntityManager em;
 
     @Inject

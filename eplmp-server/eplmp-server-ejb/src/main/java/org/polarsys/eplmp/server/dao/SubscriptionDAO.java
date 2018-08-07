@@ -21,7 +21,11 @@ import org.polarsys.eplmp.core.notification.TagUserSubscription;
 import org.polarsys.eplmp.core.notification.TagUserSubscriptionKey;
 
 import javax.enterprise.context.RequestScoped;
-import javax.persistence.*;
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
+import javax.persistence.EntityNotFoundException;
+import javax.persistence.Query;
+import javax.persistence.TypedQuery;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -35,7 +39,7 @@ public class SubscriptionDAO {
     private static final Logger LOGGER = Logger.getLogger(SubscriptionDAO.class.getName());
     public static final String WORKSPACE_ID = "workspaceId";
 
-    @PersistenceContext
+    @Inject
     private EntityManager em;
 
     public TagUserSubscription saveTagUserSubscription(TagUserSubscription pSubscription) {

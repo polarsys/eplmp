@@ -18,15 +18,15 @@ import org.polarsys.eplmp.core.security.ACLUserEntry;
 import org.polarsys.eplmp.core.security.ACLUserGroupEntry;
 
 import javax.enterprise.context.RequestScoped;
+import javax.inject.Inject;
 import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import java.util.Map;
 
 @RequestScoped
 public class ACLDAO {
 
-    @PersistenceContext
+    @Inject
     private EntityManager em;
 
     public ACLDAO() {

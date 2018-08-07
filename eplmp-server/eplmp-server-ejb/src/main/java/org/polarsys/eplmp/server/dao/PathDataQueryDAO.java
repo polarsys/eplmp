@@ -21,8 +21,8 @@ import org.polarsys.eplmp.core.query.QueryRule;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.RequestScoped;
+import javax.inject.Inject;
 import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -43,7 +43,7 @@ public class PathDataQueryDAO {
     private static final String STRING = "string";
     private static final String INSTANCE_ATTRIBUTES = "instanceAttributes";
 
-    @PersistenceContext
+    @Inject
     private EntityManager em;
 
     private CriteriaBuilder cb;

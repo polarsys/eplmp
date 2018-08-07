@@ -20,9 +20,9 @@ import org.polarsys.eplmp.core.workflow.Role;
 import org.polarsys.eplmp.core.workflow.RoleKey;
 
 import javax.enterprise.context.RequestScoped;
+import javax.inject.Inject;
 import javax.persistence.EntityExistsException;
 import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceException;
 import java.util.List;
 import java.util.logging.Level;
@@ -34,7 +34,7 @@ import java.util.logging.Logger;
 @RequestScoped
 public class RoleDAO {
 
-    @PersistenceContext
+    @Inject
     private EntityManager em;
 
     private static final Logger LOGGER = Logger.getLogger(RoleDAO.class.getName());

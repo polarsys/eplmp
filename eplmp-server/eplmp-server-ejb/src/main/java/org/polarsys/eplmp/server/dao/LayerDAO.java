@@ -15,8 +15,8 @@ import org.polarsys.eplmp.core.product.ConfigurationItemKey;
 import org.polarsys.eplmp.core.product.Layer;
 
 import javax.enterprise.context.RequestScoped;
+import javax.inject.Inject;
 import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
 import java.util.List;
 
@@ -24,7 +24,7 @@ import java.util.List;
 @RequestScoped
 public class LayerDAO {
 
-    @PersistenceContext
+    @Inject
     private EntityManager em;
     
     public LayerDAO() {

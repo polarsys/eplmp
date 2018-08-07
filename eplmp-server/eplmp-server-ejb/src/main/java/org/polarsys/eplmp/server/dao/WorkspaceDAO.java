@@ -32,7 +32,6 @@ import org.polarsys.eplmp.core.workflow.WorkspaceWorkflow;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceException;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -45,7 +44,7 @@ public class WorkspaceDAO {
     public static final String WORKSPACE = "workspace";
     public static final String WORKSPACE_ID = "workspaceId";
 
-    @PersistenceContext
+    @Inject
     private EntityManager em;
 
     @Inject

@@ -21,7 +21,6 @@ import javax.ejb.Local;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.logging.Level;
@@ -33,7 +32,7 @@ public class PlatformHealthManagerBean implements IPlatformHealthManagerLocal {
 
     private static final Logger LOGGER = Logger.getLogger(PlatformHealthManagerBean.class.getName());
 
-    @PersistenceContext
+    @Inject
     private EntityManager em;
 
     @Inject

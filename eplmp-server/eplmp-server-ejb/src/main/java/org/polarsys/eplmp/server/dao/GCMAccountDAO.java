@@ -18,16 +18,16 @@ import org.polarsys.eplmp.core.exceptions.GCMAccountNotFoundException;
 import org.polarsys.eplmp.core.gcm.GCMAccount;
 
 import javax.enterprise.context.RequestScoped;
+import javax.inject.Inject;
 import javax.persistence.EntityExistsException;
 import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceException;
 
 
 @RequestScoped
 public class GCMAccountDAO {
 
-    @PersistenceContext
+    @Inject
     private EntityManager em;
 
     public GCMAccountDAO() {

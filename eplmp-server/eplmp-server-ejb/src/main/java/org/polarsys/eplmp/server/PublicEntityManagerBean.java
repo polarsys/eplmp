@@ -36,7 +36,6 @@ import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 
 /**
  * EJB that trusts REST layer. Provide public documents, parts and binary resources services.
@@ -50,7 +49,7 @@ import javax.persistence.PersistenceContext;
 @Stateless(name = "PublicEntityBean")
 public class PublicEntityManagerBean implements IPublicEntityManagerLocal {
 
-    @PersistenceContext
+    @Inject
     private EntityManager em;
 
     @Inject

@@ -33,7 +33,6 @@ import javax.ejb.Local;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import java.util.Collection;
 import java.util.List;
 
@@ -42,7 +41,7 @@ import java.util.List;
 @Stateless(name = "PartWorkflowManagerBean")
 public class PartWorkflowManagerBean implements IPartWorkflowManagerLocal {
 
-    @PersistenceContext
+    @Inject
     private EntityManager em;
 
     @Inject
