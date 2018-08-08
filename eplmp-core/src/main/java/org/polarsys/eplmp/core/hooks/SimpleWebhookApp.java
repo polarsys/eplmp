@@ -10,6 +10,7 @@
   *******************************************************************************/
 package org.polarsys.eplmp.core.hooks;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 
@@ -33,6 +34,7 @@ public class SimpleWebhookApp extends WebhookApp {
 
     private String uri;
 
+    @Column(name="AUTH")
     private String authorization;
 
     public SimpleWebhookApp(String method, String authorization, String uri) {
