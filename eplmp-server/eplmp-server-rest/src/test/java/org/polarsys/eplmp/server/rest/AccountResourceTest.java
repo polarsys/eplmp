@@ -15,12 +15,10 @@ import org.jose4j.keys.HmacKey;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.runners.MockitoJUnitRunner;
 import org.polarsys.eplmp.core.common.Account;
 import org.polarsys.eplmp.core.common.Workspace;
 import org.polarsys.eplmp.core.exceptions.ApplicationException;
@@ -110,18 +108,22 @@ public class AccountResourceTest {
         Account account = new Account("FooBar");
         Mockito.when(authConfig.getJWTKey()).thenReturn(key);
 
-        Mockito.when(accountManager.updateAccount(Matchers.anyString(),Matchers.anyString(),Matchers.anyString(),
-                Matchers.anyString(),Matchers.anyString())).thenReturn(account);
+        Mockito.when(accountManager.updateAccount(Matchers.anyString(), Matchers.anyString(), Matchers.anyString(),
+                Matchers.anyString(), Matchers.anyString())).thenReturn(account);
 
         AccountDTO accountDTO = new AccountDTO();
         accountDTO.setLogin(account.getLogin());
         Response res = accountResource.updateAccount(null, accountDTO);
         Assert.assertEquals(Response.Status.FORBIDDEN.getStatusCode(), res.getStatus());
 
-        res = accountResource.updateAccount("WithoutBearer "+authToken, accountDTO);
+        accountDTO.setPassword("");
+        res = accountResource.updateAccount(null, accountDTO);
         Assert.assertEquals(Response.Status.FORBIDDEN.getStatusCode(), res.getStatus());
 
-        res = accountResource.updateAccount("Bearer "+authToken, accountDTO);
+        res = accountResource.updateAccount("WithoutBearer " + authToken, accountDTO);
+        Assert.assertEquals(Response.Status.FORBIDDEN.getStatusCode(), res.getStatus());
+
+        res = accountResource.updateAccount("Bearer " + authToken, accountDTO);
         Assert.assertEquals(Response.Status.OK.getStatusCode(), res.getStatus());
 
         accountDTO.setPassword("SomePass");
@@ -130,7 +132,7 @@ public class AccountResourceTest {
         try {
             accountResource.updateAccount(null, accountDTO);
             Assert.fail("Should have thrown");
-        } catch (NotAllowedException e){
+        } catch (NotAllowedException e) {
             Assert.assertNotNull(e.getMessage());
         }
 
@@ -148,7 +150,7 @@ public class AccountResourceTest {
         Key key = new HmacKey("verySecretPhrase".getBytes("UTF-8"));
         Mockito.when(authConfig.getJWTKey()).thenReturn(key);
 
-        HttpServletRequest  mockedRequest = Mockito.mock(HttpServletRequest.class);
+        HttpServletRequest mockedRequest = Mockito.mock(HttpServletRequest.class);
         HttpServletResponse mockedResponse = Mockito.mock(HttpServletResponse.class);
         HttpSession mockedSession = Mockito.mock(HttpSession.class);
         Mockito.when(mockedRequest.getSession()).thenReturn(mockedSession);
@@ -156,8 +158,8 @@ public class AccountResourceTest {
         AccountDTO accountDTO = new AccountDTO();
         Account account = new Account();
 
-        Mockito.when(accountManager.createAccount(Matchers.anyString(),Matchers.anyString(),Matchers.anyString(),
-                Matchers.anyString(),Matchers.anyString(),Matchers.anyString()))
+        Mockito.when(accountManager.createAccount(Matchers.anyString(), Matchers.anyString(), Matchers.anyString(),
+                Matchers.anyString(), Matchers.anyString(), Matchers.anyString()))
                 .thenReturn(account);
 
         Response res = accountResource.createAccount(mockedRequest, mockedResponse, accountDTO);
@@ -180,12 +182,12 @@ public class AccountResourceTest {
         Mockito.when(mockedRequest.authenticate(mockedResponse))
                 .thenThrow(new IOException("Mocked exception"));
         res = accountResource.createAccount(mockedRequest, mockedResponse, accountDTO);
-        Assert.assertEquals(Response.Status.FORBIDDEN.getStatusCode(),res.getStatus());
+        Assert.assertEquals(Response.Status.FORBIDDEN.getStatusCode(), res.getStatus());
 
     }
 
     @Test
-    public void getWorkspacesTest(){
+    public void getWorkspacesTest() {
         Workspace[] workspaces = new Workspace[]{new Workspace("wks")};
         Mockito.when(userManager.getWorkspacesWhereCallerIsActive())
                 .thenReturn(workspaces);
@@ -196,11 +198,11 @@ public class AccountResourceTest {
         Object workspaceObject = workspaceList.get(0);
         Assert.assertTrue(workspaceObject.getClass().isAssignableFrom(WorkspaceDTO.class));
         WorkspaceDTO workspace = (WorkspaceDTO) workspaceObject;
-        Assert.assertEquals(workspaces[0].getId(),workspace.getId());
+        Assert.assertEquals(workspaces[0].getId(), workspace.getId());
     }
 
     @Test
-    public void setGCMAccountTest() throws ApplicationException{
+    public void setGCMAccountTest() throws ApplicationException {
         GCMAccountDTO data = new GCMAccountDTO();
         Response response = accountResource.setGCMAccount(data);
         Mockito.doNothing().when(accountManager).setGCMAccount(data.getGcmId());
