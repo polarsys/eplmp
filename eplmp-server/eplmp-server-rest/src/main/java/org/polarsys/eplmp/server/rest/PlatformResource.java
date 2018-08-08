@@ -38,10 +38,6 @@ public class PlatformResource {
     public PlatformResource() {
     }
 
-    @PostConstruct
-    public void init() {
-    }
-
     @GET
     @Path("health")
     @ApiOperation(value = "Get platform health status",
