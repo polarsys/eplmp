@@ -24,7 +24,6 @@ import org.polarsys.eplmp.core.security.UserGroupMapping;
 import org.polarsys.eplmp.core.services.IAccountManagerLocal;
 import org.polarsys.eplmp.core.services.IOAuthManagerLocal;
 import org.polarsys.eplmp.server.auth.AuthConfig;
-import org.polarsys.eplmp.server.auth.jwt.JWTokenFactory;
 import org.polarsys.eplmp.server.rest.dto.AccountDTO;
 import org.polarsys.eplmp.server.rest.dto.LoginRequestDTO;
 import javax.ws.rs.core.Response;
@@ -41,7 +40,7 @@ import javax.servlet.http.HttpSession;
 public class AuthResourceTest {
 
     @InjectMocks
-    AuthResource ressource = new AuthResource();
+    AuthResource resource = new AuthResource();
     @Mock
     private IAccountManagerLocal accountManager;
     @Mock
@@ -71,7 +70,7 @@ public class AuthResourceTest {
     public void setUp() {
 
         MockitoAnnotations.initMocks(this);
-        ressource.init();
+        resource.init();
     }
 
     @Test
@@ -87,7 +86,7 @@ public class AuthResourceTest {
         Mockito.when(oAuthManager.isProvidedAccount(account)).thenReturn(true);
 
         // wait for 403 status
-        Response res = ressource.login(request, response, loginDTO);
+        Response res = resource.login(request, response, loginDTO);
         Assert.assertEquals(Response.Status.FORBIDDEN.getStatusCode(), res.getStatus());
 
         // -----------------------------------------------------------------------------------
@@ -97,7 +96,7 @@ public class AuthResourceTest {
         Mockito.when(authConfig.isSessionEnabled()).thenReturn(true);
 
         // wait for 403 status
-        res = ressource.login(request, response, loginDTO);
+        res = resource.login(request, response, loginDTO);
         Assert.assertEquals(Response.Status.FORBIDDEN.getStatusCode(), res.getStatus());
 
         // -----------------------------------------------------------------------------------
@@ -111,7 +110,7 @@ public class AuthResourceTest {
         // -----------------------------------------------------------------------------------
 
         // wait for 200 status
-        res = ressource.login(request, response, loginDTO);
+        res = resource.login(request, response, loginDTO);
         Object entity = res.getEntity();
         Assert.assertEquals(Response.Status.OK.getStatusCode(), res.getStatus());
         Assert.assertTrue(entity.getClass().isAssignableFrom(AccountDTO.class));
@@ -121,7 +120,7 @@ public class AuthResourceTest {
         // TEST FOR REGULAR USER CONNECTION
 
         Mockito.when(userGroupMapping.getGroupName()).thenReturn(UserGroupMapping.REGULAR_USER_ROLE_ID);
-        res = ressource.login(request, response, loginDTO);
+        res = resource.login(request, response, loginDTO);
         entity = res.getEntity();
         Assert.assertEquals(Response.Status.OK.getStatusCode(), res.getStatus());
         Assert.assertTrue(entity.getClass().isAssignableFrom(AccountDTO.class));
@@ -131,7 +130,7 @@ public class AuthResourceTest {
         // TEST FOR GUEST USER CONNECTION
 
         Mockito.when(userGroupMapping.getGroupName()).thenReturn(UserGroupMapping.GUEST_ROLE_ID);
-        res = ressource.login(request, response, loginDTO);
+        res = resource.login(request, response, loginDTO);
         entity = res.getEntity();
         Assert.assertEquals(Response.Status.OK.getStatusCode(), res.getStatus());
         Assert.assertTrue(entity.getClass().isAssignableFrom(AccountDTO.class));
@@ -142,7 +141,7 @@ public class AuthResourceTest {
         Mockito.when(request.authenticate(response)).thenThrow(new IOException());
 
         // wait for 403 status
-        res = ressource.login(request, response, loginDTO);
+        res = resource.login(request, response, loginDTO);
         Assert.assertEquals(Response.Status.FORBIDDEN.getStatusCode(), res.getStatus());
     }
 }
