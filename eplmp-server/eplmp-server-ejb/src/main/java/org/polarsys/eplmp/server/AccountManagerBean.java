@@ -20,6 +20,7 @@ import org.polarsys.eplmp.core.services.IAccountManagerLocal;
 import org.polarsys.eplmp.core.services.IContextManagerLocal;
 import org.polarsys.eplmp.core.services.INotifierLocal;
 import org.polarsys.eplmp.core.services.IPlatformOptionsManagerLocal;
+import org.polarsys.eplmp.i18n.PropertiesLoader;
 import org.polarsys.eplmp.server.dao.AccountDAO;
 import org.polarsys.eplmp.server.dao.GCMAccountDAO;
 import org.polarsys.eplmp.server.dao.OrganizationDAO;
@@ -30,8 +31,11 @@ import javax.ejb.Local;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
+
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 
 @DeclareRoles({UserGroupMapping.REGULAR_USER_ROLE_ID, UserGroupMapping.ADMIN_ROLE_ID})
 @Local(IAccountManagerLocal.class)
@@ -113,16 +117,29 @@ public class AccountManagerBean implements IAccountManagerLocal {
 
     @RolesAllowed({UserGroupMapping.REGULAR_USER_ROLE_ID, UserGroupMapping.ADMIN_ROLE_ID})
     @Override
-    public Account updateAccount(String pName, String pEmail, String pLanguage, String pPassword, String pTimeZone) throws AccountNotFoundException {
+    public Account updateAccount(String pName, String pEmail, String pLanguage, String pPassword, String pTimeZone) throws AccountNotFoundException, NotAllowedException {
+        
+        if(!isLanguageSupported(pLanguage)){
+
+            throw new NotAllowedException("NotAllowedException74");
+        }
+
+        if(!isTimeZoneAvailable(pTimeZone)) {
+
+            throw new NotAllowedException("NotAllowedException75");
+        }
+        
         Account account = accountDAO.loadAccount(contextManager.getCallerPrincipalLogin());
         account.setName(pName);
         account.setEmail(pEmail);
         account.setLanguage(pLanguage);
         account.setTimeZone(pTimeZone);
         if (pPassword != null) {
+            
             accountDAO.updateCredential(account.getLogin(), pPassword, configManager.getDigestAlgorithm());
         }
         return account;
+        
     }
 
     @RolesAllowed({UserGroupMapping.REGULAR_USER_ROLE_ID, UserGroupMapping.ADMIN_ROLE_ID})
@@ -208,7 +225,18 @@ public class AccountManagerBean implements IAccountManagerLocal {
 
     @Override
     @RolesAllowed(UserGroupMapping.ADMIN_ROLE_ID)
-    public Account updateAccount(String pLogin, String pName, String pEmail, String pLanguage, String pPassword, String pTimeZone) throws AccountNotFoundException {
+    public Account updateAccount(String pLogin, String pName, String pEmail, String pLanguage, String pPassword, String pTimeZone) 
+            throws AccountNotFoundException, NotAllowedException {
+         
+        if(!isLanguageSupported(pLanguage)){
+
+            throw new NotAllowedException("NotAllowedException74");
+        }
+
+        if(!isTimeZoneAvailable(pTimeZone)) {
+
+            throw new NotAllowedException("NotAllowedException75");
+        }
         Account otherAccount = getAccount(pLogin);
         otherAccount.setName(pName);
         otherAccount.setEmail(pEmail);
@@ -218,5 +246,16 @@ public class AccountManagerBean implements IAccountManagerLocal {
             accountDAO.updateCredential(otherAccount.getLogin(), pPassword, configManager.getDigestAlgorithm());
         }
         return otherAccount;
+    }
+    
+    
+    private Boolean  isTimeZoneAvailable(String value) {
+
+        return Arrays.asList(TimeZone.getAvailableIDs()).contains(value);
+    }
+
+    private Boolean isLanguageSupported(String value) {
+
+        return PropertiesLoader.getSupportedLanguages().contains(value);
     }
 }
