@@ -51,7 +51,6 @@ import java.util.ArrayList;
 
 import static org.mockito.MockitoAnnotations.initMocks;
 
-@RunWith(MockitoJUnitRunner.class)
 public class AccountResourceTest {
 
     @InjectMocks
