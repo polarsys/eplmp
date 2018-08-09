@@ -104,15 +104,17 @@ public class EffectivityResource {
             throws EntityNotFoundException, UpdateException, WorkspaceNotEnabledException, AccessRightException, CreationException {
 
         Effectivity effectivity;
-        if (effectivityDTO.getTypeEffectivity().equals(TypeEffectivity.SERIALNUMBERBASEDEFFECTIVITY)) {
+        TypeEffectivity typeEffectivity = effectivityDTO.getTypeEffectivity();
+
+        if (TypeEffectivity.SERIALNUMBERBASEDEFFECTIVITY.equals(typeEffectivity)) {
             effectivity = effectivityManager.updateSerialNumberBasedEffectivity(workspaceId, effectivityId,
                     effectivityDTO.getName(), effectivityDTO.getDescription(),
                     effectivityDTO.getStartNumber(), effectivityDTO.getEndNumber());
-        } else if (effectivityDTO.getTypeEffectivity().equals(TypeEffectivity.DATEBASEDEFFECTIVITY)) {
+        } else if (TypeEffectivity.DATEBASEDEFFECTIVITY.equals(typeEffectivity))  {
             effectivity = effectivityManager.updateDateBasedEffectivity(workspaceId, effectivityId,
                     effectivityDTO.getName(), effectivityDTO.getDescription(),
                     effectivityDTO.getStartDate(), effectivityDTO.getEndDate());
-        } else if (effectivityDTO.getTypeEffectivity().equals(TypeEffectivity.LOTBASEDEFFECTIVITY)) {
+        } else if (TypeEffectivity.LOTBASEDEFFECTIVITY.equals(typeEffectivity))  {
             effectivity = effectivityManager.updateLotBasedEffectivity(workspaceId, effectivityId,
                     effectivityDTO.getName(), effectivityDTO.getDescription(),
                     effectivityDTO.getStartLotId(), effectivityDTO.getEndLotId());
@@ -122,7 +124,7 @@ public class EffectivityResource {
         }
 
         EffectivityDTO returnedEffectivityDTO = mapper.map(effectivity, EffectivityDTO.class);
-        returnedEffectivityDTO.setTypeEffectivity(effectivityDTO.getTypeEffectivity());
+        returnedEffectivityDTO.setTypeEffectivity(typeEffectivity);
 
         ConfigurationItem configurationItem = effectivity.getConfigurationItem();
         returnedEffectivityDTO.setConfigurationItemKey(configurationItem != null ? configurationItem.getKey() : null);
