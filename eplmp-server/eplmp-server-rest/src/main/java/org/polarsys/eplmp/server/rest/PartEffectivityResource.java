@@ -82,18 +82,19 @@ public class PartEffectivityResource {
         ConfigurationItemKey configurationItemKey = effectivity.getConfigurationItemKey();
         String productId = configurationItemKey != null ? configurationItemKey.getId() : null;
 
-        if (typeEffectivity.equals(TypeEffectivity.DATEBASEDEFFECTIVITY)) {
+        if (TypeEffectivity.DATEBASEDEFFECTIVITY.equals(typeEffectivity)) {
             createdEffectivity = effectivityManager.createDateBasedEffectivity(
                     workspaceId, partNumber, partVersion, effectivity.getName(), effectivity.getDescription(), productId, effectivity.getStartDate(), effectivity.getEndDate());
-        } else if (typeEffectivity.equals(TypeEffectivity.SERIALNUMBERBASEDEFFECTIVITY)) {
+        } else if (TypeEffectivity.SERIALNUMBERBASEDEFFECTIVITY.equals(typeEffectivity)) {
             createdEffectivity = effectivityManager.createSerialNumberBasedEffectivity(
                     workspaceId, partNumber, partVersion, effectivity.getName(), effectivity.getDescription(), productId, effectivity.getStartNumber(),
                     effectivity.getEndNumber());
-        } else if (typeEffectivity.equals(TypeEffectivity.LOTBASEDEFFECTIVITY)) {
+        } else if (TypeEffectivity.LOTBASEDEFFECTIVITY.equals(typeEffectivity)) {
             createdEffectivity = effectivityManager.createLotBasedEffectivity(
                     workspaceId, partNumber, partVersion, effectivity.getName(), effectivity.getDescription(), productId, effectivity.getStartLotId(),
                     effectivity.getEndLotId());
         }
+        // todo : prevent Mapping exception if createdEffectivity is null => throw a bad request status
 
         returnedEffectivityDTO = mapper.map(createdEffectivity, EffectivityDTO.class);
         returnedEffectivityDTO.setConfigurationItemKey(configurationItemKey);
