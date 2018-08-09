@@ -78,25 +78,7 @@ public class AttributesResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId)
             throws EntityNotFoundException, UserNotActiveException, WorkspaceNotEnabledException {
         List<InstanceAttribute> attributes = productManager.getPartIterationsInstanceAttributesInWorkspace(workspaceId);
-        List<InstanceAttributeDTO> attributeDTOList = new ArrayList<>();
-        Set<String> seen=new HashSet<>();
-
-        for (InstanceAttribute attribute : attributes) {
-            if(attribute==null)
-                continue;
-
-            InstanceAttributeDTO dto = mapper.map(attribute, InstanceAttributeDTO.class);
-            if(seen.add(dto.getType()+"."+dto.getName())) {
-                dto.setValue(null);
-                dto.setMandatory(false);
-                dto.setLocked(false);
-                dto.setLovName(null);
-                attributeDTOList.add(dto);
-            }
-        }
-
-        return Response.ok(new GenericEntity<List<InstanceAttributeDTO>>((List<InstanceAttributeDTO>) attributeDTOList) {
-        }).build();
+        return filterAttributes(attributes);
     }
 
     @GET
@@ -115,6 +97,10 @@ public class AttributesResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId)
             throws EntityNotFoundException, UserNotActiveException, WorkspaceNotEnabledException {
         List<InstanceAttribute> attributes = productManager.getPathDataInstanceAttributesInWorkspace(workspaceId);
+        return filterAttributes(attributes);
+    }
+
+    private Response filterAttributes(List<InstanceAttribute> attributes) {
         List<InstanceAttributeDTO> attributeDTOList = new ArrayList<>();
         Set<String> seen=new HashSet<>();
 
@@ -131,7 +117,9 @@ public class AttributesResource {
                 attributeDTOList.add(dto);
             }
         }
+
         return Response.ok(new GenericEntity<List<InstanceAttributeDTO>>((List<InstanceAttributeDTO>) attributeDTOList) {
         }).build();
     }
+
 }
