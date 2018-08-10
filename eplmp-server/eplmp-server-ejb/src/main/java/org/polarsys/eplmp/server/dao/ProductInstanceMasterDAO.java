@@ -63,7 +63,7 @@ public class ProductInstanceMasterDAO {
         }catch (EntityExistsException e){
             throw new ProductInstanceAlreadyExistsException(pProductInstanceMaster);
         }catch (PersistenceException e){
-            throw new CreationException("");
+            throw new CreationException();
         }
 
     }

@@ -56,7 +56,7 @@ public class OrganizationDAO {
         try {
             //the EntityExistsException is thrown only when flush occurs
             if (pOrganization.getName().trim().equals(""))
-                throw new CreationException("");
+                throw new CreationException();
             em.persist(pOrganization);
             em.flush();
         } catch (EntityExistsException pEEEx) {
@@ -65,7 +65,7 @@ public class OrganizationDAO {
             //EntityExistsException is case sensitive
             //whereas MySQL is not thus PersistenceException could be
             //thrown instead of EntityExistsException
-            throw new CreationException("");
+            throw new CreationException();
         }
     }
 

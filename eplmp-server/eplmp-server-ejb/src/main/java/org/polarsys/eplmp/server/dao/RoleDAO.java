@@ -66,7 +66,7 @@ public class RoleDAO {
             throw new RoleAlreadyExistsException(pRole);
         } catch (PersistenceException pPEx) {
             LOGGER.log(Level.FINEST,null,pPEx);
-            throw new CreationException("");
+            throw new CreationException();
         }
     }
 

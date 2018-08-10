@@ -66,7 +66,7 @@ public class FolderDAO {
             //whereas MySQL is not thus PersistenceException could be
             //thrown instead of EntityExistsException
             LOGGER.log(Level.FINEST,null,pPEx);
-            throw new CreationException("");
+            throw new CreationException();
         }
     }
     

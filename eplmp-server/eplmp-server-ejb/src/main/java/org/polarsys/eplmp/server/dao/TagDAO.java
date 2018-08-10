@@ -83,7 +83,7 @@ public class TagDAO {
             //whereas MySQL is not thus PersistenceException could be
             //thrown instead of EntityExistsException
             if(!silent) {
-                throw new CreationException("");
+                throw new CreationException();
             }
         }
     }

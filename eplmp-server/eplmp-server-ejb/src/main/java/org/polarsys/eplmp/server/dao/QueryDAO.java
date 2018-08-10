@@ -66,7 +66,7 @@ public class QueryDAO {
             throw new QueryAlreadyExistsException(query);
         } catch (PersistenceException pPEx) {
             LOGGER.log(Level.FINEST, null, pPEx);
-            throw new CreationException("");
+            throw new CreationException();
         }
     }
 

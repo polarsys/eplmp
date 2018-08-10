@@ -67,7 +67,7 @@ public class PathToPathLinkDAO {
             //EntityExistsException is case sensitive
             //whereas MySQL is not thus PersistenceException could be
             //thrown instead of EntityExistsException
-            throw new CreationException("");
+            throw new CreationException();
         }
     }
 

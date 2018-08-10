@@ -60,7 +60,7 @@ public class EffectivityManagerBean implements IEffectivityManagerLocal {
 
         // lower range is mandatory, upper range isn't
         if (pStartNumber == null || pStartNumber.isEmpty()) {
-            throw new CreationException("");
+            throw new CreationException();
         }
 
         PartRevisionKey partRevisionKey = new PartRevisionKey(workspaceId, partNumber, version);
@@ -98,7 +98,7 @@ public class EffectivityManagerBean implements IEffectivityManagerLocal {
 
         // lower range is mandatory, upper range isn't
         if (pStartDate == null) {
-            throw new CreationException("");
+            throw new CreationException();
         }
 
         // ConfigurationItem is optional for Date based effectivities
@@ -136,7 +136,7 @@ public class EffectivityManagerBean implements IEffectivityManagerLocal {
 
         // lower range is mandatory, upper range isn't
         if (pStartLotId == null || pStartLotId.isEmpty()) {
-            throw new CreationException("");
+            throw new CreationException();
         }
 
         ConfigurationItemKey configurationItemKey = new ConfigurationItemKey(workspaceId, pConfigurationItemId);
@@ -206,7 +206,7 @@ public class EffectivityManagerBean implements IEffectivityManagerLocal {
 
         // lower range is mandatory, upper range isn't
         if (pStartNumber == null || pStartNumber.isEmpty()) {
-            throw new CreationException("");
+            throw new CreationException();
         }
 
         PartRevision partRevision = effectivityDAO.getPartRevisionHolder(pId);
@@ -235,7 +235,7 @@ public class EffectivityManagerBean implements IEffectivityManagerLocal {
 
         // lower range is mandatory, upper range isn't
         if (pStartDate == null) {
-            throw new CreationException("");
+            throw new CreationException();
         }
 
         PartRevision partRevision = effectivityDAO.getPartRevisionHolder(pId);
@@ -265,7 +265,7 @@ public class EffectivityManagerBean implements IEffectivityManagerLocal {
 
         // lower range is mandatory, upper range isn't
         if (pStartLotId == null || pStartLotId.isEmpty()) {
-            throw new CreationException("");
+            throw new CreationException();
         }
 
         PartRevision partRevision = effectivityDAO.getPartRevisionHolder(pId);

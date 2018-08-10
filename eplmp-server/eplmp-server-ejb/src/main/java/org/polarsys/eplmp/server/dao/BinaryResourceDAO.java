@@ -52,7 +52,7 @@ public class BinaryResourceDAO {
             //whereas MySQL is not thus PersistenceException could be
             //thrown instead of EntityExistsException
             LOGGER.log(Level.FINER, null, pPEx);
-            throw new CreationException("");
+            throw new CreationException();
         }
     }
 

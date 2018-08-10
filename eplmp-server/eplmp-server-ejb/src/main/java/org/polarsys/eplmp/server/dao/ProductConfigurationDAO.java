@@ -41,7 +41,7 @@ public class ProductConfigurationDAO {
             em.flush();
         } catch (PersistenceException pPEx) {
             LOGGER.log(Level.FINEST, null, pPEx);
-            throw new CreationException("");
+            throw new CreationException();
         }
     }
 

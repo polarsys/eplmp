@@ -27,9 +27,7 @@ public abstract class ApplicationException extends Exception {
 
     private Properties properties;
 
-    public ApplicationException() {
-        super();
-    }
+    public ApplicationException() {}
 
     public ApplicationException(String pMessage) {
         super(pMessage);

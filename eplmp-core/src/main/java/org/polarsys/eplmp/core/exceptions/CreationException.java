@@ -17,6 +17,8 @@ package org.polarsys.eplmp.core.exceptions;
  */
 public class CreationException extends ApplicationException {
 
+    public CreationException() {}
+
     public CreationException(String pMessage) {
         super(pMessage);
     }
