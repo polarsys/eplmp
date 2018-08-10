@@ -18,13 +18,15 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.polarsys.eplmp.core.exceptions.ApplicationException;
-import org.polarsys.eplmp.core.product.*;
+import org.polarsys.eplmp.core.product.DateBasedEffectivity;
+import org.polarsys.eplmp.core.product.LotBasedEffectivity;
+import org.polarsys.eplmp.core.product.SerialNumberBasedEffectivity;
+import org.polarsys.eplmp.core.product.TypeEffectivity;
 import org.polarsys.eplmp.core.services.IEffectivityManagerLocal;
 import org.polarsys.eplmp.core.services.IProductManagerLocal;
 import org.polarsys.eplmp.server.rest.dto.EffectivityDTO;
 
 import javax.ws.rs.core.Response;
-
 import java.util.Date;
 
 import static org.mockito.MockitoAnnotations.initMocks;

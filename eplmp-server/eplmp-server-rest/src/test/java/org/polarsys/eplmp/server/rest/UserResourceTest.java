@@ -31,7 +31,6 @@ import org.polarsys.eplmp.server.rest.dto.UserDTO;
 
 import javax.persistence.EntityManager;
 import javax.ws.rs.core.Response;
-
 import java.util.Arrays;
 import java.util.List;
 

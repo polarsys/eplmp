@@ -11,13 +11,10 @@
 
 package org.polarsys.eplmp.server.rest;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
-import org.mockito.Spy;
+import org.mockito.*;
 import org.polarsys.eplmp.core.common.Account;
 import org.polarsys.eplmp.core.exceptions.EntityNotFoundException;
 import org.polarsys.eplmp.core.security.UserGroupMapping;
@@ -26,16 +23,14 @@ import org.polarsys.eplmp.core.services.IOAuthManagerLocal;
 import org.polarsys.eplmp.server.auth.AuthConfig;
 import org.polarsys.eplmp.server.rest.dto.AccountDTO;
 import org.polarsys.eplmp.server.rest.dto.LoginRequestDTO;
-import javax.ws.rs.core.Response;
-import org.junit.Assert;
-
-import java.io.IOException;
-import java.util.Date;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import javax.ws.rs.core.Response;
+import java.io.IOException;
+import java.util.Date;
 
 public class AuthResourceTest {
 

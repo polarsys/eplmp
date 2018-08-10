@@ -18,7 +18,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.polarsys.eplmp.core.common.*;
-import org.polarsys.eplmp.core.exceptions.*;
+import org.polarsys.eplmp.core.exceptions.ApplicationException;
 import org.polarsys.eplmp.core.meta.Tag;
 import org.polarsys.eplmp.core.notification.TagUserGroupSubscription;
 import org.polarsys.eplmp.core.services.INotificationManagerLocal;

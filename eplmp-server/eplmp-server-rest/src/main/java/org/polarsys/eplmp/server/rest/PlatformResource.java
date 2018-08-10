@@ -19,7 +19,6 @@ import org.polarsys.eplmp.core.exceptions.PlatformHealthException;
 import org.polarsys.eplmp.core.services.IPlatformHealthManagerLocal;
 import org.polarsys.eplmp.server.rest.dto.PlatformHealthDTO;
 
-import javax.annotation.PostConstruct;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.ws.rs.GET;

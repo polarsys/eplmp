@@ -29,7 +29,6 @@ import org.polarsys.eplmp.server.rest.dto.WorkspaceUserGroupMemberShipDTO;
 import org.polarsys.eplmp.server.rest.dto.WorkspaceUserMemberShipDTO;
 
 import javax.ws.rs.core.Response;
-
 import java.util.ArrayList;
 
 import static org.mockito.MockitoAnnotations.initMocks;

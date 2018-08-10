@@ -33,7 +33,6 @@ import org.polarsys.eplmp.core.exceptions.AccountAlreadyExistsException;
 import org.polarsys.eplmp.core.exceptions.CreationException;
 import org.polarsys.eplmp.core.exceptions.EntityNotFoundException;
 import org.polarsys.eplmp.core.exceptions.ProvidedAccountNotFoundException;
-import org.polarsys.eplmp.core.exceptions.UserGroupNotFoundException;
 import org.polarsys.eplmp.core.security.UserGroupMapping;
 import org.polarsys.eplmp.core.services.IAccountManagerLocal;
 import org.polarsys.eplmp.core.services.IContextManagerLocal;
