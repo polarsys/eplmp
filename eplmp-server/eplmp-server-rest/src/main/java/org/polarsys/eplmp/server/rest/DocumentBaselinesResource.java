@@ -129,7 +129,9 @@ public class DocumentBaselinesResource {
         }
 
         DocumentBaseline baseline = documentBaselineService.createBaseline(workspaceId, documentBaselineDTO.getName(), documentBaselineDTO.getType(), documentBaselineDTO.getDescription(), documentRevisionKeys);
-        return prepareCreatedResponse(getBaseline(workspaceId, baseline.getId()));
+        DocumentBaselineDTO baselineDTO = getBaseline(workspaceId, baseline.getId());
+
+        return Tools.prepareCreatedResponse(String.valueOf(baselineDTO.getId()), baselineDTO);
     }
 
 
@@ -244,19 +246,4 @@ public class DocumentBaselinesResource {
                 .entity(documentBaselineFileExport).build();
     }
 
-
-    /**
-     * Try to put a document baseline in a response
-     *
-     * @param baselineDTO The document baseline to add
-     * @return a Response object with created baseline as entity
-     */
-    private Response prepareCreatedResponse(DocumentBaselineDTO baselineDTO) {
-        try {
-            return Response.created(URI.create(URLEncoder.encode(String.valueOf(baselineDTO.getId()), "UTF-8"))).entity(baselineDTO).build();
-        } catch (UnsupportedEncodingException ex) {
-            LOGGER.log(Level.WARNING, null, ex);
-            return Response.ok().entity(baselineDTO).build();
-        }
-    }
 }

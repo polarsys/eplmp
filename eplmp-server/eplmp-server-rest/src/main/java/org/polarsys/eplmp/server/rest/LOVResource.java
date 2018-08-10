@@ -100,12 +100,12 @@ public class LOVResource {
     public Response createLOV(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "LOV to create") ListOfValuesDTO lovDTO)
-            throws EntityAlreadyExistsException, EntityNotFoundException, CreationException, UnsupportedEncodingException,
+            throws EntityAlreadyExistsException, EntityNotFoundException, CreationException,
             AccessRightException, UserNotActiveException, WorkspaceNotEnabledException {
 
         ListOfValues lov = mapper.map(lovDTO, ListOfValues.class);
         lovManager.createLov(workspaceId, lov.getName(), lov.getValues());
-        return Response.created(URI.create(URLEncoder.encode(lov.getName(), "UTF-8"))).entity(lovDTO).build();
+        return Tools.prepareCreatedResponse(lov.getName(), lovDTO);
     }
 
     @GET

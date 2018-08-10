@@ -154,12 +154,7 @@ public class RoleResource {
         Role roleCreated = roleService.createRole(roleDTO.getName(), roleDTO.getWorkspaceId(), userLogins, userGroupIds);
         RoleDTO roleCreatedDTO = mapRoleToDTO(roleCreated);
 
-        try {
-            return Response.created(URI.create(URLEncoder.encode(roleCreatedDTO.getName(), "UTF-8"))).entity(roleCreatedDTO).build();
-        } catch (UnsupportedEncodingException ex) {
-            LOGGER.log(Level.WARNING, null, ex);
-            return Response.ok().entity(roleCreatedDTO).build();
-        }
+        return Tools.prepareCreatedResponse(roleCreatedDTO.getName(), roleCreatedDTO);
     }
 
     @PUT
@@ -197,12 +192,7 @@ public class RoleResource {
 
         Role roleUpdated = roleService.updateRole(new RoleKey(roleDTO.getWorkspaceId(), roleName), userLogins, userGroupIds);
         RoleDTO roleUpdatedDTO = mapRoleToDTO(roleUpdated);
-        try {
-            return Response.created(URI.create(URLEncoder.encode(roleUpdatedDTO.getName(), "UTF-8"))).entity(roleUpdatedDTO).build();
-        } catch (UnsupportedEncodingException ex) {
-            LOGGER.log(Level.WARNING, null, ex);
-            return Response.ok().entity(roleUpdatedDTO).build();
-        }
+        return Response.ok().entity(roleUpdatedDTO).build();
     }
 
     @DELETE
