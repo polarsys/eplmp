@@ -35,6 +35,7 @@ import javax.ws.rs.core.Response;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 /**
  * @author Morgan Guimard
@@ -45,8 +46,6 @@ import java.util.logging.Logger;
 @DeclareRoles(UserGroupMapping.REGULAR_USER_ROLE_ID)
 @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
 public class RoleResource {
-
-    private static final Logger LOGGER = Logger.getLogger(RoleResource.class.getName());
 
     @Inject
     private IWorkflowManagerLocal roleService;
@@ -136,15 +135,13 @@ public class RoleResource {
         List<UserGroupDTO> groupDTOs = roleDTO.getDefaultAssignedGroups();
         List<String> userLogins = new ArrayList<>();
         List<String> userGroupIds = new ArrayList<>();
+
         if (userDTOs != null) {
-            for (UserDTO userDTO : userDTOs) {
-                userLogins.add(userDTO.getLogin());
-            }
+            userLogins.addAll(userDTOs.stream().map(UserDTO::getLogin).collect(Collectors.toList()));
         }
+
         if (groupDTOs != null) {
-            for (UserGroupDTO groupDTO : groupDTOs) {
-                userGroupIds.add(groupDTO.getId());
-            }
+            userGroupIds.addAll(groupDTOs.stream().map(UserGroupDTO::getId).collect(Collectors.toList()));
         }
 
         Role roleCreated = roleService.createRole(roleDTO.getName(), roleDTO.getWorkspaceId(), userLogins, userGroupIds);
@@ -175,15 +172,13 @@ public class RoleResource {
         List<UserGroupDTO> groupDTOs = roleDTO.getDefaultAssignedGroups();
         List<String> userLogins = new ArrayList<>();
         List<String> userGroupIds = new ArrayList<>();
+
         if (userDTOs != null) {
-            for (UserDTO userDTO : userDTOs) {
-                userLogins.add(userDTO.getLogin());
-            }
+            userLogins.addAll(userDTOs.stream().map(UserDTO::getLogin).collect(Collectors.toList()));
         }
+
         if (groupDTOs != null) {
-            for (UserGroupDTO groupDTO : groupDTOs) {
-                userGroupIds.add(groupDTO.getId());
-            }
+            userGroupIds.addAll(groupDTOs.stream().map(UserGroupDTO::getId).collect(Collectors.toList()));
         }
 
         Role roleUpdated = roleService.updateRole(new RoleKey(roleDTO.getWorkspaceId(), roleName), userLogins, userGroupIds);
