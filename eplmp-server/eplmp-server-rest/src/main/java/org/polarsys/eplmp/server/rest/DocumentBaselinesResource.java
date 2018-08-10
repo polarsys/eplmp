@@ -35,13 +35,9 @@ import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.File;
-import java.io.UnsupportedEncodingException;
-import java.net.URI;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 /**
  * @author Taylor LABEJOF
@@ -53,8 +49,6 @@ import java.util.logging.Logger;
 @DeclareRoles(UserGroupMapping.REGULAR_USER_ROLE_ID)
 @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
 public class DocumentBaselinesResource {
-
-    private static final Logger LOGGER = Logger.getLogger(DocumentBaselinesResource.class.getName());
 
     @Inject
     private IDocumentBaselineManagerLocal documentBaselineService;
@@ -122,11 +116,9 @@ public class DocumentBaselinesResource {
             throws EntityNotFoundException, UserNotActiveException, AccessRightException, NotAllowedException, WorkspaceNotEnabledException {
 
         List<BaselinedDocumentDTO> baselinedDocumentsDTO = documentBaselineDTO.getBaselinedDocuments();
-        List<DocumentRevisionKey> documentRevisionKeys = new ArrayList<>();
-
-        for (BaselinedDocumentDTO document : baselinedDocumentsDTO) {
-            documentRevisionKeys.add(new DocumentRevisionKey(workspaceId, document.getDocumentMasterId(), document.getVersion()));
-        }
+        List<DocumentRevisionKey> documentRevisionKeys = baselinedDocumentsDTO.stream()
+                .map(document -> new DocumentRevisionKey(workspaceId, document.getDocumentMasterId(), document.getVersion()))
+                .collect(Collectors.toList());
 
         DocumentBaseline baseline = documentBaselineService.createBaseline(workspaceId, documentBaselineDTO.getName(), documentBaselineDTO.getType(), documentBaselineDTO.getDescription(), documentRevisionKeys);
         DocumentBaselineDTO baselineDTO = getBaseline(workspaceId, baseline.getId());
