@@ -15,15 +15,14 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import org.polarsys.eplmp.i18n.PropertiesLoader;
+import org.polarsys.eplmp.server.rest.dto.StringListDTO;
 
 import javax.enterprise.context.RequestScoped;
-import javax.json.Json;
-import javax.json.JsonArrayBuilder;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import java.util.stream.Collectors;
 
 @RequestScoped
 @Path("languages")
@@ -42,10 +41,10 @@ public class LanguagesResource {
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getLanguages() {
-        JsonArrayBuilder arrayBuilder = Json.createArrayBuilder();
-        PropertiesLoader.getSupportedLanguages().forEach(arrayBuilder::add);
-        return Response.ok().entity(arrayBuilder.build()).build();
+    public StringListDTO getLanguages() {
+        return PropertiesLoader.getSupportedLanguages()
+                .stream()
+                .collect(Collectors.toCollection(StringListDTO::new));
     }
 
 }

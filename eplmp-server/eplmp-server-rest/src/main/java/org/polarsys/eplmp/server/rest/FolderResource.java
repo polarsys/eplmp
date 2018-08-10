@@ -30,13 +30,9 @@ import javax.inject.Inject;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.io.UnsupportedEncodingException;
-import java.net.URI;
-import java.net.URLEncoder;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 @RequestScoped
@@ -142,14 +138,7 @@ public class FolderResource {
         docRsDTO.setPath(createdDocRs.getLocation().getCompletePath());
         docRsDTO.setLifeCycleState(createdDocRs.getLifeCycleState());
 
-        try {
-            return Response.created(URI.create(URLEncoder.encode(pDocMID + "-" + createdDocRs.getVersion(), "UTF-8")))
-                    .entity(docRsDTO)
-                    .build();
-        } catch (UnsupportedEncodingException ex) {
-            LOGGER.log(Level.WARNING, null, ex);
-            return Response.ok().entity(docRsDTO).build();
-        }
+        return Tools.prepareCreatedResponse(pDocMID + "-" + createdDocRs.getVersion(), docRsDTO);
     }
 
 

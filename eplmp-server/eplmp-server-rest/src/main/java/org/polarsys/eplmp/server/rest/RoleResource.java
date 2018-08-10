@@ -32,13 +32,10 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.io.UnsupportedEncodingException;
-import java.net.URI;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 /**
  * @author Morgan Guimard
@@ -49,8 +46,6 @@ import java.util.logging.Logger;
 @DeclareRoles(UserGroupMapping.REGULAR_USER_ROLE_ID)
 @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
 public class RoleResource {
-
-    private static final Logger LOGGER = Logger.getLogger(RoleResource.class.getName());
 
     @Inject
     private IWorkflowManagerLocal roleService;
@@ -140,26 +135,19 @@ public class RoleResource {
         List<UserGroupDTO> groupDTOs = roleDTO.getDefaultAssignedGroups();
         List<String> userLogins = new ArrayList<>();
         List<String> userGroupIds = new ArrayList<>();
+
         if (userDTOs != null) {
-            for (UserDTO userDTO : userDTOs) {
-                userLogins.add(userDTO.getLogin());
-            }
+            userLogins.addAll(userDTOs.stream().map(UserDTO::getLogin).collect(Collectors.toList()));
         }
+
         if (groupDTOs != null) {
-            for (UserGroupDTO groupDTO : groupDTOs) {
-                userGroupIds.add(groupDTO.getId());
-            }
+            userGroupIds.addAll(groupDTOs.stream().map(UserGroupDTO::getId).collect(Collectors.toList()));
         }
 
         Role roleCreated = roleService.createRole(roleDTO.getName(), roleDTO.getWorkspaceId(), userLogins, userGroupIds);
         RoleDTO roleCreatedDTO = mapRoleToDTO(roleCreated);
 
-        try {
-            return Response.created(URI.create(URLEncoder.encode(roleCreatedDTO.getName(), "UTF-8"))).entity(roleCreatedDTO).build();
-        } catch (UnsupportedEncodingException ex) {
-            LOGGER.log(Level.WARNING, null, ex);
-            return Response.ok().entity(roleCreatedDTO).build();
-        }
+        return Tools.prepareCreatedResponse(roleCreatedDTO.getName(), roleCreatedDTO);
     }
 
     @PUT
@@ -184,25 +172,18 @@ public class RoleResource {
         List<UserGroupDTO> groupDTOs = roleDTO.getDefaultAssignedGroups();
         List<String> userLogins = new ArrayList<>();
         List<String> userGroupIds = new ArrayList<>();
+
         if (userDTOs != null) {
-            for (UserDTO userDTO : userDTOs) {
-                userLogins.add(userDTO.getLogin());
-            }
+            userLogins.addAll(userDTOs.stream().map(UserDTO::getLogin).collect(Collectors.toList()));
         }
+
         if (groupDTOs != null) {
-            for (UserGroupDTO groupDTO : groupDTOs) {
-                userGroupIds.add(groupDTO.getId());
-            }
+            userGroupIds.addAll(groupDTOs.stream().map(UserGroupDTO::getId).collect(Collectors.toList()));
         }
 
         Role roleUpdated = roleService.updateRole(new RoleKey(roleDTO.getWorkspaceId(), roleName), userLogins, userGroupIds);
         RoleDTO roleUpdatedDTO = mapRoleToDTO(roleUpdated);
-        try {
-            return Response.created(URI.create(URLEncoder.encode(roleUpdatedDTO.getName(), "UTF-8"))).entity(roleUpdatedDTO).build();
-        } catch (UnsupportedEncodingException ex) {
-            LOGGER.log(Level.WARNING, null, ex);
-            return Response.ok().entity(roleUpdatedDTO).build();
-        }
+        return Response.ok().entity(roleUpdatedDTO).build();
     }
 
     @DELETE

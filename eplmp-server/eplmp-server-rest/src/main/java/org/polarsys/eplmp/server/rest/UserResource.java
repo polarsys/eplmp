@@ -35,11 +35,7 @@ import javax.inject.Inject;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.io.UnsupportedEncodingException;
-import java.net.URI;
-import java.net.URLEncoder;
 import java.util.List;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 @RequestScoped
@@ -187,12 +183,8 @@ public class UserResource {
                 subDTO.isOnIterationChange(),
                 subDTO.isOnStateChange());
         subDTO.setTag(tagName);
-        try {
-            return Response.created(URI.create(URLEncoder.encode(tagName, "UTF-8"))).entity(subDTO).build();
-        } catch (UnsupportedEncodingException ex) {
-            LOGGER.log(Level.WARNING, null, ex);
-            return Response.ok().entity(subDTO).build();
-        }
+
+        return Tools.prepareCreatedResponse(tagName, subDTO);
     }
 
     @DELETE

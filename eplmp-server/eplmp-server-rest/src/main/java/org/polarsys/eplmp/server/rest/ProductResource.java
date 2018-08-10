@@ -44,9 +44,6 @@ import javax.inject.Inject;
 import javax.ws.rs.*;
 import javax.ws.rs.core.*;
 import java.io.File;
-import java.io.UnsupportedEncodingException;
-import java.net.URI;
-import java.net.URLEncoder;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -163,12 +160,7 @@ public class ProductResource {
         configurationItemDTOCreated.setDesignItemNumber(configurationItem.getDesignItem().getNumber());
         configurationItemDTOCreated.setDesignItemLatestVersion(configurationItem.getDesignItem().getLastRevision().getVersion());
 
-        try {
-            return Response.created(URI.create(URLEncoder.encode(configurationItemDTOCreated.getId(), "UTF-8"))).entity(configurationItemDTOCreated).build();
-        } catch (UnsupportedEncodingException ex) {
-            LOGGER.log(Level.WARNING, null, ex);
-            return Response.ok().entity(configurationItemDTOCreated).build();
-        }
+        return Tools.prepareCreatedResponse(configurationItemDTOCreated.getId(), configurationItemDTOCreated);
     }
 
 

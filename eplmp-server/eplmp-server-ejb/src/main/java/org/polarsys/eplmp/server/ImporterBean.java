@@ -534,8 +534,8 @@ public class ImporterBean implements IImporterManagerLocal {
             }
 
             // Cache hack end //
-
-            if (!pathData.getAttributes().isEmpty() && (!permissiveUpdate || hasInstanceAccess)) {
+            // hasInstanceAccess is always true when productInstanceIteration is not null
+            if (null != productInstanceIteration && !pathData.getAttributes().isEmpty()) {
 
                 // 2 Possibilities : PathDataMasterId null => create new Path Data, not null => update PathData
                 PathDataMaster currentPathDataMaster = findPathDataMaster(productInstanceIteration, pathData.getPath());
