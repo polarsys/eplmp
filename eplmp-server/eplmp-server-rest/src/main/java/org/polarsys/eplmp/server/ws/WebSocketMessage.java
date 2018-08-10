@@ -24,7 +24,7 @@ public class WebSocketMessage implements Serializable {
 
     protected JsonObject object;
 
-    private final static String DISCRIMINATOR_FIELD = "type";
+    private static final String DISCRIMINATOR_FIELD = "type";
 
     public WebSocketMessage(JsonObject object) {
         this.object = object;

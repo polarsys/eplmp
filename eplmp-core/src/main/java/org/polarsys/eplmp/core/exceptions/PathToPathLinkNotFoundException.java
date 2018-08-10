@@ -12,7 +12,7 @@
 package org.polarsys.eplmp.core.exceptions;
 
 import java.text.MessageFormat;
-import java.util.Locale;
+
 
 /**
  *
@@ -27,12 +27,12 @@ public class PathToPathLinkNotFoundException extends EntityNotFoundException {
         mPathToPathLinkId =0;
     }
 
-    public PathToPathLinkNotFoundException(Locale pLocale, int pPathToPathLinkId) {
-        this(pLocale, pPathToPathLinkId, null);
+    public PathToPathLinkNotFoundException(int pPathToPathLinkId) {
+        this(pPathToPathLinkId, null);
     }
 
-    public PathToPathLinkNotFoundException(Locale pLocale, int pPathToPathLinkId, Throwable pCause) {
-        super(pLocale, pCause);
+    public PathToPathLinkNotFoundException(int pPathToPathLinkId, Throwable pCause) {
+        super( pCause);
         mPathToPathLinkId =pPathToPathLinkId;
     }
 

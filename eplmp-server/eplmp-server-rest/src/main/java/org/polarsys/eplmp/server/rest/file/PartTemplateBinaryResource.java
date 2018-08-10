@@ -10,6 +10,7 @@
   *******************************************************************************/
 package org.polarsys.eplmp.server.rest.file;
 
+import io.swagger.annotations.*;
 import org.polarsys.eplmp.core.common.BinaryResource;
 import org.polarsys.eplmp.core.exceptions.*;
 import org.polarsys.eplmp.core.exceptions.NotAllowedException;
@@ -18,14 +19,12 @@ import org.polarsys.eplmp.core.security.UserGroupMapping;
 import org.polarsys.eplmp.core.services.IBinaryStorageManagerLocal;
 import org.polarsys.eplmp.core.services.IProductManagerLocal;
 import org.polarsys.eplmp.server.helpers.Streams;
-import org.polarsys.eplmp.server.rest.exceptions.NotModifiedException;
 import org.polarsys.eplmp.server.rest.exceptions.PreconditionFailedException;
 import org.polarsys.eplmp.server.rest.exceptions.RequestedRangeNotSatisfiableException;
 import org.polarsys.eplmp.server.rest.file.util.BinaryResourceDownloadMeta;
 import org.polarsys.eplmp.server.rest.file.util.BinaryResourceDownloadResponseBuilder;
 import org.polarsys.eplmp.server.rest.file.util.BinaryResourceUpload;
 import org.polarsys.eplmp.server.rest.interceptors.Compress;
-import io.swagger.annotations.*;
 
 import javax.annotation.security.DeclareRoles;
 import javax.annotation.security.RolesAllowed;
@@ -48,7 +47,8 @@ import java.text.Normalizer;
 import java.util.Collection;
 
 @RequestScoped
-@Api(hidden = true, value = "partTemplateBinary", description = "Operations about part templates files")
+@Api(hidden = true, value = "partTemplateBinary", description = "Operations about part templates files",
+        authorizations = {@Authorization(value = "authorization")})
 @DeclareRoles({UserGroupMapping.REGULAR_USER_ROLE_ID})
 @RolesAllowed({UserGroupMapping.REGULAR_USER_ROLE_ID})
 public class PartTemplateBinaryResource {
@@ -71,6 +71,7 @@ public class PartTemplateBinaryResource {
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Upload success"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Consumes(MediaType.MULTIPART_FORM_DATA)
@@ -79,7 +80,7 @@ public class PartTemplateBinaryResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") final String workspaceId,
             @ApiParam(required = true, value = "Template id") @PathParam("templateId") final String templateId)
             throws EntityNotFoundException, EntityAlreadyExistsException, UserNotActiveException, AccessRightException,
-            NotAllowedException, CreationException {
+            NotAllowedException, CreationException, WorkspaceNotEnabledException {
 
         try {
             BinaryResource binaryResource;
@@ -95,6 +96,10 @@ public class PartTemplateBinaryResource {
                 OutputStream outputStream = storageManager.getBinaryResourceOutputStream(binaryResource);
                 length = BinaryResourceUpload.uploadBinary(outputStream, formPart);
                 productService.saveFileInTemplate(templatePK, fileName, length);
+            }
+
+            if (fileName == null) {
+                return Response.status(Response.Status.BAD_REQUEST).build();
             }
 
             if (formParts.size() == 1) {
@@ -113,6 +118,7 @@ public class PartTemplateBinaryResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Download success"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("/{fileName}")
@@ -125,7 +131,7 @@ public class PartTemplateBinaryResource {
             @ApiParam(required = true, value = "Template id") @PathParam("templateId") final String templateId,
             @ApiParam(required = true, value = "File name") @PathParam("fileName") final String fileName)
             throws EntityNotFoundException, UserNotActiveException, AccessRightException, NotAllowedException,
-            PreconditionFailedException, NotModifiedException, RequestedRangeNotSatisfiableException {
+            PreconditionFailedException, RequestedRangeNotSatisfiableException, WorkspaceNotEnabledException {
 
 
         String fullName = workspaceId + "/part-templates/" + templateId + "/" + fileName;
@@ -139,9 +145,13 @@ public class PartTemplateBinaryResource {
         }
 
         InputStream binaryContentInputStream = null;
+
+        // set to false because templates are never historized.
+        boolean isToBeCached = false;
+
         try {
             binaryContentInputStream = storageManager.getBinaryResourceInputStream(binaryResource);
-            return BinaryResourceDownloadResponseBuilder.prepareResponse(binaryContentInputStream, binaryResourceDownloadMeta, range);
+            return BinaryResourceDownloadResponseBuilder.prepareResponse(binaryContentInputStream, binaryResourceDownloadMeta, range, isToBeCached);
         } catch (StorageException e) {
             Streams.close(binaryContentInputStream);
             return BinaryResourceDownloadResponseBuilder.downloadError(e, fullName);

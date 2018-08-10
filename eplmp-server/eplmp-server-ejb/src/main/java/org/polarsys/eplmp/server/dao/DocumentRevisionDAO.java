@@ -20,27 +20,41 @@ import org.polarsys.eplmp.core.exceptions.DocumentRevisionNotFoundException;
 import org.polarsys.eplmp.core.meta.Tag;
 import org.polarsys.eplmp.core.workflow.Workflow;
 
+import javax.enterprise.context.RequestScoped;
+import javax.inject.Inject;
 import javax.persistence.*;
 import java.util.List;
-import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+@RequestScoped
 public class DocumentRevisionDAO {
 
+    public static final String WORKSPACE_ID = "workspaceId";
+    public static final String EXCLUDED_FOLDERS = "excludedFolders";
+
+    @Inject
     private EntityManager em;
-    private Locale mLocale;
+
+    @Inject
+    private ACLDAO aclDAO;
+
+    @Inject
+    private DocumentDAO documentDAO;
+
+    @Inject
+    private SharedEntityDAO sharedEntityDAO;
+
+    @Inject
+    private SubscriptionDAO subscriptionDAO;
+
+    @Inject
+    private WorkflowDAO workflowDAO;
+
     private static final int MAX_RESULTS = 500;
     private static final Logger LOGGER = Logger.getLogger("DocumentRevisionDAO");
 
-    public DocumentRevisionDAO(Locale pLocale, EntityManager pEM) {
-        em = pEM;
-        mLocale = pLocale;
-    }
-
-    public DocumentRevisionDAO(EntityManager pEM) {
-        em = pEM;
-        mLocale = Locale.getDefault();
+    public DocumentRevisionDAO() {
     }
 
     public String findLatestDocMId(String pWorkspaceId, String pType) {
@@ -53,7 +67,7 @@ public class DocumentRevisionDAO {
                 + "WHERE m2.workspace.id = :workspaceId "
                 + "AND m2.type = :type"
                 + ")");
-        query.setParameter("workspaceId", pWorkspaceId);
+        query.setParameter(WORKSPACE_ID, pWorkspaceId);
         query.setParameter("type", pType);
         docMId = (String) query.getSingleResult();
         return docMId;
@@ -80,7 +94,7 @@ public class DocumentRevisionDAO {
     public DocumentRevision loadDocR(DocumentRevisionKey pKey) throws DocumentRevisionNotFoundException {
         DocumentRevision docR = em.find(DocumentRevision.class, pKey);
         if (docR == null) {
-            throw new DocumentRevisionNotFoundException(mLocale, pKey);
+            throw new DocumentRevisionNotFoundException(pKey);
         } else {
             return docR;
         }
@@ -89,7 +103,7 @@ public class DocumentRevisionDAO {
     public DocumentIteration loadDocI(DocumentIterationKey pKey) throws DocumentIterationNotFoundException {
         DocumentIteration docI = em.find(DocumentIteration.class, pKey);
         if (docI == null) {
-            throw new DocumentIterationNotFoundException(mLocale, pKey);
+            throw new DocumentIterationNotFoundException(pKey);
         } else {
             return docI;
         }
@@ -99,20 +113,18 @@ public class DocumentRevisionDAO {
         try {
             return em.getReference(DocumentRevision.class, pKey);
         } catch (EntityNotFoundException pENFEx) {
-            LOGGER.log(Level.FINEST,null,pENFEx);
-            throw new DocumentRevisionNotFoundException(mLocale, pKey);
+            LOGGER.log(Level.FINEST, null, pENFEx);
+            throw new DocumentRevisionNotFoundException(pKey);
         }
     }
 
     public void createDocR(DocumentRevision pDocumentRevision) throws DocumentRevisionAlreadyExistsException, CreationException {
         try {
-            if(pDocumentRevision.getWorkflow()!=null){
-                WorkflowDAO workflowDAO = new WorkflowDAO(em);
+            if (pDocumentRevision.getWorkflow() != null) {
                 workflowDAO.createWorkflow(pDocumentRevision.getWorkflow());
             }
 
-            if(pDocumentRevision.getACL()!=null){
-                ACLDAO aclDAO = new ACLDAO(em);
+            if (pDocumentRevision.getACL() != null) {
                 aclDAO.createACL(pDocumentRevision.getACL());
             }
 
@@ -120,31 +132,26 @@ public class DocumentRevisionDAO {
             em.persist(pDocumentRevision);
             em.flush();
         } catch (EntityExistsException pEEEx) {
-            LOGGER.log(Level.FINEST,null,pEEEx);
-            throw new DocumentRevisionAlreadyExistsException(mLocale, pDocumentRevision);
+            LOGGER.log(Level.FINEST, null, pEEEx);
+            throw new DocumentRevisionAlreadyExistsException(pDocumentRevision);
         } catch (PersistenceException pPEx) {
             //EntityExistsException is case sensitive
             //whereas MySQL is not thus PersistenceException could be
             //thrown instead of EntityExistsException
-            LOGGER.log(Level.FINEST,null,pPEx);
-            throw new CreationException(mLocale);
+            LOGGER.log(Level.FINEST, null, pPEx);
+            throw new CreationException();
         }
     }
 
     public void removeRevision(DocumentRevision pDocR) {
-        SubscriptionDAO subscriptionDAO = new SubscriptionDAO(em);
-        DocumentDAO docDAO = new DocumentDAO(em);
         subscriptionDAO.removeAllSubscriptions(pDocR);
-
-        WorkflowDAO workflowDAO = new WorkflowDAO(em);
         workflowDAO.removeWorkflowConstraints(pDocR);
         em.flush();
 
-        for(DocumentIteration doc:pDocR.getDocumentIterations()) {
-            docDAO.removeDoc(doc);
+        for (DocumentIteration doc : pDocR.getDocumentIterations()) {
+            documentDAO.removeDoc(doc);
         }
 
-        SharedEntityDAO sharedEntityDAO = new SharedEntityDAO(em);
         sharedEntityDAO.deleteSharesForDocument(pDocR);
 
         DocumentMaster docM = pDocR.getDocumentMaster();
@@ -156,35 +163,35 @@ public class DocumentRevisionDAO {
 
     public List<DocumentRevision> findDocsWithAssignedTasksForGivenUser(String pWorkspaceId, String assignedUserLogin) {
         return em.createNamedQuery("DocumentRevision.findWithAssignedTasksForUser", DocumentRevision.class)
-                .setParameter("workspaceId", pWorkspaceId)
+                .setParameter(WORKSPACE_ID, pWorkspaceId)
                 .setParameter("login", assignedUserLogin)
                 .getResultList();
     }
 
     public List<DocumentRevision> findDocsWithOpenedTasksForGivenUser(String pWorkspaceId, String assignedUserLogin) {
-        return em.createNamedQuery("DocumentRevision.findWithOpenedTasksForUser",DocumentRevision.class)
-                .setParameter("workspaceId", pWorkspaceId)
+        return em.createNamedQuery("DocumentRevision.findWithOpenedTasksForUser", DocumentRevision.class)
+                .setParameter(WORKSPACE_ID, pWorkspaceId)
                 .setParameter("login", assignedUserLogin)
                 .getResultList();
     }
 
     public List<DocumentRevision> findDocsRevisionsWithReferenceOrTitleLike(String pWorkspaceId, String search, int maxResults) {
-        return em.createNamedQuery("DocumentRevision.findByReferenceOrTitle",DocumentRevision.class).
-                setParameter("workspaceId", pWorkspaceId)
+        return em.createNamedQuery("DocumentRevision.findByReferenceOrTitle", DocumentRevision.class).
+                setParameter(WORKSPACE_ID, pWorkspaceId)
                 .setParameter("id", "%" + search + "%")
                 .setParameter("title", "%" + search + "%")
                 .setMaxResults(maxResults).getResultList();
     }
 
     public int getTotalNumberOfDocuments(String pWorkspaceId) {
-        return ((Number)em.createNamedQuery("DocumentRevision.countByWorkspace")
-                .setParameter("workspaceId", pWorkspaceId)
+        return ((Number) em.createNamedQuery("DocumentRevision.countByWorkspace")
+                .setParameter(WORKSPACE_ID, pWorkspaceId)
                 .getSingleResult()).intValue();
     }
 
     public long getDiskUsageForDocumentsInWorkspace(String pWorkspaceId) {
-        Number result = (Number)em.createNamedQuery("BinaryResource.diskUsageInPath")
-                .setParameter("path", pWorkspaceId+"/documents/%")
+        Number result = (Number) em.createNamedQuery("BinaryResource.diskUsageInPath")
+                .setParameter("path", pWorkspaceId + "/documents/%")
                 .getSingleResult();
 
         return result != null ? result.longValue() : 0L;
@@ -192,8 +199,8 @@ public class DocumentRevisionDAO {
     }
 
     public long getDiskUsageForDocumentTemplatesInWorkspace(String pWorkspaceId) {
-        Number result = (Number)em.createNamedQuery("BinaryResource.diskUsageInPath")
-                .setParameter("path", pWorkspaceId+"/document-templates/%")
+        Number result = (Number) em.createNamedQuery("BinaryResource.diskUsageInPath")
+                .setParameter("path", pWorkspaceId + "/document-templates/%")
                 .getSingleResult();
 
         return result != null ? result.longValue() : 0L;
@@ -202,17 +209,17 @@ public class DocumentRevisionDAO {
 
     public List<DocumentRevision> findAllCheckedOutDocRevisions(String pWorkspaceId) {
         TypedQuery<DocumentRevision> query = em.createQuery("SELECT DISTINCT d FROM DocumentRevision d WHERE d.checkOutUser is not null and d.documentMaster.workspace.id = :workspaceId", DocumentRevision.class);
-        query.setParameter("workspaceId", pWorkspaceId);
+        query.setParameter(WORKSPACE_ID, pWorkspaceId);
         return query.getResultList();
     }
 
     public DocumentIteration findDocumentIterationByBinaryResource(BinaryResource pBinaryResource) {
         TypedQuery<DocumentIteration> query = em.createNamedQuery("DocumentIteration.findByBinaryResource", DocumentIteration.class);
         query.setParameter("binaryResource", pBinaryResource);
-        try{
+        try {
             return query.getSingleResult();
-        }catch(NoResultException ex){
-            LOGGER.log(Level.FINEST,null,ex);
+        } catch (NoResultException ex) {
+            LOGGER.log(Level.FINEST, null, ex);
             return null;
         }
     }
@@ -220,8 +227,8 @@ public class DocumentRevisionDAO {
     public List<DocumentRevision> getAllDocumentRevisions(String workspaceId) {
         String excludedFolders = workspaceId + "/~%";
         TypedQuery<DocumentRevision> query = em.createNamedQuery("DocumentRevision.findByWorkspace", DocumentRevision.class)
-                .setParameter("workspaceId", workspaceId)
-                .setParameter("excludedFolders", excludedFolders);
+                .setParameter(WORKSPACE_ID, workspaceId)
+                .setParameter(EXCLUDED_FOLDERS, excludedFolders);
         return query.getResultList();
     }
 
@@ -229,12 +236,12 @@ public class DocumentRevisionDAO {
         String excludedFolders = workspaceId + "/~%";
 
         TypedQuery<DocumentRevision> query = em.createNamedQuery("DocumentRevision.findByWorkspace.filterACLEntry", DocumentRevision.class)
-                        .setParameter("workspaceId", workspaceId)
-                        .setParameter("user", user)
-                        .setParameter("excludedFolders", excludedFolders);
-        if(start>-1 && maxResults >-1){
+                .setParameter(WORKSPACE_ID, workspaceId)
+                .setParameter("user", user)
+                .setParameter(EXCLUDED_FOLDERS, excludedFolders);
+        if (start > -1 && maxResults > -1) {
             query.setFirstResult(start)
-                .setMaxResults(Math.min(maxResults, MAX_RESULTS));
+                    .setMaxResults(Math.min(maxResults, MAX_RESULTS));
         }
         return query.getResultList();
     }
@@ -244,9 +251,9 @@ public class DocumentRevisionDAO {
         String excludedFolders = workspaceId + "/~%";
 
         return ((Number) em.createNamedQuery("DocumentRevision.countByWorkspace.filterACLEntry")
-                .setParameter("workspaceId", workspaceId)
+                .setParameter(WORKSPACE_ID, workspaceId)
                 .setParameter("user", user)
-                .setParameter("excludedFolders", excludedFolders)
+                .setParameter(EXCLUDED_FOLDERS, excludedFolders)
                 .getSingleResult()).intValue();
     }
 
@@ -254,7 +261,7 @@ public class DocumentRevisionDAO {
         try {
             return em.createNamedQuery("DocumentRevision.findByWorkflow", DocumentRevision.class).
                     setParameter("workflow", workflow).getSingleResult();
-        }catch(NoResultException e){
+        } catch (NoResultException e) {
             return null;
         }
     }

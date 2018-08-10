@@ -14,7 +14,7 @@ package org.polarsys.eplmp.core.exceptions;
 import org.polarsys.eplmp.core.document.DocumentMaster;
 
 import java.text.MessageFormat;
-import java.util.Locale;
+
 
 /**
  *
@@ -29,12 +29,12 @@ public class DocumentMasterAlreadyExistsException extends EntityAlreadyExistsExc
         mDocM = null;
     }
 
-    public DocumentMasterAlreadyExistsException(Locale pLocale, DocumentMaster pDocM) {
-        this(pLocale, pDocM, null);
+    public DocumentMasterAlreadyExistsException(DocumentMaster pDocM) {
+        this(pDocM, null);
     }
 
-    public DocumentMasterAlreadyExistsException(Locale pLocale, DocumentMaster pDocM, Throwable pCause) {
-        super(pLocale, pCause);
+    public DocumentMasterAlreadyExistsException(DocumentMaster pDocM, Throwable pCause) {
+        super( pCause);
         mDocM=pDocM;
     }
 

@@ -12,7 +12,10 @@
 package org.polarsys.eplmp.server.converters;
 
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 
 /**
  * This ConverterUtils class expose util methods around files conversion

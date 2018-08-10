@@ -14,7 +14,7 @@ package org.polarsys.eplmp.core.exceptions;
 import org.polarsys.eplmp.core.common.Workspace;
 
 import java.text.MessageFormat;
-import java.util.Locale;
+
 
 /**
  *
@@ -29,12 +29,12 @@ public class WorkspaceAlreadyExistsException extends EntityAlreadyExistsExceptio
         mWorkspace=null;
     }
     
-    public WorkspaceAlreadyExistsException(Locale pLocale, Workspace pWorkspace) {
-        this(pLocale, pWorkspace, null);
+    public WorkspaceAlreadyExistsException(Workspace pWorkspace) {
+        this(pWorkspace, null);
     }
 
-    public WorkspaceAlreadyExistsException(Locale pLocale, Workspace pWorkspace, Throwable pCause) {
-        super(pLocale, pCause);
+    public WorkspaceAlreadyExistsException(Workspace pWorkspace, Throwable pCause) {
+        super( pCause);
         mWorkspace=pWorkspace;
     }
 

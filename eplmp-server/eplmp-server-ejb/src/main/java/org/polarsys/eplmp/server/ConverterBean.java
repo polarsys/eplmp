@@ -22,7 +22,7 @@ import org.polarsys.eplmp.server.converters.CADConverter;
 import org.polarsys.eplmp.server.converters.CADConverter.ConversionException;
 import org.polarsys.eplmp.server.converters.ConversionResult;
 import org.polarsys.eplmp.server.converters.ConverterUtils;
-import org.polarsys.eplmp.server.converters.GeometryParser;
+import org.polarsys.eplmp.server.geometry.GeometryParser;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.security.DeclareRoles;
@@ -31,7 +31,6 @@ import javax.ejb.Asynchronous;
 import javax.ejb.Local;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
-import javax.script.ScriptException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -42,6 +41,7 @@ import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.DoubleStream;
+import java.util.stream.Stream;
 
 /**
  * CAD File converter
@@ -96,7 +96,7 @@ public class ConverterBean implements IConverterManagerLocal {
 
             // Don't try to convert if any conversion pending
             if (existingConversion != null && existingConversion.isPending()) {
-                LOGGER.log(Level.SEVERE, "Conversion already running for part iteration " + partIterationKey);
+                LOGGER.log(Level.SEVERE, "Conversion already running for part iteration {0}", partIterationKey);
                 return;
             }
 
@@ -172,13 +172,7 @@ public class ConverterBean implements IConverterManagerLocal {
             } catch (Exception e) {
                 LOGGER.log(Level.WARNING, e.getMessage(), e);
             } finally {
-                Files.list(tempDir).forEach((p) -> {
-                    try {
-                        Files.delete(p);
-                    } catch (IOException e) {
-                        LOGGER.warning("Unable to delete " + p.getFileName());
-                    }
-                });
+                deleteTempDirectory(tempDir);
             }
         } finally {
             Files.deleteIfExists(tempDir);
@@ -186,18 +180,25 @@ public class ConverterBean implements IConverterManagerLocal {
         return result;
     }
 
+    private void deleteTempDirectory(Path tempDir) {
+        try (Stream<Path> s = Files.list(tempDir)) {
+            s.forEach((path) -> {
+                try {
+                    Files.delete(path);
+                } catch (IOException e) {
+                    LOGGER.warning("Unable to delete " + path.getFileName());
+                }
+            });
+        } catch (IOException e) {
+            LOGGER.warning("Unable to delete " + tempDir.getFileName());
+        }
+    }
+
     private boolean handleConvertedFile(ConversionResult conversionResult, PartIterationKey pPartIPK, Path tempDir) {
 
         // manage converted file
         Path convertedFile = conversionResult.getConvertedFile();
-
-        double[] box;
-
-        try {
-            box = new GeometryParser(convertedFile).calculateBox();
-        } catch (IOException | ScriptException | NoSuchMethodException e) {
-            box = new double[6];
-        }
+        double[] box = new GeometryParser(convertedFile).calculateBox();
 
         if (decimate(convertedFile, tempDir, RATIO)) {
             String fileName = convertedFile.getFileName().toString();
@@ -223,10 +224,8 @@ public class ConverterBean implements IConverterManagerLocal {
     /**
      * Update the current Part from the imported assembly description
      *
-     * @param componentPositionMap
-     *            Assembly description root component.
-     * @param partToConvert
-     *            Current Part ID
+     * @param componentPositionMap Assembly description root component.
+     * @param partToConvert        Current Part ID
      * @throws UserNotFoundException
      * @throws UserNotActiveException
      * @throws WorkspaceNotEnabledException
@@ -265,7 +264,7 @@ public class ConverterBean implements IConverterManagerLocal {
                 partUsageLink.setCadInstances(toCADInstances(positions));
                 partUsageLinks.add(partUsageLink);
             } else {
-                LOGGER.log(Level.WARNING, "No Part found for " + cadFileName);
+                LOGGER.log(Level.WARNING, "No Part found for {0}", cadFileName);
                 succeed = false;
             }
         }
@@ -296,8 +295,13 @@ public class ConverterBean implements IConverterManagerLocal {
     private CADConverter selectConverter(BinaryResource cadBinaryResource) {
         String ext = FileIO.getExtension(cadBinaryResource.getName());
         for (CADConverter converter : converters) {
-            if (converter.canConvertToOBJ(ext)) {
-                return converter;
+            try {
+                if (converter.canConvertToOBJ(ext)) {
+                    return converter;
+                }
+            } catch (Exception e) {
+                // javax.ejb.CreateException can be thrown when static initialization fail inside plugin
+                LOGGER.log(Level.SEVERE, "Something gone wrong with converter instantiation " + converter, e);
             }
         }
         return null;
@@ -305,19 +309,19 @@ public class ConverterBean implements IConverterManagerLocal {
 
     private boolean decimate(Path file, Path tempDir, float[] ratio) {
 
-        LOGGER.log(Level.INFO, "Decimate file in progress : " + ratio);
+        LOGGER.log(Level.INFO, "Decimate file in progress : {0}", ratio);
 
         // sanity checks
         String decimater = CONF.getProperty("decimater");
         Path executable = Paths.get(decimater);
-        if (!Files.exists(executable)) {
-            LOGGER.log(Level.SEVERE, "Cannot decimate file \"" + file.getFileName() + "\", decimater \"" + decimater
-                    + "\" is not available");
+        if (!executable.toFile().exists()) {
+            LOGGER.log(Level.WARNING, "Cannot decimate file \"{0}\", decimater \"{1}\" is not available",
+                    new Object[]{file.getFileName(), decimater});
             return false;
         }
         if (!Files.isExecutable(executable)) {
-            LOGGER.log(Level.SEVERE, "Cannot decimate file \"" + file.getFileName() + "\", decimater \"" + decimater
-                    + "\" has no execution rights");
+            LOGGER.log(Level.WARNING, "Cannot decimate file \"{0}\", decimater \"{1}\" has no execution rights",
+                    new Object[]{file.getFileName(), decimater});
             return false;
         }
 
@@ -328,7 +332,7 @@ public class ConverterBean implements IConverterManagerLocal {
                     tempDir.toAbsolutePath().toString(), String.valueOf(ratio[0]), String.valueOf(ratio[1]),
                     String.valueOf(ratio[2])};
 
-            LOGGER.log(Level.INFO, "Decimate command" + "\n" + args);
+            LOGGER.log(Level.INFO, "Decimate command\n{0}", args);
 
             // Add redirectErrorStream, fix process hang up
             ProcessBuilder pb = new ProcessBuilder(args).redirectErrorStream(true);
@@ -343,7 +347,7 @@ public class ConverterBean implements IConverterManagerLocal {
                 LOGGER.log(Level.INFO, "Decimation done");
                 decimateSucceed = true;
             } else {
-                LOGGER.log(Level.SEVERE, "Decimation failed with code = " + proc.exitValue(), stdOutput);
+                LOGGER.log(Level.SEVERE, "Decimation failed with code = {0} {1}", new Object[]{proc.exitValue(), stdOutput});
             }
 
         } catch (IOException | InterruptedException e) {
@@ -374,7 +378,7 @@ public class ConverterBean implements IConverterManagerLocal {
     private void saveAttachedFile(PartIterationKey partIPK, Path file) {
         try {
             BinaryResource binaryResource = productService.saveFileInPartIteration(partIPK,
-                    file.getFileName().toString(), "attachedfiles", Files.size(file));
+                    file.getFileName().toString(), PartIteration.ATTACHED_FILES_SUBTYPE, Files.size(file));
             try (OutputStream os = storageManager.getBinaryResourceOutputStream(binaryResource)) {
                 Files.copy(file, os);
                 LOGGER.log(Level.INFO, "Attached file copied");

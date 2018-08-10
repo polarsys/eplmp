@@ -12,7 +12,7 @@
 package org.polarsys.eplmp.core.exceptions;
 
 import java.text.MessageFormat;
-import java.util.Locale;
+
 
 /**
  *
@@ -26,12 +26,12 @@ public class WorkflowNotFoundException extends EntityNotFoundException {
         mID=-1;
     }
 
-    public WorkflowNotFoundException(Locale pLocale, int pID) {
-        this(pLocale, pID, null);
+    public WorkflowNotFoundException(int pID) {
+        this(pID, null);
     }
 
-    public WorkflowNotFoundException(Locale pLocale, int pID, Throwable pCause) {
-        super(pLocale, pCause);
+    public WorkflowNotFoundException(int pID, Throwable pCause) {
+        super( pCause);
         mID=pID;
     }
 

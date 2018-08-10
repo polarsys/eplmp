@@ -13,19 +13,19 @@ package org.polarsys.eplmp.server.dao;
 
 import org.polarsys.eplmp.core.configuration.DocumentCollection;
 
+import javax.enterprise.context.RequestScoped;
+import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+@RequestScoped
 public class DocumentCollectionDAO {
 
+    @Inject
     private EntityManager em;
 
     private static final Logger LOGGER = Logger.getLogger(DocumentCollectionDAO.class.getName());
-
-    public DocumentCollectionDAO(EntityManager pEM) {
-        em = pEM;
-    }
 
     public void createDocumentCollection(DocumentCollection documentCollection){
         try {

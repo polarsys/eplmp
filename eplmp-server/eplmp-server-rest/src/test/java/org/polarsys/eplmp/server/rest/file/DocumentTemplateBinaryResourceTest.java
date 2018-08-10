@@ -11,6 +11,10 @@
 
 package org.polarsys.eplmp.server.rest.file;
 
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.*;
 import org.polarsys.eplmp.core.common.BinaryResource;
 import org.polarsys.eplmp.core.document.DocumentMasterTemplateKey;
 import org.polarsys.eplmp.core.services.IBinaryStorageManagerLocal;
@@ -18,10 +22,6 @@ import org.polarsys.eplmp.core.services.IDocumentManagerLocal;
 import org.polarsys.eplmp.core.services.IOnDemandConverterManagerLocal;
 import org.polarsys.eplmp.server.util.PartImpl;
 import org.polarsys.eplmp.server.util.ResourceUtil;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.Part;
@@ -93,13 +93,15 @@ public class DocumentTemplateBinaryResourceTest {
         Mockito.when(documentService.saveFileInTemplate(Matchers.any(DocumentMasterTemplateKey.class), Matchers.anyString(), Matchers.anyInt())).thenReturn(binaryResource);
         Mockito.when(storageManager.getBinaryResourceOutputStream(binaryResource)).thenReturn(outputStream);
         Mockito.when(request.getRequestURI()).thenReturn(ResourceUtil.WORKSPACE_ID + "/documents/" + ResourceUtil.DOCUMENT_ID + "/" + ResourceUtil.FILENAME1);
+        Mockito.when(request.getParts()).thenReturn(filesParts);
 
         //When
         Response response = documentTemplateBinaryResource.uploadDocumentTemplateFiles(request, ResourceUtil.WORKSPACE_ID, ResourceUtil.DOC_TEMPLATE_ID);
 
         //Then
         Assert.assertNotNull(response);
-        Assert.assertEquals(Response.Status.NO_CONTENT.getStatusCode(), response.getStatus());
+        Assert.assertEquals(Response.Status.CREATED.getStatusCode(), response.getStatus());
+        Assert.assertNotNull(response.getLocation());
 
         //delete temporary file
         uploadedFile.deleteOnExit();

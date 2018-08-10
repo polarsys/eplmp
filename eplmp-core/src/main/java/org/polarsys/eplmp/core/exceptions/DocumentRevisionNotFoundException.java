@@ -15,7 +15,7 @@ import org.polarsys.eplmp.core.common.Version;
 import org.polarsys.eplmp.core.document.DocumentRevisionKey;
 
 import java.text.MessageFormat;
-import java.util.Locale;
+
 
 /**
  *
@@ -31,24 +31,24 @@ public class DocumentRevisionNotFoundException extends EntityNotFoundException {
         mDocRStringVersion=null;
     }
 
-    public DocumentRevisionNotFoundException(Locale pLocale, DocumentRevisionKey pDocRPK) {
-        this(pLocale, pDocRPK, null);
+    public DocumentRevisionNotFoundException(DocumentRevisionKey pDocRPK) {
+        this(pDocRPK, null);
     }
 
-    public DocumentRevisionNotFoundException(Locale pLocale, DocumentRevisionKey pDocRPK, Throwable pCause) {
-        this(pLocale, pDocRPK.getDocumentMaster().getId(), pDocRPK.getVersion(), pCause);
+    public DocumentRevisionNotFoundException(DocumentRevisionKey pDocRPK, Throwable pCause) {
+        this(pDocRPK.getDocumentMaster().getId(), pDocRPK.getVersion(), pCause);
     }
 
-    public DocumentRevisionNotFoundException(Locale pLocale, String pDocMID, Version pDocRVersion) {
-        this(pLocale, pDocMID, pDocRVersion.toString(), null);
+    public DocumentRevisionNotFoundException(String pDocMID, Version pDocRVersion) {
+        this(pDocMID, pDocRVersion.toString(), null);
     }
 
-    public DocumentRevisionNotFoundException(Locale pLocale, String pDocMId, String pDocRStringVersion) {
-        this(pLocale, pDocMId, pDocRStringVersion, null);
+    public DocumentRevisionNotFoundException(String pDocMId, String pDocRStringVersion) {
+        this(pDocMId, pDocRStringVersion, null);
     }
 
-    public DocumentRevisionNotFoundException(Locale pLocale, String pDocMId, String pDocRStringVersion, Throwable pCause) {
-        super(pLocale, pCause);
+    public DocumentRevisionNotFoundException(String pDocMId, String pDocRStringVersion, Throwable pCause) {
+        super( pCause);
         mDocMId=pDocMId;
         mDocRStringVersion=pDocRStringVersion;
     }

@@ -38,7 +38,7 @@ public class ProductBaselineCreationConfigSpec extends ProductConfigSpec {
 
     private User user;
 
-    public ProductBaselineCreationConfigSpec(){
+    public ProductBaselineCreationConfigSpec() {
     }
 
     public ProductBaselineCreationConfigSpec(User user, ProductBaselineType type, List<PartIteration> partIterations, List<String> substituteLinks, List<String> optionalUsageLinks) {
@@ -52,6 +52,7 @@ public class ProductBaselineCreationConfigSpec extends ProductConfigSpec {
     public User getUser() {
         return user;
     }
+
     public void setUser(User user) {
         this.user = user;
     }
@@ -59,27 +60,27 @@ public class ProductBaselineCreationConfigSpec extends ProductConfigSpec {
     @Override
     public PartIteration filterPartIteration(PartMaster partMaster) {
 
-        if(type.equals(ProductBaselineType.RELEASED)){
+        if (type.equals(ProductBaselineType.RELEASED)) {
 
-            for(PartIteration pi : partIterations){
-                if(pi.getPartRevision().getPartMaster().getKey().equals(partMaster.getKey())){
+            for (PartIteration pi : partIterations) {
+                if (pi.getPartRevision().getPartMaster().getKey().equals(partMaster.getKey())) {
                     retainedPartIterations.add(pi);
                     return pi;
                 }
             }
             // Else, take the latest released
             PartRevision lastReleasedRevision = partMaster.getLastReleasedRevision();
-            if(lastReleasedRevision != null){
+            if (lastReleasedRevision != null) {
                 PartIteration pi = lastReleasedRevision.getLastIteration();
                 retainedPartIterations.add(pi);
                 return pi;
             }
 
-        }else if(type.equals(ProductBaselineType.LATEST)){
+        } else if (type.equals(ProductBaselineType.LATEST)) {
 
             PartIteration pi = partMaster.getLastRevision().getLastCheckedInIteration();
 
-            if(pi!=null){
+            if (pi != null) {
                 retainedPartIterations.add(pi);
                 return pi;
             }
@@ -94,19 +95,18 @@ public class ProductBaselineCreationConfigSpec extends ProductConfigSpec {
         // No ambiguities here, must return 1 value
         // Check if optional or substitute, nominal link else
 
-        PartLink nominalLink = path.get(path.size()-1);
+        PartLink nominalLink = path.get(path.size() - 1);
 
-        if(nominalLink.isOptional() && optionalUsageLinks.contains(Tools.getPathAsString(path))){
+        if (nominalLink.isOptional() && optionalUsageLinks.contains(Tools.getPathAsString(path))) {
             retainedOptionalUsageLinks.add(Tools.getPathAsString(path));
-            return null;
         }
 
-        for(PartSubstituteLink substituteLink:nominalLink.getSubstitutes()){
+        for (PartSubstituteLink substituteLink : nominalLink.getSubstitutes()) {
 
             List<PartLink> substitutePath = new ArrayList<>(path);
-            substitutePath.set(substitutePath.size()-1,substituteLink);
+            substitutePath.set(substitutePath.size() - 1, substituteLink);
 
-            if(substituteLinks.contains(Tools.getPathAsString(substitutePath))){
+            if (substituteLinks.contains(Tools.getPathAsString(substitutePath))) {
                 retainedSubstituteLinks.add(Tools.getPathAsString(substitutePath));
                 return substituteLink;
             }

@@ -12,7 +12,7 @@
 package org.polarsys.eplmp.core.exceptions;
 
 import java.text.MessageFormat;
-import java.util.Locale;
+
 
 /**
  *
@@ -21,17 +21,12 @@ import java.util.Locale;
 public class ListOfValuesNotFoundException extends EntityNotFoundException {
     private final String mName;
 
-    public ListOfValuesNotFoundException(String pMessage) {
-        super(pMessage);
-        mName=null;
+    public ListOfValuesNotFoundException(String pName) {
+        this(pName, null);
     }
 
-    public ListOfValuesNotFoundException(Locale pLocale, String pName) {
-        this(pLocale, pName, null);
-    }
-
-    public ListOfValuesNotFoundException(Locale pLocale, String pName, Throwable pCause) {
-        super(pLocale, pCause);
+    public ListOfValuesNotFoundException(String pName, Throwable pCause) {
+        super( pCause);
         mName=pName;
     }
 

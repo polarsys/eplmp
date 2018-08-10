@@ -71,7 +71,7 @@ import java.util.Date;
 })
 @NamedQueries({
         @NamedQuery(name="ChangeIssue.findChangeIssuesByWorkspace",query="SELECT DISTINCT c FROM ChangeIssue c WHERE c.workspace.id = :workspaceId"),
-        @NamedQuery(name="ChangeIssue.findByReference", query="SELECT c FROM ChangeIssue c WHERE c.name LIKE :name AND c.workspace.id = :workspaceId")
+        @NamedQuery(name="ChangeIssue.findByName", query="SELECT c FROM ChangeIssue c WHERE c.name LIKE :name AND c.workspace.id = :workspaceId")
 })
 public class ChangeIssue extends ChangeItem {
 

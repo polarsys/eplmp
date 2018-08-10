@@ -24,7 +24,7 @@ import java.util.List;
  * @author Julien Maffre
  */
 @XmlRootElement
-@ApiModel(value = "ComponentDTO", description = "This class is the representation of an {@link org.polarsys.eplmp.core.product.Component} entity")
+@ApiModel(value = "ComponentDTO", description = "This class is the representation of a {@link org.polarsys.eplmp.core.product.Component} entity")
 public class ComponentDTO implements Serializable {
 
     @ApiModelProperty(value = "Part author name")

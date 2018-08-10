@@ -1,13 +1,13 @@
 /*******************************************************************************
- * Copyright (c) 2017 DocDoku.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
- * <p>
- * Contributors:
- * DocDoku - initial API and implementation
- *******************************************************************************/
+  * Copyright (c) 2017 DocDoku.
+  * All rights reserved. This program and the accompanying materials
+  * are made available under the terms of the Eclipse Public License v1.0
+  * which accompanies this distribution, and is available at
+  * http://www.eclipse.org/legal/epl-v10.html
+  *
+  * Contributors:
+  *    DocDoku - initial API and implementation
+  *******************************************************************************/
 
 package org.polarsys.eplmp.server;
 
@@ -21,10 +21,8 @@ import javax.ejb.Local;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -34,7 +32,7 @@ public class PlatformHealthManagerBean implements IPlatformHealthManagerLocal {
 
     private static final Logger LOGGER = Logger.getLogger(PlatformHealthManagerBean.class.getName());
 
-    @PersistenceContext
+    @Inject
     private EntityManager em;
 
     @Inject
@@ -77,7 +75,7 @@ public class PlatformHealthManagerBean implements IPlatformHealthManagerLocal {
         String officeHome = null;
         try {
             officeHome = officeConfig.getOfficeHome();
-        }catch (Exception e) {
+        } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Office properties object not accessible", e);
             check = false;
         }
@@ -101,7 +99,7 @@ public class PlatformHealthManagerBean implements IPlatformHealthManagerLocal {
 
         try {
             Integer officePort = officeConfig.getOfficePort();
-        }catch (Exception e) {
+        } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Office port incorrectly set", e);
             check = false;
         }
@@ -135,7 +133,7 @@ public class PlatformHealthManagerBean implements IPlatformHealthManagerLocal {
 
         if (!check) {
             LOGGER.log(Level.SEVERE, "Health check didn't pass");
-            throw new PlatformHealthException(Locale.getDefault());
+            throw new PlatformHealthException();
         }
 
     }

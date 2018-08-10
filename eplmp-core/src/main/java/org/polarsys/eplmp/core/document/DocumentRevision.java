@@ -349,6 +349,15 @@ public class DocumentRevision implements Serializable, Comparable<DocumentRevisi
         }
     }
 
+    public DocumentIteration getWorkingCopy(){
+
+        if(isCheckedOut()){
+            return getLastIteration();
+        }else{
+            return null;
+        }
+    }
+
     public DocumentIteration removeLastIteration() {
         int index = documentIterations.size() - 1;
         if (index < 0) {
@@ -545,6 +554,10 @@ public class DocumentRevision implements Serializable, Comparable<DocumentRevisi
 
     public Date getReleaseDate() {
         return releaseStatusChange == null ? null : releaseStatusChange.getStatusModificationDate();
+    }
+
+    public boolean isLastRevision() {
+        return documentMaster.getLastRevision().equals(this);
     }
 
     @Override

@@ -14,7 +14,7 @@ package org.polarsys.eplmp.core.exceptions;
 import org.polarsys.eplmp.core.meta.Tag;
 
 import java.text.MessageFormat;
-import java.util.Locale;
+
 
 /**
  *
@@ -29,12 +29,12 @@ public class TagAlreadyExistsException extends EntityAlreadyExistsException {
         mTag=null;
     }
 
-    public TagAlreadyExistsException(Locale pLocale, Tag pTag) {
-        this(pLocale, pTag, null);
+    public TagAlreadyExistsException(Tag pTag) {
+        this(pTag, null);
     }
 
-    public TagAlreadyExistsException(Locale pLocale, Tag pTag, Throwable pCause) {
-        super(pLocale, pCause);
+    public TagAlreadyExistsException(Tag pTag, Throwable pCause) {
+        super( pCause);
         mTag=pTag;
     }
 

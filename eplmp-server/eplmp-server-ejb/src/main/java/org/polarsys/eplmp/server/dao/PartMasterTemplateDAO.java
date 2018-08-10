@@ -17,23 +17,22 @@ import org.polarsys.eplmp.core.meta.ListOfValuesKey;
 import org.polarsys.eplmp.core.product.PartMasterTemplate;
 import org.polarsys.eplmp.core.product.PartMasterTemplateKey;
 
-import javax.persistence.*;
+import javax.enterprise.context.RequestScoped;
+import javax.inject.Inject;
+import javax.persistence.EntityExistsException;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceException;
+import javax.persistence.TypedQuery;
 import java.util.List;
-import java.util.Locale;
 
+
+@RequestScoped
 public class PartMasterTemplateDAO {
 
+    @Inject
     private EntityManager em;
-    private Locale mLocale;
 
-    public PartMasterTemplateDAO(Locale pLocale, EntityManager pEM) {
-        em = pEM;
-        mLocale = pLocale;
-    }
-
-    public PartMasterTemplateDAO(EntityManager pEM) {
-        em = pEM;
-        mLocale = Locale.getDefault();
+    public PartMasterTemplateDAO() {
     }
 
     public PartMasterTemplate removePartMTemplate(PartMasterTemplateKey pKey) throws PartMasterTemplateNotFoundException {
@@ -51,7 +50,7 @@ public class PartMasterTemplateDAO {
             throws PartMasterTemplateNotFoundException {
         PartMasterTemplate template = em.find(PartMasterTemplate.class, pKey);
         if (template == null) {
-            throw new PartMasterTemplateNotFoundException(mLocale, pKey.getId());
+            throw new PartMasterTemplateNotFoundException(pKey.getId());
         } else {
             return template;
         }
@@ -63,12 +62,12 @@ public class PartMasterTemplateDAO {
             em.persist(pTemplate);
             em.flush();
         } catch (EntityExistsException pEEEx) {
-            throw new PartMasterTemplateAlreadyExistsException(mLocale, pTemplate);
+            throw new PartMasterTemplateAlreadyExistsException(pTemplate);
         } catch (PersistenceException pPEx) {
             //EntityExistsException is case sensitive
             //whereas MySQL is not thus PersistenceException could be
             //thrown instead of EntityExistsException
-            throw new CreationException(mLocale);
+            throw new CreationException();
         }
     }
 

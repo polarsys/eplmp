@@ -1,18 +1,16 @@
 /*******************************************************************************
- * Copyright (c) 2017 DocDoku.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
- * <p>
- * Contributors:
- * DocDoku - initial API and implementation
- *******************************************************************************/
+  * Copyright (c) 2017 DocDoku.
+  * All rights reserved. This program and the accompanying materials
+  * are made available under the terms of the Eclipse Public License v1.0
+  * which accompanies this distribution, and is available at
+  * http://www.eclipse.org/legal/epl-v10.html
+  *
+  * Contributors:
+  *    DocDoku - initial API and implementation
+  *******************************************************************************/
 
 package org.polarsys.eplmp.server.auth.jwt;
 
-import org.polarsys.eplmp.core.security.UserGroupMapping;
-import org.polarsys.eplmp.core.sharing.SharedEntity;
 import org.jose4j.jws.AlgorithmIdentifiers;
 import org.jose4j.jws.JsonWebSignature;
 import org.jose4j.jwt.JwtClaims;
@@ -22,6 +20,8 @@ import org.jose4j.jwt.consumer.InvalidJwtException;
 import org.jose4j.jwt.consumer.JwtConsumer;
 import org.jose4j.jwt.consumer.JwtConsumerBuilder;
 import org.jose4j.lang.JoseException;
+import org.polarsys.eplmp.core.security.UserGroupMapping;
+import org.polarsys.eplmp.core.sharing.SharedEntity;
 
 import javax.json.Json;
 import javax.json.JsonObject;

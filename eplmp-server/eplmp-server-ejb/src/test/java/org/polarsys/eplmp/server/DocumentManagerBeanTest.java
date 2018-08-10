@@ -1,16 +1,23 @@
 /*******************************************************************************
-  * Copyright (c) 2017 DocDoku.
-  * All rights reserved. This program and the accompanying materials
-  * are made available under the terms of the Eclipse Public License v1.0
-  * which accompanies this distribution, and is available at
-  * http://www.eclipse.org/legal/epl-v10.html
-  *
-  * Contributors:
-  *    DocDoku - initial API and implementation
-  *******************************************************************************/
+ * Copyright (c) 2017 DocDoku.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ * <p/>
+ * Contributors:
+ * DocDoku - initial API and implementation
+ *******************************************************************************/
 
 package org.polarsys.eplmp.server;
 
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Matchers;
+import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.polarsys.eplmp.core.common.Account;
 import org.polarsys.eplmp.core.common.BinaryResource;
 import org.polarsys.eplmp.core.common.User;
@@ -23,18 +30,13 @@ import org.polarsys.eplmp.core.meta.InstanceDateAttribute;
 import org.polarsys.eplmp.core.meta.InstanceTextAttribute;
 import org.polarsys.eplmp.core.security.ACL;
 import org.polarsys.eplmp.core.security.ACLPermission;
-import org.polarsys.eplmp.core.services.*;
+import org.polarsys.eplmp.core.services.IUserManagerLocal;
+import org.polarsys.eplmp.server.dao.ACLDAO;
+import org.polarsys.eplmp.server.dao.BinaryResourceDAO;
+import org.polarsys.eplmp.server.dao.DocumentMasterTemplateDAO;
+import org.polarsys.eplmp.server.dao.DocumentRevisionDAO;
 import org.polarsys.eplmp.server.util.DocumentUtil;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Matchers;
-import org.mockito.Mock;
-import org.mockito.Mockito;
 
-import javax.ejb.SessionContext;
-import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -45,56 +47,46 @@ import static org.mockito.MockitoAnnotations.initMocks;
 
 public class DocumentManagerBeanTest {
 
-
-
     @InjectMocks
-    DocumentManagerBean  documentManagerBean = new DocumentManagerBean();
-
-    @Mock
-    private EntityManager em;
-    @Mock
-    private SessionContext ctx;
+    private
+    DocumentManagerBean documentManagerBean = new DocumentManagerBean();
 
     @Mock
     private IUserManagerLocal userManager;
     @Mock
-    private IContextManagerLocal contextManager;
-    @Mock
-    private INotifierLocal mailer;
-    @Mock
-    private IGCMSenderLocal gcmNotifier;
-    @Mock
-    private IIndexerManagerLocal indexerManager;
-    @Mock
-    private IBinaryStorageManagerLocal storageManager;
-    @Mock
     private TypedQuery<DocumentIteration> documentIterationQuery;
     @Mock
     private TypedQuery<ACL> aclTypedQuery;
+    @Mock
+    private BinaryResourceDAO binaryResourceDAO;
+    @Mock
+    private DocumentMasterTemplateDAO documentMasterTemplateDAO;
+    @Mock
+    private DocumentRevisionDAO documentRevisionDAO;
+    @Mock
+    private ACLDAO aclDAO;
 
-    private Account account;
-    private Workspace workspace ;
+    private Workspace workspace;
     private User user;
     private DocumentMasterTemplate documentMasterTemplate;
     private BinaryResource binaryResource;
     private DocumentIteration documentIteration;
     private DocumentRevision documentRevision;
     private ACL acl;
-    private Folder folder;
 
     @Before
-    public void setup() throws Exception {
+    public void setup() {
         initMocks(this);
-        account = new Account(DocumentUtil.USER_2_LOGIN, DocumentUtil.USER_2_NAME, DocumentUtil.USER2_MAIL, DocumentUtil.LANGUAGE,new Date(),null);
-        workspace = new Workspace(DocumentUtil.WORKSPACE_ID,account, DocumentUtil.WORKSPACE_DESCRIPTION, false);
+        Account account = new Account(DocumentUtil.USER_2_LOGIN, DocumentUtil.USER_2_NAME, DocumentUtil.USER2_MAIL, DocumentUtil.LANGUAGE, new Date(), null);
+        workspace = new Workspace(DocumentUtil.WORKSPACE_ID, account, DocumentUtil.WORKSPACE_DESCRIPTION, false);
         user = new User(workspace, new Account(DocumentUtil.USER_1_LOGIN, DocumentUtil.USER_1_NAME, DocumentUtil.USER1_MAIL, DocumentUtil.LANGUAGE, new Date(), null));
-        documentMasterTemplate= new DocumentMasterTemplate(workspace, DocumentUtil.DOCUMENT_TEMPLATE_ID, user,"","");
-        binaryResource = new BinaryResource(DocumentUtil.FULL_NAME,DocumentUtil.DOCUMENT_SIZE,new Date());
+        documentMasterTemplate = new DocumentMasterTemplate(workspace, DocumentUtil.DOCUMENT_TEMPLATE_ID, user, "", "");
+        binaryResource = new BinaryResource(DocumentUtil.FULL_NAME, DocumentUtil.DOCUMENT_SIZE, new Date());
         documentIteration = new DocumentIteration();
         acl = new ACL();
         acl.addEntry(user, ACLPermission.READ_ONLY);
 
-        folder = new Folder(DocumentUtil.WORKSPACE_ID+"/"+user.getName()+"/folders/"+DocumentUtil.FOLDER);
+        Folder folder = new Folder(DocumentUtil.WORKSPACE_ID + "/" + user.getName() + "/folders/" + DocumentUtil.FOLDER);
         documentRevision = new DocumentRevision();
         documentRevision.setLocation(folder);
         documentIteration.setDocumentRevision(documentRevision);
@@ -112,14 +104,16 @@ public class DocumentManagerBeanTest {
 
         Mockito.when(userManager.checkWorkspaceWriteAccess(DocumentUtil.WORKSPACE_ID)).thenReturn(user);
         Mockito.when(userManager.checkWorkspaceReadAccess(DocumentUtil.WORKSPACE_ID)).thenReturn(user);
-        Mockito.when(em.find(DocumentMasterTemplate.class, pDocMTemplateKey)).thenReturn(documentMasterTemplate);
+        Mockito.when(documentMasterTemplateDAO.loadDocMTemplate(pDocMTemplateKey)).thenReturn(documentMasterTemplate);
+
         //When
-        BinaryResource binaryResource= documentManagerBean.saveFileInTemplate(pDocMTemplateKey, DocumentUtil.FILE1_NAME, DocumentUtil.DOCUMENT_SIZE);
+        BinaryResource binaryResource = documentManagerBean.saveFileInTemplate(pDocMTemplateKey, DocumentUtil.FILE1_NAME, DocumentUtil.DOCUMENT_SIZE);
+
         //Then
-        Assert.assertTrue(binaryResource.getLastModified()!= null);
-        Assert.assertTrue(binaryResource.getContentLength() == DocumentUtil.DOCUMENT_SIZE);
+        Assert.assertNotNull(binaryResource.getLastModified());
+        Assert.assertEquals(DocumentUtil.DOCUMENT_SIZE, binaryResource.getContentLength());
         Assert.assertTrue(!binaryResource.getFullName().isEmpty());
-        Assert.assertTrue(binaryResource.getFullName().equals(DocumentUtil.WORKSPACE_ID+"/document-templates/"+DocumentUtil.DOCUMENT_TEMPLATE_ID+"/"+ DocumentUtil.FILE1_NAME));
+        Assert.assertEquals(binaryResource.getFullName(), DocumentUtil.WORKSPACE_ID + "/document-templates/" + DocumentUtil.DOCUMENT_TEMPLATE_ID + "/" + DocumentUtil.FILE1_NAME);
     }
 
     /**
@@ -129,26 +123,27 @@ public class DocumentManagerBeanTest {
     @Test
     public void saveFileInDocument() throws Exception {
         //Given
-        DocumentMaster documentMaster = Mockito.spy(new DocumentMaster(workspace, DocumentUtil.DOCUMENT_ID,user));
-        DocumentRevision documentRevision = Mockito.spy(new DocumentRevision(documentMaster, DocumentUtil.VERSION,user));
+        DocumentMaster documentMaster = new DocumentMaster(workspace, DocumentUtil.DOCUMENT_ID, user);
+        DocumentRevision documentRevision = new DocumentRevision(documentMaster, DocumentUtil.VERSION, user);
         ArrayList<DocumentIteration> iterations = new ArrayList<>();
         iterations.add(new DocumentIteration(documentRevision, user));
         documentRevision.setDocumentIterations(iterations);
         documentRevision.setCheckOutUser(user);
-        DocumentRevisionKey documentRevisionKey = Mockito.spy(new DocumentRevisionKey(DocumentUtil.WORKSPACE_ID, DocumentUtil.DOCUMENT_ID, DocumentUtil.VERSION));
-        DocumentIterationKey iterationKey = Mockito.spy(new DocumentIterationKey(DocumentUtil.WORKSPACE_ID, DocumentUtil.DOCUMENT_ID, DocumentUtil.VERSION,DocumentUtil.ITERATION));
+        DocumentRevisionKey documentRevisionKey = new DocumentRevisionKey(DocumentUtil.WORKSPACE_ID, DocumentUtil.DOCUMENT_ID, DocumentUtil.VERSION);
+        DocumentIterationKey iterationKey = new DocumentIterationKey(DocumentUtil.WORKSPACE_ID, DocumentUtil.DOCUMENT_ID, DocumentUtil.VERSION, DocumentUtil.ITERATION);
 
         Mockito.when(userManager.checkWorkspaceWriteAccess(DocumentUtil.WORKSPACE_ID)).thenReturn(user);
         Mockito.when(userManager.checkWorkspaceReadAccess(DocumentUtil.WORKSPACE_ID)).thenReturn(user);
-        Mockito.when(em.find(DocumentRevision.class, documentRevisionKey)).thenReturn(documentRevision);
-        Mockito.when(em.find(DocumentRevision.class, new DocumentRevisionKey(DocumentUtil.WORKSPACE_ID, DocumentUtil.DOCUMENT_ID, DocumentUtil.VERSION))).thenReturn(documentRevision);
+        Mockito.when(documentRevisionDAO.loadDocR(documentRevisionKey)).thenReturn(documentRevision);
+
         //When
-        BinaryResource binaryResource= documentManagerBean.saveFileInDocument(iterationKey, DocumentUtil.FILE1_NAME, DocumentUtil.DOCUMENT_SIZE);
+        BinaryResource binaryResource = documentManagerBean.saveFileInDocument(iterationKey, DocumentUtil.FILE1_NAME, DocumentUtil.DOCUMENT_SIZE);
+
         //Then
-        Assert.assertTrue(binaryResource.getLastModified()!= null);
-        Assert.assertTrue(binaryResource.getContentLength() == DocumentUtil.DOCUMENT_SIZE);
+        Assert.assertNotNull(binaryResource.getLastModified());
+        Assert.assertEquals(DocumentUtil.DOCUMENT_SIZE, binaryResource.getContentLength());
         Assert.assertTrue(!binaryResource.getFullName().isEmpty());
-        Assert.assertTrue(binaryResource.getFullName().equals(DocumentUtil.WORKSPACE_ID+"/documents/"+ DocumentUtil.DOCUMENT_ID +"/"+DocumentUtil.VERSION+"/"+DocumentUtil.ITERATION+"/"+ DocumentUtil.FILE1_NAME));
+        Assert.assertEquals(binaryResource.getFullName(), DocumentUtil.WORKSPACE_ID + "/documents/" + DocumentUtil.DOCUMENT_ID + "/" + DocumentUtil.VERSION + "/" + DocumentUtil.ITERATION + "/" + DocumentUtil.FILE1_NAME);
 
     }
 
@@ -159,26 +154,27 @@ public class DocumentManagerBeanTest {
     @Test
     public void saveFileWithSpecialCharactersInDocument() throws Exception {
         //Given
-        DocumentMaster documentMaster = Mockito.spy(new DocumentMaster(workspace, DocumentUtil.DOCUMENT_ID,user));
-        DocumentRevision documentRevision = Mockito.spy(new DocumentRevision(documentMaster, DocumentUtil.VERSION,user));
+        DocumentMaster documentMaster = new DocumentMaster(workspace, DocumentUtil.DOCUMENT_ID, user);
+        DocumentRevision documentRevision = new DocumentRevision(documentMaster, DocumentUtil.VERSION, user);
         ArrayList<DocumentIteration> iterations = new ArrayList<>();
         iterations.add(new DocumentIteration(documentRevision, user));
         documentRevision.setDocumentIterations(iterations);
         documentRevision.setCheckOutUser(user);
-        DocumentRevisionKey documentRevisionKey = Mockito.spy(new DocumentRevisionKey(DocumentUtil.WORKSPACE_ID, DocumentUtil.DOCUMENT_ID, DocumentUtil.VERSION));
-        DocumentIterationKey iterationKey = Mockito.spy(new DocumentIterationKey(DocumentUtil.WORKSPACE_ID, DocumentUtil.DOCUMENT_ID, DocumentUtil.VERSION,DocumentUtil.ITERATION));
+        DocumentRevisionKey documentRevisionKey = new DocumentRevisionKey(DocumentUtil.WORKSPACE_ID, DocumentUtil.DOCUMENT_ID, DocumentUtil.VERSION);
+        DocumentIterationKey iterationKey = new DocumentIterationKey(DocumentUtil.WORKSPACE_ID, DocumentUtil.DOCUMENT_ID, DocumentUtil.VERSION, DocumentUtil.ITERATION);
 
         Mockito.when(userManager.checkWorkspaceWriteAccess(DocumentUtil.WORKSPACE_ID)).thenReturn(user);
         Mockito.when(userManager.checkWorkspaceReadAccess(DocumentUtil.WORKSPACE_ID)).thenReturn(user);
-        Mockito.when(em.find(DocumentRevision.class, documentRevisionKey)).thenReturn(documentRevision);
-        Mockito.when(em.find(DocumentRevision.class, new DocumentRevisionKey(DocumentUtil.WORKSPACE_ID, DocumentUtil.DOCUMENT_ID, DocumentUtil.VERSION))).thenReturn(documentRevision);
+        Mockito.when(documentRevisionDAO.loadDocR(documentRevisionKey)).thenReturn(documentRevision);
+
         //When
-        BinaryResource binaryResource= documentManagerBean.saveFileInDocument(iterationKey, DocumentUtil.FILE2_NAME, DocumentUtil.DOCUMENT_SIZE);
+        BinaryResource binaryResource = documentManagerBean.saveFileInDocument(iterationKey, DocumentUtil.FILE2_NAME, DocumentUtil.DOCUMENT_SIZE);
+
         //Then
-        Assert.assertTrue(binaryResource.getLastModified()!= null);
-        Assert.assertTrue(binaryResource.getContentLength() == DocumentUtil.DOCUMENT_SIZE);
+        Assert.assertNotNull(binaryResource.getLastModified());
+        Assert.assertEquals(DocumentUtil.DOCUMENT_SIZE, binaryResource.getContentLength());
         Assert.assertTrue(!binaryResource.getFullName().isEmpty());
-        Assert.assertTrue(binaryResource.getFullName().equals(DocumentUtil.WORKSPACE_ID+"/documents/"+ DocumentUtil.DOCUMENT_ID +"/"+DocumentUtil.VERSION+"/"+DocumentUtil.ITERATION+"/"+ DocumentUtil.FILE2_NAME));
+        Assert.assertEquals(binaryResource.getFullName(), DocumentUtil.WORKSPACE_ID + "/documents/" + DocumentUtil.DOCUMENT_ID + "/" + DocumentUtil.VERSION + "/" + DocumentUtil.ITERATION + "/" + DocumentUtil.FILE2_NAME);
 
     }
 
@@ -189,19 +185,20 @@ public class DocumentManagerBeanTest {
     @Test(expected = NotAllowedException.class)
     public void saveFileWithForbiddenCharactersInDocument() throws Exception {
         //Given
-        DocumentMaster documentMaster = Mockito.spy(new DocumentMaster(workspace, DocumentUtil.DOCUMENT_ID,user));
-        DocumentRevision documentRevision = Mockito.spy(new DocumentRevision(documentMaster, DocumentUtil.VERSION,user));
+        DocumentMaster documentMaster = new DocumentMaster(workspace, DocumentUtil.DOCUMENT_ID, user);
+        DocumentRevision documentRevision = new DocumentRevision(documentMaster, DocumentUtil.VERSION, user);
         ArrayList<DocumentIteration> iterations = new ArrayList<>();
         iterations.add(new DocumentIteration(documentRevision, user));
         documentRevision.setDocumentIterations(iterations);
         documentRevision.setCheckOutUser(user);
-        DocumentRevisionKey documentRevisionKey = Mockito.spy(new DocumentRevisionKey(DocumentUtil.WORKSPACE_ID, DocumentUtil.DOCUMENT_ID, DocumentUtil.VERSION));
-        DocumentIterationKey iterationKey = Mockito.spy(new DocumentIterationKey(DocumentUtil.WORKSPACE_ID, DocumentUtil.DOCUMENT_ID, DocumentUtil.VERSION,DocumentUtil.ITERATION));
+        DocumentRevisionKey documentRevisionKey = new DocumentRevisionKey(DocumentUtil.WORKSPACE_ID, DocumentUtil.DOCUMENT_ID, DocumentUtil.VERSION);
+        DocumentIterationKey iterationKey = new DocumentIterationKey(DocumentUtil.WORKSPACE_ID, DocumentUtil.DOCUMENT_ID, DocumentUtil.VERSION, DocumentUtil.ITERATION);
 
         Mockito.when(userManager.checkWorkspaceWriteAccess(DocumentUtil.WORKSPACE_ID)).thenReturn(user);
         Mockito.when(userManager.checkWorkspaceReadAccess(DocumentUtil.WORKSPACE_ID)).thenReturn(user);
-        Mockito.when(em.find(DocumentRevision.class, documentRevisionKey)).thenReturn(documentRevision);
-        Mockito.when(em.find(DocumentRevision.class, new DocumentRevisionKey(DocumentUtil.WORKSPACE_ID, DocumentUtil.DOCUMENT_ID, DocumentUtil.VERSION))).thenReturn(documentRevision);
+        Mockito.when(documentRevisionDAO.loadDocR(documentRevisionKey)).thenReturn(documentRevision);
+
+
         //When
         documentManagerBean.saveFileInDocument(iterationKey, DocumentUtil.FILE3_NAME, DocumentUtil.DOCUMENT_SIZE);
 
@@ -212,17 +209,20 @@ public class DocumentManagerBeanTest {
      *  Test to download a document file
      *  */
     @Test
-    public void getBinaryResourceTest()throws Exception{
+    public void getBinaryResourceTest() throws Exception {
         //Given
         Mockito.when(userManager.checkWorkspaceReadAccess(BinaryResource.parseWorkspaceId(DocumentUtil.FULL_NAME))).thenReturn(user);
-        Mockito.when(em.find(BinaryResource.class, DocumentUtil.FULL_NAME)).thenReturn(binaryResource);
+        Mockito.when(binaryResourceDAO.loadBinaryResource(DocumentUtil.FULL_NAME)).thenReturn(binaryResource);
         Mockito.when(documentIterationQuery.getSingleResult()).thenReturn(documentIteration);
         Mockito.when(documentIterationQuery.setParameter("binaryResource", binaryResource)).thenReturn(documentIterationQuery);
-        Mockito.when(em.createQuery("SELECT d FROM DocumentIteration d WHERE :binaryResource MEMBER OF d.attachedFiles", DocumentIteration.class)).thenReturn(documentIterationQuery);
+        Mockito.when(binaryResourceDAO.getDocumentHolder(binaryResource)).thenReturn(documentIteration);
+
+        //When
         BinaryResource binaryResource = documentManagerBean.getBinaryResource(DocumentUtil.FULL_NAME);
+
         //Then
         Assert.assertNotNull(binaryResource);
-        Assert.assertTrue(binaryResource.getContentLength() == DocumentUtil.DOCUMENT_SIZE);
+        Assert.assertEquals(DocumentUtil.DOCUMENT_SIZE, binaryResource.getContentLength());
     }
 
     /**
@@ -231,10 +231,9 @@ public class DocumentManagerBeanTest {
      *
      */
     @Test
-    public void changeAttributesWithLockedTemplate()throws Exception{
+    public void changeAttributesWithLockedTemplate() throws Exception {
 
-        DocumentMaster documentMaster = new DocumentMaster(workspace, DocumentUtil.DOCUMENT_ID,user);
-
+        DocumentMaster documentMaster = new DocumentMaster(workspace, DocumentUtil.DOCUMENT_ID, user);
 
         documentRevision = new DocumentRevision(documentMaster, "A", user);
         documentIteration = new DocumentIteration(documentRevision, user);
@@ -244,7 +243,7 @@ public class DocumentManagerBeanTest {
         iterations.add(documentIteration);
         documentRevision.setDocumentIterations(iterations);
 
-        DocumentRevisionKey rKey = new DocumentRevisionKey(workspace.getId(), documentMaster.getId(), documentRevision.getVersion());
+        DocumentRevisionKey documentRevisionKey = new DocumentRevisionKey(workspace.getId(), documentMaster.getId(), documentRevision.getVersion());
 
         //Creation of current attributes of the iteration
         InstanceAttribute attribute = new InstanceTextAttribute("Nom", "Testeur", false);
@@ -256,27 +255,25 @@ public class DocumentManagerBeanTest {
 
         Mockito.when(userManager.checkWorkspaceReadAccess(workspace.getId())).thenReturn(user);
         Mockito.when(userManager.checkWorkspaceWriteAccess(workspace.getId())).thenReturn(user);
-        Mockito.when(em.find(DocumentRevision.class, null)).thenReturn(documentRevision);
-        Mockito.when(em.find(DocumentRevision.class, rKey)).thenReturn(documentRevision);
+        Mockito.when(documentRevisionDAO.loadDocR(documentRevisionKey)).thenReturn(documentRevision);
 
-
-        try{
+        try {
             //Test to remove attribute
             documentManagerBean.updateDocument(documentIteration.getKey(), "test", Arrays.asList(new InstanceAttribute[]{}), new DocumentRevisionKey[]{}, null);
-            Assert.assertTrue("updateDocument should have raise an exception because we have removed attributes", false);
-        }catch (NotAllowedException notAllowedException){
-            try{
+            Assert.fail("updateDocument should have raise an exception because we have removed attributes");
+        } catch (NotAllowedException notAllowedException) {
+            try {
                 //Test with a swipe of attribute
                 documentManagerBean.updateDocument(documentIteration.getKey(), "test", Arrays.asList(new InstanceAttribute[]{new InstanceDateAttribute("Nom", new Date(), false)}), new DocumentRevisionKey[]{}, null);
-                Assert.assertTrue("updateDocument should have raise an exception because we have changed the attribute type attributes", false);
-            }catch (NotAllowedException notAllowedException2){
+                Assert.fail("updateDocument should have raise an exception because we have changed the attribute type attributes");
+            } catch (NotAllowedException notAllowedException2) {
                 try {
                     //Test without modifying the attribute
                     documentManagerBean.updateDocument(documentIteration.getKey(), "test", Arrays.asList(new InstanceAttribute[]{attribute}), new DocumentRevisionKey[]{}, null);
                     //Test with a new value of the attribute
                     documentManagerBean.updateDocument(documentIteration.getKey(), "test", Arrays.asList(new InstanceAttribute[]{new InstanceTextAttribute("Nom", "Testeur change", false)}), new DocumentRevisionKey[]{}, null);
-                } catch (NotAllowedException notAllowedException3){
-                    Assert.assertTrue("updateDocument shouldn't have raised an exception because we haven't change the number of attribute or the type", false);
+                } catch (NotAllowedException notAllowedException3) {
+                    Assert.fail("updateDocument shouldn't have raised an exception because we haven't change the number of attribute or the type");
                 }
             }
         }
@@ -288,9 +285,9 @@ public class DocumentManagerBeanTest {
      *
      */
     @Test
-    public void changeAttributesWithUnlockedTemplate()throws Exception{
+    public void changeAttributesWithUnlockedTemplate() throws Exception {
 
-        DocumentMaster documentMaster = new DocumentMaster(workspace, DocumentUtil.DOCUMENT_ID,user);
+        DocumentMaster documentMaster = new DocumentMaster(workspace, DocumentUtil.DOCUMENT_ID, user);
 
         documentRevision = new DocumentRevision(documentMaster, "A", user);
         documentIteration = new DocumentIteration(documentRevision, user);
@@ -300,7 +297,7 @@ public class DocumentManagerBeanTest {
         iterations.add(documentIteration);
         documentRevision.setDocumentIterations(iterations);
 
-        DocumentRevisionKey rKey = new DocumentRevisionKey(workspace.getId(), documentMaster.getId(), documentRevision.getVersion());
+        DocumentRevisionKey documentRevisionKey = new DocumentRevisionKey(workspace.getId(), documentMaster.getId(), documentRevision.getVersion());
 
         //Creation of current attributes of the iteration
         InstanceAttribute attribute = new InstanceTextAttribute("Nom", "Testeur", false);
@@ -312,11 +309,9 @@ public class DocumentManagerBeanTest {
 
         Mockito.when(userManager.checkWorkspaceReadAccess(workspace.getId())).thenReturn(user);
         Mockito.when(userManager.checkWorkspaceWriteAccess(workspace.getId())).thenReturn(user);
-        Mockito.when(em.find(DocumentRevision.class, null)).thenReturn(documentRevision);
-        Mockito.when(em.find(DocumentRevision.class, rKey)).thenReturn(documentRevision);
+        Mockito.when(documentRevisionDAO.loadDocR(documentRevisionKey)).thenReturn(documentRevision);
 
-
-        try{
+        try {
             //Test to remove attribute
             documentManagerBean.updateDocument(documentIteration.getKey(), "test", Arrays.asList(new InstanceAttribute[]{}), new DocumentRevisionKey[]{}, null);
             //Add the attribute
@@ -325,8 +320,8 @@ public class DocumentManagerBeanTest {
             documentManagerBean.updateDocument(documentIteration.getKey(), "test", Arrays.asList(new InstanceAttribute[]{new InstanceTextAttribute("Nom", "Testeur change", false)}), new DocumentRevisionKey[]{}, null);
             //Change the type of the attribute
             documentManagerBean.updateDocument(documentIteration.getKey(), "test", Arrays.asList(new InstanceAttribute[]{new InstanceDateAttribute("Nom", new Date(), false)}), new DocumentRevisionKey[]{}, null);
-        } catch (NotAllowedException notAllowedException3){
-            Assert.assertTrue("updateDocument shouldn't have raised an exception because the attribute are not frozen", false);
+        } catch (NotAllowedException notAllowedException3) {
+            Assert.fail("updateDocument shouldn't have raised an exception because the attribute are not frozen");
         }
     }
 
@@ -337,11 +332,11 @@ public class DocumentManagerBeanTest {
      */
 
     @Test
-    public void removeACLFromDocument()throws Exception{
+    public void removeACLFromDocument() throws Exception {
 
-        user = new User(workspace, new Account(DocumentUtil.USER_1_LOGIN, DocumentUtil.USER_1_NAME, DocumentUtil.USER1_MAIL, DocumentUtil.LANGUAGE, new Date(),null));
+        user = new User(workspace, new Account(DocumentUtil.USER_1_LOGIN, DocumentUtil.USER_1_NAME, DocumentUtil.USER1_MAIL, DocumentUtil.LANGUAGE, new Date(), null));
 
-        DocumentMaster documentMaster = new DocumentMaster(workspace, DocumentUtil.DOCUMENT_ID,user);
+        DocumentMaster documentMaster = new DocumentMaster(workspace, DocumentUtil.DOCUMENT_ID, user);
         documentRevision = new DocumentRevision(documentMaster, "A", user);
         documentIteration = new DocumentIteration(documentRevision, user);
         documentRevision.setCheckOutUser(user);
@@ -350,16 +345,14 @@ public class DocumentManagerBeanTest {
         acl.addEntry(user, ACLPermission.READ_ONLY);
         documentRevision.setACL(acl);
 
-        DocumentRevisionKey pKey = new DocumentRevisionKey(workspace.getId(), documentMaster.getId(), documentRevision.getVersion());
+        DocumentRevisionKey documentRevisionKey = new DocumentRevisionKey(workspace.getId(), documentMaster.getId(), documentRevision.getVersion());
 
         Mockito.when(userManager.checkWorkspaceReadAccess(workspace.getId())).thenReturn(user);
-        Mockito.when(em.getReference(DocumentRevision.class, pKey)).thenReturn(documentRevision);
-
-        Mockito.when(aclTypedQuery.setParameter(Matchers.anyString(),Matchers.any())).thenReturn(aclTypedQuery);
-        Mockito.when(em.createNamedQuery(Matchers.<String>any())).thenReturn(aclTypedQuery);
+        Mockito.when(aclTypedQuery.setParameter(Matchers.anyString(), Matchers.any())).thenReturn(aclTypedQuery);
+        Mockito.when(documentRevisionDAO.getDocRRef(documentRevisionKey)).thenReturn(documentRevision);
 
         documentManagerBean.removeACLFromDocumentRevision(documentRevision.getKey());
-        Assert.assertTrue(documentRevision.getACL() == null);
+        Assert.assertNull(documentRevision.getACL());
     }
 
 }

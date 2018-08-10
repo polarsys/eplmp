@@ -11,6 +11,8 @@
 
 package org.polarsys.eplmp.server.rest;
 
+import org.dozer.DozerBeanMapperSingletonWrapper;
+import org.dozer.Mapper;
 import org.polarsys.eplmp.core.change.ModificationNotification;
 import org.polarsys.eplmp.core.common.User;
 import org.polarsys.eplmp.core.common.UserGroup;
@@ -22,16 +24,22 @@ import org.polarsys.eplmp.core.security.ACLUserEntry;
 import org.polarsys.eplmp.core.security.ACLUserGroupEntry;
 import org.polarsys.eplmp.server.rest.dto.*;
 import org.polarsys.eplmp.server.rest.dto.baseline.*;
-import org.dozer.DozerBeanMapperSingletonWrapper;
-import org.dozer.Mapper;
 
+import javax.ws.rs.core.Response;
+import java.io.UnsupportedEncodingException;
+import java.net.URI;
+import java.net.URLEncoder;
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 /**
  * @author Florent Garin
  */
 public class Tools {
+
+    private static final Logger LOGGER = Logger.getLogger(Tools.class.getName());
 
     private Tools() {
 
@@ -281,5 +289,14 @@ public class Tools {
         Mapper mapper = DozerBeanMapperSingletonWrapper.getInstance();
         pathChoiceDTO.setPartUsageLink(mapper.map(choice.getPartUsageLink(), PartUsageLinkDTO.class));
         return pathChoiceDTO;
+    }
+
+    public static Response prepareCreatedResponse(String location, Object entity){
+        try {
+            return Response.created(URI.create(URLEncoder.encode(location, "UTF-8"))).entity(entity).build();
+        } catch (UnsupportedEncodingException ex) {
+            LOGGER.log(Level.WARNING, null, ex);
+            return Response.ok().entity(entity).build();
+        }
     }
 }

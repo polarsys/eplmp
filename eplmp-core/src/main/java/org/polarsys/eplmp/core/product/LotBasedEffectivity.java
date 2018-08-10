@@ -12,7 +12,6 @@
 
 package org.polarsys.eplmp.core.product;
 
-import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 

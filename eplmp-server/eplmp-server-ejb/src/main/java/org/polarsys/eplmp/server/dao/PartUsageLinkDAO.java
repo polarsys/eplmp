@@ -16,66 +16,65 @@ import org.polarsys.eplmp.core.product.PartMasterKey;
 import org.polarsys.eplmp.core.product.PartSubstituteLink;
 import org.polarsys.eplmp.core.product.PartUsageLink;
 
+import javax.enterprise.context.RequestScoped;
+import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
+
+@RequestScoped
 public class PartUsageLinkDAO {
 
+    @Inject
     private EntityManager em;
-    private Locale mLocale;
 
-    public PartUsageLinkDAO(Locale pLocale, EntityManager pEM) {
-        em = pEM;
-        mLocale = pLocale;
-    }
-    
-    public PartUsageLinkDAO(EntityManager pEM) {
-        em = pEM;
-        mLocale = Locale.getDefault();
+    @Inject
+    private PathToPathLinkDAO pathToPathLinkDAO;
+
+    public PartUsageLinkDAO() {
     }
 
-    
-    public List<PartUsageLink[]> findPartUsagePaths(PartMasterKey pPartMKey){
-        List<PartUsageLink> usages= findPartUsages(pPartMKey.getWorkspace(),pPartMKey.getNumber()); 
+
+    public List<PartUsageLink[]> findPartUsagePaths(PartMasterKey pPartMKey) {
+        List<PartUsageLink> usages = findPartUsages(pPartMKey.getWorkspace(), pPartMKey.getNumber());
         List<PartUsageLink[]> usagePaths = new ArrayList<>();
-        for(PartUsageLink usage:usages){
-            List<PartUsageLink> path=new ArrayList<>();
+        for (PartUsageLink usage : usages) {
+            List<PartUsageLink> path = new ArrayList<>();
             path.add(usage);
-            createPath(usage,path,usagePaths);
+            createPath(usage, path, usagePaths);
         }
-        
+
         return usagePaths;
     }
 
-    private void createPath(PartUsageLink currentUsage, List<PartUsageLink> currentPath, List<PartUsageLink[]> usagePaths){
-        
-        PartIteration owner = em.createNamedQuery("PartUsageLink.getPartOwner",PartIteration.class)
+    private void createPath(PartUsageLink currentUsage, List<PartUsageLink> currentPath, List<PartUsageLink[]> usagePaths) {
+
+        PartIteration owner = em.createNamedQuery("PartUsageLink.getPartOwner", PartIteration.class)
                 .setParameter("usage", currentUsage)
                 .getSingleResult();
         List<PartUsageLink> parentUsages = findPartUsages(owner.getWorkspaceId(), owner.getPartNumber());
-        
-        for(PartUsageLink parentUsage:parentUsages){
-            List<PartUsageLink> newPath=new ArrayList<>(currentPath);
-            newPath.add(0,parentUsage);
+
+        for (PartUsageLink parentUsage : parentUsages) {
+            List<PartUsageLink> newPath = new ArrayList<>(currentPath);
+            newPath.add(0, parentUsage);
             createPath(parentUsage, newPath, usagePaths);
         }
-        if(parentUsages.isEmpty()) {
+        if (parentUsages.isEmpty()) {
             usagePaths.add(currentPath.toArray(new PartUsageLink[currentPath.size()]));
         }
-              
-    }
-    
-    public List<PartUsageLink> findPartUsages(String workspaceId, String partNumber){
-        return em.createNamedQuery("PartUsageLink.findByComponent",PartUsageLink.class)
-            .setParameter("partNumber", partNumber)
-            .setParameter("workspaceId", workspaceId)
-            .getResultList();
+
     }
 
-    public boolean hasPartUsages(String workspaceId, String partNumber){
-        return !findPartUsages(workspaceId,partNumber).isEmpty();
+    public List<PartUsageLink> findPartUsages(String workspaceId, String partNumber) {
+        return em.createNamedQuery("PartUsageLink.findByComponent", PartUsageLink.class)
+                .setParameter("partNumber", partNumber)
+                .setParameter("workspaceId", workspaceId)
+                .getResultList();
+    }
+
+    public boolean hasPartUsages(String workspaceId, String partNumber) {
+        return !findPartUsages(workspaceId, partNumber).isEmpty();
     }
 
     public List<PartSubstituteLink> findPartSubstitutes(String workspaceId, String partNumber) {
@@ -86,13 +85,13 @@ public class PartUsageLinkDAO {
     }
 
     public boolean hasPartSubstitutes(String workspaceId, String partNumber) {
-        return !findPartSubstitutes(workspaceId,partNumber).isEmpty();
+        return !findPartSubstitutes(workspaceId, partNumber).isEmpty();
     }
-    
+
     public PartUsageLink loadPartUsageLink(int pId) throws PartUsageLinkNotFoundException {
         PartUsageLink link = em.find(PartUsageLink.class, pId);
         if (link == null) {
-            throw new PartUsageLinkNotFoundException(mLocale, pId);
+            throw new PartUsageLinkNotFoundException(pId);
         } else {
             return link;
         }
@@ -101,7 +100,7 @@ public class PartUsageLinkDAO {
     public PartSubstituteLink loadPartSubstituteLink(int pId) throws PartUsageLinkNotFoundException {
         PartSubstituteLink link = em.find(PartSubstituteLink.class, pId);
         if (link == null) {
-            throw new PartUsageLinkNotFoundException(mLocale, pId);
+            throw new PartUsageLinkNotFoundException(pId);
         } else {
             return link;
         }
@@ -110,9 +109,7 @@ public class PartUsageLinkDAO {
     public void removeOrphanPartLinks() {
         List<PartUsageLink> partUsageLinks = em.createNamedQuery("PartUsageLink.findOrphans", PartUsageLink.class).getResultList();
 
-        PathToPathLinkDAO pathToPathLinkDAO = new PathToPathLinkDAO(mLocale, em);
-
-        for(PartUsageLink partUsageLink:partUsageLinks){
+        for (PartUsageLink partUsageLink : partUsageLinks) {
             pathToPathLinkDAO.removePathToPathLinks(partUsageLink.getFullId());
             for (PartSubstituteLink partSubstituteLink : partUsageLink.getSubstitutes()) {
                 pathToPathLinkDAO.removePathToPathLinks(partSubstituteLink.getFullId());
@@ -120,4 +117,5 @@ public class PartUsageLinkDAO {
             em.remove(partUsageLink);
         }
     }
+
 }

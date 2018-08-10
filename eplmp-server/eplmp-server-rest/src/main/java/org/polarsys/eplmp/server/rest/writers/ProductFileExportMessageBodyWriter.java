@@ -17,11 +17,12 @@ import org.polarsys.eplmp.core.configuration.ProductInstanceMasterKey;
 import org.polarsys.eplmp.core.document.DocumentLink;
 import org.polarsys.eplmp.core.exceptions.*;
 import org.polarsys.eplmp.core.product.ConfigurationItemKey;
+import org.polarsys.eplmp.core.product.PartIteration;
 import org.polarsys.eplmp.core.services.IBinaryStorageManagerLocal;
 import org.polarsys.eplmp.core.services.IProductInstanceManagerLocal;
 import org.polarsys.eplmp.core.services.IProductManagerLocal;
-import org.polarsys.eplmp.server.rest.util.ProductFileExport;
 import org.polarsys.eplmp.server.rest.util.FileExportTools;
+import org.polarsys.eplmp.server.rest.util.ProductFileExport;
 
 import javax.inject.Inject;
 import javax.ws.rs.WebApplicationException;
@@ -123,7 +124,7 @@ public class ProductFileExportMessageBodyWriter implements MessageBodyWriter<Pro
         ProductInstanceIteration lastIteration = productInstanceMaster.getLastIteration();
 
         for (BinaryResource attachedFile : lastIteration.getAttachedFiles()) {
-            addToZipFile(attachedFile, "attachedfiles", zs);
+            addToZipFile(attachedFile, PartIteration.ATTACHED_FILES_SUBTYPE, zs);
         }
 
         for (DocumentLink docLink : lastIteration.getLinkedDocuments()) {

@@ -14,7 +14,7 @@ package org.polarsys.eplmp.core.exceptions;
 import org.polarsys.eplmp.core.common.UserGroup;
 
 import java.text.MessageFormat;
-import java.util.Locale;
+
 
 /**
  *
@@ -29,12 +29,12 @@ public class UserGroupAlreadyExistsException extends EntityAlreadyExistsExceptio
         mUserGroup=null;
     }
 
-    public UserGroupAlreadyExistsException(Locale pLocale, UserGroup pUserGroup) {
-        this(pLocale, pUserGroup, null);
+    public UserGroupAlreadyExistsException(UserGroup pUserGroup) {
+        this(pUserGroup, null);
     }
 
-    public UserGroupAlreadyExistsException(Locale pLocale, UserGroup pUserGroup, Throwable pCause) {
-        super(pLocale, pCause);
+    public UserGroupAlreadyExistsException(UserGroup pUserGroup, Throwable pCause) {
+        super( pCause);
         mUserGroup=pUserGroup;
     }
 

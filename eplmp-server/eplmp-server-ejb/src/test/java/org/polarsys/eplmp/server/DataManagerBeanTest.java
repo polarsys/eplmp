@@ -11,13 +11,13 @@
 
 package org.polarsys.eplmp.server;
 
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 import org.polarsys.eplmp.core.common.BinaryResource;
 import org.polarsys.eplmp.server.storage.StorageProvider;
 import org.polarsys.eplmp.server.storage.filesystem.FileStorageProvider;
 import org.polarsys.eplmp.server.util.DocumentUtil;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
 
 import java.io.BufferedOutputStream;
 import java.util.Date;
@@ -31,7 +31,7 @@ public class DataManagerBeanTest {
     private BinaryResource binaryResource;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         //Given
         defaultStorageProvider = new FileStorageProvider(System.getProperty("java.io.tmpdir")+TARGET_FILE_STORAGE);
         binaryResource = new BinaryResource(DocumentUtil.FULL_NAME4,DocumentUtil.DOCUMENT_SIZE,new Date());
@@ -41,8 +41,9 @@ public class DataManagerBeanTest {
     public void testGetBinaryResourceOutputStream() throws Exception {
         //When
         BufferedOutputStream outputStream = (BufferedOutputStream)defaultStorageProvider.getBinaryResourceOutputStream(binaryResource);
+
         //Then
-        Assert.assertTrue(outputStream != null);
+        Assert.assertNotNull(outputStream);
     }
 
 }

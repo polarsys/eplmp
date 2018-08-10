@@ -30,7 +30,7 @@ public class CustomConverterProvider implements ParamConverterProvider {
     // Safe cast, ignore warning
     @SuppressWarnings("unchecked")
     public <T> ParamConverter<T> getConverter(Class<T> clazz, Type type, Annotation[] annotations) {
-        if (clazz.getName().equals(Date.class.getName())) {
+        if (clazz.isAssignableFrom(Date.class)) {
             return (ParamConverter<T>) dateAdapter;
         }
         return null;

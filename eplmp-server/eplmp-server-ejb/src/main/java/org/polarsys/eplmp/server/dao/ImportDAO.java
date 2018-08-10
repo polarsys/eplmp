@@ -15,37 +15,34 @@ import org.polarsys.eplmp.core.common.User;
 import org.polarsys.eplmp.core.exceptions.CreationException;
 import org.polarsys.eplmp.core.product.Import;
 
-import javax.persistence.*;
+import javax.enterprise.context.RequestScoped;
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
+import javax.persistence.PersistenceException;
+import javax.persistence.TypedQuery;
 import java.util.List;
-import java.util.Locale;
 
+
+@RequestScoped
 public class ImportDAO {
 
+    @Inject
     private EntityManager em;
-    private Locale mLocale;
 
-    public ImportDAO(Locale pLocale, EntityManager pEM) {
-        mLocale=pLocale;
-        em=pEM;
+    public ImportDAO() {
     }
 
-    public ImportDAO(EntityManager pEM) {
-        mLocale=Locale.getDefault();
-        em=pEM;
-    }
-
-    public void createImport(Import importToPersist) throws  CreationException {
-        try{
+    public void createImport(Import pImportToPersist) throws CreationException {
+        try {
             //the EntityExistsException is thrown only when flush occurs
-            em.persist(importToPersist);
+            em.persist(pImportToPersist);
             em.flush();
-        }catch(EntityExistsException pEEEx){
-            throw new CreationException(mLocale);
-        }catch(PersistenceException pPEx){
+        } catch (PersistenceException pPEx) {
             //EntityExistsException is case sensitive
             //whereas MySQL is not thus PersistenceException could be
             //thrown instead of EntityExistsException
-            throw new CreationException(mLocale);
+            throw new CreationException();
         }
     }
 
@@ -53,9 +50,9 @@ public class ImportDAO {
         TypedQuery<Import> query = em.createQuery("SELECT DISTINCT i FROM Import i WHERE i.id = :id AND i.user = :user", Import.class);
         query.setParameter("user", user);
         query.setParameter("id", id);
-        try{
+        try {
             return query.getSingleResult();
-        }catch(NoResultException e){
+        } catch (NoResultException e) {
             return null;
         }
     }

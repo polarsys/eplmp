@@ -1,20 +1,22 @@
 /*******************************************************************************
- * Copyright (c) 2017 DocDoku.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
- * <p>
- * Contributors:
- * DocDoku - initial API and implementation
- *******************************************************************************/
+  * Copyright (c) 2017 DocDoku.
+  * All rights reserved. This program and the accompanying materials
+  * are made available under the terms of the Eclipse Public License v1.0
+  * which accompanies this distribution, and is available at
+  * http://www.eclipse.org/legal/epl-v10.html
+  *
+  * Contributors:
+  *    DocDoku - initial API and implementation
+  *******************************************************************************/
 
 package org.polarsys.eplmp.core.services;
 
 import org.polarsys.eplmp.core.document.DocumentIteration;
 import org.polarsys.eplmp.core.document.DocumentRevision;
+import org.polarsys.eplmp.core.exceptions.AccessRightException;
 import org.polarsys.eplmp.core.exceptions.AccountNotFoundException;
 import org.polarsys.eplmp.core.exceptions.NotAllowedException;
+import org.polarsys.eplmp.core.exceptions.WorkspaceNotFoundException;
 import org.polarsys.eplmp.core.product.PartIteration;
 import org.polarsys.eplmp.core.product.PartRevision;
 import org.polarsys.eplmp.core.query.DocumentSearchQuery;
@@ -46,7 +48,7 @@ public interface IIndexerManagerLocal {
 
     void indexAllWorkspacesData() throws AccountNotFoundException;
 
-    void indexWorkspaceData(String workspaceId) throws AccountNotFoundException;
+    void indexWorkspaceData(String workspaceId) throws WorkspaceNotFoundException, AccountNotFoundException, AccessRightException;
 
     boolean ping();
 }

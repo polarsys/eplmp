@@ -10,11 +10,14 @@
   *******************************************************************************/
 package org.polarsys.eplmp.server.rest;
 
+import io.swagger.annotations.*;
+import org.dozer.DozerBeanMapperSingletonWrapper;
+import org.dozer.Mapper;
 import org.polarsys.eplmp.core.change.ModificationNotification;
-import org.polarsys.eplmp.core.common.*;
-import org.polarsys.eplmp.core.configuration.ProductStructureFilter;
+import org.polarsys.eplmp.core.common.BinaryResource;
 import org.polarsys.eplmp.core.configuration.ProductBaseline;
 import org.polarsys.eplmp.core.configuration.ProductInstanceMaster;
+import org.polarsys.eplmp.core.configuration.ProductStructureFilter;
 import org.polarsys.eplmp.core.document.DocumentRevisionKey;
 import org.polarsys.eplmp.core.exceptions.*;
 import org.polarsys.eplmp.core.exceptions.NotAllowedException;
@@ -22,8 +25,11 @@ import org.polarsys.eplmp.core.meta.InstanceAttribute;
 import org.polarsys.eplmp.core.meta.InstanceAttributeTemplate;
 import org.polarsys.eplmp.core.meta.Tag;
 import org.polarsys.eplmp.core.product.*;
-import org.polarsys.eplmp.core.security.*;
-import org.polarsys.eplmp.core.services.*;
+import org.polarsys.eplmp.core.security.UserGroupMapping;
+import org.polarsys.eplmp.core.services.IConverterManagerLocal;
+import org.polarsys.eplmp.core.services.IProductInstanceManagerLocal;
+import org.polarsys.eplmp.core.services.IProductManagerLocal;
+import org.polarsys.eplmp.core.services.IWorkspaceManagerLocal;
 import org.polarsys.eplmp.core.sharing.SharedPart;
 import org.polarsys.eplmp.core.util.FileIO;
 import org.polarsys.eplmp.core.workflow.Workflow;
@@ -31,9 +37,6 @@ import org.polarsys.eplmp.server.rest.collections.VirtualInstanceCollection;
 import org.polarsys.eplmp.server.rest.dto.*;
 import org.polarsys.eplmp.server.rest.dto.baseline.ProductBaselineDTO;
 import org.polarsys.eplmp.server.rest.dto.product.ProductInstanceMasterDTO;
-import io.swagger.annotations.*;
-import org.dozer.DozerBeanMapperSingletonWrapper;
-import org.dozer.Mapper;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.security.DeclareRoles;
@@ -47,7 +50,8 @@ import javax.ws.rs.core.Response;
 import java.util.*;
 
 @RequestScoped
-@Api(hidden = true, value = "part", description = "Operation about single parts")
+@Api(hidden = true, value = "part", description = "Operation about single parts",
+        authorizations = {@Authorization(value = "authorization")})
 @DeclareRoles(UserGroupMapping.REGULAR_USER_ROLE_ID)
 @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
 public class PartResource {
@@ -80,6 +84,7 @@ public class PartResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of PartRevisionDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Produces(MediaType.APPLICATION_JSON)
@@ -87,7 +92,7 @@ public class PartResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Part number") @PathParam("partNumber") String partNumber,
             @ApiParam(required = true, value = "Part version") @PathParam("partVersion") String partVersion)
-            throws EntityNotFoundException, AccessRightException, UserNotActiveException {
+            throws EntityNotFoundException, AccessRightException, UserNotActiveException, WorkspaceNotEnabledException {
 
         PartRevisionKey revisionKey = new PartRevisionKey(workspaceId, partNumber, partVersion);
         PartRevision partRevision = productService.getPartRevision(revisionKey);
@@ -102,12 +107,13 @@ public class PartResource {
     }
 
     @GET
-    @ApiOperation(value = "Get product instance where part is in use",
+    @ApiOperation(value = "Get product instance where part revision is in use",
             response = ProductInstanceMasterDTO.class,
             responseContainer = "List")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of ProductInstanceMasterDTOs. It can be an empty list."),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("/used-by-product-instance-masters")
@@ -116,8 +122,7 @@ public class PartResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Part number") @PathParam("partNumber") String partNumber,
             @ApiParam(required = true, value = "Part version") @PathParam("partVersion") String partVersion)
-            throws UserNotFoundException, WorkspaceNotFoundException, UserNotActiveException,
-            PartRevisionNotFoundException, AccessRightException, WorkspaceNotEnabledException {
+            throws EntityNotFoundException, UserNotActiveException, AccessRightException, WorkspaceNotEnabledException {
 
         PartRevisionKey revisionKey = new PartRevisionKey(workspaceId, partNumber, partVersion);
         PartRevision partRevision = productService.getPartRevision(revisionKey);
@@ -135,12 +140,13 @@ public class PartResource {
     }
 
     @GET
-    @ApiOperation(value = "Get part revisions where use as component",
+    @ApiOperation(value = "Get part revisions where given part revision is used as a component",
             response = PartRevisionDTO.class,
             responseContainer = "List")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of PartRevisionDTOs. It can be an empty list."),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("/used-by-as-component")
@@ -149,8 +155,7 @@ public class PartResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Part number") @PathParam("partNumber") String partNumber,
             @ApiParam(required = true, value = "Part version") @PathParam("partVersion") String partVersion)
-            throws UserNotFoundException, WorkspaceNotFoundException, UserNotActiveException,
-            PartRevisionNotFoundException, AccessRightException, WorkspaceNotEnabledException {
+            throws EntityNotFoundException, UserNotActiveException, AccessRightException, WorkspaceNotEnabledException {
 
         List<PartIteration> partIterations = productService.getUsedByAsComponent(new PartRevisionKey(workspaceId, partNumber, partVersion));
 
@@ -166,12 +171,13 @@ public class PartResource {
     }
 
     @GET
-    @ApiOperation(value = "Get part revisions where use as substitute",
+    @ApiOperation(value = "Get part revisions where given part revision is used as a substitute",
             response = PartRevisionDTO.class,
             responseContainer = "List")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of PartRevisionDTOs. It can be an empty list."),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("/used-by-as-substitute")
@@ -180,8 +186,7 @@ public class PartResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Part number") @PathParam("partNumber") String partNumber,
             @ApiParam(required = true, value = "Part version") @PathParam("partVersion") String partVersion)
-            throws UserNotFoundException, WorkspaceNotFoundException, UserNotActiveException,
-            PartRevisionNotFoundException, AccessRightException, WorkspaceNotEnabledException {
+            throws EntityNotFoundException, UserNotActiveException, AccessRightException, WorkspaceNotEnabledException {
 
         List<PartIteration> partIterations = productService.getUsedByAsSubstitute(new PartRevisionKey(workspaceId, partNumber, partVersion));
 
@@ -202,6 +207,7 @@ public class PartResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of updated PartRevisionDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("/iterations/{partIteration}")
@@ -214,7 +220,7 @@ public class PartResource {
             @ApiParam(required = true, value = "Part iteration") @PathParam("partIteration") int partIteration,
             @ApiParam(required = true, value = "Part iteration to update") PartIterationDTO data)
             throws EntityNotFoundException, EntityAlreadyExistsException, AccessRightException,
-            UserNotActiveException, NotAllowedException, CreationException, EntityConstraintException {
+            UserNotActiveException, NotAllowedException, CreationException, EntityConstraintException, WorkspaceNotEnabledException {
 
         PartRevisionKey revisionKey = new PartRevisionKey(workspaceId, partNumber, partVersion);
         PartRevision partRevision = productService.getPartRevision(revisionKey);
@@ -278,11 +284,12 @@ public class PartResource {
     }
 
     @GET
-    @ApiOperation(value = "Get conversion status",
+    @ApiOperation(value = "Get part iteration conversion status",
             response = ConversionDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of ConversionDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("/iterations/{partIteration}/conversion")
@@ -292,8 +299,7 @@ public class PartResource {
             @ApiParam(required = true, value = "Part number") @PathParam("partNumber") String partNumber,
             @ApiParam(required = true, value = "Part version") @PathParam("partVersion") String partVersion,
             @ApiParam(required = true, value = "Part iteration") @PathParam("partIteration") int partIteration)
-            throws UserNotActiveException, PartRevisionNotFoundException, WorkspaceNotFoundException,
-            UserNotFoundException, PartIterationNotFoundException, AccessRightException, WorkspaceNotEnabledException {
+            throws UserNotActiveException, EntityNotFoundException, AccessRightException, WorkspaceNotEnabledException {
 
         PartIterationKey partIPK = new PartIterationKey(workspaceId, partNumber, partVersion, partIteration);
         Conversion conversion = productService.getConversion(partIPK);
@@ -304,11 +310,12 @@ public class PartResource {
     }
 
     @PUT
-    @ApiOperation(value = "Retry conversion",
+    @ApiOperation(value = "Retry part iteration conversion",
             response = Response.class)
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful conversion retry"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("/iterations/{partIteration}/conversion")
@@ -317,8 +324,7 @@ public class PartResource {
             @ApiParam(required = true, value = "Part number") @PathParam("partNumber") String partNumber,
             @ApiParam(required = true, value = "Part version") @PathParam("partVersion") String partVersion,
             @ApiParam(required = true, value = "Part iteration") @PathParam("partIteration") int iteration)
-            throws UserNotActiveException, PartRevisionNotFoundException, WorkspaceNotFoundException,
-            UserNotFoundException, PartIterationNotFoundException, AccessRightException,
+            throws UserNotActiveException, EntityNotFoundException, AccessRightException,
             NotAllowedException, WorkspaceNotEnabledException {
 
         PartIterationKey partIPK = new PartIterationKey(workspaceId, partNumber, partVersion, iteration);
@@ -332,11 +338,12 @@ public class PartResource {
     }
 
     @PUT
-    @ApiOperation(value = "Checkin part",
+    @ApiOperation(value = "Checkin part revision",
             response = PartRevisionDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of checked in PartRevisionDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("/checkin")
@@ -347,7 +354,7 @@ public class PartResource {
             @ApiParam(required = true, value = "Part number") @PathParam("partNumber") String partNumber,
             @ApiParam(required = true, value = "Part version") @PathParam("partVersion") String partVersion)
             throws EntityNotFoundException, AccessRightException, NotAllowedException,
-            EntityConstraintException, UserNotActiveException {
+            EntityConstraintException, UserNotActiveException, WorkspaceNotEnabledException {
 
         PartRevisionKey revisionKey = new PartRevisionKey(workspaceId, partNumber, partVersion);
         PartRevision partRevision = productService.checkInPart(revisionKey);
@@ -355,11 +362,12 @@ public class PartResource {
     }
 
     @PUT
-    @ApiOperation(value = "Checkout part",
+    @ApiOperation(value = "Checkout part revision",
             response = PartRevisionDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of checked out PartRevisionDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("/checkout")
@@ -370,7 +378,7 @@ public class PartResource {
             @ApiParam(required = true, value = "Part number") @PathParam("partNumber") String partNumber,
             @ApiParam(required = true, value = "Part version") @PathParam("partVersion") String partVersion)
             throws EntityNotFoundException, EntityAlreadyExistsException, CreationException, AccessRightException,
-            NotAllowedException, UserNotActiveException {
+            NotAllowedException, UserNotActiveException, WorkspaceNotEnabledException {
 
         PartRevisionKey revisionKey = new PartRevisionKey(workspaceId, partNumber, partVersion);
         PartRevision partRevision = productService.checkOutPart(revisionKey);
@@ -378,11 +386,12 @@ public class PartResource {
     }
 
     @PUT
-    @ApiOperation(value = "Undo checkout part",
+    @ApiOperation(value = "Undo checkout part revision",
             response = PartRevisionDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of undo checked out PartRevisionDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("/undocheckout")
@@ -392,7 +401,7 @@ public class PartResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Part number") @PathParam("partNumber") String partNumber,
             @ApiParam(required = true, value = "Part version") @PathParam("partVersion") String partVersion)
-            throws EntityNotFoundException, UserNotActiveException, AccessRightException, NotAllowedException {
+            throws EntityNotFoundException, UserNotActiveException, AccessRightException, NotAllowedException, WorkspaceNotEnabledException {
 
         PartRevisionKey revisionKey = new PartRevisionKey(workspaceId, partNumber, partVersion);
         PartRevision partRevision = productService.undoCheckOutPart(revisionKey);
@@ -400,11 +409,12 @@ public class PartResource {
     }
 
     @PUT
-    @ApiOperation(value = "Update part ACL",
+    @ApiOperation(value = "Update part revision ACL",
             response = Response.class)
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful ACL removal of PartRevisionDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("/acl")
@@ -415,7 +425,7 @@ public class PartResource {
             @ApiParam(required = true, value = "Part number") @PathParam("partNumber") String partNumber,
             @ApiParam(required = true, value = "Part version") @PathParam("partVersion") String partVersion,
             @ApiParam(required = true, value = "ACL rules to set") ACLDTO acl)
-            throws EntityNotFoundException, AccessRightException, UserNotActiveException {
+            throws EntityNotFoundException, AccessRightException, UserNotActiveException, WorkspaceNotEnabledException {
 
         PartRevisionKey revisionKey = new PartRevisionKey(workspaceId, partNumber, partVersion);
 
@@ -433,6 +443,7 @@ public class PartResource {
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful retrieval of the new version of PartRevisionDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("/newVersion")
@@ -443,7 +454,7 @@ public class PartResource {
             @ApiParam(required = true, value = "Part number") @PathParam("partNumber") String partNumber,
             @ApiParam(required = true, value = "Part version") @PathParam("partVersion") String partVersion,
             @ApiParam(required = true, value = "New version of part to create") PartCreationDTO partCreationDTO)
-            throws EntityNotFoundException, EntityAlreadyExistsException, CreationException, AccessRightException, NotAllowedException {
+            throws EntityNotFoundException, EntityAlreadyExistsException, CreationException, AccessRightException, NotAllowedException, WorkspaceNotEnabledException {
 
         RoleMappingDTO[] roleMappingDTOs = partCreationDTO.getRoleMapping();
         PartRevisionKey revisionKey = new PartRevisionKey(workspaceId, partNumber, partVersion);
@@ -470,11 +481,12 @@ public class PartResource {
     }
 
     @PUT
-    @ApiOperation(value = "Release part",
+    @ApiOperation(value = "Release part revision",
             response = PartRevisionDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of released PartRevisionDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("/release")
@@ -484,7 +496,7 @@ public class PartResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Part number") @PathParam("partNumber") String partNumber,
             @ApiParam(required = true, value = "Part version") @PathParam("partVersion") String partVersion)
-            throws EntityNotFoundException, UserNotActiveException, AccessRightException, NotAllowedException {
+            throws EntityNotFoundException, UserNotActiveException, AccessRightException, NotAllowedException, WorkspaceNotEnabledException {
 
         PartRevisionKey revisionKey = new PartRevisionKey(workspaceId, partNumber, partVersion);
         PartRevision partRevision = productService.releasePartRevision(revisionKey);
@@ -492,11 +504,12 @@ public class PartResource {
     }
 
     @PUT
-    @ApiOperation(value = "Set part as obsolete",
+    @ApiOperation(value = "Set part revision as obsolete",
             response = PartRevisionDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of obsolete PartRevisionDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("/obsolete")
@@ -506,7 +519,7 @@ public class PartResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Part number") @PathParam("partNumber") String partNumber,
             @ApiParam(required = true, value = "Part version") @PathParam("partVersion") String partVersion)
-            throws EntityNotFoundException, UserNotActiveException, AccessRightException, NotAllowedException {
+            throws EntityNotFoundException, UserNotActiveException, AccessRightException, NotAllowedException, WorkspaceNotEnabledException {
 
         PartRevisionKey revisionKey = new PartRevisionKey(workspaceId, partNumber, partVersion);
         PartRevision partRevision = productService.markPartRevisionAsObsolete(revisionKey);
@@ -514,11 +527,12 @@ public class PartResource {
     }
 
     @DELETE
-    @ApiOperation(value = "Delete part",
+    @ApiOperation(value = "Delete part revision",
             response = Response.class)
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful deletion of PartRevisionDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Produces(MediaType.APPLICATION_JSON)
@@ -526,7 +540,7 @@ public class PartResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Part number") @PathParam("partNumber") String partNumber,
             @ApiParam(required = true, value = "Part version") @PathParam("partVersion") String partVersion)
-            throws EntityNotFoundException, UserNotActiveException, EntityConstraintException, AccessRightException {
+            throws EntityNotFoundException, UserNotActiveException, EntityConstraintException, AccessRightException, WorkspaceNotEnabledException {
 
         PartRevisionKey revisionKey = new PartRevisionKey(workspaceId, partNumber, partVersion);
         productService.deletePartRevision(revisionKey);
@@ -539,6 +553,7 @@ public class PartResource {
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful deletion of file of PartRevisionDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Consumes(MediaType.APPLICATION_JSON)
@@ -550,7 +565,7 @@ public class PartResource {
             @ApiParam(required = true, value = "Part iteration") @PathParam("partIteration") int partIteration,
             @ApiParam(required = true, value = "Sub type") @PathParam("subType") String subType,
             @ApiParam(required = true, value = "File name") @PathParam("fileName") String fileName)
-            throws EntityNotFoundException, UserNotActiveException {
+            throws EntityNotFoundException, UserNotActiveException, WorkspaceNotEnabledException {
         PartIterationKey partIKey = new PartIterationKey(workspaceId, partNumber, partVersion, partIteration);
         String fileFullName = workspaceId + "/parts/" + FileIO.encode(partNumber) + "/" + partVersion + "/" + partIteration + "/" + subType + "/" + fileName;
         productService.removeFileInPartIteration(partIKey, subType, fileFullName);
@@ -563,6 +578,7 @@ public class PartResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful renaming of file of PartRevisionDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Consumes(MediaType.APPLICATION_JSON)
@@ -576,9 +592,8 @@ public class PartResource {
             @ApiParam(required = true, value = "Sub type") @PathParam("subType") String subType,
             @ApiParam(required = true, value = "File name") @PathParam("fileName") String fileName,
             @ApiParam(required = true, value = "File to rename") FileDTO fileDTO)
-            throws UserNotActiveException, WorkspaceNotFoundException, CreationException, UserNotFoundException,
-            FileNotFoundException, NotAllowedException, FileAlreadyExistsException,
-            StorageException, WorkspaceNotEnabledException {
+            throws UserNotActiveException, CreationException, NotAllowedException, EntityAlreadyExistsException,
+            StorageException, WorkspaceNotEnabledException, EntityNotFoundException {
 
         String fileFullName = workspaceId + "/parts/" + FileIO.encode(partNumber) + "/" + partVersion + "/" + partIteration + "/" + subType + "/" + fileName;
         BinaryResource binaryResource = productService.renameFileInPartIteration(subType, fileFullName, fileDTO.getShortName());
@@ -586,11 +601,12 @@ public class PartResource {
     }
 
     @POST
-    @ApiOperation(value = "Create a new shared part",
+    @ApiOperation(value = "Create a new shared part from part revision",
             response = SharedPartDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of created SharedPartDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Consumes(MediaType.APPLICATION_JSON)
@@ -601,7 +617,7 @@ public class PartResource {
             @ApiParam(required = true, value = "Part number") @PathParam("partNumber") String partNumber,
             @ApiParam(required = true, value = "Part version") @PathParam("partVersion") String partVersion,
             @ApiParam(required = true, value = "Shared part to create") SharedPartDTO pSharedPartDTO)
-            throws EntityNotFoundException, AccessRightException, UserNotActiveException {
+            throws EntityNotFoundException, AccessRightException, UserNotActiveException, WorkspaceNotEnabledException {
 
         String password = pSharedPartDTO.getPassword();
         Date expireDate = pSharedPartDTO.getExpireDate();
@@ -618,6 +634,7 @@ public class PartResource {
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful publish of PartRevisionDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Consumes(MediaType.APPLICATION_JSON)
@@ -626,19 +643,19 @@ public class PartResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Part number") @PathParam("partNumber") String partNumber,
             @ApiParam(required = true, value = "Part version") @PathParam("partVersion") String partVersion)
-            throws EntityNotFoundException, AccessRightException, UserNotActiveException {
+            throws EntityNotFoundException, AccessRightException, UserNotActiveException, WorkspaceNotEnabledException {
 
         productService.setPublicSharedPart(new PartRevisionKey(workspaceId, partNumber, partVersion), true);
         return Response.noContent().build();
     }
 
-    // Todo : refactor to only one method with the one above. Use a query param to set on/off public sharing
     @PUT
     @ApiOperation(value = "Un-publish part revision",
             response = Response.class)
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful un-publish of PartRevisionDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Consumes(MediaType.APPLICATION_JSON)
@@ -647,19 +664,20 @@ public class PartResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Part number") @PathParam("partNumber") String partNumber,
             @ApiParam(required = true, value = "Part version") @PathParam("partVersion") String partVersion)
-            throws EntityNotFoundException, AccessRightException, UserNotActiveException {
+            throws EntityNotFoundException, AccessRightException, UserNotActiveException, WorkspaceNotEnabledException {
 
         productService.setPublicSharedPart(new PartRevisionKey(workspaceId, partNumber, partVersion), false);
         return Response.noContent().build();
     }
 
     @GET
-    @ApiOperation(value = "Get part's aborted workflow list",
+    @ApiOperation(value = "Get part revision's aborted workflow list",
             response = WorkflowDTO.class,
             responseContainer = "List")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of WorkflowDTOs. It can be an empty list."),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("/aborted-workflows")
@@ -668,7 +686,7 @@ public class PartResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Part number") @PathParam("partNumber") String partNumber,
             @ApiParam(required = true, value = "Part version") @PathParam("partVersion") String partVersion)
-            throws EntityNotFoundException, AccessRightException, UserNotActiveException {
+            throws EntityNotFoundException, AccessRightException, UserNotActiveException, WorkspaceNotEnabledException {
 
         PartRevisionKey revisionKey = new PartRevisionKey(workspaceId, partNumber, partVersion);
         PartRevision partRevision = productService.getPartRevision(revisionKey);
@@ -685,11 +703,12 @@ public class PartResource {
     }
 
     @PUT
-    @ApiOperation(value = "Save part's tags",
+    @ApiOperation(value = "Save part revision tags",
             response = PartRevisionDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of updated PartRevisionDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("/tags")
@@ -700,7 +719,7 @@ public class PartResource {
             @ApiParam(required = true, value = "Part number") @PathParam("partNumber") String partNumber,
             @ApiParam(required = true, value = "Part version") @PathParam("partVersion") String partVersion,
             @ApiParam(required = true, value = "Tag list to add") TagListDTO tagListDTO)
-            throws EntityNotFoundException, NotAllowedException, AccessRightException, UserNotActiveException {
+            throws EntityNotFoundException, NotAllowedException, AccessRightException, UserNotActiveException, WorkspaceNotEnabledException {
 
         List<TagDTO> tagDTOs = tagListDTO.getTags();
         String[] tagLabels = new String[tagDTOs.size()];
@@ -715,11 +734,12 @@ public class PartResource {
     }
 
     @POST
-    @ApiOperation(value = "Add tags to part",
+    @ApiOperation(value = "Add tags to part revision",
             response = PartRevisionDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of updated PartRevisionDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("/tags")
@@ -730,7 +750,7 @@ public class PartResource {
             @ApiParam(required = true, value = "Part number") @PathParam("partNumber") String partNumber,
             @ApiParam(required = true, value = "Part version") @PathParam("partVersion") String partVersion,
             @ApiParam(required = true, value = "Tag list to add") TagListDTO tagListDTO)
-            throws EntityNotFoundException, UserNotActiveException, AccessRightException, NotAllowedException {
+            throws EntityNotFoundException, UserNotActiveException, AccessRightException, NotAllowedException, WorkspaceNotEnabledException {
 
         PartRevisionKey revisionKey = new PartRevisionKey(workspaceId, partNumber, partVersion);
         PartRevision partRevision = productService.getPartRevision(revisionKey);
@@ -750,11 +770,12 @@ public class PartResource {
     }
 
     @DELETE
-    @ApiOperation(value = "Delete tags from part",
+    @ApiOperation(value = "Delete tags from part revision",
             response = PartRevisionDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of updated PartRevisionDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("/tags/{tagName}")
@@ -763,7 +784,7 @@ public class PartResource {
             @ApiParam(required = true, value = "Part number") @PathParam("partNumber") String partNumber,
             @ApiParam(required = true, value = "Part version") @PathParam("partVersion") String partVersion,
             @ApiParam(required = true, value = "Tag name") @PathParam("tagName") String tagName)
-            throws EntityNotFoundException, NotAllowedException, AccessRightException, UserNotActiveException{
+            throws EntityNotFoundException, NotAllowedException, AccessRightException, UserNotActiveException, WorkspaceNotEnabledException {
 
         PartRevision partRevision = productService.removeTag(new PartRevisionKey(workspaceId, partNumber, partVersion), tagName);
         return mapper.map(partRevision, PartRevisionDTO.class);
@@ -771,12 +792,13 @@ public class PartResource {
 
 
     @GET
-    @ApiOperation(value = "Get instances under given part, head view",
+    @ApiOperation(value = "Get instances under given part revision (latest checked-in view)",
             response = LeafDTO.class,
             responseContainer = "List")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of instance nodes"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("/instances")
@@ -785,7 +807,7 @@ public class PartResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Part number") @PathParam("partNumber") String partNumber,
             @ApiParam(required = true, value = "Part version") @PathParam("partVersion") String partVersion)
-            throws UserNotFoundException, WorkspaceNotFoundException, UserNotActiveException, PartRevisionNotFoundException, AccessRightException, WorkspaceNotEnabledException {
+            throws EntityNotFoundException, UserNotActiveException, AccessRightException, WorkspaceNotEnabledException {
         PartRevision partRevision = productService.getPartRevision(new PartRevisionKey(workspaceId, partNumber, partVersion));
         ProductStructureFilter filter = productService.getLatestCheckedInPSFilter(workspaceId);
         VirtualInstanceCollection virtualInstanceCollection = new VirtualInstanceCollection(partRevision, filter);
@@ -793,12 +815,13 @@ public class PartResource {
     }
 
     @GET
-    @ApiOperation(value = "Get baselines where part revision is involved",
+    @ApiOperation(value = "Get product baselines where part revision is involved",
             response = ProductBaselineDTO.class,
             responseContainer = "List")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of ProductBaselineDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("/baselines")
@@ -807,8 +830,7 @@ public class PartResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Part number") @PathParam("partNumber") String partNumber,
             @ApiParam(required = true, value = "Part version") @PathParam("partVersion") String partVersion)
-            throws UserNotFoundException, WorkspaceNotFoundException, UserNotActiveException,
-            PartRevisionNotFoundException, WorkspaceNotEnabledException {
+            throws EntityNotFoundException, UserNotActiveException, WorkspaceNotEnabledException {
 
         List<ProductBaseline> baselines = productService.findBaselinesWherePartRevisionHasIterations(new PartRevisionKey(workspaceId, partNumber, partVersion));
         List<ProductBaselineDTO> productBaselineDTOs = new ArrayList<>();
@@ -821,7 +843,7 @@ public class PartResource {
 
 
     public List<PartUsageLink> createComponents(String workspaceId, List<PartUsageLinkDTO> pComponents)
-            throws EntityNotFoundException, EntityAlreadyExistsException, AccessRightException, NotAllowedException, CreationException, UserNotActiveException {
+            throws EntityNotFoundException, EntityAlreadyExistsException, AccessRightException, NotAllowedException, CreationException, UserNotActiveException, WorkspaceNotEnabledException {
 
         List<PartUsageLink> components = new ArrayList<>();
         for (PartUsageLinkDTO partUsageLinkDTO : pComponents) {
@@ -856,10 +878,10 @@ public class PartResource {
                     if (substitute != null) {
 
                         PartSubstituteLink partSubstituteLink = new PartSubstituteLink();
-                        partSubstituteLink.setAmount(partUsageLinkDTO.getAmount());
+                        partSubstituteLink.setAmount(substituteLinkDTO.getAmount());
                         partSubstituteLink.setComment(partUsageLinkDTO.getComment());
                         partSubstituteLink.setReferenceDescription(partUsageLinkDTO.getReferenceDescription());
-                        partSubstituteLink.setUnit(partUsageLinkDTO.getUnit());
+                        partSubstituteLink.setUnit(substituteLinkDTO.getUnit());
                         partSubstituteLink.setId(partUsageLinkDTO.getId());
 
                         List<CADInstance> subCADInstances = new ArrayList<>();
@@ -904,7 +926,7 @@ public class PartResource {
     }
 
     public PartMaster findOrCreatePartMaster(String workspaceId, ComponentDTO componentDTO)
-            throws EntityNotFoundException, EntityAlreadyExistsException, NotAllowedException, UserNotActiveException, AccessRightException, CreationException {
+            throws EntityNotFoundException, EntityAlreadyExistsException, NotAllowedException, UserNotActiveException, AccessRightException, CreationException, WorkspaceNotEnabledException {
         String componentNumber = componentDTO.getNumber();
         PartMasterKey partMasterKey = new PartMasterKey(workspaceId, componentNumber);
         if (productService.partMasterExists(partMasterKey)) {

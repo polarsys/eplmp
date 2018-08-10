@@ -17,30 +17,22 @@ import org.polarsys.eplmp.core.exceptions.DocumentMasterTemplateAlreadyExistsExc
 import org.polarsys.eplmp.core.exceptions.DocumentMasterTemplateNotFoundException;
 import org.polarsys.eplmp.core.meta.ListOfValuesKey;
 
+import javax.enterprise.context.RequestScoped;
+import javax.inject.Inject;
 import javax.persistence.EntityExistsException;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceException;
 import javax.persistence.TypedQuery;
 import java.util.List;
-import java.util.Locale;
 
+
+@RequestScoped
 public class DocumentMasterTemplateDAO {
 
+    @Inject
     private EntityManager em;
-    private Locale mLocale;
 
-    public DocumentMasterTemplateDAO(Locale pLocale, EntityManager pEM) {
-        em = pEM;
-        mLocale = pLocale;
-    }
-
-    public DocumentMasterTemplateDAO(EntityManager pEM) {
-        em = pEM;
-        mLocale = Locale.getDefault();
-    }
-
-    public void updateDocMTemplate(DocumentMasterTemplate pTemplate) {
-        em.merge(pTemplate);
+    public DocumentMasterTemplateDAO() {
     }
 
     public DocumentMasterTemplate removeDocMTemplate(DocumentMasterTemplateKey pKey) throws DocumentMasterTemplateNotFoundException {
@@ -58,7 +50,7 @@ public class DocumentMasterTemplateDAO {
             throws DocumentMasterTemplateNotFoundException {
         DocumentMasterTemplate template = em.find(DocumentMasterTemplate.class, pKey);
         if (template == null) {
-            throw new DocumentMasterTemplateNotFoundException(mLocale, pKey.getId());
+            throw new DocumentMasterTemplateNotFoundException(pKey.getId());
         } else {
             return template;
         }
@@ -70,16 +62,16 @@ public class DocumentMasterTemplateDAO {
             em.persist(pTemplate);
             em.flush();
         } catch (EntityExistsException pEEEx) {
-            throw new DocumentMasterTemplateAlreadyExistsException(mLocale, pTemplate);
+            throw new DocumentMasterTemplateAlreadyExistsException(pTemplate);
         } catch (PersistenceException pPEx) {
             //EntityExistsException is case sensitive
             //whereas MySQL is not thus PersistenceException could be
             //thrown instead of EntityExistsException
-            throw new CreationException(mLocale);
+            throw new CreationException();
         }
     }
 
-    public List<DocumentMasterTemplate> findAllDocMTemplatesFromLOV(ListOfValuesKey lovKey){
+    public List<DocumentMasterTemplate> findAllDocMTemplatesFromLOV(ListOfValuesKey lovKey) {
         return em.createNamedQuery("DocumentMasterTemplate.findWhereLOV", DocumentMasterTemplate.class)
                 .setParameter("lovName", lovKey.getName())
                 .setParameter("workspace_id", lovKey.getWorkspaceId())

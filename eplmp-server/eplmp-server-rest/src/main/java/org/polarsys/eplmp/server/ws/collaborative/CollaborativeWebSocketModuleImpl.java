@@ -52,7 +52,7 @@ public class CollaborativeWebSocketModuleImpl implements WebSocketModule {
 
     public static final String CHAT_MESSAGE = "CHAT_MESSAGE";
 
-    private final static List<String> SUPPORTED_TYPES = Arrays.asList(
+    private static final List<String> SUPPORTED_TYPES = Arrays.asList(
             COLLABORATIVE_CREATE,
             COLLABORATIVE_INVITE,
             COLLABORATIVE_COMMANDS,

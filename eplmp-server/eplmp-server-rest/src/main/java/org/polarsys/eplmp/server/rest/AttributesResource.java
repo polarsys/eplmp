@@ -10,17 +10,16 @@
   *******************************************************************************/
 package org.polarsys.eplmp.server.rest;
 
+import io.swagger.annotations.*;
+import org.dozer.DozerBeanMapperSingletonWrapper;
+import org.dozer.Mapper;
+import org.polarsys.eplmp.core.exceptions.EntityNotFoundException;
 import org.polarsys.eplmp.core.exceptions.UserNotActiveException;
-import org.polarsys.eplmp.core.exceptions.UserNotFoundException;
 import org.polarsys.eplmp.core.exceptions.WorkspaceNotEnabledException;
-import org.polarsys.eplmp.core.exceptions.WorkspaceNotFoundException;
 import org.polarsys.eplmp.core.meta.InstanceAttribute;
 import org.polarsys.eplmp.core.security.UserGroupMapping;
 import org.polarsys.eplmp.core.services.IProductManagerLocal;
 import org.polarsys.eplmp.server.rest.dto.InstanceAttributeDTO;
-import io.swagger.annotations.*;
-import org.dozer.DozerBeanMapperSingletonWrapper;
-import org.dozer.Mapper;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.security.DeclareRoles;
@@ -44,7 +43,8 @@ import java.util.Set;
  */
 
 @RequestScoped
-@Api(hidden = true, value = "attributes", description = "Operations about attributes")
+@Api(hidden = true, value = "attributes", description = "Operations about attributes",
+        authorizations = {@Authorization(value = "authorization")})
 @DeclareRoles(UserGroupMapping.REGULAR_USER_ROLE_ID)
 @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
 public class AttributesResource {
@@ -70,32 +70,15 @@ public class AttributesResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of InstanceAttributeDTOs. It can be an empty list."),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Produces(MediaType.APPLICATION_JSON)
     public Response getPartIterationsAttributes(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId)
-            throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, WorkspaceNotEnabledException {
+            throws EntityNotFoundException, UserNotActiveException, WorkspaceNotEnabledException {
         List<InstanceAttribute> attributes = productManager.getPartIterationsInstanceAttributesInWorkspace(workspaceId);
-        List<InstanceAttributeDTO> attributeDTOList = new ArrayList<>();
-        Set<String> seen=new HashSet<>();
-
-        for (InstanceAttribute attribute : attributes) {
-            if(attribute==null)
-                continue;
-
-            InstanceAttributeDTO dto = mapper.map(attribute, InstanceAttributeDTO.class);
-            if(seen.add(dto.getType()+"."+dto.getName())) {
-                dto.setValue(null);
-                dto.setMandatory(false);
-                dto.setLocked(false);
-                dto.setLovName(null);
-                attributeDTOList.add(dto);
-            }
-        }
-
-        return Response.ok(new GenericEntity<List<InstanceAttributeDTO>>((List<InstanceAttributeDTO>) attributeDTOList) {
-        }).build();
+        return filterAttributes(attributes);
     }
 
     @GET
@@ -106,13 +89,18 @@ public class AttributesResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of InstanceAttributeDTOs. It can be an empty list."),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Produces(MediaType.APPLICATION_JSON)
     public Response getPathDataAttributes(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId)
-            throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, WorkspaceNotEnabledException {
+            throws EntityNotFoundException, UserNotActiveException, WorkspaceNotEnabledException {
         List<InstanceAttribute> attributes = productManager.getPathDataInstanceAttributesInWorkspace(workspaceId);
+        return filterAttributes(attributes);
+    }
+
+    private Response filterAttributes(List<InstanceAttribute> attributes) {
         List<InstanceAttributeDTO> attributeDTOList = new ArrayList<>();
         Set<String> seen=new HashSet<>();
 
@@ -129,7 +117,9 @@ public class AttributesResource {
                 attributeDTOList.add(dto);
             }
         }
+
         return Response.ok(new GenericEntity<List<InstanceAttributeDTO>>((List<InstanceAttributeDTO>) attributeDTOList) {
         }).build();
     }
+
 }

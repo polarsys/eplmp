@@ -30,7 +30,6 @@ import javax.ejb.Local;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import java.util.*;
 
 @DeclareRoles({UserGroupMapping.REGULAR_USER_ROLE_ID, UserGroupMapping.ADMIN_ROLE_ID})
@@ -38,8 +37,14 @@ import java.util.*;
 @Stateless(name = "DocumentBaselineManagerBean")
 public class DocumentBaselineManagerBean implements IDocumentBaselineManagerLocal {
 
-    @PersistenceContext
+    @Inject
     private EntityManager em;
+
+    @Inject
+    private DocumentBaselineDAO documentBaselineDAO;
+
+    @Inject
+    private DocumentRevisionDAO documentRevisionDAO;
 
     @Inject
     private IUserManagerLocal userManager;
@@ -56,10 +61,10 @@ public class DocumentBaselineManagerBean implements IDocumentBaselineManagerLoca
         DocumentBaseline baseline = new DocumentBaseline(user, name, type, description);
         baseline.getDocumentCollection().setCreationDate(new Date());
         baseline.getDocumentCollection().setAuthor(user);
-        new DocumentBaselineDAO(em, new Locale(user.getLanguage())).createBaseline(baseline);
+        documentBaselineDAO.createBaseline(baseline);
         snapshotDocuments(baseline, workspaceId, documentRevisionKeys);
         if (baseline.getDocumentCollection().getBaselinedDocuments().isEmpty()) {
-            throw new NotAllowedException(new Locale(user.getLanguage()), "NotAllowedException66");
+            throw new NotAllowedException("NotAllowedException66");
         }
         return baseline;
     }
@@ -67,31 +72,30 @@ public class DocumentBaselineManagerBean implements IDocumentBaselineManagerLoca
     @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
     @Override
     public List<DocumentBaseline> getBaselines(String workspaceId) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, WorkspaceNotEnabledException {
-        User user = userManager.checkWorkspaceReadAccess(workspaceId);
-        DocumentBaselineDAO documentBaselineDAO = new DocumentBaselineDAO(em, new Locale(user.getLanguage()));
+        userManager.checkWorkspaceReadAccess(workspaceId);
         return documentBaselineDAO.findBaselines(workspaceId);
     }
 
     @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
     @Override
     public void deleteBaseline(String workspaceId, int baselineId) throws UserNotFoundException, AccessRightException, WorkspaceNotFoundException, BaselineNotFoundException, UserNotActiveException, WorkspaceNotEnabledException {
-        User user = userManager.checkWorkspaceWriteAccess(workspaceId);
+        userManager.checkWorkspaceWriteAccess(workspaceId);
         DocumentBaseline documentBaseline = getBaselineLight(workspaceId, baselineId);
-        new DocumentBaselineDAO(em, new Locale(user.getLanguage())).deleteBaseline(documentBaseline);
+        documentBaselineDAO.deleteBaseline(documentBaseline);
     }
 
     @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
     @Override
     public DocumentBaseline getBaselineLight(String workspaceId, int baselineId) throws BaselineNotFoundException, UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, WorkspaceNotEnabledException {
-        User user = userManager.checkWorkspaceReadAccess(workspaceId);
-        return new DocumentBaselineDAO(em, new Locale(user.getLanguage())).loadBaseline(baselineId);
+        userManager.checkWorkspaceReadAccess(workspaceId);
+        return documentBaselineDAO.loadBaseline(baselineId);
     }
 
     @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
     @Override
     public DocumentCollection getACLFilteredDocumentCollection(String workspaceId, int baselineId) throws BaselineNotFoundException, UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, WorkspaceNotEnabledException {
         User user = userManager.checkWorkspaceReadAccess(workspaceId);
-        DocumentBaseline documentBaseline = new DocumentBaselineDAO(em).loadBaseline(baselineId);
+        DocumentBaseline documentBaseline = documentBaselineDAO.loadBaseline(baselineId);
         DocumentCollection filteredDocumentCollection = new DocumentCollection();
 
         for (Map.Entry<BaselinedDocumentKey, BaselinedDocument> map : documentBaseline.getDocumentCollection().getBaselinedDocuments().entrySet()) {
@@ -157,7 +161,6 @@ public class DocumentBaselineManagerBean implements IDocumentBaselineManagerLoca
     }
 
     private DocumentIteration filterBaselinedDocument(DocumentBaselineType type, DocumentRevisionKey documentRevisionKey) throws DocumentRevisionNotFoundException {
-        DocumentRevisionDAO documentRevisionDAO = new DocumentRevisionDAO(em);
         DocumentRevision documentRevision = documentRevisionDAO.loadDocR(documentRevisionKey);
 
         if (type.equals(DocumentBaselineType.RELEASED)) {

@@ -11,13 +11,13 @@
 
 package org.polarsys.eplmp.server.rest.converters;
 
+import org.dozer.DozerConverter;
 import org.polarsys.eplmp.core.hooks.SNSWebhookApp;
 import org.polarsys.eplmp.core.hooks.SimpleWebhookApp;
 import org.polarsys.eplmp.core.hooks.Webhook;
 import org.polarsys.eplmp.core.hooks.WebhookApp;
 import org.polarsys.eplmp.server.rest.dto.WebhookAppParameterDTO;
 import org.polarsys.eplmp.server.rest.dto.WebhookDTO;
-import org.dozer.DozerConverter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,11 +31,11 @@ public class WebhookDozerConverter extends DozerConverter<Webhook, WebhookDTO> {
     }
 
     @Override
-    public WebhookDTO convertTo(Webhook webhook, WebhookDTO webhookDTO) {
+    public WebhookDTO convertTo(Webhook webhook, WebhookDTO pWebhookDTO) {
 
         if (webhook != null) {
             List<WebhookAppParameterDTO> parameters=new ArrayList<>();
-            webhookDTO = new WebhookDTO(webhook.getId(),webhook.getName(), webhook.isActive(),parameters,webhook.getAppName());
+            WebhookDTO webhookDTO = new WebhookDTO(webhook.getId(),webhook.getName(), webhook.isActive(),parameters,webhook.getAppName());
 
             WebhookApp app = webhook.getWebhookApp();
             if(app instanceof SimpleWebhookApp){

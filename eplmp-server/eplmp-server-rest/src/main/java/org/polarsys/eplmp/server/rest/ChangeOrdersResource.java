@@ -10,12 +10,14 @@
   *******************************************************************************/
 package org.polarsys.eplmp.server.rest;
 
+import io.swagger.annotations.*;
+import org.dozer.DozerBeanMapperSingletonWrapper;
+import org.dozer.Mapper;
 import org.polarsys.eplmp.core.change.ChangeItem;
 import org.polarsys.eplmp.core.change.ChangeOrder;
 import org.polarsys.eplmp.core.document.DocumentIterationKey;
-import org.polarsys.eplmp.core.exceptions.AccessRightException;
-import org.polarsys.eplmp.core.exceptions.EntityNotFoundException;
-import org.polarsys.eplmp.core.exceptions.UserNotActiveException;
+import org.polarsys.eplmp.core.exceptions.*;
+import org.polarsys.eplmp.core.exceptions.NotAllowedException;
 import org.polarsys.eplmp.core.meta.Tag;
 import org.polarsys.eplmp.core.product.PartIterationKey;
 import org.polarsys.eplmp.core.security.UserGroupMapping;
@@ -24,9 +26,6 @@ import org.polarsys.eplmp.server.rest.dto.*;
 import org.polarsys.eplmp.server.rest.dto.change.ChangeOrderDTO;
 import org.polarsys.eplmp.server.rest.dto.change.ChangeRequestDTO;
 import org.polarsys.eplmp.server.rest.dto.change.ChangeRequestListDTO;
-import io.swagger.annotations.*;
-import org.dozer.DozerBeanMapperSingletonWrapper;
-import org.dozer.Mapper;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.security.DeclareRoles;
@@ -37,11 +36,15 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 
 @RequestScoped
-@Api(hidden = true, value = "orders", description = "Operations about orders")
+@Api(hidden = true, value = "orders", description = "Operations about orders",
+        authorizations = {@Authorization(value = "authorization")})
 @DeclareRoles(UserGroupMapping.REGULAR_USER_ROLE_ID)
 @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
 public class ChangeOrdersResource {
@@ -66,12 +69,13 @@ public class ChangeOrdersResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of ChangeOrderDTOs. It can be an empty list."),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Produces(MediaType.APPLICATION_JSON)
     public Response getOrders(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId)
-            throws EntityNotFoundException, UserNotActiveException {
+            throws EntityNotFoundException, UserNotActiveException, WorkspaceNotEnabledException {
         List<ChangeOrder> changeOrders = changeManager.getChangeOrders(workspaceId);
         List<ChangeOrderDTO> changeOrderDTOs = new ArrayList<>();
         for (ChangeOrder order : changeOrders) {
@@ -89,6 +93,7 @@ public class ChangeOrdersResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of created ChangeOrderDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Consumes(MediaType.APPLICATION_JSON)
@@ -96,7 +101,7 @@ public class ChangeOrdersResource {
     public ChangeOrderDTO createOrder(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Change order to create") ChangeOrderDTO changeOrderDTO)
-            throws EntityNotFoundException, AccessRightException {
+            throws EntityNotFoundException, AccessRightException, NotAllowedException, WorkspaceNotEnabledException {
         ChangeOrder changeOrder = changeManager.createChangeOrder(workspaceId,
                 changeOrderDTO.getName(),
                 changeOrderDTO.getDescription(),
@@ -115,6 +120,7 @@ public class ChangeOrdersResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of ChangeOrderDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Produces(MediaType.APPLICATION_JSON)
@@ -122,7 +128,7 @@ public class ChangeOrdersResource {
     public ChangeOrderDTO getOrder(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Order id") @PathParam("orderId") int orderId)
-            throws EntityNotFoundException, UserNotActiveException, AccessRightException {
+            throws EntityNotFoundException, UserNotActiveException, AccessRightException, WorkspaceNotEnabledException {
         ChangeOrder changeOrder = changeManager.getChangeOrder(workspaceId, orderId);
         ChangeOrderDTO changeOrderDTO = mapper.map(changeOrder, ChangeOrderDTO.class);
         changeOrderDTO.setWritable(changeManager.isChangeItemWritable(changeOrder));
@@ -135,6 +141,7 @@ public class ChangeOrdersResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of updated ChangeOrderDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Consumes(MediaType.APPLICATION_JSON)
@@ -144,7 +151,7 @@ public class ChangeOrdersResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Order id") @PathParam("orderId") int orderId,
             @ApiParam(required = true, value = "Change order to update") ChangeOrderDTO pChangeOrderDTO)
-            throws EntityNotFoundException, UserNotActiveException, AccessRightException {
+            throws EntityNotFoundException, UserNotActiveException, AccessRightException, NotAllowedException, WorkspaceNotEnabledException {
         ChangeOrder changeOrder = changeManager.updateChangeOrder(orderId,
                 workspaceId,
                 pChangeOrderDTO.getDescription(),
@@ -163,6 +170,7 @@ public class ChangeOrdersResource {
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful deletion of ChangeOrderDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Consumes(MediaType.APPLICATION_JSON)
@@ -170,7 +178,7 @@ public class ChangeOrdersResource {
     public Response removeOrder(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Order id") @PathParam("orderId") int orderId)
-            throws EntityNotFoundException, UserNotActiveException, AccessRightException {
+            throws EntityNotFoundException, UserNotActiveException, AccessRightException, WorkspaceNotEnabledException {
         changeManager.deleteChangeOrder(orderId);
         return Response.noContent().build();
     }
@@ -182,6 +190,7 @@ public class ChangeOrdersResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of updated ChangeOrderDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{orderId}/tags")
@@ -191,7 +200,7 @@ public class ChangeOrdersResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Order id") @PathParam("orderId") int orderId,
             @ApiParam(required = true, value = "Tag list to add") TagListDTO tagListDTO)
-            throws EntityNotFoundException, UserNotActiveException, AccessRightException {
+            throws EntityNotFoundException, UserNotActiveException, AccessRightException, WorkspaceNotEnabledException {
         List<TagDTO> tagDTOs = tagListDTO.getTags();
         String[] tagsLabel = new String[tagDTOs.size()];
         for (int i = 0; i < tagDTOs.size(); i++) {
@@ -210,6 +219,7 @@ public class ChangeOrdersResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of updated ChangeOrderDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{orderId}/tags")
@@ -219,7 +229,7 @@ public class ChangeOrdersResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Order id") @PathParam("orderId") int orderId,
             @ApiParam(required = true, value = "Tag list to add") TagListDTO tagListDTO)
-            throws EntityNotFoundException, UserNotActiveException, AccessRightException {
+            throws EntityNotFoundException, UserNotActiveException, AccessRightException, WorkspaceNotEnabledException {
         ChangeOrder changeOrder = changeManager.getChangeOrder(workspaceId, orderId);
         Set<Tag> tags = changeOrder.getTags();
         Set<String> tagLabels = new HashSet<>();
@@ -245,6 +255,7 @@ public class ChangeOrdersResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of updated ChangeOrderDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{orderId}/tags/{tagName}")
@@ -252,7 +263,7 @@ public class ChangeOrdersResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Order id") @PathParam("orderId") int orderId,
             @ApiParam(required = true, value = "Tag name") @PathParam("tagName") String tagName)
-            throws EntityNotFoundException, UserNotActiveException, AccessRightException {
+            throws EntityNotFoundException, UserNotActiveException, AccessRightException, WorkspaceNotEnabledException {
         ChangeOrder changeOrder = changeManager.removeChangeOrderTag(workspaceId, orderId, tagName);
         ChangeOrderDTO changeOrderDTO = mapper.map(changeOrder, ChangeOrderDTO.class);
         changeOrderDTO.setWritable(changeManager.isChangeItemWritable(changeOrder));
@@ -265,6 +276,7 @@ public class ChangeOrdersResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of updated ChangeOrderDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{orderId}/affected-documents")
@@ -274,7 +286,7 @@ public class ChangeOrdersResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Order id") @PathParam("orderId") int orderId,
             @ApiParam(required = true, value = "Documents to save as affected") DocumentIterationListDTO documentIterationListDTO)
-            throws EntityNotFoundException, UserNotActiveException, AccessRightException {
+            throws EntityNotFoundException, UserNotActiveException, AccessRightException, WorkspaceNotEnabledException {
 
         List<DocumentIterationDTO> documentIterationDTOs = documentIterationListDTO.getDocuments();
         DocumentIterationKey[] links = createDocumentIterationKeys(documentIterationDTOs);
@@ -291,6 +303,7 @@ public class ChangeOrdersResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of updated ChangeOrderDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{orderId}/affected-parts")
@@ -300,7 +313,7 @@ public class ChangeOrdersResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Order id") @PathParam("orderId") int orderId,
             @ApiParam(required = true, value = "Parts to save as affected") PartIterationListDTO partIterationListDTO)
-            throws EntityNotFoundException, UserNotActiveException, AccessRightException {
+            throws EntityNotFoundException, UserNotActiveException, AccessRightException, WorkspaceNotEnabledException {
 
         List<PartIterationDTO> partIterationDTOs = partIterationListDTO.getParts();
         PartIterationKey[] links = createPartIterationKeys(partIterationDTOs);
@@ -317,6 +330,7 @@ public class ChangeOrdersResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of updated ChangeOrderDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{orderId}/affected-requests")
@@ -326,7 +340,7 @@ public class ChangeOrdersResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Order id") @PathParam("orderId") int orderId,
             @ApiParam(required = true, value = "Change requests to save as affected") ChangeRequestListDTO changeRequestListDTOs)
-            throws EntityNotFoundException, UserNotActiveException, AccessRightException {
+            throws EntityNotFoundException, UserNotActiveException, AccessRightException, WorkspaceNotEnabledException {
         int[] links;
         List<ChangeRequestDTO> changeRequestDTOs = changeRequestListDTOs.getRequests();
         if (changeRequestDTOs != null) {
@@ -351,6 +365,7 @@ public class ChangeOrdersResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of updated ChangeOrderDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{orderId}/acl")
@@ -359,7 +374,7 @@ public class ChangeOrdersResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String pWorkspaceId,
             @ApiParam(required = true, value = "Order id") @PathParam("orderId") int orderId,
             @ApiParam(required = true, value = "ACL rules to set") ACLDTO acl)
-            throws EntityNotFoundException, UserNotActiveException, AccessRightException {
+            throws EntityNotFoundException, UserNotActiveException, AccessRightException, WorkspaceNotEnabledException {
         ChangeItem changeOrder;
         if (acl.hasEntries()) {
             changeOrder = changeManager.updateACLForChangeOrder(pWorkspaceId, orderId, acl.getUserEntriesMap(), acl.getUserGroupEntriesMap());

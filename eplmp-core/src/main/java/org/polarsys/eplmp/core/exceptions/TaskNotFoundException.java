@@ -14,7 +14,7 @@ package org.polarsys.eplmp.core.exceptions;
 import org.polarsys.eplmp.core.workflow.TaskKey;
 
 import java.text.MessageFormat;
-import java.util.Locale;
+
 
 /**
  *
@@ -28,8 +28,8 @@ public class TaskNotFoundException extends EntityNotFoundException {
         mTaskKey=null;
     }
     
-    public TaskNotFoundException(Locale pLocale, TaskKey pTaskKey) {
-        super(pLocale);
+    public TaskNotFoundException(TaskKey pTaskKey) {
+        super();
         mTaskKey=pTaskKey;
     }
 

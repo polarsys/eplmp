@@ -12,7 +12,7 @@
 package org.polarsys.eplmp.core.exceptions;
 
 import java.text.MessageFormat;
-import java.util.Locale;
+
 
 /**
  *
@@ -21,17 +21,12 @@ import java.util.Locale;
 public class WorkspaceNotFoundException extends EntityNotFoundException {
     private final String mID;
 
-    public WorkspaceNotFoundException(String pMessage) {
-        super(pMessage);
-        mID=null;
-    }
-    
-    public WorkspaceNotFoundException(Locale pLocale, String pID) {
-        this(pLocale, pID, null);
+    public WorkspaceNotFoundException(String pID) {
+        this(pID, null);
     }
 
-    public WorkspaceNotFoundException(Locale pLocale, String pID, Throwable pCause) {
-        super(pLocale, pCause);
+    public WorkspaceNotFoundException(String pID, Throwable pCause) {
+        super( pCause);
         mID=pID;
     }
 

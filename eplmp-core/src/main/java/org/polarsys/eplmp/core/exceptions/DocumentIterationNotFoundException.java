@@ -14,7 +14,6 @@ package org.polarsys.eplmp.core.exceptions;
 import org.polarsys.eplmp.core.document.DocumentIterationKey;
 
 import java.text.MessageFormat;
-import java.util.Locale;
 
 /**
  *
@@ -32,20 +31,19 @@ public class DocumentIterationNotFoundException extends EntityNotFoundException 
         mDocIStringIteration=null;
     }
 
-    public DocumentIterationNotFoundException(Locale pLocale, DocumentIterationKey pKey) {
-        this(pLocale, pKey, null);
+    public DocumentIterationNotFoundException(DocumentIterationKey pKey) {
+        this(pKey, null);
     }
 
-    public DocumentIterationNotFoundException(Locale pLocale, DocumentIterationKey pKey, Throwable pCause) {
-        this(pLocale, pKey.getDocumentMasterId(), pKey.getDocumentRevisionVersion(), pKey.getIteration(),  pCause);
+    public DocumentIterationNotFoundException(DocumentIterationKey pKey, Throwable pCause) {
+        this(pKey.getDocumentMasterId(), pKey.getDocumentRevisionVersion(), pKey.getIteration(),  pCause);
     }
 
-    public DocumentIterationNotFoundException(Locale pLocale,
-                                              String pDocMId,
+    public DocumentIterationNotFoundException(String pDocMId,
                                               String pDocRStringVersion,
                                               int pDocIStringIteration,
                                               Throwable pCause) {
-        super(pLocale, pCause);
+        super(pCause);
         mDocMId=pDocMId;
         mDocRStringVersion=pDocRStringVersion;
         mDocIStringIteration=pDocIStringIteration;

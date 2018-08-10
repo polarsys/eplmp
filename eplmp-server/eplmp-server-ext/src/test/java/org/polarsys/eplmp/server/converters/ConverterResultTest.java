@@ -10,15 +10,15 @@
   *******************************************************************************/
 package org.polarsys.eplmp.server.converters;
 
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+
 import java.net.URI;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
-
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
 
 public class ConverterResultTest {
 

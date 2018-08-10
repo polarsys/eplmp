@@ -1,13 +1,13 @@
 /*******************************************************************************
- * Copyright (c) 2017 DocDoku.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
- * <p>
- * Contributors:
- * DocDoku - initial API and implementation
- *******************************************************************************/
+  * Copyright (c) 2017 DocDoku.
+  * All rights reserved. This program and the accompanying materials
+  * are made available under the terms of the Eclipse Public License v1.0
+  * which accompanies this distribution, and is available at
+  * http://www.eclipse.org/legal/epl-v10.html
+  *
+  * Contributors:
+  *    DocDoku - initial API and implementation
+  *******************************************************************************/
 
 package org.polarsys.eplmp.server.rest;
 
@@ -47,7 +47,8 @@ import java.util.List;
  * @author Morgan Guimard
  */
 @RequestScoped
-@Api(value = "admin", description = "Admin resources")
+@Api(value = "admin", description = "Admin resources",
+        authorizations = {@Authorization(value = "authorization")})
 @Path("admin")
 @DeclareRoles(UserGroupMapping.ADMIN_ROLE_ID)
 @RolesAllowed(UserGroupMapping.ADMIN_ROLE_ID)
@@ -97,11 +98,12 @@ public class AdminResource implements Serializable {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of disk usage statistics"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Produces(MediaType.APPLICATION_JSON)
     public JsonObject getDiskSpaceUsageStats()
-            throws AccountNotFoundException {
+            throws EntityNotFoundException {
 
         JsonObjectBuilder diskUsage = Json.createObjectBuilder();
 
@@ -123,12 +125,12 @@ public class AdminResource implements Serializable {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of user statistics"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Produces(MediaType.APPLICATION_JSON)
     public JsonObject getUsersStats()
-            throws AccountNotFoundException, WorkspaceNotFoundException, AccessRightException, UserNotFoundException,
-            UserNotActiveException, WorkspaceNotEnabledException {
+            throws EntityNotFoundException, AccessRightException, UserNotActiveException, WorkspaceNotEnabledException {
 
         JsonObjectBuilder userStats = Json.createObjectBuilder();
 
@@ -150,11 +152,12 @@ public class AdminResource implements Serializable {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of documents statistics"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Produces(MediaType.APPLICATION_JSON)
     public JsonObject getDocumentsStats()
-            throws AccountNotFoundException, WorkspaceNotFoundException, AccessRightException, UserNotFoundException, UserNotActiveException, WorkspaceNotEnabledException {
+            throws EntityNotFoundException, AccessRightException, UserNotActiveException, WorkspaceNotEnabledException {
 
         JsonObjectBuilder docStats = Json.createObjectBuilder();
 
@@ -176,12 +179,12 @@ public class AdminResource implements Serializable {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of products statistics"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Produces(MediaType.APPLICATION_JSON)
     public JsonObject getProductsStats()
-            throws AccountNotFoundException, UserNotFoundException, UserNotActiveException,
-            WorkspaceNotFoundException, WorkspaceNotEnabledException {
+            throws EntityNotFoundException, UserNotActiveException, WorkspaceNotEnabledException {
 
         JsonObjectBuilder productsStats = Json.createObjectBuilder();
 
@@ -203,12 +206,12 @@ public class AdminResource implements Serializable {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of parts statistics"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Produces(MediaType.APPLICATION_JSON)
     public JsonObject getPartsStats()
-            throws AccountNotFoundException, AccessRightException, WorkspaceNotFoundException, UserNotFoundException,
-            UserNotActiveException, WorkspaceNotEnabledException {
+            throws AccessRightException,EntityNotFoundException, UserNotActiveException, WorkspaceNotEnabledException {
 
         JsonObjectBuilder partsStats = Json.createObjectBuilder();
 
@@ -224,16 +227,18 @@ public class AdminResource implements Serializable {
 
 
     @PUT
-    @ApiOperation(value = "Synchronize index for workspace",
+    @ApiOperation(value = "Synchronize index for given workspace",
             response = Response.class)
     @ApiResponses(value = {
             @ApiResponse(code = 202, message = "Accepted delete operation (asynchronous method)"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("index/{workspaceId}")
     public Response indexWorkspaceData(
-            @ApiParam(value = "Workspace id", required = true) @PathParam("workspaceId") String workspaceId) throws AccountNotFoundException {
+            @ApiParam(value = "Workspace id", required = true) @PathParam("workspaceId") String workspaceId)
+            throws EntityNotFoundException, AccessRightException {
         indexManager.indexWorkspaceData(workspaceId);
         return Response.accepted().build();
 
@@ -245,11 +250,11 @@ public class AdminResource implements Serializable {
     @ApiResponses(value = {
             @ApiResponse(code = 202, message = "Accepted delete operation (asynchronous method)"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("index-all")
-    public Response indexAllWorkspaces()
-            throws AccountNotFoundException {
+    public Response indexAllWorkspaces() throws AccountNotFoundException {
         indexManager.indexAllWorkspacesData();
         return Response.status(Response.Status.ACCEPTED).build();
     }
@@ -261,6 +266,7 @@ public class AdminResource implements Serializable {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of PlatformOptions"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Produces(MediaType.APPLICATION_JSON)
@@ -275,6 +281,7 @@ public class AdminResource implements Serializable {
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful update of PlatformOptions"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Produces(MediaType.APPLICATION_JSON)
@@ -292,6 +299,7 @@ public class AdminResource implements Serializable {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of updated Workspace"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("workspace/{workspaceId}/enable")
@@ -299,7 +307,7 @@ public class AdminResource implements Serializable {
     public WorkspaceDTO enableWorkspace(
             @ApiParam(value = "Workspace id", required = true) @PathParam("workspaceId") String workspaceId,
             @ApiParam(value = "Enabled", required = true) @QueryParam("enabled") boolean enabled)
-            throws WorkspaceNotFoundException {
+            throws EntityNotFoundException {
         Workspace workspace = workspaceManager.enableWorkspace(workspaceId, enabled);
         return mapper.map(workspace, WorkspaceDTO.class);
     }
@@ -310,6 +318,7 @@ public class AdminResource implements Serializable {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of updated Account"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("accounts/{login}/enable")
@@ -317,7 +326,7 @@ public class AdminResource implements Serializable {
     public AccountDTO enableAccount(
             @ApiParam(value = "Workspace id", required = true) @PathParam("login") String login,
             @ApiParam(value = "Enabled", required = true) @QueryParam("enabled") boolean enabled)
-            throws WorkspaceNotFoundException, AccountNotFoundException, NotAllowedException {
+            throws EntityNotFoundException, NotAllowedException {
         Account account = accountManager.enableAccount(login, enabled);
         return mapper.map(account, AccountDTO.class);
     }
@@ -325,12 +334,13 @@ public class AdminResource implements Serializable {
 
     @GET
     @Path("accounts")
-    @ApiOperation(value = "Get accounts ",
+    @ApiOperation(value = "Get all registered accounts",
             response = AccountDTO.class,
             responseContainer = "List")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of Accounts"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Produces(MediaType.APPLICATION_JSON)
@@ -348,6 +358,7 @@ public class AdminResource implements Serializable {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of updated Account"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @ApiOperation(value = "Update account",
@@ -356,7 +367,7 @@ public class AdminResource implements Serializable {
     @Consumes(MediaType.APPLICATION_JSON)
     public AccountDTO updateAccount(
             @ApiParam(required = true, value = "Updated account") AccountDTO accountDTO)
-            throws AccountNotFoundException, NotAllowedException {
+            throws EntityNotFoundException, NotAllowedException {
 
         Account account = accountManager.updateAccount(
                 accountDTO.getLogin(),
@@ -374,6 +385,7 @@ public class AdminResource implements Serializable {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of auth providers"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @ApiOperation(value = "Get detailed providers",
@@ -397,6 +409,7 @@ public class AdminResource implements Serializable {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of auth provider"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @ApiOperation(value = "Get detailed provider",
@@ -412,14 +425,15 @@ public class AdminResource implements Serializable {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful creation of auth provider"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
-    @ApiOperation(value = "Create provider",
+    @ApiOperation(value = "Create a new OAuth provider",
             response = OAuthProviderDTO.class)
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     public Response createProvider(@ApiParam(required = true, value = "Updated account") OAuthProviderDTO providerDTO)
-            throws AccountNotFoundException {
+            throws EntityNotFoundException {
 
         OAuthProvider provider = oAuthManager.createProvider(providerDTO.getName(), providerDTO.isEnabled(), providerDTO.getAuthority(),
                 providerDTO.getIssuer(), providerDTO.getClientID(), providerDTO.getJwsAlgorithm(),
@@ -433,16 +447,17 @@ public class AdminResource implements Serializable {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful update of auth provider"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
-    @ApiOperation(value = "Update provider",
+    @ApiOperation(value = "Update OAuth provider",
             response = OAuthProviderDTO.class)
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     public Response updateProvider(
             @ApiParam(value = "OAuthProvider id", required = true) @PathParam("id") int id,
             @ApiParam(required = true, value = "Updated provider") OAuthProviderDTO providerDTO)
-            throws AccountNotFoundException, OAuthProviderNotFoundException {
+            throws EntityNotFoundException {
 
         OAuthProvider provider = oAuthManager.updateProvider(id, providerDTO.getName(), providerDTO.isEnabled(), providerDTO.getAuthority(),
                 providerDTO.getIssuer(), providerDTO.getClientID(), providerDTO.getJwsAlgorithm(),
@@ -456,14 +471,15 @@ public class AdminResource implements Serializable {
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful removal of auth provider"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
-    @ApiOperation(value = "Remove provider",
+    @ApiOperation(value = "Delete OAuth provider",
             response = Response.class)
     @Produces(MediaType.APPLICATION_JSON)
     public Response removeProvider(
             @ApiParam(value = "OAuthProvider id", required = true) @PathParam("id") int id)
-            throws AccountNotFoundException, OAuthProviderNotFoundException {
+            throws EntityNotFoundException {
         oAuthManager.deleteProvider(id);
         return Response.noContent().build();
     }

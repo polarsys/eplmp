@@ -1,13 +1,14 @@
 /*******************************************************************************
- * Copyright (c) 2017 DocDoku.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
- * <p>
- * Contributors:
- * DocDoku - initial API and implementation
- *******************************************************************************/
+  * Copyright (c) 2017 DocDoku.
+  * All rights reserved. This program and the accompanying materials
+  * are made available under the terms of the Eclipse Public License v1.0
+  * which accompanies this distribution, and is available at
+  * http://www.eclipse.org/legal/epl-v10.html
+  *
+  * Contributors:
+  *    DocDoku - initial API and implementation
+  *******************************************************************************/
+
 package org.polarsys.eplmp.server.indexer;
 
 import io.searchbox.client.JestClient;
@@ -31,10 +32,7 @@ import org.polarsys.eplmp.core.product.*;
 import org.polarsys.eplmp.core.query.DocumentSearchQuery;
 import org.polarsys.eplmp.core.query.PartSearchQuery;
 import org.polarsys.eplmp.core.security.UserGroupMapping;
-import org.polarsys.eplmp.core.services.IAccountManagerLocal;
-import org.polarsys.eplmp.core.services.IBinaryStorageManagerLocal;
-import org.polarsys.eplmp.core.services.IIndexerManagerLocal;
-import org.polarsys.eplmp.core.services.INotifierLocal;
+import org.polarsys.eplmp.core.services.*;
 import org.polarsys.eplmp.i18n.PropertiesLoader;
 import org.polarsys.eplmp.server.dao.*;
 
@@ -44,8 +42,6 @@ import javax.ejb.Asynchronous;
 import javax.ejb.Local;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
@@ -60,11 +56,23 @@ import java.util.logging.Logger;
 @DeclareRoles({UserGroupMapping.REGULAR_USER_ROLE_ID, UserGroupMapping.ADMIN_ROLE_ID})
 public class IndexerManagerBean implements IIndexerManagerLocal {
 
-    @PersistenceContext
-    private EntityManager em;
-
     @Inject
     private JestClient esClient;
+
+    @Inject
+    private DocumentMasterDAO documentMasterDAO;
+
+    @Inject
+    private DocumentRevisionDAO documentRevisionDAO;
+
+    @Inject
+    private PartMasterDAO partMasterDAO;
+
+    @Inject
+    private PartRevisionDAO partRevisionDAO;
+
+    @Inject
+    private WorkspaceDAO workspaceDAO;
 
     @Inject
     private IAccountManagerLocal accountManager;
@@ -78,10 +86,17 @@ public class IndexerManagerBean implements IIndexerManagerLocal {
     @Inject
     private IBinaryStorageManagerLocal storageManager;
 
+    @Inject
+    private IContextManagerLocal contextManager;
+
+    @Inject
+    private IUserManagerLocal userManager;
+
     private static final String I18N_CONF = "/org/polarsys/eplmp/core/i18n/LocalStrings";
 
-    private static final Logger LOGGER = Logger.getLogger(IndexerManagerBean.class.getName());
+    private static final String ANALYZER_SETTING_RESOURCE = "/org/polarsys/eplmp/server/indexer/analyzer-setting.json";
 
+    private static final Logger LOGGER = Logger.getLogger(IndexerManagerBean.class.getName());
 
     @Override
     @RolesAllowed({UserGroupMapping.ADMIN_ROLE_ID, UserGroupMapping.REGULAR_USER_ROLE_ID})
@@ -89,16 +104,15 @@ public class IndexerManagerBean implements IIndexerManagerLocal {
         try {
             createIndex(IndexerUtils.formatIndexName(workspaceId));
         } catch (IOException e) {
-            //Throw an application exception?
-            LOGGER.log(Level.SEVERE, "Cannot create index for workspace [" + workspaceId + "]", e);
+            LOGGER.log(Level.WARNING, "Cannot create index for workspace [" + workspaceId + "]", e);
         }
     }
 
     @Override
-    @Asynchronous
     @RolesAllowed({UserGroupMapping.ADMIN_ROLE_ID, UserGroupMapping.REGULAR_USER_ROLE_ID})
     public void deleteWorkspaceIndex(String workspaceId) throws AccountNotFoundException {
-        doDeleteWorkspaceIndex(workspaceId);
+        Account account = accountManager.getMyAccount();
+        doDeleteWorkspaceIndex(account, workspaceId);
     }
 
     @Override
@@ -178,8 +192,7 @@ public class IndexerManagerBean implements IIndexerManagerLocal {
             );
 
         } catch (IOException e) {
-            Account account = accountManager.getMyAccount();
-            throw new NotAllowedException(new Locale(account.getLanguage()), "IndexerNotAvailableForSearch");
+            throw new NotAllowedException("IndexerNotAvailableForSearch");
         }
 
         if (searchResult.isSucceeded()) {
@@ -225,8 +238,7 @@ public class IndexerManagerBean implements IIndexerManagerLocal {
             );
 
         } catch (IOException e) {
-            Account account = accountManager.getMyAccount();
-            throw new NotAllowedException(new Locale(account.getLanguage()), "IndexerNotAvailableForSearch");
+            throw new NotAllowedException("IndexerNotAvailableForSearch");
         }
 
         if (searchResult.isSucceeded()) {
@@ -248,25 +260,30 @@ public class IndexerManagerBean implements IIndexerManagerLocal {
     }
 
     @Override
-    @Asynchronous
     @RolesAllowed({UserGroupMapping.ADMIN_ROLE_ID})
     public void indexAllWorkspacesData() throws AccountNotFoundException {
-        WorkspaceDAO wDAO = new WorkspaceDAO(em);
-
-        for (Workspace workspace : wDAO.getAll()) {
-            indexWorkspaceData(workspace.getId());
+        Account account = accountManager.getMyAccount();
+        for (Workspace workspace : workspaceDAO.getAll()) {
+            doIndexWorkspaceData(account, workspace.getId());
         }
     }
 
     @Override
-    @Asynchronous
     @RolesAllowed({UserGroupMapping.ADMIN_ROLE_ID, UserGroupMapping.REGULAR_USER_ROLE_ID})
-    public void indexWorkspaceData(String workspaceId) throws AccountNotFoundException {
+    public void indexWorkspaceData(String workspaceId)
+            throws WorkspaceNotFoundException, AccountNotFoundException, AccessRightException {
         Account account = accountManager.getMyAccount();
+        if (!contextManager.isCallerInRole(UserGroupMapping.ADMIN_ROLE_ID)) {
+            userManager.checkAdmin(workspaceId);
+        }
+        doIndexWorkspaceData(account, workspaceId);
+    }
 
+    @Asynchronous
+    private void doIndexWorkspaceData(Account account, String workspaceId) {
         try {
             // Clear workspace if exists, or recreate
-            doDeleteWorkspaceIndex(workspaceId);
+            doDeleteWorkspaceIndex(account, workspaceId);
             Bulk.Builder bb = new Bulk.Builder().defaultIndex(workspaceId);
             bulkWorkspaceRequestBuilder(bb, workspaceId);
 
@@ -276,13 +293,14 @@ public class IndexerManagerBean implements IIndexerManagerLocal {
                 mailer.sendBulkIndexationSuccess(account);
             } else {
                 String failureMessage = result.getErrorMessage();
-                LOGGER.log(Level.SEVERE, "Failures while bulk indexing workspace [" + workspaceId + "]: \n" + failureMessage);
+                LOGGER.log(Level.WARNING, "Failures while bulk indexing workspace [" + workspaceId + "]: \n" + failureMessage);
                 mailer.sendBulkIndexationFailure(account, failureMessage);
             }
         } catch (IOException e) {
             LOGGER.log(Level.WARNING, "Cannot index the whole workspace: The Elasticsearch server does not seem to respond");
-            mailer.sendBulkIndexationFailure(account, getString("IndexerNotAvailableForRequest", new Locale(account.getLanguage())));
+            mailer.sendBulkIndexationFailure(account, getString("IndexerNotAvailableForRequest", account.getLocale()));
         }
+
     }
 
     @Override
@@ -324,9 +342,7 @@ public class IndexerManagerBean implements IIndexerManagerLocal {
 
     }
 
-
-    private void doDeleteWorkspaceIndex(String workspaceId) throws AccountNotFoundException {
-        Account account = accountManager.getMyAccount();
+    private void doDeleteWorkspaceIndex(Account account, String workspaceId) {
         try {
             DocumentResult result = esClient.execute(new Delete.Builder(IndexerUtils.formatIndexName(workspaceId))
                     .build());
@@ -336,13 +352,14 @@ public class IndexerManagerBean implements IIndexerManagerLocal {
         } catch (IOException e) {
             LOGGER.log(Level.WARNING, "Cannot delete index for workspace [" + workspaceId
                     + "]: The Elasticsearch server does not seem to respond. Consider deleting it manually.");
-            mailer.sendWorkspaceIndexationFailure(account, workspaceId, getString("IndexerNotAvailableForRequest", new Locale(account.getLanguage())));
+            mailer.sendWorkspaceIndexationFailure(account, workspaceId, getString("IndexerNotAvailableForRequest", account.getLocale()));
         }
     }
 
     private void createIndex(String pIndex) throws IOException {
 
         Settings settings = Settings.builder()
+                .loadFromStream(ANALYZER_SETTING_RESOURCE, this.getClass().getResourceAsStream(ANALYZER_SETTING_RESOURCE))
                 .put("number_of_shards", indexerConfigManager.getNumberOfShards())
                 .put("number_of_replicas", indexerConfigManager.getNumberOfReplicas())
                 .put("auto_expand_replicas", indexerConfigManager.getAutoExpandReplicas())
@@ -353,7 +370,7 @@ public class IndexerManagerBean implements IIndexerManagerLocal {
                 .build());
 
         if (!result.isSucceeded()) {
-            LOGGER.log(Level.SEVERE, "Cannot create index settings: " + result.getErrorMessage());
+            LOGGER.log(Level.WARNING, "Cannot create index settings: " + result.getErrorMessage());
             return;
         }
 
@@ -363,7 +380,7 @@ public class IndexerManagerBean implements IIndexerManagerLocal {
 
 
         if (!result.isSucceeded()) {
-            LOGGER.log(Level.SEVERE, "Cannot create index DEFAULT_TYPE mappings: " + result.getErrorMessage());
+            LOGGER.log(Level.WARNING, "Cannot create index DEFAULT_TYPE mappings: " + result.getErrorMessage());
             return;
         }
 
@@ -373,7 +390,7 @@ public class IndexerManagerBean implements IIndexerManagerLocal {
 
 
         if (!result.isSucceeded()) {
-            LOGGER.log(Level.SEVERE, "Cannot create index PART_TYPE mappings: " + result.getErrorMessage());
+            LOGGER.log(Level.WARNING, "Cannot create index PART_TYPE mappings: " + result.getErrorMessage());
             return;
         }
 
@@ -383,7 +400,7 @@ public class IndexerManagerBean implements IIndexerManagerLocal {
 
 
         if (!result.isSucceeded()) {
-            LOGGER.log(Level.SEVERE, "Cannot create index DOCUMENT_TYPE mappings: " + result.getErrorMessage());
+            LOGGER.log(Level.WARNING, "Cannot create index DOCUMENT_TYPE mappings: " + result.getErrorMessage());
             return;
         }
 
@@ -398,7 +415,7 @@ public class IndexerManagerBean implements IIndexerManagerLocal {
             createIndex(index);
         } catch (IOException e) {
             //Throw an application exception?
-            LOGGER.log(Level.SEVERE, "Cannot create index for workspace [" + workspaceId + "]", e);
+            LOGGER.log(Level.WARNING, "Cannot create index for workspace [" + workspaceId + "]", e);
         }
 
         bulkDocumentsIndexRequestBuilder(pBulkRequest, workspaceId);
@@ -408,34 +425,47 @@ public class IndexerManagerBean implements IIndexerManagerLocal {
     }
 
     private Bulk.Builder bulkDocumentsIndexRequestBuilder(Bulk.Builder pBulkRequest, String workspaceId) {
-        DocumentMasterDAO docMasterDAO = new DocumentMasterDAO(em);
-        for (DocumentMaster docM : docMasterDAO.getAllByWorkspace(workspaceId)) {
-            for (DocumentRevision docR : docM.getDocumentRevisions()) {
-                docR.getDocumentIterations().stream().filter(documentIteration -> documentIteration.getCheckInDate() != null)
-                        .forEach(documentIteration -> {
-                            try {
-                                pBulkRequest.addAction(indexRequest(documentIteration));
-                            } catch (IOException e) {
-                                LOGGER.log(Level.WARNING, "The document " + documentIteration + " cannot be indexed.", e);
-                            }
-                        });
+        Long countByWorkspace = documentMasterDAO.getCountByWorkspace(workspaceId);
+        Integer limit = 1000;
+        int numberOfPage = (int) Math.ceil(countByWorkspace.doubleValue() / limit.doubleValue());
+
+        for (int pageIndex = 0; pageIndex < numberOfPage; pageIndex++) {
+            int offset = pageIndex * limit;
+            for (DocumentMaster docM : documentMasterDAO.getPaginatedByWorkspace(workspaceId, limit, offset)) {
+                for (DocumentRevision docR : docM.getDocumentRevisions()) {
+                    docR.getDocumentIterations().stream().filter(documentIteration -> documentIteration.getCheckInDate() != null)
+                            .forEach(documentIteration -> {
+                                try {
+                                    pBulkRequest.addAction(indexRequest(documentIteration));
+                                } catch (IOException e) {
+                                    LOGGER.log(Level.WARNING, "The document " + documentIteration + " cannot be indexed.", e);
+                                }
+                            });
+                }
             }
         }
+
         return pBulkRequest;
     }
 
     private Bulk.Builder bulkPartsIndexRequestBuilder(Bulk.Builder pBulkRequest, String workspaceId) {
-        PartMasterDAO partMasterDAO = new PartMasterDAO(em);
-        for (PartMaster partMaster : partMasterDAO.getAllByWorkspace(workspaceId)) {
-            for (PartRevision partRev : partMaster.getPartRevisions()) {
-                partRev.getPartIterations().stream().filter(partIteration -> partIteration.getCheckInDate() != null)
-                        .forEach(partIteration -> {
-                            try {
-                                pBulkRequest.addAction(indexRequest(partIteration));
-                            } catch (IOException e) {
-                                LOGGER.log(Level.WARNING, "The part " + partIteration.getKey() + " cannot be indexed.", e);
-                            }
-                        });
+        Long countByWorkspace = partMasterDAO.getCountByWorkspace(workspaceId);
+        Integer limit = 1000;
+        int numberOfPage = (int) Math.ceil(countByWorkspace.doubleValue() / limit.doubleValue());
+
+        for (int pageIndex = 0; pageIndex < numberOfPage; pageIndex++) {
+            int offset = pageIndex * limit;
+            for (PartMaster partMaster : partMasterDAO.getPaginatedByWorkspace(workspaceId, limit, offset)) {
+                for (PartRevision partRev : partMaster.getPartRevisions()) {
+                    partRev.getPartIterations().stream().filter(partIteration -> partIteration.getCheckInDate() != null)
+                            .forEach(partIteration -> {
+                                try {
+                                    pBulkRequest.addAction(indexRequest(partIteration));
+                                } catch (IOException e) {
+                                    LOGGER.log(Level.WARNING, "The part " + partIteration.getKey() + " cannot be indexed.", e);
+                                }
+                            });
+                }
             }
         }
         return pBulkRequest;
@@ -480,7 +510,7 @@ public class IndexerManagerBean implements IIndexerManagerLocal {
             try (InputStream in = storageManager.getBinaryResourceInputStream(bin)) {
                 contentInputs.put(bin.getName(), IndexerUtils.streamToString(bin.getFullName(), in));
             } catch (StorageException | IOException e) {
-                LOGGER.log(Level.SEVERE, "Cannot read file " + bin.getFullName(), e);
+                LOGGER.log(Level.WARNING, "Cannot read file " + bin.getFullName(), e);
             }
         }
         return contentInputs;
@@ -529,7 +559,7 @@ public class IndexerManagerBean implements IIndexerManagerLocal {
 
     private DocumentRevision getDocumentRevision(DocumentRevisionKey documentRevisionKey) {
         try {
-            return new DocumentRevisionDAO(em).loadDocR(documentRevisionKey);
+            return documentRevisionDAO.loadDocR(documentRevisionKey);
         } catch (DocumentRevisionNotFoundException e) {
             LOGGER.log(Level.INFO, "Cannot infer document revision from key [" + documentRevisionKey + "]", e);
             return null;
@@ -560,13 +590,13 @@ public class IndexerManagerBean implements IIndexerManagerLocal {
 
     }
 
-    private PartRevision getPartRevision(PartRevisionKey partRevision) {
-        try {
-            return new PartRevisionDAO(em).loadPartR(partRevision);
-        } catch (PartRevisionNotFoundException e) {
-            LOGGER.log(Level.INFO, "Cannot infer part revision from key [" + partRevision + "]", e);
-            return null;
+    private PartRevision getPartRevision(PartRevisionKey partRevisionKey) {
+        PartRevision partRevision = partRevisionDAO.loadPartR(partRevisionKey);
+
+        if (partRevision == null) {
+            LOGGER.log(Level.INFO, "Cannot infer part revision from key [" + partRevisionKey + "]");
         }
+        return partRevision;
     }
 
 }

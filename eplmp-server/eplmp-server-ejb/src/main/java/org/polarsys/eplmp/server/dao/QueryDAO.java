@@ -17,30 +17,30 @@ import org.polarsys.eplmp.core.query.Query;
 import org.polarsys.eplmp.core.query.QueryContext;
 import org.polarsys.eplmp.core.query.QueryRule;
 
+import javax.enterprise.context.RequestScoped;
+import javax.inject.Inject;
 import javax.persistence.EntityExistsException;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceException;
 import java.util.List;
-import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
  * @author Morgan Guimard on 09/04/15.
  */
+
+@RequestScoped
 public class QueryDAO {
 
+    @Inject
     private EntityManager em;
-    private Locale mLocale;
 
 
     private static final Logger LOGGER = Logger.getLogger(QueryDAO.class.getName());
 
-    public QueryDAO(Locale pLocale, EntityManager pEM) {
-        em = pEM;
-        mLocale = pLocale;
-
+    public QueryDAO() {
     }
 
     public void createQuery(Query query) throws CreationException, QueryAlreadyExistsException {
@@ -48,7 +48,7 @@ public class QueryDAO {
 
             QueryRule queryRule = query.getQueryRule();
 
-            if(queryRule != null){
+            if (queryRule != null) {
                 persistQueryRules(queryRule);
             }
 
@@ -63,10 +63,10 @@ public class QueryDAO {
             persistContexts(query, query.getContexts());
         } catch (EntityExistsException pEEEx) {
             LOGGER.log(Level.FINEST, null, pEEEx);
-            throw new QueryAlreadyExistsException(mLocale, query);
+            throw new QueryAlreadyExistsException(query);
         } catch (PersistenceException pPEx) {
             LOGGER.log(Level.FINEST, null, pPEx);
-            throw new CreationException(mLocale);
+            throw new CreationException();
         }
     }
 

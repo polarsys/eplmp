@@ -10,6 +10,9 @@
   *******************************************************************************/
 package org.polarsys.eplmp.server.rest;
 
+import io.swagger.annotations.*;
+import org.dozer.DozerBeanMapperSingletonWrapper;
+import org.dozer.Mapper;
 import org.polarsys.eplmp.core.configuration.BaselinedPart;
 import org.polarsys.eplmp.core.configuration.ProductBaseline;
 import org.polarsys.eplmp.core.configuration.ProductBaselineType;
@@ -28,9 +31,6 @@ import org.polarsys.eplmp.server.rest.dto.LightPathToPathLinkDTO;
 import org.polarsys.eplmp.server.rest.dto.PathToPathLinkDTO;
 import org.polarsys.eplmp.server.rest.dto.baseline.BaselinedPartDTO;
 import org.polarsys.eplmp.server.rest.dto.baseline.ProductBaselineDTO;
-import io.swagger.annotations.*;
-import org.dozer.DozerBeanMapperSingletonWrapper;
-import org.dozer.Mapper;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.security.DeclareRoles;
@@ -48,7 +48,8 @@ import java.util.List;
  * @author Taylor LABEJOF
  */
 @RequestScoped
-@Api(hidden = true, value = "productBaseline", description = "Operations about product-baseline")
+@Api(hidden = true, value = "productBaseline", description = "Operations about product-baseline",
+        authorizations = {@Authorization(value = "authorization")})
 @DeclareRoles(UserGroupMapping.REGULAR_USER_ROLE_ID)
 @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
 public class ProductBaselinesResource {
@@ -70,18 +71,19 @@ public class ProductBaselinesResource {
     }
 
     @GET
-    @ApiOperation(value = "Get product-baselines with given workspace",
+    @ApiOperation(value = "Get product-baselines in given workspace",
             response = ProductBaselineDTO.class,
             responseContainer = "List")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of ProductBaselineDTOs. It can be an empty list."),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Produces(MediaType.APPLICATION_JSON)
     public Response getAllProductBaselines(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId)
-            throws UserNotActiveException, EntityNotFoundException, AccessRightException {
+            throws UserNotActiveException, EntityNotFoundException, AccessRightException, WorkspaceNotEnabledException {
 
         List<ProductBaseline> productBaselines = productBaselineService.getAllBaselines(workspaceId);
         return makeList(productBaselines, workspaceId);
@@ -96,13 +98,14 @@ public class ProductBaselinesResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of ProductBaselineDTOs. It can be an empty list."),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Produces(MediaType.APPLICATION_JSON)
     public Response getProductBaselinesForProduct(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Configuration item id") @PathParam("ciId") String ciId)
-            throws UserNotActiveException, EntityNotFoundException, AccessRightException {
+            throws UserNotActiveException, EntityNotFoundException, AccessRightException, WorkspaceNotEnabledException {
 
         ConfigurationItemKey configurationItemKey = new ConfigurationItemKey(workspaceId, ciId);
         List<ProductBaseline> productBaselines = productBaselineService.getBaselines(configurationItemKey);
@@ -110,11 +113,12 @@ public class ProductBaselinesResource {
     }
 
     @POST
-    @ApiOperation(value = "Create product-baseline",
+    @ApiOperation(value = "Create a new product-baseline",
             response = ProductBaselineDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of ProductBaselineDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Consumes(MediaType.APPLICATION_JSON)
@@ -124,7 +128,7 @@ public class ProductBaselinesResource {
             @ApiParam(required = true, value = "Product baseline to create") ProductBaselineDTO productBaselineDTO)
             throws UserNotActiveException, EntityNotFoundException, NotAllowedException, AccessRightException,
             PartRevisionNotReleasedException, EntityConstraintException, CreationException,
-            PathToPathLinkAlreadyExistsException {
+            EntityAlreadyExistsException, WorkspaceNotEnabledException {
 
         String ciId = productBaselineDTO.getConfigurationItemId();
         ConfigurationItemKey ciKey = new ConfigurationItemKey(workspaceId, ciId);
@@ -152,6 +156,7 @@ public class ProductBaselinesResource {
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful deletion of ProductBaselineDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{ciId}/baselines/{baselineId}")
@@ -161,18 +166,19 @@ public class ProductBaselinesResource {
             @ApiParam(required = true, value = "Configuration item id") @PathParam("ciId") String ciId,
             @ApiParam(required = true, value = "Baseline id") @PathParam("baselineId") int baselineId)
             throws EntityNotFoundException, AccessRightException, UserNotActiveException,
-            EntityConstraintException {
+            EntityConstraintException, WorkspaceNotEnabledException {
 
         productBaselineService.deleteBaseline(workspaceId, baselineId);
         return Response.noContent().build();
     }
 
     @GET
-    @ApiOperation(value = "Get product-baseline",
+    @ApiOperation(value = "Get product-baseline by id",
             response = ProductBaselineDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of ProductBaselineDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{ciId}/baselines/{baselineId}")
@@ -181,7 +187,7 @@ public class ProductBaselinesResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Configuration item id") @PathParam("ciId") String ciId,
             @ApiParam(required = true, value = "Baseline id") @PathParam("baselineId") int baselineId)
-            throws EntityNotFoundException, UserNotActiveException, AccessRightException {
+            throws EntityNotFoundException, UserNotActiveException, AccessRightException, WorkspaceNotEnabledException {
 
         ProductBaseline productBaseline = productBaselineService.getBaseline(baselineId);
         ProductBaselineDTO productBaselineDTO = mapper.map(productBaseline, ProductBaselineDTO.class);
@@ -216,12 +222,13 @@ public class ProductBaselinesResource {
     }
 
     @GET
-    @ApiOperation(value = "Get product-baseline's part",
+    @ApiOperation(value = "Get product-baseline's baselined parts",
             response = BaselinedPartDTO.class,
             responseContainer = "List")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of BaselinedPartDTOs. It can be an empty list."),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{ciId}/baselines/{baselineId}/parts")
@@ -231,7 +238,7 @@ public class ProductBaselinesResource {
             @ApiParam(required = true, value = "Configuration item id") @PathParam("ciId") String ciId,
             @ApiParam(required = true, value = "Baseline id") @PathParam("baselineId") int baselineId,
             @ApiParam(required = true, value = "Query") @QueryParam("q") String q)
-            throws EntityNotFoundException, UserNotActiveException {
+            throws EntityNotFoundException, UserNotActiveException, WorkspaceNotEnabledException {
 
         int maxResults = 8;
         List<BaselinedPart> baselinedPartList = productBaselineService.getBaselinedPartWithReference(baselineId, q, maxResults);
@@ -251,6 +258,7 @@ public class ProductBaselinesResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of LightPathToPathLinkDTOs. It can be an empty list."),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{ciId}/baselines/{baselineId}/path-to-path-links-types")
@@ -259,8 +267,7 @@ public class ProductBaselinesResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Configuration item id") @PathParam("ciId") String ciId,
             @ApiParam(required = true, value = "Baseline id") @PathParam("baselineId") int baselineId)
-            throws UserNotFoundException, WorkspaceNotFoundException, UserNotActiveException,
-            BaselineNotFoundException, WorkspaceNotEnabledException {
+            throws EntityNotFoundException, UserNotActiveException, WorkspaceNotEnabledException {
 
         List<String> pathToPathLinkTypes = productBaselineService.getPathToPathLinkTypes(workspaceId, ciId, baselineId);
         List<LightPathToPathLinkDTO> pathToPathLinkDTOs = new ArrayList<>();
@@ -280,6 +287,7 @@ public class ProductBaselinesResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of LightPathToPathLinkDTOs. It can be an empty list."),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{ciId}/baselines/{baselineId}/path-to-path-links/source/{sourcePath}/target/{targetPath}")
@@ -290,9 +298,7 @@ public class ProductBaselinesResource {
             @ApiParam(required = true, value = "Baseline id") @PathParam("baselineId") int baselineId,
             @ApiParam(required = true, value = "Source path") @PathParam("sourcePath") String sourcePathAsString,
             @ApiParam(required = true, value = "Target path") @PathParam("targetPath") String targetPathAsString)
-            throws UserNotFoundException, WorkspaceNotFoundException, UserNotActiveException, AccessRightException,
-            ProductInstanceMasterNotFoundException, BaselineNotFoundException, ConfigurationItemNotFoundException,
-            PartUsageLinkNotFoundException, WorkspaceNotEnabledException {
+            throws EntityNotFoundException, UserNotActiveException, AccessRightException, WorkspaceNotEnabledException {
 
         List<PathToPathLink> pathToPathLinks = productBaselineService.getPathToPathLinkFromSourceAndTarget(workspaceId, configurationItemId, baselineId, sourcePathAsString, targetPathAsString);
         List<PathToPathLinkDTO> pathToPathLinkDTOs = new ArrayList<>();

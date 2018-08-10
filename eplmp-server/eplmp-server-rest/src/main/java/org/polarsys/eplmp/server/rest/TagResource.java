@@ -10,6 +10,9 @@
   *******************************************************************************/
 package org.polarsys.eplmp.server.rest;
 
+import io.swagger.annotations.*;
+import org.dozer.DozerBeanMapperSingletonWrapper;
+import org.dozer.Mapper;
 import org.polarsys.eplmp.core.document.DocumentRevision;
 import org.polarsys.eplmp.core.exceptions.*;
 import org.polarsys.eplmp.core.exceptions.NotAllowedException;
@@ -17,9 +20,6 @@ import org.polarsys.eplmp.core.meta.TagKey;
 import org.polarsys.eplmp.core.security.UserGroupMapping;
 import org.polarsys.eplmp.core.services.IDocumentManagerLocal;
 import org.polarsys.eplmp.server.rest.dto.*;
-import io.swagger.annotations.*;
-import org.dozer.DozerBeanMapperSingletonWrapper;
-import org.dozer.Mapper;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.security.DeclareRoles;
@@ -30,23 +30,20 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.io.UnsupportedEncodingException;
-import java.net.URI;
-import java.net.URLEncoder;
 import java.util.*;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
  * @author Yassine Belouad
  */
 @RequestScoped
-@Api(hidden = true, value = "tags", description = "Operations about tags")
+@Api(hidden = true, value = "tags", description = "Operations about tags",
+        authorizations = {@Authorization(value = "authorization")})
 @DeclareRoles(UserGroupMapping.REGULAR_USER_ROLE_ID)
 @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
 public class TagResource {
 
-    private final static Logger LOGGER = Logger.getLogger(TagResource.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(TagResource.class.getName());
 
     @Inject
     private IDocumentManagerLocal documentService;
@@ -61,18 +58,19 @@ public class TagResource {
     }
 
     @GET
-    @ApiOperation(value = "Get tags in workspace",
+    @ApiOperation(value = "Get tags in given workspace",
             response = TagDTO.class,
             responseContainer = "List")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of TagDTOs. It can be an empty list."),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Produces(MediaType.APPLICATION_JSON)
     public Response getTagsInWorkspace(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId)
-            throws EntityNotFoundException, UserNotActiveException {
+            throws EntityNotFoundException, UserNotActiveException, WorkspaceNotEnabledException {
 
         String[] tagsName = documentService.getTags(workspaceId);
         List<TagDTO> tagsDTO = new ArrayList<>();
@@ -84,11 +82,12 @@ public class TagResource {
     }
 
     @POST
-    @ApiOperation(value = "Create tag in workspace",
+    @ApiOperation(value = "Create a new tag in workspace",
             response = TagDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of TagDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Consumes(MediaType.APPLICATION_JSON)
@@ -96,18 +95,19 @@ public class TagResource {
     public TagDTO createTag(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(value = "Tag to create", required = true) TagDTO tag)
-            throws EntityNotFoundException, EntityAlreadyExistsException, UserNotActiveException, AccessRightException, CreationException {
+            throws EntityNotFoundException, EntityAlreadyExistsException, UserNotActiveException, AccessRightException, CreationException, WorkspaceNotEnabledException {
 
         documentService.createTag(workspaceId, tag.getLabel());
         return new TagDTO(tag.getLabel());
     }
 
     @POST
-    @ApiOperation(value = "Create tags in workspace",
+    @ApiOperation(value = "Create new tags in workspace",
             response = Response.class)
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful creation of TagDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("/multiple")
@@ -116,7 +116,7 @@ public class TagResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(value = "Tag list to create", required = true) TagListDTO tagList)
             throws EntityNotFoundException, EntityAlreadyExistsException, UserNotActiveException,
-            AccessRightException, CreationException {
+            AccessRightException, CreationException, WorkspaceNotEnabledException {
 
         for (TagDTO tagDTO : tagList.getTags()) {
             documentService.createTag(workspaceId, tagDTO.getLabel());
@@ -125,30 +125,32 @@ public class TagResource {
     }
 
     @DELETE
-    @ApiOperation(value = "Delete tag in workspace",
+    @ApiOperation(value = "Delete a tag in workspace",
             response = Response.class)
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful deletion of TagDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{tagId}")
     public Response deleteTag(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Tag id") @PathParam("tagId") String tagId)
-            throws EntityNotFoundException, AccessRightException {
+            throws EntityNotFoundException, AccessRightException, WorkspaceNotEnabledException {
 
         documentService.deleteTag(new TagKey(workspaceId, tagId));
         return Response.noContent().build();
     }
 
     @GET
-    @ApiOperation(value = "Get documents from given tag id",
+    @ApiOperation(value = "Get document revisions from given tag id",
             response = DocumentRevisionDTO.class,
             responseContainer = "List")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of DocumentRevisionDTOs. It can be an empty list."),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{tagId}/documents/")
@@ -156,7 +158,7 @@ public class TagResource {
     public DocumentRevisionDTO[] getDocumentsWithGivenTagIdAndWorkspaceId(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Tag id") @PathParam("tagId") String tagId)
-            throws EntityNotFoundException, UserNotActiveException {
+            throws EntityNotFoundException, UserNotActiveException, WorkspaceNotEnabledException {
 
         TagKey tagKey = new TagKey(workspaceId, tagId);
         DocumentRevision[] docRs = documentService.findDocumentRevisionsByTag(tagKey);
@@ -176,12 +178,13 @@ public class TagResource {
 
     @POST
     @Path("{tagId}/documents/")
-    @ApiOperation(value = "Create document",
+    @ApiOperation(value = "Create a new document master and its first revision with given tag",
             response = DocumentRevisionDTO.class,
             responseContainer = "List")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of DocumentRevisionDTOs. It can be an empty list."),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Consumes(MediaType.APPLICATION_JSON)
@@ -190,7 +193,8 @@ public class TagResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Document to create") DocumentCreationDTO docCreationDTO,
             @ApiParam(required = true, value = "Tag id") @PathParam("tagId") String tagId)
-            throws CreationException, FileAlreadyExistsException, DocumentRevisionAlreadyExistsException, WorkspaceNotFoundException, UserNotFoundException, NotAllowedException, DocumentMasterAlreadyExistsException, RoleNotFoundException, FolderNotFoundException, WorkflowModelNotFoundException, AccessRightException, DocumentMasterTemplateNotFoundException, DocumentRevisionNotFoundException, UserNotActiveException, UserGroupNotFoundException, WorkspaceNotEnabledException {
+            throws CreationException, EntityAlreadyExistsException, EntityNotFoundException, NotAllowedException,
+            AccessRightException, UserNotActiveException, WorkspaceNotEnabledException {
 
         String pDocMID = docCreationDTO.getReference();
         String pTitle = docCreationDTO.getTitle();
@@ -225,12 +229,7 @@ public class TagResource {
         docRsDTO.setPath(createdDocRs.getLocation().getCompletePath());
         docRsDTO.setLifeCycleState(createdDocRs.getLifeCycleState());
 
-        try {
-            return Response.created(URI.create(URLEncoder.encode(pDocMID + "-" + createdDocRs.getVersion(), "UTF-8"))).entity(docRsDTO).build();
-        } catch (UnsupportedEncodingException ex) {
-            LOGGER.log(Level.WARNING, null, ex);
-            return Response.ok().entity(docRsDTO).build();
-        }
+        return Tools.prepareCreatedResponse(pDocMID + "-" + createdDocRs.getVersion(), docRsDTO);
     }
 
     private String getPathFromUrlParams(String workspaceId, String folderId) {

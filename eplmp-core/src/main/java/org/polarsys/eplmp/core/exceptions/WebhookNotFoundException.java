@@ -12,7 +12,7 @@
 package org.polarsys.eplmp.core.exceptions;
 
 import java.text.MessageFormat;
-import java.util.Locale;
+
 
 /**
  * @author Morgan Guimard
@@ -21,12 +21,12 @@ public class WebhookNotFoundException extends EntityNotFoundException {
     private final int mId;
 
 
-    public WebhookNotFoundException(Locale pLocale, int mId) {
-        this(pLocale, mId, null);
+    public WebhookNotFoundException(int mId) {
+        this(mId, null);
     }
 
-    public WebhookNotFoundException(Locale pLocale, int pId, Throwable pCause) {
-        super(pLocale, pCause);
+    public WebhookNotFoundException(int pId, Throwable pCause) {
+        super( pCause);
         mId = pId;
     }
 

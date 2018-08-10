@@ -16,78 +16,69 @@ import org.polarsys.eplmp.core.change.ChangeOrder;
 import org.polarsys.eplmp.core.change.ChangeRequest;
 import org.polarsys.eplmp.core.document.DocumentRevisionKey;
 import org.polarsys.eplmp.core.meta.Folder;
-import org.polarsys.eplmp.core.exceptions.ChangeIssueNotFoundException;
-import org.polarsys.eplmp.core.exceptions.ChangeOrderNotFoundException;
-import org.polarsys.eplmp.core.exceptions.ChangeRequestNotFoundException;
 import org.polarsys.eplmp.core.meta.Tag;
 import org.polarsys.eplmp.core.product.PartRevisionKey;
 
+import javax.enterprise.context.RequestScoped;
+import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
+
+@RequestScoped
 public class ChangeItemDAO {
 
+    private static final String DOCUMENT_MASTER_ID = "documentMasterId";
+    private static final String VERSION = "version";
+    private static final String PART_MASTER_NUMBER = "partMasterNumber";
+    private static final String FOLDER = "folder";
+
+    @Inject
     private EntityManager em;
-    private Locale mLocale;
-    private static final String WORKSPACEID = "workspaceId";
 
-    public ChangeItemDAO(Locale pLocale, EntityManager pEM) {
-        em = pEM;
-        mLocale = pLocale;
-    }
+    @Inject
+    private ACLDAO aclDAO;
 
-    public ChangeItemDAO(EntityManager pEM) {
-        em = pEM;
-        mLocale = Locale.getDefault();
+    @Inject
+    private FolderDAO folderDAO;
+
+    private static final String WORKSPACE_ID = "workspaceId";
+
+    public ChangeItemDAO() {
     }
 
 
     public List<ChangeIssue> findAllChangeIssues(String pWorkspaceId) {
         return em.createNamedQuery("ChangeIssue.findChangeIssuesByWorkspace", ChangeIssue.class)
-                 .setParameter(WORKSPACEID, pWorkspaceId)
+                 .setParameter(WORKSPACE_ID, pWorkspaceId)
                  .getResultList();
     }
     public List<ChangeRequest> findAllChangeRequests(String pWorkspaceId) {
         return em.createNamedQuery("ChangeRequest.findChangeRequestsByWorkspace", ChangeRequest.class)
-                 .setParameter(WORKSPACEID, pWorkspaceId)
+                 .setParameter(WORKSPACE_ID, pWorkspaceId)
                  .getResultList();
     }
     public List<ChangeOrder> findAllChangeOrders(String pWorkspaceId) {
         return em.createNamedQuery("ChangeOrder.findChangeOrdersByWorkspace", ChangeOrder.class)
-                 .setParameter(WORKSPACEID, pWorkspaceId)
+                 .setParameter(WORKSPACE_ID, pWorkspaceId)
                  .getResultList();
     }
     
-    public ChangeIssue loadChangeIssue(int pId) throws ChangeIssueNotFoundException {
-        ChangeIssue change = em.find(ChangeIssue.class, pId);
-        if (change == null) {
-            throw new ChangeIssueNotFoundException(mLocale, pId);
-        } else {
-            return change;
-        }
+    public ChangeIssue loadChangeIssue(int pId) {
+        return  em.find(ChangeIssue.class, pId);
     }
-    public ChangeOrder loadChangeOrder(int pId) throws ChangeOrderNotFoundException {
-        ChangeOrder change = em.find(ChangeOrder.class, pId);
-        if (change == null) {
-            throw new ChangeOrderNotFoundException(mLocale, pId);
-        } else {
-            return change;
-        }
+
+    public ChangeOrder loadChangeOrder(int pId) {
+        return em.find(ChangeOrder.class, pId);
     }
-    public ChangeRequest loadChangeRequest(int pId) throws ChangeRequestNotFoundException {
-        ChangeRequest change = em.find(ChangeRequest.class, pId);
-        if (change == null) {
-            throw new ChangeRequestNotFoundException(mLocale, pId);
-        } else {
-            return change;
-        }
+
+    public ChangeRequest loadChangeRequest(int pId) {
+        return em.find(ChangeRequest.class, pId);
     }
 
     public void createChangeItem(ChangeItem pChange) {
         if(pChange.getACL()!=null){
-            ACLDAO aclDAO = new ACLDAO(em);
             aclDAO.createACL(pChange.getACL());
         }
 
@@ -105,28 +96,28 @@ public class ChangeItemDAO {
     }
 
     public List<ChangeIssue> findAllChangeIssuesWithReferenceLike(String pWorkspaceId, String reference, int maxResults) {
-        return em.createNamedQuery("ChangeIssue.findByReference",ChangeIssue.class)
-                .setParameter(WORKSPACEID, pWorkspaceId).setParameter("name", "%" + reference + "%").setMaxResults(maxResults).getResultList();
+        return em.createNamedQuery("ChangeIssue.findByName",ChangeIssue.class)
+                .setParameter(WORKSPACE_ID, pWorkspaceId).setParameter("name", "%" + reference + "%").setMaxResults(maxResults).getResultList();
     }
 
     public List<ChangeRequest> findAllChangeRequestsWithReferenceLike(String pWorkspaceId, String reference, int maxResults) {
-        return em.createNamedQuery("ChangeRequest.findByReference",ChangeRequest.class)
-                .setParameter(WORKSPACEID, pWorkspaceId).setParameter("name", "%" + reference + "%").setMaxResults(maxResults).getResultList();
+        return em.createNamedQuery("ChangeRequest.findByName",ChangeRequest.class)
+                .setParameter(WORKSPACE_ID, pWorkspaceId).setParameter("name", "%" + reference + "%").setMaxResults(maxResults).getResultList();
     }
 
     public List<ChangeItem> findChangeItemByTag(String pWorkspaceId, Tag tag){
         List<ChangeItem> changeItems = new ArrayList<>();
         changeItems.addAll(em.createQuery("SELECT c FROM ChangeIssue c WHERE :tag MEMBER OF c.tags AND c.workspace.id = :workspaceId ", ChangeIssue.class)
                 .setParameter("tag", tag)
-                .setParameter(WORKSPACEID, pWorkspaceId)
+                .setParameter(WORKSPACE_ID, pWorkspaceId)
                 .getResultList());
         changeItems.addAll(em.createQuery("SELECT c FROM ChangeRequest c WHERE :tag MEMBER OF c.tags AND c.workspace.id = :workspaceId ", ChangeRequest.class)
                 .setParameter("tag", tag)
-                .setParameter(WORKSPACEID, pWorkspaceId)
+                .setParameter(WORKSPACE_ID, pWorkspaceId)
                 .getResultList());
         changeItems.addAll(em.createQuery("SELECT c FROM ChangeOrder c WHERE :tag MEMBER OF c.tags AND c.workspace.id = :workspaceId ", ChangeOrder.class)
                 .setParameter("tag", tag)
-                .setParameter(WORKSPACEID, pWorkspaceId)
+                .setParameter(WORKSPACE_ID, pWorkspaceId)
                 .getResultList());
         return changeItems;
     }
@@ -136,19 +127,19 @@ public class ChangeItemDAO {
         String id = documentRevisionKey.getDocumentMaster().getId();
         List<ChangeItem> changeItems = new ArrayList<>();
         changeItems.addAll(em.createQuery("SELECT c FROM ChangeIssue c , DocumentIteration i WHERE i member of c.affectedDocuments AND i.documentRevision.documentMaster.workspace.id = :workspaceId AND i.documentRevision.version = :version AND i.documentRevision.documentMasterId = :documentMasterId", ChangeIssue.class)
-                .setParameter("workspaceId", workspaceId)
-                .setParameter("documentMasterId", id)
-                .setParameter("version", documentRevisionKey.getVersion())                
+                .setParameter(WORKSPACE_ID, workspaceId)
+                .setParameter(DOCUMENT_MASTER_ID, id)
+                .setParameter(VERSION, documentRevisionKey.getVersion())
                 .getResultList());
         changeItems.addAll(em.createQuery("SELECT c FROM ChangeRequest c , DocumentIteration i WHERE i member of c.affectedDocuments AND i.documentRevision.documentMaster.workspace.id = :workspaceId AND i.documentRevision.version = :version AND i.documentRevision.documentMasterId = :documentMasterId", ChangeRequest.class)
-                .setParameter("workspaceId", workspaceId)
-                .setParameter("documentMasterId", id)
-                .setParameter("version", documentRevisionKey.getVersion())
+                .setParameter(WORKSPACE_ID, workspaceId)
+                .setParameter(DOCUMENT_MASTER_ID, id)
+                .setParameter(VERSION, documentRevisionKey.getVersion())
                 .getResultList());
         changeItems.addAll(em.createQuery("SELECT c FROM ChangeOrder c , DocumentIteration i WHERE i member of c.affectedDocuments AND i.documentRevision.documentMaster.workspace.id = :workspaceId AND i.documentRevision.version = :version AND i.documentRevision.documentMasterId = :documentMasterId", ChangeOrder.class)
-                .setParameter("workspaceId", workspaceId)
-                .setParameter("documentMasterId", id)
-                .setParameter("version", documentRevisionKey.getVersion())
+                .setParameter(WORKSPACE_ID, workspaceId)
+                .setParameter(DOCUMENT_MASTER_ID, id)
+                .setParameter(VERSION, documentRevisionKey.getVersion())
                 .getResultList());
         return changeItems;
     }
@@ -158,19 +149,19 @@ public class ChangeItemDAO {
         String id = partRevisionKey.getPartMasterNumber();
         List<ChangeItem> changeItems = new ArrayList<>();
         changeItems.addAll(em.createQuery("SELECT c FROM ChangeIssue c , PartIteration i WHERE i member of c.affectedParts AND i.partRevision.partMaster.workspace.id = :workspaceId AND i.partRevision.version = :version AND i.partRevision.partMasterNumber = :partMasterNumber", ChangeIssue.class)
-                .setParameter("workspaceId", workspaceId)
-                .setParameter("partMasterNumber", id)
-                .setParameter("version", partRevisionKey.getVersion())
+                .setParameter(WORKSPACE_ID, workspaceId)
+                .setParameter(PART_MASTER_NUMBER, id)
+                .setParameter(VERSION, partRevisionKey.getVersion())
                 .getResultList());
         changeItems.addAll(em.createQuery("SELECT c FROM ChangeRequest c , PartIteration i WHERE i member of c.affectedParts AND i.partRevision.partMaster.workspace.id = :workspaceId AND i.partRevision.version = :version AND i.partRevision.partMasterNumber = :partMasterNumber", ChangeRequest.class)
-                .setParameter("workspaceId", workspaceId)
-                .setParameter("partMasterNumber", id)
-                .setParameter("version", partRevisionKey.getVersion())
+                .setParameter(WORKSPACE_ID, workspaceId)
+                .setParameter(PART_MASTER_NUMBER, id)
+                .setParameter(VERSION, partRevisionKey.getVersion())
                 .getResultList());
         changeItems.addAll(em.createQuery("SELECT c FROM ChangeOrder c , PartIteration i WHERE i member of c.affectedParts AND i.partRevision.partMaster.workspace.id = :workspaceId AND i.partRevision.version = :version AND i.partRevision.partMasterNumber = :partMasterNumber", ChangeOrder.class)
-                .setParameter("workspaceId", workspaceId)
-                .setParameter("partMasterNumber", id)
-                .setParameter("version", partRevisionKey.getVersion())
+                .setParameter(WORKSPACE_ID, workspaceId)
+                .setParameter(PART_MASTER_NUMBER, id)
+                .setParameter(VERSION, partRevisionKey.getVersion())
                 .getResultList());
         return changeItems;
     }
@@ -187,33 +178,19 @@ public class ChangeItemDAO {
     public List<ChangeItem> findChangeItemByFolder(Folder folder){
         List<ChangeItem> changeItems = new ArrayList<>();
         changeItems.addAll(em.createQuery("SELECT c FROM ChangeIssue c , DocumentIteration i WHERE i member of c.affectedDocuments AND i.documentRevision.location = :folder", ChangeIssue.class)
-                .setParameter("folder", folder)
+                .setParameter(FOLDER, folder)
                 .getResultList());
         changeItems.addAll(em.createQuery("SELECT c FROM ChangeRequest c , DocumentIteration i WHERE i member of c.affectedDocuments AND i.documentRevision.location = :folder", ChangeRequest.class)
-                .setParameter("folder", folder)
+                .setParameter(FOLDER, folder)
                 .getResultList());
         changeItems.addAll(em.createQuery("SELECT c FROM ChangeOrder c , DocumentIteration i WHERE i member of c.affectedDocuments AND i.documentRevision.location = :folder", ChangeOrder.class)
-                .setParameter("folder", folder)
+                .setParameter(FOLDER, folder)
                 .getResultList());
         return changeItems;
     }
 
-
-    public boolean hasConstraintsInFolderHierarchy(Folder folder) {
-        boolean hasConstraints = false;
-
-        FolderDAO folderDAO = new FolderDAO(mLocale,em);
-
-        for(Folder subFolder : folderDAO.getSubFolders(folder)){
-            hasConstraints |= hasConstraintsInFolderHierarchy(subFolder);
-        }
-
-        return hasConstraints || hasChangeItems(folder);
-
-    }
-
-    public boolean hasChangeItems(Folder folder) {
-        return !findChangeItemByFolder(folder).isEmpty();
+    public boolean hasChangeItems(Folder pFolder) {
+        return !findChangeItemByFolder(pFolder).isEmpty();
     }
 
     public boolean hasChangeRequestsLinked(ChangeIssue changeIssue) {
@@ -226,14 +203,14 @@ public class ChangeItemDAO {
 
     private List<ChangeRequest> findAllChangeRequestsByChangeIssue(ChangeIssue changeIssue) {
         return em.createNamedQuery("ChangeRequest.findByChangeIssue", ChangeRequest.class)
-                .setParameter("workspaceId", changeIssue.getWorkspaceId())
+                .setParameter(WORKSPACE_ID, changeIssue.getWorkspaceId())
                 .setParameter("changeIssue", changeIssue)
                 .getResultList();
     }
 
     private List<ChangeOrder> findAllChangeOrdersByChangeRequest(ChangeRequest changeRequest) {
         return em.createNamedQuery("ChangeOrder.findByChangeRequest", ChangeOrder.class)
-                .setParameter("workspaceId", changeRequest.getWorkspaceId())
+                .setParameter(WORKSPACE_ID, changeRequest.getWorkspaceId())
                 .setParameter("changeRequest", changeRequest)
                 .getResultList();
     }

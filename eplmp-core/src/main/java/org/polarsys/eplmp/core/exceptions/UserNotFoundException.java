@@ -12,7 +12,7 @@
 package org.polarsys.eplmp.core.exceptions;
 
 import java.text.MessageFormat;
-import java.util.Locale;
+
 
 /**
  *
@@ -20,18 +20,13 @@ import java.util.Locale;
  */
 public class UserNotFoundException extends EntityNotFoundException {
     private final String mLogin;
-    
-    public UserNotFoundException(String pMessage) {
-        super(pMessage);
-        mLogin=null;
-    }
-    
-    public UserNotFoundException(Locale pLocale, String pLogin) {
-        this(pLocale, pLogin, null);
+
+    public UserNotFoundException(String pLogin) {
+        this(pLogin, null);
     }
 
-    public UserNotFoundException(Locale pLocale, String pLogin, Throwable pCause) {
-        super(pLocale, pCause);
+    public UserNotFoundException(String pLogin, Throwable pCause) {
+        super( pCause);
         mLogin=pLogin;
     }
 

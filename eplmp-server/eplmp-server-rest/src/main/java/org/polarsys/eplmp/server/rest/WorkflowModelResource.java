@@ -10,6 +10,9 @@
   *******************************************************************************/
 package org.polarsys.eplmp.server.rest;
 
+import io.swagger.annotations.*;
+import org.dozer.DozerBeanMapperSingletonWrapper;
+import org.dozer.Mapper;
 import org.polarsys.eplmp.core.exceptions.*;
 import org.polarsys.eplmp.core.exceptions.NotAllowedException;
 import org.polarsys.eplmp.core.security.UserGroupMapping;
@@ -20,9 +23,6 @@ import org.polarsys.eplmp.core.workflow.WorkflowModelKey;
 import org.polarsys.eplmp.server.rest.dto.ACLDTO;
 import org.polarsys.eplmp.server.rest.dto.ActivityModelDTO;
 import org.polarsys.eplmp.server.rest.dto.WorkflowModelDTO;
-import io.swagger.annotations.*;
-import org.dozer.DozerBeanMapperSingletonWrapper;
-import org.dozer.Mapper;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.security.DeclareRoles;
@@ -40,7 +40,8 @@ import java.util.Map;
  * @author Morgan Guimard
  */
 @RequestScoped
-@Api(hidden = true, value = "workflowModels", description = "Operations about workflow models")
+@Api(hidden = true, value = "workflowModels", description = "Operations about workflow models",
+        authorizations = {@Authorization(value = "authorization")})
 @DeclareRoles(UserGroupMapping.REGULAR_USER_ROLE_ID)
 @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
 public class WorkflowModelResource {
@@ -59,18 +60,19 @@ public class WorkflowModelResource {
     }
 
     @GET
-    @ApiOperation(value = "Get workflow models",
+    @ApiOperation(value = "Get workflow models in given workspace",
             response = WorkflowModelDTO.class,
             responseContainer = "List")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of WorkflowModelDTOs. It can be an empty list."),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Produces(MediaType.APPLICATION_JSON)
     public WorkflowModelDTO[] getWorkflowModelsInWorkspace(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId)
-            throws EntityNotFoundException, UserNotActiveException {
+            throws EntityNotFoundException, UserNotActiveException, WorkspaceNotEnabledException {
 
         WorkflowModel[] workflowModels = workflowService.getWorkflowModels(workspaceId);
         WorkflowModelDTO[] workflowModelDTOs = new WorkflowModelDTO[workflowModels.length];
@@ -83,11 +85,12 @@ public class WorkflowModelResource {
     }
 
     @GET
-    @ApiOperation(value = "Get workflow model",
+    @ApiOperation(value = "Get workflow model by id",
             response = WorkflowModelDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of WorkflowModelDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{workflowModelId}")
@@ -95,35 +98,37 @@ public class WorkflowModelResource {
     public WorkflowModelDTO getWorkflowModelInWorkspace(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Workflow model id") @PathParam("workflowModelId") String workflowModelId)
-            throws EntityNotFoundException, UserNotActiveException {
+            throws EntityNotFoundException, UserNotActiveException, WorkspaceNotEnabledException {
 
         WorkflowModel workflowModel = workflowService.getWorkflowModel(new WorkflowModelKey(workspaceId, workflowModelId));
         return mapper.map(workflowModel, WorkflowModelDTO.class);
     }
 
     @DELETE
-    @ApiOperation(value = "Delete workflow model",
+    @ApiOperation(value = "Delete a workflow model",
             response = Response.class)
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful deletion of WorkflowModelDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{workflowModelId}")
     public Response delWorkflowModel(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Workflow model id") @PathParam("workflowModelId") String workflowModelId)
-            throws EntityNotFoundException, AccessRightException, UserNotActiveException, EntityConstraintException {
+            throws EntityNotFoundException, AccessRightException, UserNotActiveException, EntityConstraintException, WorkspaceNotEnabledException {
         workflowService.deleteWorkflowModel(new WorkflowModelKey(workspaceId, workflowModelId));
         return Response.noContent().build();
     }
 
     @PUT
-    @ApiOperation(value = "Update workflow model",
+    @ApiOperation(value = "Update a workflow model",
             response = WorkflowModelDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of updated WorkflowModelDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{workflowModelId}")
@@ -132,8 +137,8 @@ public class WorkflowModelResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Workflow model id") @PathParam("workflowModelId") String workflowModelId,
             @ApiParam(required = true, value = "Workflow model to update") WorkflowModelDTO workflowModelDTOToPersist)
-            throws EntityNotFoundException, AccessRightException, EntityAlreadyExistsException, CreationException,
-            UserNotActiveException, NotAllowedException {
+            throws EntityNotFoundException, AccessRightException, EntityAlreadyExistsException,
+            CreationException, UserNotActiveException, NotAllowedException, WorkspaceNotEnabledException {
 
         WorkflowModelKey workflowModelKey = new WorkflowModelKey(workspaceId, workflowModelId);
         List<ActivityModelDTO> activityModelDTOsList = workflowModelDTOToPersist.getActivityModels();
@@ -149,6 +154,7 @@ public class WorkflowModelResource {
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful update of WorkflowModelDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{workflowModelId}/acl")
@@ -157,7 +163,7 @@ public class WorkflowModelResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String pWorkspaceId,
             @ApiParam(required = true, value = "Workflow model id") @PathParam("workflowModelId") String workflowModelId,
             @ApiParam(required = true, value = "ACL rules to set") ACLDTO acl)
-            throws EntityNotFoundException, UserNotActiveException, AccessRightException {
+            throws EntityNotFoundException, UserNotActiveException, AccessRightException, WorkspaceNotEnabledException {
 
         if (acl.hasEntries()) {
             workflowService.updateACLForWorkflow(pWorkspaceId, workflowModelId, acl.getUserEntriesMap(), acl.getUserGroupEntriesMap());
@@ -168,11 +174,12 @@ public class WorkflowModelResource {
     }
 
     @POST
-    @ApiOperation(value = "Create workflow model",
+    @ApiOperation(value = "Create a new workflow model",
             response = WorkflowModelDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of created WorkflowModelDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Consumes(MediaType.APPLICATION_JSON)
@@ -181,7 +188,7 @@ public class WorkflowModelResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Workflow model to create rules to set") WorkflowModelDTO workflowModelDTOToPersist)
             throws EntityNotFoundException, EntityAlreadyExistsException, UserNotActiveException, NotAllowedException,
-            AccessRightException, CreationException {
+            AccessRightException, CreationException, WorkspaceNotEnabledException {
 
         List<ActivityModelDTO> activityModelDTOsList = workflowModelDTOToPersist.getActivityModels();
         ActivityModel[] activityModels = extractActivityModelFromDTO(activityModelDTOsList);

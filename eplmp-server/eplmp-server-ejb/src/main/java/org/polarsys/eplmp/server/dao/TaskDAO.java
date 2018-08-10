@@ -12,35 +12,31 @@
 package org.polarsys.eplmp.server.dao;
 
 import org.polarsys.eplmp.core.common.User;
-import org.polarsys.eplmp.core.common.UserKey;
 import org.polarsys.eplmp.core.exceptions.TaskNotFoundException;
 import org.polarsys.eplmp.core.workflow.Task;
 import org.polarsys.eplmp.core.workflow.TaskKey;
 
+import javax.enterprise.context.RequestScoped;
+import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 import java.util.List;
-import java.util.Locale;
 
+
+
+@RequestScoped
 public class TaskDAO {
-    
+
+    @Inject
     private EntityManager em;
-    private Locale mLocale;
-    
-    public TaskDAO(Locale pLocale, EntityManager pEM) {
-        em = pEM;
-        mLocale =pLocale;
-    }
-    
-    public TaskDAO(EntityManager pEM) {
-        em=pEM;
-        mLocale=Locale.getDefault();
+
+    public TaskDAO() {
     }
     
     public Task loadTask(TaskKey pTaskKey) throws TaskNotFoundException {
         Task task = em.find(Task.class,pTaskKey);
         if (task == null) {
-            throw new TaskNotFoundException(mLocale, pTaskKey);
+            throw new TaskNotFoundException(pTaskKey);
         } else {
             return task;
         }

@@ -10,11 +10,11 @@
   *******************************************************************************/
 package org.polarsys.eplmp.server;
 
-import org.polarsys.eplmp.server.converters.CADConverter;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mockito.Mockito;
+import org.polarsys.eplmp.server.converters.CADConverter;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
@@ -24,7 +24,7 @@ import java.util.List;
 
 public class BeanLocatorTest {
 
-    static Context ctx;
+    private static Context ctx;
 
     @BeforeClass
     public static void setup() throws Exception {
@@ -43,10 +43,10 @@ public class BeanLocatorTest {
         ctx.bind("java:global/application/module/c2Bean!org.polarsys.eplmp.server.converters.CADConverter", converter2);
     }
 
-    BeanLocator locator = new BeanLocator();
+    private BeanLocator locator = new BeanLocator();
 
     @Test
-    public void testSearch() throws Exception {
+    public void testSearch() {
         List<CADConverter> converters = locator.search(CADConverter.class, ctx);
 
         Assert.assertEquals(2, converters.size());

@@ -11,6 +11,9 @@
 
 package org.polarsys.eplmp.server.rest;
 
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.*;
 import org.polarsys.eplmp.core.common.Account;
 import org.polarsys.eplmp.core.common.User;
 import org.polarsys.eplmp.core.common.Workspace;
@@ -23,11 +26,6 @@ import org.polarsys.eplmp.core.services.IProductManagerLocal;
 import org.polarsys.eplmp.core.services.IUserManagerLocal;
 import org.polarsys.eplmp.server.rest.dto.*;
 import org.polarsys.eplmp.server.util.ResourceUtil;
-import org.dozer.DozerBeanMapperSingletonWrapper;
-import org.dozer.Mapper;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.*;
 
 import javax.persistence.EntityManager;
 import java.util.ArrayList;
@@ -40,7 +38,7 @@ import static org.mockito.MockitoAnnotations.initMocks;
 public class PartResourceTest {
 
     @InjectMocks
-    PartResource partResource = new PartResource();
+    private PartResource partResource = new PartResource();
     @Mock
     private IProductManagerLocal productService;
     @Mock
@@ -59,13 +57,11 @@ public class PartResourceTest {
     private PartMaster partMaster = new PartMaster(workspace, "partNumber", user);
     @Spy
     private PartMaster subPartMaster = new PartMaster(workspace, "SubPartNumber", user);
-    @Spy
-    private Mapper mapper = DozerBeanMapperSingletonWrapper.getInstance();
 
     @Before
     public void setup() throws Exception {
         initMocks(this);
-
+        partResource.init();
     }
 
     @Test

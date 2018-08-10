@@ -20,24 +20,21 @@ import org.polarsys.eplmp.core.exceptions.ProductInstanceAlreadyExistsException;
 import org.polarsys.eplmp.core.exceptions.ProductInstanceMasterNotFoundException;
 import org.polarsys.eplmp.core.product.PartRevision;
 
+import javax.enterprise.context.RequestScoped;
+import javax.inject.Inject;
 import javax.persistence.EntityExistsException;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceException;
 import java.util.List;
-import java.util.Locale;
 
+
+@RequestScoped
 public class ProductInstanceMasterDAO {
 
+    @Inject
     private EntityManager em;
-    private Locale mLocale;
 
-    public ProductInstanceMasterDAO(EntityManager pEM) {
-        em = pEM;
-    }
-
-    public ProductInstanceMasterDAO(Locale pLocale, EntityManager pEM) {
-        em = pEM;
-        mLocale = pLocale;
+    public ProductInstanceMasterDAO() {
     }
 
     public List<ProductInstanceMaster> findProductInstanceMasters(String workspaceId) {
@@ -59,14 +56,14 @@ public class ProductInstanceMasterDAO {
                 .getResultList();
     }
 
-    public void createProductInstanceMaster(ProductInstanceMaster productInstanceMaster) throws ProductInstanceAlreadyExistsException, CreationException {
+    public void createProductInstanceMaster(ProductInstanceMaster pProductInstanceMaster) throws ProductInstanceAlreadyExistsException, CreationException {
         try{
-            em.persist(productInstanceMaster);
+            em.persist(pProductInstanceMaster);
             em.flush();
         }catch (EntityExistsException e){
-            throw new ProductInstanceAlreadyExistsException(mLocale, productInstanceMaster);
+            throw new ProductInstanceAlreadyExistsException(pProductInstanceMaster);
         }catch (PersistenceException e){
-            throw new CreationException(mLocale);
+            throw new CreationException();
         }
 
     }
@@ -74,10 +71,14 @@ public class ProductInstanceMasterDAO {
     public ProductInstanceMaster loadProductInstanceMaster(ProductInstanceMasterKey pId) throws ProductInstanceMasterNotFoundException {
         ProductInstanceMaster productInstanceMaster = em.find(ProductInstanceMaster.class, pId);
         if (productInstanceMaster == null) {
-            throw new ProductInstanceMasterNotFoundException(mLocale, pId);
+            throw new ProductInstanceMasterNotFoundException(pId);
         } else {
             return productInstanceMaster;
         }
+    }
+
+    public boolean existsProductInstanceMaster(ProductInstanceMasterKey pId) {
+        return em.find(ProductInstanceMaster.class, pId) != null;
     }
 
     public void deleteProductInstanceMaster(ProductInstanceMaster productInstanceMaster) {

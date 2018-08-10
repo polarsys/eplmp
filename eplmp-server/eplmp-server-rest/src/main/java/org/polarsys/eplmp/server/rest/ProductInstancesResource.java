@@ -10,6 +10,9 @@
   *******************************************************************************/
 package org.polarsys.eplmp.server.rest;
 
+import io.swagger.annotations.*;
+import org.dozer.DozerBeanMapperSingletonWrapper;
+import org.dozer.Mapper;
 import org.polarsys.eplmp.core.common.BinaryResource;
 import org.polarsys.eplmp.core.configuration.*;
 import org.polarsys.eplmp.core.document.DocumentRevisionKey;
@@ -29,15 +32,13 @@ import org.polarsys.eplmp.server.rest.dto.product.ProductInstanceCreationDTO;
 import org.polarsys.eplmp.server.rest.dto.product.ProductInstanceIterationDTO;
 import org.polarsys.eplmp.server.rest.dto.product.ProductInstanceMasterDTO;
 import org.polarsys.eplmp.server.rest.file.util.BinaryResourceUpload;
-import io.swagger.annotations.*;
-import org.dozer.DozerBeanMapperSingletonWrapper;
-import org.dozer.Mapper;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.security.DeclareRoles;
 import javax.annotation.security.RolesAllowed;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.Part;
 import javax.ws.rs.*;
@@ -48,6 +49,7 @@ import javax.ws.rs.core.Response;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.net.URLDecoder;
 import java.nio.file.Files;
 import java.util.*;
@@ -58,7 +60,8 @@ import java.util.logging.Logger;
  * @author Taylor LABEJOF
  */
 @RequestScoped
-@Api(hidden = true, value = "productInstances", description = "Operations about product-instances")
+@Api(hidden = true, value = "productInstances", description = "Operations about product-instances",
+        authorizations = {@Authorization(value = "authorization")})
 @DeclareRoles(UserGroupMapping.REGULAR_USER_ROLE_ID)
 @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
 public class ProductInstancesResource {
@@ -89,12 +92,13 @@ public class ProductInstancesResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of ProductInstanceMasterDTOs. It can be an empty list."),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Produces(MediaType.APPLICATION_JSON)
     public Response getAllProductInstances(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId)
-            throws EntityNotFoundException, UserNotActiveException {
+            throws EntityNotFoundException, UserNotActiveException, WorkspaceNotEnabledException {
         List<ProductInstanceMaster> productInstanceMasterList = productInstanceService.getProductInstanceMasters(workspaceId);
         return makeList(productInstanceMasterList);
     }
@@ -107,24 +111,26 @@ public class ProductInstancesResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of ProductInstanceMasterDTOs. It can be an empty list."),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Produces(MediaType.APPLICATION_JSON)
     public Response getProductInstances(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Configuration item id") @PathParam("ciId") String ciId)
-            throws EntityNotFoundException, UserNotActiveException {
+            throws EntityNotFoundException, UserNotActiveException, WorkspaceNotEnabledException {
         ConfigurationItemKey configurationItemKey = new ConfigurationItemKey(workspaceId, ciId);
         List<ProductInstanceMaster> productInstanceMasterList = productInstanceService.getProductInstanceMasters(configurationItemKey);
         return makeList(productInstanceMasterList);
     }
 
     @POST
-    @ApiOperation(value = "Create product-instance",
+    @ApiOperation(value = "Create a new product-instance",
             response = ProductInstanceMasterDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of ProductInstanceMasterDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Consumes(MediaType.APPLICATION_JSON)
@@ -133,7 +139,7 @@ public class ProductInstancesResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Product instance master to create") ProductInstanceCreationDTO productInstanceCreationDTO)
             throws EntityNotFoundException, EntityAlreadyExistsException, AccessRightException, CreationException,
-            NotAllowedException, EntityConstraintException, UserNotActiveException {
+            NotAllowedException, EntityConstraintException, UserNotActiveException, WorkspaceNotEnabledException {
 
 
         List<InstanceAttributeDTO> instanceAttributeDTOs = productInstanceCreationDTO.getInstanceAttributes();
@@ -176,6 +182,7 @@ public class ProductInstancesResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of updated ProductInstanceMasterDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{ciId}/instances/{serialNumber}/iterations/{iteration}")
@@ -188,7 +195,7 @@ public class ProductInstancesResource {
             @ApiParam(required = true, value = "Product instance iteration") @PathParam("iteration") int iteration,
             @ApiParam(required = true, value = "Product instance master to update") ProductInstanceIterationDTO productInstanceCreationDTO)
             throws EntityNotFoundException, EntityAlreadyExistsException, AccessRightException, CreationException,
-            UserNotActiveException {
+            UserNotActiveException, WorkspaceNotEnabledException {
 
         List<InstanceAttributeDTO> instanceAttributes = productInstanceCreationDTO.getInstanceAttributes();
         List<InstanceAttribute> attributes = new ArrayList<>();
@@ -227,11 +234,12 @@ public class ProductInstancesResource {
     }
 
     @GET
-    @ApiOperation(value = "Get product-instance",
+    @ApiOperation(value = "Get product-instance by serial number",
             response = ProductInstanceMasterDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of ProductInstanceMasterDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{ciId}/instances/{serialNumber}")
@@ -240,7 +248,7 @@ public class ProductInstancesResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Configuration item id") @PathParam("ciId") String configurationItemId,
             @ApiParam(required = true, value = "Serial number") @PathParam("serialNumber") String serialNumber)
-            throws EntityNotFoundException, UserNotActiveException {
+            throws EntityNotFoundException, UserNotActiveException, WorkspaceNotEnabledException {
 
         ProductInstanceMaster productInstanceMaster = productInstanceService.getProductInstanceMaster(new ProductInstanceMasterKey(serialNumber, workspaceId, configurationItemId));
         ConfigurationItemKey ciKey = new ConfigurationItemKey(workspaceId, configurationItemId);
@@ -297,6 +305,7 @@ public class ProductInstancesResource {
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful deletion of file of ProductInstanceMasterDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Consumes(MediaType.APPLICATION_JSON)
@@ -307,7 +316,7 @@ public class ProductInstancesResource {
             @ApiParam(required = true, value = "Configuration item id") @PathParam("ciId") String configurationItemId,
             @ApiParam(required = true, value = "Serial number") @PathParam("serialNumber") String serialNumber,
             @ApiParam(required = true, value = "File name") @PathParam("fileName") String fileName)
-            throws EntityNotFoundException, AccessRightException, UserNotActiveException {
+            throws EntityNotFoundException, AccessRightException, UserNotActiveException, WorkspaceNotEnabledException {
 
         String fullName = workspaceId + "/product-instances/" + serialNumber + "/iterations/" + iteration + "/" + fileName;
         productInstanceService.removeFileFromProductInstanceIteration(workspaceId, iteration, fullName, new ProductInstanceMasterKey(serialNumber, workspaceId, configurationItemId));
@@ -321,6 +330,7 @@ public class ProductInstancesResource {
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful update of ProductInstanceMasterDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{ciId}/instances/{serialNumber}/acl")
@@ -330,7 +340,7 @@ public class ProductInstancesResource {
             @ApiParam(required = true, value = "Configuration item id") @PathParam("ciId") String configurationItemId,
             @ApiParam(required = true, value = "Serial number") @PathParam("serialNumber") String serialNumber,
             @ApiParam(required = true, value = "ACL to set") ACLDTO acl)
-            throws EntityNotFoundException, AccessRightException, UserNotActiveException, NotAllowedException {
+            throws EntityNotFoundException, AccessRightException, UserNotActiveException, NotAllowedException, WorkspaceNotEnabledException {
 
         if (acl.hasEntries()) {
             productInstanceService.updateACLForProductInstanceMaster(workspaceId, configurationItemId, serialNumber,
@@ -348,6 +358,7 @@ public class ProductInstancesResource {
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful deletion of ProductInstanceMasterDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{ciId}/instances/{serialNumber}")
@@ -356,7 +367,7 @@ public class ProductInstancesResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Configuration item id") @PathParam("ciId") String configurationItemId,
             @ApiParam(required = true, value = "Serial number") @PathParam("serialNumber") String serialNumber)
-            throws EntityNotFoundException, AccessRightException, UserNotActiveException {
+            throws EntityNotFoundException, AccessRightException, UserNotActiveException, WorkspaceNotEnabledException {
 
         productInstanceService.deleteProductInstance(workspaceId, configurationItemId, serialNumber);
         return Response.noContent().build();
@@ -369,6 +380,7 @@ public class ProductInstancesResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of ProductInstanceMasterDTOs. It can be an empty list."),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{ciId}/instances/{serialNumber}/iterations")
@@ -377,7 +389,7 @@ public class ProductInstancesResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Configuration item id") @PathParam("ciId") String configurationItemId,
             @ApiParam(required = true, value = "Serial number") @PathParam("serialNumber") String serialNumber)
-            throws EntityNotFoundException, UserNotActiveException {
+            throws EntityNotFoundException, UserNotActiveException, WorkspaceNotEnabledException {
 
         List<ProductInstanceIteration> productInstanceIterationList = productInstanceService.getProductInstanceIterations(new ProductInstanceMasterKey(serialNumber, workspaceId, configurationItemId));
         List<ProductInstanceIterationDTO> productInstanceIterationDTOs = new ArrayList<>();
@@ -396,6 +408,7 @@ public class ProductInstancesResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of ProductInstanceIterationDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{ciId}/instances/{serialNumber}/iterations/{iteration}")
@@ -405,18 +418,19 @@ public class ProductInstancesResource {
             @ApiParam(required = true, value = "Configuration item id") @PathParam("ciId") String configurationItemId,
             @ApiParam(required = true, value = "Serial number") @PathParam("serialNumber") String serialNumber,
             @ApiParam(required = true, value = "Product instance iteration") @PathParam("iteration") int iteration)
-            throws EntityNotFoundException, UserNotActiveException {
+            throws EntityNotFoundException, UserNotActiveException, WorkspaceNotEnabledException {
 
         ProductInstanceIteration productInstanceIteration = productInstanceService.getProductInstanceIteration(new ProductInstanceIterationKey(serialNumber, workspaceId, configurationItemId, iteration));
         return mapper.map(productInstanceIteration, ProductInstanceIterationDTO.class);
     }
 
     @PUT
-    @ApiOperation(value = "Rebase product-instance",
+    @ApiOperation(value = "Rebase product-instance with given baseline",
             response = Response.class)
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful rebase of ProductInstanceIterationDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Consumes(MediaType.APPLICATION_JSON)
@@ -427,21 +441,20 @@ public class ProductInstancesResource {
             @ApiParam(required = true, value = "Configuration item id") @PathParam("ciId") String configurationItemId,
             @ApiParam(required = true, value = "Serial number") @PathParam("serialNumber") String serialNumber,
             @ApiParam(required = true, value = "Product baseline to rebase with") ProductBaselineDTO baselineDTO)
-            throws UserNotActiveException, WorkspaceNotFoundException, BaselineNotFoundException, UserNotFoundException,
-            ProductInstanceMasterNotFoundException, AccessRightException, NotAllowedException,
-            ConfigurationItemNotFoundException, PathToPathLinkAlreadyExistsException, PartMasterNotFoundException,
-            CreationException, EntityConstraintException, WorkspaceNotEnabledException {
+            throws UserNotActiveException, EntityNotFoundException, AccessRightException, NotAllowedException,
+            EntityAlreadyExistsException, CreationException, EntityConstraintException, WorkspaceNotEnabledException {
 
         productInstanceService.rebaseProductInstance(workspaceId, serialNumber, new ConfigurationItemKey(workspaceId, configurationItemId), baselineDTO.getId());
         return Response.noContent().build();
     }
 
     @PUT
-    @ApiOperation(value = "Rename attached file in product instance",
+    @ApiOperation(value = "Rename attached file in product instance iteration",
             response = FileDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of renamed FileDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Consumes(MediaType.APPLICATION_JSON)
@@ -454,9 +467,8 @@ public class ProductInstancesResource {
             @ApiParam(required = true, value = "Product instance iteration") @PathParam("iteration") int iteration,
             @ApiParam(required = true, value = "File name") @PathParam("fileName") String fileName,
             @ApiParam(required = true, value = "Renamed file") FileDTO fileDTO)
-            throws UserNotActiveException, WorkspaceNotFoundException, CreationException, UserNotFoundException,
-            FileNotFoundException, NotAllowedException, FileAlreadyExistsException, StorageException,
-            ProductInstanceMasterNotFoundException, AccessRightException, WorkspaceNotEnabledException {
+            throws UserNotActiveException, EntityNotFoundException, CreationException, NotAllowedException,
+            EntityAlreadyExistsException, StorageException, AccessRightException, WorkspaceNotEnabledException {
 
         String fullName = workspaceId + "/product-instances/" + serialNumber + "/iterations/" + iteration + "/" + fileName;
         BinaryResource binaryResource = productInstanceService.renameFileInProductInstance(fullName, fileDTO.getShortName(), serialNumber, configurationItemId, iteration);
@@ -464,11 +476,12 @@ public class ProductInstancesResource {
     }
 
     @GET
-    @ApiOperation(value = "Get product-instance's path-data",
+    @ApiOperation(value = "Get product-instance's last iteration path-data",
             response = PathDataMasterDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of PathDataMasterDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{ciId}/instances/{serialNumber}/pathdata/{path}")
@@ -478,9 +491,7 @@ public class ProductInstancesResource {
             @ApiParam(required = true, value = "Configuration item id") @PathParam("ciId") String configurationItemId,
             @ApiParam(required = true, value = "Serial number") @PathParam("serialNumber") String serialNumber,
             @ApiParam(required = true, value = "Complete path in context") @PathParam("path") String pathAsString)
-            throws UserNotFoundException, WorkspaceNotFoundException, UserNotActiveException, AccessRightException,
-            ProductInstanceMasterNotFoundException, ConfigurationItemNotFoundException,
-            PartUsageLinkNotFoundException, BaselineNotFoundException, WorkspaceNotEnabledException {
+            throws EntityNotFoundException, UserNotActiveException, AccessRightException, WorkspaceNotEnabledException {
 
         PathDataMaster pathDataMaster = productInstanceService.getPathDataByPath(workspaceId, configurationItemId, serialNumber, pathAsString);
 
@@ -523,6 +534,7 @@ public class ProductInstancesResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of renamed FileDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Consumes(MediaType.APPLICATION_JSON)
@@ -536,10 +548,8 @@ public class ProductInstancesResource {
             @ApiParam(required = true, value = "Product instance iteration") @PathParam("iteration") int iteration,
             @ApiParam(required = true, value = "File name") @PathParam("fileName") String fileName,
             @ApiParam(required = true, value = "Renamed file") FileDTO fileDTO)
-            throws UserNotActiveException, WorkspaceNotFoundException, CreationException, UserNotFoundException,
-            FileNotFoundException, NotAllowedException, FileAlreadyExistsException,
-            ProductInstanceMasterNotFoundException, AccessRightException, StorageException,
-            WorkspaceNotEnabledException {
+            throws UserNotActiveException, CreationException, NotAllowedException, EntityAlreadyExistsException,
+            EntityNotFoundException, AccessRightException, StorageException, WorkspaceNotEnabledException {
 
         String fullName = workspaceId + "/product-instances/" + serialNumber + "/pathdata/" + pathDataId + "/iterations/" + iteration + "/" + fileName;
         BinaryResource binaryResource = productInstanceService.renameFileInPathData(workspaceId, configurationItemId, serialNumber, pathDataId, iteration, fullName, fileDTO.getShortName());
@@ -552,6 +562,7 @@ public class ProductInstancesResource {
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful file deletion"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Consumes(MediaType.APPLICATION_JSON)
@@ -564,9 +575,8 @@ public class ProductInstancesResource {
             @ApiParam(required = true, value = "Path data master id") @PathParam("pathDataId") int pathDataId,
             @ApiParam(required = true, value = "Product instance iteration") @PathParam("iteration") int iteration,
             @ApiParam(required = true, value = "File name") @PathParam("fileName") String fileName
-    ) throws UserNotActiveException, WorkspaceNotFoundException, CreationException, UserNotFoundException,
-            FileNotFoundException, NotAllowedException, FileAlreadyExistsException,
-            ProductInstanceMasterNotFoundException, AccessRightException, WorkspaceNotEnabledException {
+    ) throws UserNotActiveException, CreationException, EntityNotFoundException, NotAllowedException,
+            EntityAlreadyExistsException, AccessRightException, WorkspaceNotEnabledException {
 
         String fullName = workspaceId + "/product-instances/" + serialNumber + "/pathdata/" + pathDataId + "/iterations/" + iteration + "/" + fileName;
         ProductInstanceMaster productInstanceMaster = productInstanceService.getProductInstanceMaster(new ProductInstanceMasterKey(serialNumber, workspaceId, configurationItemId));
@@ -580,6 +590,7 @@ public class ProductInstancesResource {
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful deletion of PathDataMaster"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{ciId}/instances/{serialNumber}/pathdata/{pathDataId}")
@@ -589,8 +600,7 @@ public class ProductInstancesResource {
             @ApiParam(required = true, value = "Configuration item id") @PathParam("ciId") String configurationItemId,
             @ApiParam(required = true, value = "Serial number") @PathParam("serialNumber") String serialNumber,
             @ApiParam(required = true, value = "Path data master id") @PathParam("pathDataId") int pathDataId)
-            throws UserNotActiveException, WorkspaceNotFoundException, UserNotFoundException,
-            ProductInstanceMasterNotFoundException, AccessRightException, NotAllowedException,
+            throws UserNotActiveException, EntityNotFoundException, AccessRightException, NotAllowedException,
             WorkspaceNotEnabledException {
 
         productInstanceService.deletePathData(workspaceId, configurationItemId, serialNumber, pathDataId);
@@ -603,6 +613,7 @@ public class ProductInstancesResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of updated PathDataMasterDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{ciId}/instances/{serialNumber}/pathdata/{pathDataId}")
@@ -613,7 +624,9 @@ public class ProductInstancesResource {
             @ApiParam(required = true, value = "Configuration item id") @PathParam("ciId") String configurationItemId,
             @ApiParam(required = true, value = "Serial number") @PathParam("serialNumber") String serialNumber,
             @ApiParam(required = true, value = "Path data master id") @PathParam("pathDataId") int pathDataId,
-            @ApiParam(required = true, value = "Path data iteration to create") PathDataIterationCreationDTO pathDataIterationCreationDTO) throws UserNotFoundException, AccessRightException, UserNotActiveException, ProductInstanceMasterNotFoundException, WorkspaceNotFoundException, NotAllowedException, PathDataAlreadyExistsException, FileAlreadyExistsException, CreationException, ConfigurationItemNotFoundException, PartUsageLinkNotFoundException, BaselineNotFoundException, PathDataMasterNotFoundException, DocumentRevisionNotFoundException, WorkspaceNotEnabledException {
+            @ApiParam(required = true, value = "Path data iteration to create") PathDataIterationCreationDTO pathDataIterationCreationDTO)
+            throws EntityNotFoundException, AccessRightException, UserNotActiveException, NotAllowedException,
+            EntityAlreadyExistsException, CreationException, WorkspaceNotEnabledException {
 
         List<InstanceAttributeDTO> instanceAttributeDTOs = pathDataIterationCreationDTO.getInstanceAttributes();
         List<InstanceAttribute> attributes = new ArrayList<>();
@@ -671,11 +684,12 @@ public class ProductInstancesResource {
     }
 
     @POST
-    @ApiOperation(value = "Create new path-data",
+    @ApiOperation(value = "Create a new path-data in product-instance last iteration",
             response = PathDataMasterDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of created PathDataMaster"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{ciId}/instances/{serialNumber}/pathdata/{path}/new")
@@ -687,10 +701,8 @@ public class ProductInstancesResource {
             @ApiParam(required = true, value = "Serial number") @PathParam("serialNumber") String serialNumber,
             @ApiParam(required = true, value = "Complete path in context") @PathParam("path") String pathAsString,
             @ApiParam(required = true, value = "Path data iteration create") PathDataIterationCreationDTO pathDataIterationCreationDTO)
-            throws UserNotFoundException, AccessRightException, UserNotActiveException,
-            ProductInstanceMasterNotFoundException, WorkspaceNotFoundException, NotAllowedException,
-            PathDataAlreadyExistsException, FileAlreadyExistsException, CreationException,
-            ConfigurationItemNotFoundException, PartUsageLinkNotFoundException, WorkspaceNotEnabledException {
+            throws EntityNotFoundException, AccessRightException, UserNotActiveException,
+            NotAllowedException, EntityAlreadyExistsException, CreationException, WorkspaceNotEnabledException {
 
         List<InstanceAttributeDTO> instanceAttributeDTOs = pathDataIterationCreationDTO.getInstanceAttributes();
         List<InstanceAttribute> attributes = new ArrayList<>();
@@ -725,6 +737,7 @@ public class ProductInstancesResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of updated PathDataMaster"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{ciId}/instances/{serialNumber}/pathdata/{pathDataId}/iterations/{iteration}")
@@ -737,10 +750,8 @@ public class ProductInstancesResource {
             @ApiParam(required = true, value = "Path data master id") @PathParam("pathDataId") int pathDataId,
             @ApiParam(required = true, value = "Product instance iteration") @PathParam("iteration") int iteration,
             @ApiParam(required = true, value = "Path data iteration to update") PathDataIterationCreationDTO pathDataIterationCreationDTO)
-            throws UserNotFoundException, AccessRightException, UserNotActiveException,
-            ProductInstanceMasterNotFoundException, WorkspaceNotFoundException, NotAllowedException,
-            PathDataAlreadyExistsException, ConfigurationItemNotFoundException, PartUsageLinkNotFoundException,
-            DocumentRevisionNotFoundException, WorkspaceNotEnabledException {
+            throws AccessRightException, UserNotActiveException, EntityNotFoundException, NotAllowedException,
+            EntityAlreadyExistsException, WorkspaceNotEnabledException {
 
         List<InstanceAttributeDTO> instanceAttributeDTOs = pathDataIterationCreationDTO.getInstanceAttributes();
         List<InstanceAttribute> attributes = new ArrayList<>();
@@ -791,6 +802,7 @@ public class ProductInstancesResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of LightPathToPathLinkDTOs. It can be an empty list."),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{ciId}/instances/{serialNumber}/path-to-path-links-types")
@@ -799,8 +811,7 @@ public class ProductInstancesResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Configuration item id") @PathParam("ciId") String configurationItemId,
             @ApiParam(required = true, value = "Serial number") @PathParam("serialNumber") String serialNumber)
-            throws UserNotFoundException, WorkspaceNotFoundException, UserNotActiveException, AccessRightException,
-            ProductInstanceMasterNotFoundException, WorkspaceNotEnabledException {
+            throws EntityNotFoundException, UserNotActiveException, AccessRightException, WorkspaceNotEnabledException {
 
         List<String> pathToPathLinkTypes = productInstanceService.getPathToPathLinkTypes(workspaceId, configurationItemId, serialNumber);
         List<LightPathToPathLinkDTO> pathToPathLinkDTOs = new ArrayList<>();
@@ -819,6 +830,7 @@ public class ProductInstancesResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of LightPathToPathLinkDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{ciId}/instances/{serialNumber}/link-path-part/{pathPart}")
@@ -828,9 +840,7 @@ public class ProductInstancesResource {
             @ApiParam(required = true, value = "Configuration item id") @PathParam("ciId") String configurationItemId,
             @ApiParam(required = true, value = "Serial number") @PathParam("serialNumber") String serialNumber,
             @ApiParam(required = true, value = "Complete path to the part") @PathParam("pathPart") String partPath)
-            throws UserNotFoundException, WorkspaceNotFoundException, UserNotActiveException, AccessRightException,
-            ProductInstanceMasterNotFoundException, PartUsageLinkNotFoundException,
-            ConfigurationItemNotFoundException, WorkspaceNotEnabledException {
+            throws EntityNotFoundException, UserNotActiveException, AccessRightException, WorkspaceNotEnabledException {
 
         PartMaster partMaster = productService.getPartMasterFromPath(workspaceId, configurationItemId, partPath);
         LightPartMasterDTO lightPartMasterDTO = new LightPartMasterDTO();
@@ -846,6 +856,7 @@ public class ProductInstancesResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of LightPathToPathLinkDTOs. It can be an empty list."),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{ciId}/instances/{serialNumber}/path-to-path-links")
@@ -854,8 +865,7 @@ public class ProductInstancesResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Configuration item id") @PathParam("ciId") String configurationItemId,
             @ApiParam(required = true, value = "Serial number") @PathParam("serialNumber") String serialNumber)
-            throws UserNotFoundException, WorkspaceNotFoundException, UserNotActiveException, AccessRightException,
-            ProductInstanceMasterNotFoundException, WorkspaceNotEnabledException {
+            throws EntityNotFoundException, UserNotActiveException, AccessRightException, WorkspaceNotEnabledException {
 
         List<PathToPathLink> pathToPathLinkTypes = productInstanceService.getPathToPathLinks(workspaceId, configurationItemId, serialNumber);
         List<LightPathToPathLinkDTO> pathToPathLinkDTOs = new ArrayList<>();
@@ -873,6 +883,7 @@ public class ProductInstancesResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of LightPathToPathLinkDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{ciId}/instances/{serialNumber}/path-to-path-links/{pathToPathLinkId}")
@@ -882,9 +893,7 @@ public class ProductInstancesResource {
             @ApiParam(required = true, value = "Configuration item id") @PathParam("ciId") String configurationItemId,
             @ApiParam(required = true, value = "Serial number") @PathParam("serialNumber") String serialNumber,
             @ApiParam(required = true, value = "Path to path link id") @PathParam("pathToPathLinkId") int pathToPathLinkId)
-            throws UserNotActiveException, WorkspaceNotFoundException, UserNotFoundException,
-            ProductInstanceMasterNotFoundException, AccessRightException, PathToPathLinkNotFoundException,
-            WorkspaceNotEnabledException {
+            throws UserNotActiveException, EntityNotFoundException, AccessRightException, WorkspaceNotEnabledException {
 
         PathToPathLink pathToPathLink = productInstanceService.getPathToPathLink(workspaceId, configurationItemId, serialNumber, pathToPathLinkId);
         return mapper.map(pathToPathLink, LightPathToPathLinkDTO.class);
@@ -897,6 +906,7 @@ public class ProductInstancesResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of LightPathToPathLinkDTOs. It can be an empty list."),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{ciId}/instances/{serialNumber}/path-to-path-links/source/{sourcePath}/target/{targetPath}")
@@ -907,9 +917,7 @@ public class ProductInstancesResource {
             @ApiParam(required = true, value = "Serial number") @PathParam("serialNumber") String serialNumber,
             @ApiParam(required = true, value = "Complete source path") @PathParam("sourcePath") String sourcePathAsString,
             @ApiParam(required = true, value = "Complete target path") @PathParam("targetPath") String targetPathAsString)
-            throws UserNotFoundException, WorkspaceNotFoundException, UserNotActiveException, AccessRightException,
-            ProductInstanceMasterNotFoundException, ConfigurationItemNotFoundException,
-            PartUsageLinkNotFoundException, WorkspaceNotEnabledException {
+            throws EntityNotFoundException, UserNotActiveException, AccessRightException, WorkspaceNotEnabledException {
 
         List<PathToPathLink> pathToPathLinks = productInstanceService.getPathToPathLinkFromSourceAndTarget(workspaceId, configurationItemId, serialNumber, sourcePathAsString, targetPathAsString);
         List<PathToPathLinkDTO> pathToPathLinkDTOs = new ArrayList<>();
@@ -949,6 +957,7 @@ public class ProductInstancesResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of LightPathToPathLinkDTOs. It can be an empty list."),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{ciId}/instances/{serialNumber}/path-to-path-links-roots/{type}")
@@ -958,8 +967,7 @@ public class ProductInstancesResource {
             @ApiParam(required = true, value = "Configuration item id") @PathParam("ciId") String configurationItemId,
             @ApiParam(required = true, value = "Serial number") @PathParam("serialNumber") String serialNumber,
             @ApiParam(required = true, value = "Link type") @PathParam("type") String type)
-            throws UserNotFoundException, WorkspaceNotFoundException, UserNotActiveException, AccessRightException,
-            ProductInstanceMasterNotFoundException, WorkspaceNotEnabledException {
+            throws EntityNotFoundException, UserNotActiveException, AccessRightException, WorkspaceNotEnabledException {
 
         List<PathToPathLink> pathToPathLinks = productInstanceService.getRootPathToPathLinks(workspaceId, configurationItemId, serialNumber, type);
         List<LightPathToPathLinkDTO> lightPathToPathLinkDTOs = new ArrayList<>();
@@ -976,6 +984,7 @@ public class ProductInstancesResource {
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful import"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("import")
@@ -987,7 +996,7 @@ public class ProductInstancesResource {
             @ApiParam(required = false, value = "Auto freeze after update flag") @QueryParam("autoFreezeAfterUpdate") boolean autoFreezeAfterUpdate,
             @ApiParam(required = false, value = "Permissive update flag") @QueryParam("permissiveUpdate") boolean permissiveUpdate,
             @ApiParam(required = false, value = "Revision note to set") @QueryParam("revisionNote") String revisionNote)
-            throws Exception {
+            throws IOException, ServletException {
 
         Collection<Part> parts = request.getParts();
 

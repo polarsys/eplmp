@@ -13,24 +13,20 @@ package org.polarsys.eplmp.server.dao;
 
 import org.polarsys.eplmp.core.meta.InstanceAttribute;
 
+import javax.enterprise.context.RequestScoped;
+import javax.inject.Inject;
 import javax.persistence.EntityExistsException;
 import javax.persistence.EntityManager;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+@RequestScoped
 public class InstanceAttributeDAO {
     private static final Logger LOGGER = Logger.getLogger(InstanceAttributeDAO.class.getName());
 
-    private final EntityManager em;
-
-    public InstanceAttributeDAO(EntityManager pEM) {
-        em=pEM;
-    }
-
-    public void removeAttribute(InstanceAttribute pAttr){
-        em.remove(pAttr);
-    }
+    @Inject
+    private EntityManager em;
 
     public void createAttribute(InstanceAttribute pAttr){
         try{

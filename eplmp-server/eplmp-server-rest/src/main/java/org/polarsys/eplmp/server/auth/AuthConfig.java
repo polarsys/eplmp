@@ -21,7 +21,6 @@ import javax.naming.NamingException;
 import java.io.UnsupportedEncodingException;
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
-import java.util.Optional;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;

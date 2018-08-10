@@ -20,29 +20,27 @@ import org.polarsys.eplmp.core.notification.TagUserGroupSubscriptionKey;
 import org.polarsys.eplmp.core.notification.TagUserSubscription;
 import org.polarsys.eplmp.core.notification.TagUserSubscriptionKey;
 
+import javax.enterprise.context.RequestScoped;
+import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityNotFoundException;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
+@RequestScoped
 public class SubscriptionDAO {
     private static final Logger LOGGER = Logger.getLogger(SubscriptionDAO.class.getName());
-    private final EntityManager em;
-    private Locale mLocale;
+    public static final String WORKSPACE_ID = "workspaceId";
 
-
-    public SubscriptionDAO(Locale pLocale, EntityManager pEM) {
-        mLocale=pLocale;
-        em=pEM;
-    }
-
-    public SubscriptionDAO(EntityManager pEM) {
-        em = pEM;
-    }
+    @Inject
+    private EntityManager em;
 
     public TagUserSubscription saveTagUserSubscription(TagUserSubscription pSubscription) {
         return em.merge(pSubscription);
@@ -229,13 +227,13 @@ public class SubscriptionDAO {
 
         if(pDocR.getTags() !=null && !pDocR.getTags().isEmpty()) {
             listUsers = em.createNamedQuery("TagUserSubscription.findIterationChangeSubscribersByTags", User.class)
-                    .setParameter("workspaceId", pDocR.getWorkspaceId())
+                    .setParameter(WORKSPACE_ID, pDocR.getWorkspaceId())
                     .setParameter("tags", pDocR.getTags().stream().map(Tag::getLabel).collect(Collectors.toList()))
                     .getResultList();
             users.addAll(listUsers);
 
             listUsers = em.createNamedQuery("TagUserGroupSubscription.findIterationChangeSubscribersByTags", User.class)
-                    .setParameter("workspaceId", pDocR.getWorkspaceId())
+                    .setParameter(WORKSPACE_ID, pDocR.getWorkspaceId())
                     .setParameter("tags", pDocR.getTags().stream().map(Tag::getLabel).collect(Collectors.toList()))
                     .getResultList();
             users.addAll(listUsers);
@@ -251,13 +249,13 @@ public class SubscriptionDAO {
 
         if(pDocR.getTags() !=null && !pDocR.getTags().isEmpty()) {
             listUsers = em.createNamedQuery("TagUserSubscription.findStateChangeSubscribersByTags", User.class)
-                    .setParameter("workspaceId", pDocR.getWorkspaceId())
+                    .setParameter(WORKSPACE_ID, pDocR.getWorkspaceId())
                     .setParameter("tags", pDocR.getTags().stream().map(Tag::getLabel).collect(Collectors.toList()))
                     .getResultList();
             users.addAll(listUsers);
 
             listUsers = em.createNamedQuery("TagUserGroupSubscription.findStateChangeSubscribersByTags", User.class)
-                    .setParameter("workspaceId", pDocR.getWorkspaceId())
+                    .setParameter(WORKSPACE_ID, pDocR.getWorkspaceId())
                     .setParameter("tags", pDocR.getTags().stream().map(Tag::getLabel).collect(Collectors.toList()))
                     .getResultList();
             users.addAll(listUsers);

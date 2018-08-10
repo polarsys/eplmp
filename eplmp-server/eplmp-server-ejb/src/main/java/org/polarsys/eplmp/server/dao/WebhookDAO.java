@@ -14,30 +14,30 @@ package org.polarsys.eplmp.server.dao;
 import org.polarsys.eplmp.core.exceptions.WebhookNotFoundException;
 import org.polarsys.eplmp.core.hooks.Webhook;
 
+import javax.enterprise.context.RequestScoped;
+import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import java.util.List;
-import java.util.Locale;
 
+
+@RequestScoped
 public class WebhookDAO {
 
+    @Inject
     private EntityManager em;
-    private Locale mLocale;
 
-    public WebhookDAO(Locale pLocale, EntityManager pEM) {
-        mLocale = pLocale;
-        em = pEM;
+    public WebhookDAO() {
     }
 
     public Webhook loadWebhook(int id) throws WebhookNotFoundException {
         Webhook webhook = em.find(Webhook.class, id);
         if (webhook == null) {
-            throw new WebhookNotFoundException(mLocale, id);
+            throw new WebhookNotFoundException(id);
         }
         return webhook;
     }
 
-    public void removeWebook(Webhook w) {
-        // then
+    public void removeWebhook(Webhook w) {
         em.remove(w);
         em.flush();
     }

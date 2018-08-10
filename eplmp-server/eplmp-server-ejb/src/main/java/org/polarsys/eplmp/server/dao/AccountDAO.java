@@ -15,78 +15,67 @@ import org.polarsys.eplmp.core.common.Account;
 import org.polarsys.eplmp.core.common.Workspace;
 import org.polarsys.eplmp.core.exceptions.AccountAlreadyExistsException;
 import org.polarsys.eplmp.core.exceptions.AccountNotFoundException;
-import org.polarsys.eplmp.core.exceptions.CreationException;
 import org.polarsys.eplmp.core.security.Credential;
 import org.polarsys.eplmp.core.security.UserGroupMapping;
 
-import javax.persistence.*;
+import javax.enterprise.context.RequestScoped;
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceException;
+import javax.persistence.TypedQuery;
 import java.util.List;
-import java.util.Locale;
 
+
+@RequestScoped
 public class AccountDAO {
-    
+
+    @Inject
     private EntityManager em;
-    private Locale mLocale;
-    
-    public AccountDAO(Locale pLocale, EntityManager pEM) {
-        mLocale=pLocale;
-        em=pEM;
-    }
-    
-    public AccountDAO(EntityManager pEM) {
-        mLocale=Locale.getDefault();
-        em=pEM;
+    //private EntityManager em;
+
+    public AccountDAO() {
     }
 
-    public void createAccount(Account pAccount, String pPassword, String pAlgorithm) throws AccountAlreadyExistsException, CreationException {
-        try{
+    public void createAccount(Account pAccount, String pPassword, String pAlgorithm) throws AccountAlreadyExistsException {
+        try {
             //the EntityExistsException is thrown only when flush occurs 
             em.persist(pAccount);
             em.flush();
             Credential credential = Credential.createCredential(pAccount.getLogin(), pPassword, pAlgorithm);
             em.persist(credential);
-            em.persist(new UserGroupMapping(pAccount.getLogin()));            
-        }catch(EntityExistsException pEEEx){
-            throw new AccountAlreadyExistsException(mLocale, pAccount.getLogin());
-        }catch(PersistenceException pPEx){
+            em.persist(new UserGroupMapping(pAccount.getLogin()));
+        } catch (PersistenceException pEEEx) {
             //EntityExistsException is case sensitive
             //whereas MySQL is not thus PersistenceException could be
             //thrown instead of EntityExistsException
-            throw new CreationException(mLocale);
+            throw new AccountAlreadyExistsException(pAccount.getLogin());
         }
     }
-    
-    public void updateAccount(Account pAccount, String pPassword, String pAlgorithm){
-        em.merge(pAccount);
-        if(pPassword!=null){
-            updateCredential(pAccount.getLogin(),pPassword, pAlgorithm);
-        }
-    }
-    
-    public void updateCredential(String pLogin, String pPassword, String pAlgorithm){
-        Credential credential = Credential.createCredential(pLogin,pPassword, pAlgorithm);
+
+    public void updateCredential(String pLogin, String pPassword, String pAlgorithm) {
+        Credential credential = Credential.createCredential(pLogin, pPassword, pAlgorithm);
         em.merge(credential);
     }
-    
+
     public Account loadAccount(String pLogin) throws AccountNotFoundException {
-        Account account = em.find(Account.class,pLogin);
+        Account account = em.find(Account.class, pLogin);
         if (account == null) {
-            throw new AccountNotFoundException(mLocale, pLogin);
+            throw new AccountNotFoundException(pLogin);
         } else {
             return account;
         }
     }
-    
+
     public Workspace[] getAdministratedWorkspaces(Account pAdmin) {
         Workspace[] workspaces;
         TypedQuery<Workspace> query = em.createQuery("SELECT DISTINCT w FROM Workspace w WHERE w.admin = :admin", Workspace.class);
-        List<Workspace> listWorkspaces = query.setParameter("admin",pAdmin).getResultList();
+        List<Workspace> listWorkspaces = query.setParameter("admin", pAdmin).getResultList();
         workspaces = new Workspace[listWorkspaces.size()];
-        for(int i=0;i<listWorkspaces.size();i++) {
+        for (int i = 0; i < listWorkspaces.size(); i++) {
             workspaces[i] = listWorkspaces.get(i);
         }
-        
-        return workspaces;    
+
+        return workspaces;
     }
 
     public Workspace[] getAllWorkspaces() {
@@ -94,20 +83,20 @@ public class AccountDAO {
         TypedQuery<Workspace> query = em.createQuery("SELECT DISTINCT w FROM Workspace w", Workspace.class);
         List<Workspace> listWorkspaces = query.getResultList();
         workspaces = new Workspace[listWorkspaces.size()];
-        for(int i=0;i<listWorkspaces.size();i++) {
+        for (int i = 0; i < listWorkspaces.size(); i++) {
             workspaces[i] = listWorkspaces.get(i);
         }
 
         return workspaces;
     }
 
-    public List<Account> getAccounts(){
+    public List<Account> getAccounts() {
         TypedQuery<Account> query = em.createQuery("SELECT DISTINCT a FROM Account a", Account.class);
         return query.getResultList();
     }
 
 
-    public boolean authenticate(String login, String password, String pAlgorithm){
+    public boolean authenticate(String login, String password, String pAlgorithm) {
         Credential credential = em.find(Credential.class, login);
         return credential != null && credential.authenticate(password, pAlgorithm);
     }

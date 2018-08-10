@@ -11,7 +11,7 @@
 
 package org.polarsys.eplmp.core.exceptions;
 
-import java.util.Locale;
+
 
 /**
  *
@@ -19,16 +19,16 @@ import java.util.Locale;
  */
 public class WrongInputException extends ApplicationException {
 
+    public WrongInputException() {
+        super();
+    }
+
     public WrongInputException(String pMessage) {
         super(pMessage);
     }
 
-    public WrongInputException(Locale pLocale) {
-        this(pLocale, null);
-    }
-
-    public WrongInputException(Locale pLocale, Throwable pCause) {
-        super(pLocale, pCause);
+    public WrongInputException(Throwable pCause) {
+        super( pCause);
     }
 
     @Override

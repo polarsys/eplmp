@@ -19,7 +19,6 @@ import java.io.File;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Date;
-import java.util.List;
 
 public interface StorageProvider {
     InputStream getBinaryResourceInputStream(BinaryResource pBinaryResource) throws StorageException, FileNotFoundException;
@@ -30,7 +29,7 @@ public interface StorageProvider {
     void delData(BinaryResource pBinaryResource) throws StorageException;
     String getExternalResourceURI(BinaryResource binaryResource);
     String getShortenExternalResourceURI(BinaryResource binaryResource);
-    void deleteWorkspaceFolder(String workspaceId, List<BinaryResource> binaryResourcesInWorkspace) throws StorageException;
+    void deleteWorkspaceFolder(String workspaceId) throws StorageException;
     void renameData(File file, String pNewName) throws StorageException;
     boolean exists(BinaryResource binaryResource, String generatedFileName);
     Date getLastModified(BinaryResource binaryResource, String generatedFileName) throws FileNotFoundException;

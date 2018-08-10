@@ -14,7 +14,7 @@ package org.polarsys.eplmp.core.exceptions;
 import org.polarsys.eplmp.core.product.PathToPathLink;
 
 import java.text.MessageFormat;
-import java.util.Locale;
+
 
 /**
  *
@@ -29,12 +29,12 @@ public class PathToPathLinkAlreadyExistsException extends EntityAlreadyExistsExc
         mPathToPathLink =null;
     }
 
-    public PathToPathLinkAlreadyExistsException(Locale pLocale, PathToPathLink pPathToPathLink) {
-        this(pLocale, pPathToPathLink, null);
+    public PathToPathLinkAlreadyExistsException(PathToPathLink pPathToPathLink) {
+        this(pPathToPathLink, null);
     }
 
-    public PathToPathLinkAlreadyExistsException(Locale pLocale, PathToPathLink pPathToPathLink, Throwable pCause) {
-        super(pLocale, pCause);
+    public PathToPathLinkAlreadyExistsException(PathToPathLink pPathToPathLink, Throwable pCause) {
+        super( pCause);
         mPathToPathLink = pPathToPathLink;
     }
 

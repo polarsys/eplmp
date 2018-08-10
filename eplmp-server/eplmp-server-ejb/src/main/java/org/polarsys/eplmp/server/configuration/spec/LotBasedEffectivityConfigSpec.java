@@ -34,7 +34,7 @@ public class LotBasedEffectivityConfigSpec extends EffectivityConfigSpec {
      */
     private String lotId;
 
-    private final static Comparator<CharSequence> STRING_COMPARATOR = new AlphanumericComparator();
+    private static final Comparator<CharSequence> STRING_COMPARATOR = new AlphanumericComparator();
 
     public LotBasedEffectivityConfigSpec(String lotId, ConfigurationItem configurationItem) {
         super(configurationItem);

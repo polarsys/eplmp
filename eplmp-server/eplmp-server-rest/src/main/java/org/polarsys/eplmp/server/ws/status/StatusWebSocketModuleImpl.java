@@ -30,9 +30,9 @@ import javax.websocket.Session;
 @StatusWebSocketModule
 public class StatusWebSocketModuleImpl implements WebSocketModule {
 
-    private final static String USER_STATUS = "USER_STATUS";
-    private final static String USER_STATUS_OFFLINE = "USER_STATUS_OFFLINE";
-    private final static String USER_STATUS_ONLINE = "USER_STATUS_ONLINE";
+    private static final String USER_STATUS = "USER_STATUS";
+    private static final String USER_STATUS_OFFLINE = "USER_STATUS_OFFLINE";
+    private static final String USER_STATUS_ONLINE = "USER_STATUS_ONLINE";
     @Inject
     private WebSocketSessionsManager webSocketSessionsManager;
 

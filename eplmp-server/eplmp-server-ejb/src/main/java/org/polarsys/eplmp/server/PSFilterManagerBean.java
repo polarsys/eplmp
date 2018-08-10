@@ -32,16 +32,17 @@ import javax.annotation.security.RolesAllowed;
 import javax.ejb.Local;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 
 @DeclareRoles({UserGroupMapping.REGULAR_USER_ROLE_ID, UserGroupMapping.ADMIN_ROLE_ID})
 @Local(IPSFilterManagerLocal.class)
 @Stateless(name = "PSFilterManagerBean")
 public class PSFilterManagerBean implements IPSFilterManagerLocal {
 
-    @PersistenceContext
-    private EntityManager em;
+    @Inject
+    private ProductBaselineDAO productBaselineDAO;
+
+    @Inject
+    private ProductInstanceMasterDAO productInstanceMasterDAO;
 
     @Inject
     private IUserManagerLocal userManager;
@@ -49,9 +50,8 @@ public class PSFilterManagerBean implements IPSFilterManagerLocal {
     @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
     @Override
     public ProductStructureFilter getBaselinePSFilter(int baselineId) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, BaselineNotFoundException, WorkspaceNotEnabledException {
-        ProductBaselineDAO productBaselineDAO = new ProductBaselineDAO(em);
         ProductBaseline productBaseline = productBaselineDAO.loadBaseline(baselineId);
-        //User user = userManager.checkWorkspaceReadAccess(productBaseline.getConfigurationItem().getWorkspaceId());
+        userManager.checkWorkspaceReadAccess(productBaseline.getConfigurationItem().getWorkspaceId());
         return new ProductBaselineConfigSpec(productBaseline);
     }
 
@@ -60,7 +60,7 @@ public class PSFilterManagerBean implements IPSFilterManagerLocal {
     public ProductStructureFilter getProductInstanceConfigSpec(ConfigurationItemKey ciKey, String serialNumber) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, ProductInstanceMasterNotFoundException, WorkspaceNotEnabledException {
         User user = userManager.checkWorkspaceReadAccess(ciKey.getWorkspace());
         ProductInstanceMasterKey productInstanceMasterKey = new ProductInstanceMasterKey(serialNumber, ciKey);
-        ProductInstanceMaster productIM = new ProductInstanceMasterDAO(em).loadProductInstanceMaster(productInstanceMasterKey);
+        ProductInstanceMaster productIM = productInstanceMasterDAO.loadProductInstanceMaster(productInstanceMasterKey);
         ProductInstanceIteration productII = productIM.getLastIteration();
         return new ProductInstanceConfigSpec(productII, user);
     }

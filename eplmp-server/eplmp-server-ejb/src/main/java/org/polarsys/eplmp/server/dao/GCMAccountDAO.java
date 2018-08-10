@@ -17,46 +17,46 @@ import org.polarsys.eplmp.core.exceptions.GCMAccountAlreadyExistsException;
 import org.polarsys.eplmp.core.exceptions.GCMAccountNotFoundException;
 import org.polarsys.eplmp.core.gcm.GCMAccount;
 
+import javax.enterprise.context.RequestScoped;
+import javax.inject.Inject;
 import javax.persistence.EntityExistsException;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceException;
-import java.util.Locale;
 
+
+@RequestScoped
 public class GCMAccountDAO {
 
+    @Inject
     private EntityManager em;
-    private Locale mLocale;
 
-    public GCMAccountDAO(Locale pLocale, EntityManager pEM) {
-        mLocale=pLocale;
-        em=pEM;
+    public GCMAccountDAO() {
     }
 
-    public GCMAccountDAO(EntityManager pEM) {
-        mLocale=Locale.getDefault();
-        em=pEM;
-    }
-
-    public GCMAccount loadGCMAccount(Account account) throws GCMAccountNotFoundException {
-        GCMAccount gcmAccount = em.find(GCMAccount.class, account.getLogin());
+    public GCMAccount loadGCMAccount(Account pAccount) throws GCMAccountNotFoundException {
+        GCMAccount gcmAccount = em.find(GCMAccount.class, pAccount.getLogin());
         if(gcmAccount == null){
-            throw new GCMAccountNotFoundException(mLocale,account.getLogin());
+            throw new GCMAccountNotFoundException(pAccount.getLogin());
         }
         return gcmAccount;
     }
+    public boolean hasGCMAccount(Account pAccount) {
+        GCMAccount gcmAccount = em.find(GCMAccount.class, pAccount.getLogin());
+        return gcmAccount != null;
+    }
 
-    public void createGCMAccount(GCMAccount gcmAccount) throws GCMAccountAlreadyExistsException, CreationException {
+    public void createGCMAccount(GCMAccount pGMCAccount) throws GCMAccountAlreadyExistsException, CreationException {
         try{
             //the EntityExistsException is thrown only when flush occurs
-            em.persist(gcmAccount);
+            em.persist(pGMCAccount);
             em.flush();
         }catch(EntityExistsException pEEEx){
-            throw new GCMAccountAlreadyExistsException(mLocale, gcmAccount.getAccount().getLogin());
+            throw new GCMAccountAlreadyExistsException(pGMCAccount.getAccount().getLogin());
         }catch(PersistenceException pPEx){
             //EntityExistsException is case sensitive
             //whereas MySQL is not thus PersistenceException could be
             //thrown instead of EntityExistsException
-            throw new CreationException(mLocale);
+            throw new CreationException();
         }
     }
 

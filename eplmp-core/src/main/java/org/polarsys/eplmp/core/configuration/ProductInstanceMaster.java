@@ -98,9 +98,6 @@ public class ProductInstanceMaster implements Serializable {
         this.productInstanceIterations.add(productInstanceIteration);
         return productInstanceIteration;
     }
-    public void removeIteration(ProductInstanceIteration prodInstI){
-        this.productInstanceIterations.remove(prodInstI);
-    }
 
     public ProductInstanceIteration getLastIteration() {
         int index = productInstanceIterations.size()-1;

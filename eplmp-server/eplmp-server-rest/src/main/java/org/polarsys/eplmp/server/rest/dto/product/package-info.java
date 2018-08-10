@@ -10,7 +10,8 @@
   *******************************************************************************/
 
 /**
- * @author kelto on 01/06/15.
+ * @author Charles Fallourd
+ * @version 2.5, 01/06/15
  */
 @XmlJavaTypeAdapter(value = DateAdapter.class, type = Date.class) package org.polarsys.eplmp.server.rest.dto.product;
 

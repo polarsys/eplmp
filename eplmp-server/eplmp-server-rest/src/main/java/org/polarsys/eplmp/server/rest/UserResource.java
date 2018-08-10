@@ -10,9 +10,15 @@
   *******************************************************************************/
 package org.polarsys.eplmp.server.rest;
 
+import io.swagger.annotations.*;
+import org.dozer.DozerBeanMapperSingletonWrapper;
+import org.dozer.Mapper;
 import org.polarsys.eplmp.core.common.User;
 import org.polarsys.eplmp.core.common.Workspace;
-import org.polarsys.eplmp.core.exceptions.*;
+import org.polarsys.eplmp.core.exceptions.AccessRightException;
+import org.polarsys.eplmp.core.exceptions.EntityNotFoundException;
+import org.polarsys.eplmp.core.exceptions.UserNotActiveException;
+import org.polarsys.eplmp.core.exceptions.WorkspaceNotEnabledException;
 import org.polarsys.eplmp.core.notification.TagUserSubscription;
 import org.polarsys.eplmp.core.security.UserGroupMapping;
 import org.polarsys.eplmp.core.services.INotificationManagerLocal;
@@ -20,9 +26,6 @@ import org.polarsys.eplmp.core.services.IUserManagerLocal;
 import org.polarsys.eplmp.core.services.IWorkspaceManagerLocal;
 import org.polarsys.eplmp.server.rest.dto.TagSubscriptionDTO;
 import org.polarsys.eplmp.server.rest.dto.UserDTO;
-import io.swagger.annotations.*;
-import org.dozer.DozerBeanMapperSingletonWrapper;
-import org.dozer.Mapper;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.security.DeclareRoles;
@@ -32,15 +35,12 @@ import javax.inject.Inject;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.io.UnsupportedEncodingException;
-import java.net.URI;
-import java.net.URLEncoder;
 import java.util.List;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 @RequestScoped
-@Api(hidden = true, value = "users", description = "Operations about users")
+@Api(hidden = true, value = "users", description = "Operations about users",
+        authorizations = {@Authorization(value = "authorization")})
 @DeclareRoles(UserGroupMapping.REGULAR_USER_ROLE_ID)
 @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
 public class UserResource {
@@ -68,18 +68,19 @@ public class UserResource {
     }
 
     @GET
-    @ApiOperation(value = "Get users",
+    @ApiOperation(value = "Get users in workspace",
             response = UserDTO.class,
             responseContainer = "List")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of UserDTOs. It can be an empty list."),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Produces(MediaType.APPLICATION_JSON)
     public UserDTO[] getUsersInWorkspace(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId)
-            throws EntityNotFoundException, AccessRightException, UserNotActiveException {
+            throws EntityNotFoundException, AccessRightException, UserNotActiveException, WorkspaceNotEnabledException {
 
         User[] users = userManager.getUsers(workspaceId);
         UserDTO[] userDTOs = new UserDTO[users.length];
@@ -92,18 +93,19 @@ public class UserResource {
     }
 
     @GET
-    @ApiOperation(value = "Get current user details",
+    @ApiOperation(value = "Get authenticated user details",
             response = UserDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of UserDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("me")
     @Produces(MediaType.APPLICATION_JSON)
     public UserDTO whoAmI(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId)
-            throws EntityNotFoundException, UserNotActiveException {
+            throws EntityNotFoundException, UserNotActiveException, WorkspaceNotEnabledException {
 
         User user = userManager.whoAmI(workspaceId);
         return mapper.map(user, UserDTO.class);
@@ -115,13 +117,14 @@ public class UserResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of UserDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("admin")
     @Produces(MediaType.APPLICATION_JSON)
     public UserDTO getAdminInWorkspace(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId)
-            throws EntityNotFoundException {
+            throws EntityNotFoundException, UserNotActiveException, WorkspaceNotEnabledException {
 
         Workspace workspace = workspaceManager.getWorkspace(workspaceId);
         UserDTO userDTO = mapper.map(workspace.getAdmin(), UserDTO.class);
@@ -144,8 +147,7 @@ public class UserResource {
     public TagSubscriptionDTO[] getTagSubscriptionsForUser(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "User login") @PathParam("login") String login)
-            throws UserNotFoundException, AccessRightException, UserNotActiveException,
-            WorkspaceNotFoundException, WorkspaceNotEnabledException {
+            throws  AccessRightException, UserNotActiveException, EntityNotFoundException, WorkspaceNotEnabledException {
 
         List<TagUserSubscription> subs = notificationManager.getTagUserSubscriptionsByUser(workspaceId, login);
 
@@ -162,6 +164,7 @@ public class UserResource {
     @ApiResponses(value = {
             @ApiResponse(code = 201, message = "Successful retrieval of created/updated TagSubscriptionDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{login}/tag-subscriptions/{tagName}")
@@ -172,7 +175,7 @@ public class UserResource {
             @ApiParam(required = true, value = "User login") @PathParam("login") String login,
             @ApiParam(required = true, value = "Tag name") @PathParam("tagName") String tagName,
             @ApiParam(required = true, value = "Tag subscription to update or create") TagSubscriptionDTO subDTO)
-            throws EntityNotFoundException, AccessRightException, UserNotActiveException {
+            throws EntityNotFoundException, AccessRightException, UserNotActiveException, WorkspaceNotEnabledException {
 
         notificationManager.createOrUpdateTagUserSubscription(workspaceId,
                 login,
@@ -180,12 +183,8 @@ public class UserResource {
                 subDTO.isOnIterationChange(),
                 subDTO.isOnStateChange());
         subDTO.setTag(tagName);
-        try {
-            return Response.created(URI.create(URLEncoder.encode(tagName, "UTF-8"))).entity(subDTO).build();
-        } catch (UnsupportedEncodingException ex) {
-            LOGGER.log(Level.WARNING, null, ex);
-            return Response.ok().entity(subDTO).build();
-        }
+
+        return Tools.prepareCreatedResponse(tagName, subDTO);
     }
 
     @DELETE
@@ -194,6 +193,7 @@ public class UserResource {
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful deletion of TagSubscriptionDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{login}/tag-subscriptions/{tagName}")
@@ -202,8 +202,7 @@ public class UserResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "User login") @PathParam("login") String login,
             @ApiParam(required = true, value = "Tag name") @PathParam("tagName") String tagName)
-            throws UserNotFoundException, AccessRightException, UserNotActiveException,
-            WorkspaceNotFoundException, WorkspaceNotEnabledException {
+            throws EntityNotFoundException, AccessRightException, UserNotActiveException, WorkspaceNotEnabledException {
 
         notificationManager.removeTagUserSubscription(workspaceId, login, tagName);
         return Response.noContent().build();

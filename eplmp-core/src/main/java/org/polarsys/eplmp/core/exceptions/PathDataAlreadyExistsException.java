@@ -14,7 +14,7 @@ package org.polarsys.eplmp.core.exceptions;
 import org.polarsys.eplmp.core.configuration.PathDataMaster;
 
 import java.text.MessageFormat;
-import java.util.Locale;
+
 
 /**
  *
@@ -30,12 +30,12 @@ public class PathDataAlreadyExistsException extends EntityAlreadyExistsException
     }
 
 
-    public PathDataAlreadyExistsException(Locale pLocale, PathDataMaster pPathDataMaster) {
-        this(pLocale, pPathDataMaster, null);
+    public PathDataAlreadyExistsException(PathDataMaster pPathDataMaster) {
+        this(pPathDataMaster, null);
     }
 
-    public PathDataAlreadyExistsException(Locale pLocale, PathDataMaster pPathDataMaster, Throwable pCause) {
-        super(pLocale, pCause);
+    public PathDataAlreadyExistsException(PathDataMaster pPathDataMaster, Throwable pCause) {
+        super( pCause);
         pathDataMaster = pPathDataMaster;
     }
 

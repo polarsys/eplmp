@@ -14,7 +14,7 @@ package org.polarsys.eplmp.core.exceptions;
 import org.polarsys.eplmp.core.product.PartRevision;
 
 import java.text.MessageFormat;
-import java.util.Locale;
+
 
 /**
  *
@@ -30,12 +30,12 @@ public class PartRevisionAlreadyExistsException extends EntityAlreadyExistsExcep
     }
 
 
-    public PartRevisionAlreadyExistsException(Locale pLocale, PartRevision pPartR) {
-        this(pLocale, pPartR, null);
+    public PartRevisionAlreadyExistsException(PartRevision pPartR) {
+        this(pPartR, null);
     }
 
-    public PartRevisionAlreadyExistsException(Locale pLocale, PartRevision pPartR, Throwable pCause) {
-        super(pLocale, pCause);
+    public PartRevisionAlreadyExistsException(PartRevision pPartR, Throwable pCause) {
+        super( pCause);
         mPartR=pPartR;
     }
 

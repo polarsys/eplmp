@@ -1,13 +1,14 @@
 /*******************************************************************************
- * Copyright (c) 2017 DocDoku.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
- * <p>
- * Contributors:
- * DocDoku - initial API and implementation
- *******************************************************************************/
+  * Copyright (c) 2017 DocDoku.
+  * All rights reserved. This program and the accompanying materials
+  * are made available under the terms of the Eclipse Public License v1.0
+  * which accompanies this distribution, and is available at
+  * http://www.eclipse.org/legal/epl-v10.html
+  *
+  * Contributors:
+  *    DocDoku - initial API and implementation
+  *******************************************************************************/
+
 package org.polarsys.eplmp.server.dao;
 
 import org.polarsys.eplmp.core.common.Account;
@@ -16,30 +17,26 @@ import org.polarsys.eplmp.core.common.ProvidedAccount;
 import org.polarsys.eplmp.core.exceptions.OAuthProviderNotFoundException;
 import org.polarsys.eplmp.core.exceptions.ProvidedAccountNotFoundException;
 
+import javax.enterprise.context.RequestScoped;
+import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import java.util.List;
-import java.util.Locale;
 
+
+@RequestScoped
 public class OAuthProviderDAO {
 
+    @Inject
     private EntityManager em;
-    private Locale mLocale;
 
-    public OAuthProviderDAO(Locale pLocale, EntityManager pEM) {
-        em = pEM;
-        mLocale = pLocale;
+    public OAuthProviderDAO() {
     }
 
-    public OAuthProviderDAO(EntityManager pEM) {
-        em = pEM;
-        mLocale = Locale.getDefault();
-    }
-
-    public OAuthProvider findProvider(int id) throws OAuthProviderNotFoundException {
-        OAuthProvider oAuthProvider = em.find(OAuthProvider.class, id);
+    public OAuthProvider findProvider(int pId) throws OAuthProviderNotFoundException {
+        OAuthProvider oAuthProvider = em.find(OAuthProvider.class, pId);
         if (oAuthProvider == null) {
-            throw new OAuthProviderNotFoundException(mLocale, id);
+            throw new OAuthProviderNotFoundException(pId);
         }
         return oAuthProvider;
     }
@@ -68,7 +65,7 @@ public class OAuthProviderDAO {
                     .setParameter("sub", sub)
                     .getSingleResult();
         } catch (NoResultException e) {
-            throw new ProvidedAccountNotFoundException(Locale.getDefault(), sub);
+            throw new ProvidedAccountNotFoundException(sub);
         }
     }
 
@@ -78,7 +75,7 @@ public class OAuthProviderDAO {
                     .setParameter("account", account)
                     .getSingleResult();
         } catch (NoResultException e) {
-            throw new ProvidedAccountNotFoundException(Locale.getDefault(), account.getLogin());
+            throw new ProvidedAccountNotFoundException(account.getLogin());
         }
     }
 

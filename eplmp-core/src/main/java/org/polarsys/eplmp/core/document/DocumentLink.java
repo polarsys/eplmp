@@ -122,8 +122,6 @@ public class DocumentLink implements Serializable, Cloneable{
         this.targetDocumentWorkspaceId = targetDocumentWorkspaceId;
     }
 
-    
-
     public void setTargetDocument(DocumentRevision targetDocument) {
         this.targetDocument = targetDocument;
         targetDocumentMasterId =targetDocument.getId();
@@ -131,6 +129,9 @@ public class DocumentLink implements Serializable, Cloneable{
         targetDocumentWorkspaceId=targetDocument.getWorkspaceId();
     }
 
+    public void removeTargetDocument() {
+        this.targetDocument = null;
+    }
     
     @Override
     public String toString() {

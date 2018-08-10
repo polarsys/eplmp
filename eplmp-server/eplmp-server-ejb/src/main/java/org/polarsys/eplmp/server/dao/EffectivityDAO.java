@@ -17,28 +17,25 @@ import org.polarsys.eplmp.core.exceptions.EffectivityNotFoundException;
 import org.polarsys.eplmp.core.product.Effectivity;
 import org.polarsys.eplmp.core.product.PartRevision;
 
+import javax.enterprise.context.RequestScoped;
+import javax.inject.Inject;
 import javax.persistence.*;
 import java.util.List;
-import java.util.Locale;
 
+
+@RequestScoped
 public class EffectivityDAO {
+
+    @Inject
     private EntityManager em;
-    private Locale mLocale;
 
-    public EffectivityDAO(EntityManager pEM) {
-        em = pEM;
-        mLocale = Locale.getDefault();
-    }
-
-    public EffectivityDAO(Locale locale, EntityManager pEM) {
-        em = pEM;
-        mLocale = locale;
+    public EffectivityDAO() {
     }
 
     public Effectivity loadEffectivity(int pId) throws EffectivityNotFoundException {
         Effectivity effectivity = em.find(Effectivity.class, pId);
         if (effectivity == null) {
-            throw new EffectivityNotFoundException(mLocale, String.valueOf(pId));
+            throw new EffectivityNotFoundException(String.valueOf(pId));
         } else {
             return effectivity;
         }
@@ -60,12 +57,12 @@ public class EffectivityDAO {
             em.persist(pEffectivity);
             em.flush();
         } catch (EntityExistsException pEEEx) {
-            throw new EffectivityAlreadyExistsException(mLocale, pEffectivity);
+            throw new EffectivityAlreadyExistsException(pEffectivity);
         } catch (PersistenceException pPEx) {
             //EntityExistsException is case sensitive
             //whereas MySQL is not thus PersistenceException could be
             //thrown instead of EntityExistsException
-            throw new CreationException(mLocale);
+            throw new CreationException();
         }
     }
 

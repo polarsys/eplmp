@@ -1,13 +1,13 @@
 /*******************************************************************************
- * Copyright (c) 2017 DocDoku.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
- * <p>
- * Contributors:
- * DocDoku - initial API and implementation
- *******************************************************************************/
+  * Copyright (c) 2017 DocDoku.
+  * All rights reserved. This program and the accompanying materials
+  * are made available under the terms of the Eclipse Public License v1.0
+  * which accompanies this distribution, and is available at
+  * http://www.eclipse.org/legal/epl-v10.html
+  *
+  * Contributors:
+  *    DocDoku - initial API and implementation
+  *******************************************************************************/
 
 package org.polarsys.eplmp.server;
 
@@ -52,10 +52,13 @@ public class ImporterBean implements IImporterManagerLocal {
 
     @Inject
     private IUserManagerLocal userManager;
+
     @Inject
     private IProductManagerLocal productManager;
+
     @Inject
     private IProductInstanceManagerLocal productInstanceManager;
+
     @Inject
     private ILOVManagerLocal lovManager;
 
@@ -73,17 +76,16 @@ public class ImporterBean implements IImporterManagerLocal {
     @Asynchronous
     @FileImport
     public Future<ImportResult> importIntoParts(String workspaceId, File file, String originalFileName, String revisionNote, boolean autoCheckout, boolean autoCheckin, boolean permissiveUpdate) {
-
+        Locale locale = getLocale(workspaceId);
         PartImporter selectedImporter = selectPartImporter(file);
-        Locale userLocale = getUserLocale(workspaceId);
 
-        Properties properties = PropertiesLoader.loadLocalizedProperties(userLocale, I18N_CONF, ImporterBean.class);
+        Properties properties = PropertiesLoader.loadLocalizedProperties(locale, I18N_CONF, ImporterBean.class);
 
         PartImporterResult partImporterResult;
 
         if (selectedImporter != null) {
             try {
-                partImporterResult = selectedImporter.importFile(userLocale, workspaceId, file, autoCheckout, autoCheckin, permissiveUpdate);
+                partImporterResult = selectedImporter.importFile(locale, workspaceId, file, autoCheckout, autoCheckin, permissiveUpdate);
             } catch (PartImporter.ImporterException e) {
                 LOGGER.log(Level.SEVERE, null, e);
                 List<String> errors = Collections.singletonList(AttributesImporterUtils.createError(properties, "ImporterException", e.getMessage()));
@@ -105,16 +107,15 @@ public class ImporterBean implements IImporterManagerLocal {
 
     @Override
     public ImportPreview dryRunImportIntoParts(String workspaceId, File file, String originalFileName, boolean autoCheckout, boolean autoCheckin, boolean permissiveUpdate) throws ImportPreviewException {
-
+        Locale locale = getLocale(workspaceId);
         PartImporter selectedImporter = selectPartImporter(file);
-        Locale userLocale = getUserLocale(workspaceId);
-        Properties properties = PropertiesLoader.loadLocalizedProperties(userLocale, I18N_CONF, ImporterBean.class);
+        Properties properties = PropertiesLoader.loadLocalizedProperties(locale, I18N_CONF, ImporterBean.class);
 
         PartImporterResult partImporterResult;
 
         if (selectedImporter != null) {
             try {
-                partImporterResult = selectedImporter.importFile(userLocale, workspaceId, file, autoCheckout, autoCheckin, permissiveUpdate);
+                partImporterResult = selectedImporter.importFile(locale, workspaceId, file, autoCheckout, autoCheckin, permissiveUpdate);
             } catch (PartImporter.ImporterException e) {
                 LOGGER.log(Level.SEVERE, null, e);
                 List<String> errors = Collections.singletonList(AttributesImporterUtils.createError(properties, "ImporterException", e.getMessage()));
@@ -153,14 +154,14 @@ public class ImporterBean implements IImporterManagerLocal {
     @Asynchronous
     @FileImport
     public Future<ImportResult> importIntoPathData(String workspaceId, File file, String originalFileName, String revisionNote, boolean autoFreezeAfterUpdate, boolean permissiveUpdate) {
+        Locale locale = getLocale(workspaceId);
         PathDataImporter selectedImporter = selectPathDataImporter(file);
-        Locale userLocale = getUserLocale(workspaceId);
-        Properties properties = PropertiesLoader.loadLocalizedProperties(userLocale, I18N_CONF, ImporterBean.class);
+        Properties properties = PropertiesLoader.loadLocalizedProperties(locale, I18N_CONF, ImporterBean.class);
 
         PathDataImporterResult pathDataImporterResult;
 
         if (selectedImporter != null) {
-            pathDataImporterResult = selectedImporter.importFile(getUserLocale(workspaceId), workspaceId, file, autoFreezeAfterUpdate, permissiveUpdate);
+            pathDataImporterResult = selectedImporter.importFile(locale, workspaceId, file, autoFreezeAfterUpdate, permissiveUpdate);
         } else {
             List<String> errors = getNoImporterAvailableError(properties);
             pathDataImporterResult = new PathDataImporterResult(file, new ArrayList<>(), errors, null, null, null);
@@ -176,16 +177,15 @@ public class ImporterBean implements IImporterManagerLocal {
     @Asynchronous
     @FileImport
     public Future<ImportResult> importBom(String workspaceId, File file, String originalFileName, String revisionNote, boolean autoCheckout, boolean autoCheckin, boolean permissiveUpdate) {
-
+        Locale locale = getLocale(workspaceId);
         BomImporter selectedImporter = selectBomImporter(file);
-        Locale userLocale = getUserLocale(workspaceId);
-        Properties properties = PropertiesLoader.loadLocalizedProperties(userLocale, I18N_CONF, ImporterBean.class);
+        Properties properties = PropertiesLoader.loadLocalizedProperties(locale, I18N_CONF, ImporterBean.class);
 
         BomImporterResult bomImporterResult;
 
         if (selectedImporter != null) {
             try {
-                bomImporterResult = selectedImporter.importFile(getUserLocale(workspaceId), workspaceId, file, autoCheckout, autoCheckin, permissiveUpdate);
+                bomImporterResult = selectedImporter.importFile(locale, workspaceId, file, autoCheckout, autoCheckin, permissiveUpdate);
             } catch (BomImporter.ImporterException e) {
                 LOGGER.log(Level.SEVERE, null, e);
                 List<String> errors = Collections.singletonList(AttributesImporterUtils.createError(properties, "ImporterException", e.getMessage()));
@@ -200,23 +200,22 @@ public class ImporterBean implements IImporterManagerLocal {
             return new AsyncResult<>(new ImportResult(bomImporterResult.getImportedFile(), bomImporterResult.getWarnings(), bomImporterResult.getErrors()));
         }
 
-        ImportResult result = doBomImport(properties, workspaceId, getUser(workspaceId), userLocale, revisionNote, autoCheckin, autoCheckout, permissiveUpdate, bomImporterResult);
+        ImportResult result = doBomImport(properties, workspaceId, getUser(workspaceId), revisionNote, autoCheckin, autoCheckout, permissiveUpdate, bomImporterResult);
         return new AsyncResult<>(result);
     }
 
 
     @Override
     public ImportPreview dryRunImportBom(String workspaceId, File file, String originalFileName, boolean autoCheckout, boolean autoCheckin, boolean permissiveUpdate) throws ImportPreviewException {
-
+        Locale locale = getLocale(workspaceId);
         BomImporter selectedImporter = selectBomImporter(file);
-        Locale userLocale = getUserLocale(workspaceId);
-        Properties properties = PropertiesLoader.loadLocalizedProperties(userLocale, I18N_CONF, ImporterBean.class);
+        Properties properties = PropertiesLoader.loadLocalizedProperties(locale, I18N_CONF, ImporterBean.class);
 
         BomImporterResult bomImporterResult;
 
         if (selectedImporter != null) {
             try {
-                bomImporterResult = selectedImporter.importFile(getUserLocale(workspaceId), workspaceId, file, autoCheckout, autoCheckin, permissiveUpdate);
+                bomImporterResult = selectedImporter.importFile(locale, workspaceId, file, autoCheckout, autoCheckin, permissiveUpdate);
             } catch (BomImporter.ImporterException e) {
                 LOGGER.log(Level.SEVERE, null, e);
                 List<String> errors = Collections.singletonList(AttributesImporterUtils.createError(properties, "ImporterException", e.getMessage()));
@@ -279,16 +278,9 @@ public class ImporterBean implements IImporterManagerLocal {
         return user;
     }
 
-    private Locale getUserLocale(String workspaceId) {
-        Locale locale;
-        try {
-            User user = userManager.whoAmI(workspaceId);
-            locale = new Locale(user.getLanguage());
-        } catch (ApplicationException e) {
-            LOGGER.log(Level.SEVERE, "Cannot fetch account info", e);
-            locale = Locale.getDefault();
-        }
-        return locale;
+    private Locale getLocale(String workspaceId) {
+        User user = getUser(workspaceId);
+        return user != null ? user.getLocale() : Locale.getDefault();
     }
 
     private PartImporter selectPartImporter(File file) {
@@ -407,20 +399,20 @@ public class ImporterBean implements IImporterManagerLocal {
 
         try {
             bulkPartUpdate(listParts, workspaceId, autoCheckout, autoCheckin, permissiveUpdate, errors, warnings);
-        } catch (Exception e) {
+        } catch (ApplicationException e) {
             LOGGER.log(Level.WARNING, null, e);
             errors.add("Unhandled exception");
         }
         return new ImportResult(partImporterResult.getImportedFile(), warnings, errors);
     }
 
-    public void bulkPartUpdate(List<PartToImport> parts, String workspaceId, boolean autoCheckout, boolean autoCheckin, boolean permissive, List<String> errors, List<String> warnings) throws Exception {
+    public void bulkPartUpdate(List<PartToImport> parts, String workspaceId, boolean autoCheckout, boolean autoCheckin, boolean permissive, List<String> errors, List<String> warnings) throws ApplicationException {
 
         LOGGER.log(Level.INFO, "Bulk parts update");
         User user = userManager.checkWorkspaceReadAccess(workspaceId);
 
-        boolean errorOccured = false;
-        Exception exception = null;
+        boolean errorOccurred = false;
+        ApplicationException exception = null;
 
         for (PartToImport part : parts) {
             PartIteration partIteration = part.getPartIteration();
@@ -444,7 +436,7 @@ public class ImporterBean implements IImporterManagerLocal {
                     }
                     productManager.updatePartIteration(partIteration.getKey(), part.getRevisionNote(), partIteration.getSource(), null, part.getInstanceAttributes(), null, null, null, null);
                 } else {
-                    throw new NotAllowedException(new Locale(user.getLanguage()), "NotAllowedException25", partIteration.getPartRevision().toString());
+                    throw new NotAllowedException("NotAllowedException25", partIteration.getPartRevision().toString());
                 }
 
                 //CheckIn if checkout before
@@ -459,7 +451,7 @@ public class ImporterBean implements IImporterManagerLocal {
             } catch (CreationException | PartMasterNotFoundException | EntityConstraintException | UserNotFoundException | WorkspaceNotFoundException | UserNotActiveException | PartUsageLinkNotFoundException | PartRevisionNotFoundException | AccessRightException | FileAlreadyExistsException e) {
                 LOGGER.log(Level.WARNING, null, e);
                 errors.add(e.getLocalizedMessage() + ": " + partIteration.getNumber());
-                errorOccured = true;
+                errorOccurred = true;
                 exception = e;
 
             } catch (NotAllowedException e) {
@@ -468,7 +460,7 @@ public class ImporterBean implements IImporterManagerLocal {
                     warnings.add(e.getLocalizedMessage());
                 } else {
                     errors.add(e.getLocalizedMessage());
-                    errorOccured = true;
+                    errorOccurred = true;
                     exception = e;
                 }
             }
@@ -476,7 +468,7 @@ public class ImporterBean implements IImporterManagerLocal {
 
         LOGGER.log(Level.INFO, "Bulk parts update finished");
 
-        if (errorOccured) {
+        if (errorOccurred) {
             throw exception;
         }
     }
@@ -519,12 +511,7 @@ public class ImporterBean implements IImporterManagerLocal {
             // Cache hack start //
             String productId = pathData.getProductId();
             String serialNUmber = pathData.getSerialNumber();
-            Map<String, Boolean> productAccess = instancesAccess.get(productId);
-
-            if (productAccess == null) {
-                productAccess = new HashMap<>();
-                instancesAccess.put(productId, productAccess);
-            }
+            Map<String, Boolean> productAccess = instancesAccess.computeIfAbsent(productId, k -> new HashMap<>());
 
             Boolean hasInstanceAccess = productAccess.get(serialNUmber);
             if (hasInstanceAccess == null) {
@@ -534,11 +521,7 @@ public class ImporterBean implements IImporterManagerLocal {
 
             ProductInstanceIteration productInstanceIteration = null;
             if (hasInstanceAccess) {
-                Map<String, ProductInstanceIteration> cache = productInstancesCache.get(productId);
-                if (cache == null) {
-                    cache = new HashMap<>();
-                    productInstancesCache.put(productId, cache);
-                }
+                Map<String, ProductInstanceIteration> cache = productInstancesCache.computeIfAbsent(productId, k -> new HashMap<>());
 
                 productInstanceIteration = cache.get(serialNUmber);
 
@@ -551,8 +534,8 @@ public class ImporterBean implements IImporterManagerLocal {
             }
 
             // Cache hack end //
-
-            if (!pathData.getAttributes().isEmpty() && (!permissiveUpdate || (permissiveUpdate && hasInstanceAccess))) {
+            // hasInstanceAccess is always true when productInstanceIteration is not null
+            if (null != productInstanceIteration && !pathData.getAttributes().isEmpty()) {
 
                 // 2 Possibilities : PathDataMasterId null => create new Path Data, not null => update PathData
                 PathDataMaster currentPathDataMaster = findPathDataMaster(productInstanceIteration, pathData.getPath());
@@ -662,7 +645,7 @@ public class ImporterBean implements IImporterManagerLocal {
     }
 
 
-    private ImportResult doBomImport(Properties properties, String workspaceId, User user, Locale locale, String revisionNote, boolean autoCheckin, boolean autoCheckout, boolean permissiveUpdate, BomImporterResult bomImporterResult) {
+    private ImportResult doBomImport(Properties properties, String workspaceId, User user, String revisionNote, boolean autoCheckin, boolean autoCheckout, boolean permissiveUpdate, BomImporterResult bomImporterResult) {
 
         List<String> errors = new ArrayList<>();
         List<String> warnings = new ArrayList<>();
@@ -703,7 +686,7 @@ public class ImporterBean implements IImporterManagerLocal {
                         // Ignore lock by someone else, next bucket
                         continue;
                     } else {
-                        errors.add(new NotAllowedException(locale, "NotAllowedException37").getMessage());
+                        errors.add(new NotAllowedException("NotAllowedException37").getMessage());
                         return new ImportResult(file, warnings, errors);
                     }
 
@@ -713,7 +696,7 @@ public class ImporterBean implements IImporterManagerLocal {
                         parentPartLastRevision = productManager.checkOutPart(parentPartLastRevision.getKey());
                         parentPartLastIteration = parentPartLastRevision.getLastIteration();
                     } else if (!permissiveUpdate) {
-                        errors.add(new NotAllowedException(locale, "NotAllowedException25", parentPartNumber).getMessage());
+                        errors.add(new NotAllowedException("NotAllowedException25", parentPartNumber).getMessage());
                         return new ImportResult(file, warnings, errors);
                     } else { // permissive update
                         continue;
@@ -748,7 +731,8 @@ public class ImporterBean implements IImporterManagerLocal {
         return null;
     }
 
-    private PartMaster getOrCreatePartMaster(Properties properties, List<String> errors, String workspaceId, Set<PartRevisionKey> toCheckin, String partNumber, PartToImport bomRow, String revisionNote, boolean autoCheckin) throws UserNotFoundException, WorkspaceNotFoundException, UserNotActiveException, WorkspaceNotEnabledException, PartMasterNotFoundException, PartMasterAlreadyExistsException, PartMasterTemplateNotFoundException, FileAlreadyExistsException, NotAllowedException, UserGroupNotFoundException, RoleNotFoundException, WorkflowModelNotFoundException, AccessRightException, CreationException, PartRevisionNotFoundException, ListOfValuesNotFoundException, DocumentRevisionNotFoundException, PartUsageLinkNotFoundException, EntityConstraintException {
+    private PartMaster getOrCreatePartMaster(Properties properties, List<String> errors, String workspaceId, Set<PartRevisionKey> toCheckin, String partNumber, PartToImport bomRow, String revisionNote, boolean autoCheckin)
+            throws UserNotFoundException, WorkspaceNotFoundException, UserNotActiveException, WorkspaceNotEnabledException, PartMasterNotFoundException, PartMasterAlreadyExistsException, PartMasterTemplateNotFoundException, FileAlreadyExistsException, NotAllowedException, UserGroupNotFoundException, RoleNotFoundException, WorkflowModelNotFoundException, AccessRightException, CreationException, PartRevisionNotFoundException, ListOfValuesNotFoundException, DocumentRevisionNotFoundException, PartUsageLinkNotFoundException, EntityConstraintException {
 
         PartMaster partMaster;
         PartMasterKey partMasterKey = new PartMasterKey(workspaceId, partNumber);

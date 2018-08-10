@@ -10,36 +10,31 @@
   *******************************************************************************/
 package org.polarsys.eplmp.server.rest;
 
-import org.polarsys.eplmp.core.security.UserGroupMapping;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import org.polarsys.eplmp.server.rest.dto.StringListDTO;
 
-import javax.annotation.security.DeclareRoles;
-import javax.annotation.security.RolesAllowed;
 import javax.enterprise.context.RequestScoped;
-import javax.json.Json;
-import javax.json.JsonArrayBuilder;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import java.util.Collections;
 import java.util.TimeZone;
 
 @RequestScoped
 @Path("timezones")
-@Api(value = "timezone", description = "Operations about timezones")
-@DeclareRoles({UserGroupMapping.REGULAR_USER_ROLE_ID, UserGroupMapping.ADMIN_ROLE_ID})
-@RolesAllowed({UserGroupMapping.REGULAR_USER_ROLE_ID, UserGroupMapping.ADMIN_ROLE_ID})
+@Api(value = "timezone", description = "Operations about timezones",
+        authorizations = {})
 public class TimeZoneResource {
 
     public TimeZoneResource() {
     }
 
     @GET
-    @ApiOperation(value = "Get timezones",
+    @ApiOperation(value = "Get supported timezones",
             response = String.class,
             responseContainer = "List")
     @ApiResponses(value = {
@@ -48,12 +43,10 @@ public class TimeZoneResource {
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getTimeZones() {
-        JsonArrayBuilder arrayBuilder = Json.createArrayBuilder();
-        for (String timeZone : TimeZone.getAvailableIDs()) {
-            arrayBuilder.add(timeZone);
-        }
-        return Response.ok().entity(arrayBuilder.build()).build();
+    public StringListDTO getTimeZones() {
+        StringListDTO timeZones = new StringListDTO();
+        Collections.addAll(timeZones, TimeZone.getAvailableIDs());
+        return timeZones;
     }
 
 }

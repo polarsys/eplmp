@@ -19,15 +19,18 @@ import java.io.Serializable;
 import java.util.Date;
 
 @XmlRootElement
-@ApiModel(value="BinaryResourceDTO", description="This class is the representation of an {@link org.polarsys.eplmp.core.common.BinaryResource} entity")
+@ApiModel(value="BinaryResourceDTO", description="This class is the representation of a {@link org.polarsys.eplmp.core.common.BinaryResource} entity")
 public class BinaryResourceDTO implements Serializable {
 
     @ApiModelProperty(value = "Resource full path")
     private String fullName;
+
     @ApiModelProperty(value = "Resource name")
     private String name;
+
     @ApiModelProperty(value = "Resource size")
     private long contentLength;
+
     @ApiModelProperty(value = "Resource last modification date")
     private Date lastModified;
 

@@ -12,42 +12,42 @@
 package org.polarsys.eplmp.server.dao;
 
 import org.polarsys.eplmp.core.document.DocumentRevision;
-import org.polarsys.eplmp.core.meta.Folder;
 import org.polarsys.eplmp.core.exceptions.CreationException;
 import org.polarsys.eplmp.core.exceptions.EntityConstraintException;
 import org.polarsys.eplmp.core.exceptions.FolderAlreadyExistsException;
 import org.polarsys.eplmp.core.exceptions.FolderNotFoundException;
+import org.polarsys.eplmp.core.meta.Folder;
 
+import javax.enterprise.context.RequestScoped;
+import javax.inject.Inject;
 import javax.persistence.EntityExistsException;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceException;
 import javax.persistence.TypedQuery;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+@RequestScoped
 public class FolderDAO {
-    
+
+    @Inject
     private EntityManager em;
-    private Locale mLocale;
+
+    @Inject
+    private DocumentRevisionDAO documentRevisionDAO;
+
     private static final Logger LOGGER = Logger.getLogger(FolderDAO.class.getName());
     
-    public FolderDAO(Locale pLocale, EntityManager pEM) {
-        em = pEM;
-        mLocale=pLocale;
-    }
-    
-    public FolderDAO(EntityManager pEM) {
-        em = pEM;
-        mLocale=Locale.getDefault();
+    public FolderDAO() {
+
     }
     
     public Folder loadFolder(String pCompletePath) throws FolderNotFoundException {
         Folder folder = em.find(Folder.class,pCompletePath);
         if (folder == null) {
-            throw new FolderNotFoundException(mLocale, pCompletePath);
+            throw new FolderNotFoundException(pCompletePath);
         } else {
             return folder;
         }
@@ -60,13 +60,13 @@ public class FolderDAO {
             em.flush();
         }catch(EntityExistsException pEEEx){
             LOGGER.log(Level.FINEST,null,pEEEx);
-            throw new FolderAlreadyExistsException(mLocale, pFolder);
+            throw new FolderAlreadyExistsException(pFolder);
         }catch(PersistenceException pPEx){
             //EntityExistsException is case sensitive
             //whereas MySQL is not thus PersistenceException could be
             //thrown instead of EntityExistsException
             LOGGER.log(Level.FINEST,null,pPEx);
-            throw new CreationException(mLocale);
+            throw new CreationException();
         }
     }
     
@@ -90,12 +90,12 @@ public class FolderDAO {
     public void removeFolder(String pCompletePath) throws FolderNotFoundException, EntityConstraintException {
         Folder folder = em.find(Folder.class,pCompletePath);
         if(folder==null) {
-            throw new FolderNotFoundException(mLocale, pCompletePath);
+            throw new FolderNotFoundException(pCompletePath);
         }
         
         removeFolder(folder);
     }
-    
+
     public void removeFolder(Folder pFolder) throws EntityConstraintException {
         Folder[] subFolders = getSubFolders(pFolder);
         for(Folder subFolder:subFolders) {
@@ -109,9 +109,8 @@ public class FolderDAO {
     }
 
     public List<DocumentRevision> moveFolder(Folder pFolder, Folder pNewFolder) throws FolderAlreadyExistsException, CreationException{
-        DocumentRevisionDAO docRDAO=new DocumentRevisionDAO(mLocale,em);
         List<DocumentRevision> allDocRs = new LinkedList<>();
-        List<DocumentRevision> docRs = docRDAO.findDocRsByFolder(pFolder.getCompletePath());
+        List<DocumentRevision> docRs = documentRevisionDAO.findDocRsByFolder(pFolder.getCompletePath());
         allDocRs.addAll(docRs);
 
         for(DocumentRevision docR:allDocRs){
@@ -133,9 +132,8 @@ public class FolderDAO {
     }
 
     public List<DocumentRevision> findDocumentRevisionsInFolder(Folder pFolder) {
-        DocumentRevisionDAO docRDAO = new DocumentRevisionDAO(mLocale, em);
         List<DocumentRevision> allDocRs = new LinkedList<>();
-        List<DocumentRevision> docRs = docRDAO.findDocRsByFolder(pFolder.getCompletePath());
+        List<DocumentRevision> docRs = documentRevisionDAO.findDocRsByFolder(pFolder.getCompletePath());
         allDocRs.addAll(docRs);
 
         Folder[] subFolders = getSubFolders(pFolder);

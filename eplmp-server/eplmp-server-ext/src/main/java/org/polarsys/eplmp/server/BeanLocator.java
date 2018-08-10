@@ -43,7 +43,7 @@ public class BeanLocator {
             InitialContext context = new InitialContext();
             Context ctx = (Context) context.lookup("java:global");
             result.addAll(search(type, ctx));
-        } catch (NamingException e) {
+        } catch (Exception e) {
             LOGGER.log(Level.SEVERE, null, e);
         }
 
@@ -80,11 +80,11 @@ public class BeanLocator {
                         result.addAll(search(type, (Context) o));
                     }
                     // else ignore this object
-                } catch (NamingException e) {
+                } catch (Exception e) {
                     LOGGER.log(Level.INFO, "Ignoring JNDI entry: " + e.getMessage());
                 }
             }
-        } catch (NamingException e) {
+        } catch (Exception e) {
             LOGGER.log(Level.SEVERE, e.getMessage(), e);
         }
         return result;

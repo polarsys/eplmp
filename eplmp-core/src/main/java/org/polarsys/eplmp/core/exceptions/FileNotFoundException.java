@@ -12,7 +12,7 @@
 package org.polarsys.eplmp.core.exceptions;
 
 import java.text.MessageFormat;
-import java.util.Locale;
+
 
 /**
  *
@@ -21,13 +21,8 @@ import java.util.Locale;
 public class FileNotFoundException extends EntityNotFoundException {
     private final String mFullName;
     
-    public FileNotFoundException(String pMessage) {
-        super(pMessage);
-        mFullName=null;
-    }
-    
-    public FileNotFoundException(Locale pLocale, String pFullName) {
-        super(pLocale);
+    public FileNotFoundException(String pFullName) {
+        super();
         mFullName=pFullName;
     }
 

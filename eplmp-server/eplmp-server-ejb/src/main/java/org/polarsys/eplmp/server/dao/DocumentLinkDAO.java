@@ -18,23 +18,19 @@ import org.polarsys.eplmp.core.document.DocumentLink;
 import org.polarsys.eplmp.core.document.DocumentRevision;
 import org.polarsys.eplmp.core.product.PartIteration;
 
+import javax.enterprise.context.RequestScoped;
+import javax.inject.Inject;
 import javax.persistence.EntityExistsException;
 import javax.persistence.EntityManager;
 import java.util.List;
-import java.util.Locale;
 
-
+@RequestScoped
 public class DocumentLinkDAO {
 
+    public static final String DOCUMENT_REVISION = "documentRevision";
+
+    @Inject
     private EntityManager em;
-
-    public DocumentLinkDAO(Locale pLocale, EntityManager pEM) {
-        em = pEM;
-    }
-
-    public void removeLink(DocumentLink pLink){
-        em.remove(pLink);
-    }
 
     public void createLink(DocumentLink pLink){
         try{
@@ -48,23 +44,23 @@ public class DocumentLinkDAO {
 
     public List<DocumentIteration> getInverseDocumentsLinks(DocumentRevision documentRevision){
         return em.createNamedQuery("DocumentLink.findInverseDocumentLinks",DocumentIteration.class)
-                .setParameter("documentRevision",documentRevision)
+                .setParameter(DOCUMENT_REVISION,documentRevision)
                 .getResultList();
     }
 
     public List<PartIteration> getInversePartsLinks(DocumentRevision documentRevision){
         return em.createNamedQuery("DocumentLink.findInversePartLinks",PartIteration.class)
-                .setParameter("documentRevision",documentRevision)
+                .setParameter(DOCUMENT_REVISION,documentRevision)
                 .getResultList();
     }
     public List<ProductInstanceIteration> getInverseProductInstanceIteration(DocumentRevision documentRevision){
         return em.createNamedQuery("DocumentLink.findProductInstanceIteration", ProductInstanceIteration.class)
-                .setParameter("documentRevision",documentRevision)
+                .setParameter(DOCUMENT_REVISION,documentRevision)
                 .getResultList();
     }
     public List<PathDataIteration> getInversefindPathData(DocumentRevision documentRevision){
         return em.createNamedQuery("DocumentLink.findPathData", PathDataIteration.class)
-                .setParameter("documentRevision",documentRevision)
+                .setParameter(DOCUMENT_REVISION,documentRevision)
                 .getResultList();
     }
 

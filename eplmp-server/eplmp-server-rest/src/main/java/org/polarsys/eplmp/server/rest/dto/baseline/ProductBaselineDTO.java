@@ -11,12 +11,12 @@
 
 package org.polarsys.eplmp.server.rest.dto.baseline;
 
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import org.polarsys.eplmp.core.configuration.ProductBaselineType;
 import org.polarsys.eplmp.server.rest.dto.LightPartLinkListDTO;
 import org.polarsys.eplmp.server.rest.dto.PathToPathLinkDTO;
 import org.polarsys.eplmp.server.rest.dto.UserDTO;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
 
 import javax.xml.bind.annotation.XmlRootElement;
 import java.io.Serializable;

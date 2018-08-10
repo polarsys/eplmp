@@ -27,7 +27,7 @@ import java.io.File;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Date;
-import java.util.List;
+
 
 @DeclareRoles(UserGroupMapping.REGULAR_USER_ROLE_ID)
 @Local(IBinaryStorageManagerLocal.class)
@@ -168,8 +168,8 @@ public class BinaryStorageManagerBean implements IBinaryStorageManagerLocal {
     }
 
     @Override
-    public void deleteWorkspaceFolder(String workspaceId, List<BinaryResource> binaryResourcesInWorkspace) throws StorageException {
-        defaultStorageProvider.deleteWorkspaceFolder(workspaceId, binaryResourcesInWorkspace);
+    public void deleteWorkspaceFolder(String workspaceId) throws StorageException {
+        defaultStorageProvider.deleteWorkspaceFolder(workspaceId);
     }
 
 }

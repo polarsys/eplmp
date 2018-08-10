@@ -13,20 +13,16 @@ package org.polarsys.eplmp.server.dao;
 
 import org.polarsys.eplmp.core.document.DocumentIteration;
 
+import javax.enterprise.context.RequestScoped;
+import javax.inject.Inject;
 import javax.persistence.EntityManager;
 
 
+@RequestScoped
 public class DocumentDAO {
 
-    private final EntityManager em;
-
-    public DocumentDAO(EntityManager pEM) {
-        em=pEM;
-    }
-
-    public void updateDoc(DocumentIteration pDoc){
-        em.merge(pDoc);
-    }
+    @Inject
+    private EntityManager em;
 
     public void removeDoc(DocumentIteration pDoc){
         em.remove(pDoc);

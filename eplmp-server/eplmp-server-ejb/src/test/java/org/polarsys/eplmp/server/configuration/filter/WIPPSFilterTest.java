@@ -11,22 +11,23 @@
 
 package org.polarsys.eplmp.server.configuration.filter;
 
-import org.polarsys.eplmp.core.common.User;
-import org.polarsys.eplmp.core.product.PartIteration;
-import org.polarsys.eplmp.core.product.PartMaster;
-import org.polarsys.eplmp.core.product.PartRevision;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.polarsys.eplmp.core.common.User;
+import org.polarsys.eplmp.core.product.PartIteration;
+import org.polarsys.eplmp.core.product.PartMaster;
+import org.polarsys.eplmp.core.product.PartRevision;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * @author kelto on 13/01/16.
+ * @author Charles Fallourd
+ * @version 2.5, 13/01/16
  */
 @RunWith(MockitoJUnitRunner.class)
 public class WIPPSFilterTest {
@@ -34,16 +35,15 @@ public class WIPPSFilterTest {
     private WIPPSFilter filter;
     private PartMaster partMaster;
     private List<PartRevision> partRevisions;
-    private User user;
 
     @Before
     public void setup() {
-        user = Mockito.spy(new User());
-        Mockito.doReturn("test").when(user).getLogin();
+        User user = Mockito.spy(new User());
+        Mockito.when(user.getLogin()).thenReturn("test");
         filter = new WIPPSFilter(user);
         partMaster = Mockito.spy(new PartMaster());
         partRevisions = new ArrayList<>();
-        Mockito.doReturn(partRevisions).when(partMaster).getPartRevisions();
+        Mockito.when(partMaster.getPartRevisions()).thenReturn(partRevisions);
     }
 
 
@@ -77,18 +77,18 @@ public class WIPPSFilterTest {
         Mockito.doReturn(Mockito.mock(PartIteration.class)).when(partRevision).getLastAccessibleIteration(Mockito.any());
         partRevisions.add(partRevision);
 
-        Assert.assertTrue(filter.filter(partMaster).size() == 1);
+        Assert.assertEquals(1, filter.filter(partMaster).size());
 
         partRevision = Mockito.spy(new PartRevision());
         Mockito.doReturn(null).when(partRevision).getLastAccessibleIteration(Mockito.any());
         partRevisions.add(partRevision);
 
-        Assert.assertTrue(filter.filter(partMaster).size() == 1);
+        Assert.assertEquals(1, filter.filter(partMaster).size());
 
         partRevision = Mockito.spy(new PartRevision());
         Mockito.doReturn(null).when(partRevision).getLastAccessibleIteration(Mockito.any());
         partRevisions.add(partRevision);
 
-        Assert.assertTrue(filter.filter(partMaster).size() == 1);
+        Assert.assertEquals(1, filter.filter(partMaster).size());
     }
 }

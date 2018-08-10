@@ -17,7 +17,10 @@ import org.polarsys.eplmp.core.common.UserGroup;
 import javax.persistence.*;
 import javax.xml.bind.annotation.XmlTransient;
 import java.io.Serializable;
-import java.util.*;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Task is the smallest unit of work in a workflow.

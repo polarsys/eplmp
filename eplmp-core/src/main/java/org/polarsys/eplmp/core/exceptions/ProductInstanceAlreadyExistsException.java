@@ -14,7 +14,7 @@ package org.polarsys.eplmp.core.exceptions;
 import org.polarsys.eplmp.core.configuration.ProductInstanceMaster;
 
 import java.text.MessageFormat;
-import java.util.Locale;
+
 
 /**
  *
@@ -30,12 +30,12 @@ public class ProductInstanceAlreadyExistsException extends EntityAlreadyExistsEx
     }
 
 
-    public ProductInstanceAlreadyExistsException(Locale pLocale, ProductInstanceMaster productInstanceMaster) {
-        this(pLocale, productInstanceMaster, null);
+    public ProductInstanceAlreadyExistsException(ProductInstanceMaster productInstanceMaster) {
+        this(productInstanceMaster, null);
     }
 
-    public ProductInstanceAlreadyExistsException(Locale pLocale, ProductInstanceMaster productInstanceMaster, Throwable pCause) {
-        super(pLocale, pCause);
+    public ProductInstanceAlreadyExistsException(ProductInstanceMaster productInstanceMaster, Throwable pCause) {
+        super( pCause);
         this.productInstanceMaster=productInstanceMaster;
     }
 

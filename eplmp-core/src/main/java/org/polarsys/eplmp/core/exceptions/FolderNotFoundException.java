@@ -12,7 +12,7 @@
 package org.polarsys.eplmp.core.exceptions;
 
 import java.text.MessageFormat;
-import java.util.Locale;
+
 
 /**
  *
@@ -21,17 +21,12 @@ import java.util.Locale;
 public class FolderNotFoundException extends EntityNotFoundException {
     private final String mCompletePath;
 
-    public FolderNotFoundException(String pMessage) {
-        super(pMessage);
-        mCompletePath=null;
-    }
-    
-    public FolderNotFoundException(Locale pLocale, String pCompletePath) {
-        this(pLocale, pCompletePath, null);
+    public FolderNotFoundException(String pCompletePath) {
+        this(pCompletePath, null);
     }
 
-    public FolderNotFoundException(Locale pLocale, String pCompletePath, Throwable pCause) {
-        super(pLocale, pCause);
+    public FolderNotFoundException(String pCompletePath, Throwable pCause) {
+        super( pCause);
         mCompletePath=pCompletePath;
     }
 

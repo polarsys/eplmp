@@ -14,7 +14,8 @@ package org.polarsys.eplmp.core.configuration;
 import org.polarsys.eplmp.core.common.BinaryResource;
 
 import java.io.Serializable;
-import java.util.*;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * @author Elisabel Généreux

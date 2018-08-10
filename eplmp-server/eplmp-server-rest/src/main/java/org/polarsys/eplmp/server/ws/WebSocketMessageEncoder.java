@@ -12,8 +12,6 @@
 package org.polarsys.eplmp.server.ws;
 
 
-import org.polarsys.eplmp.server.ws.WebSocketMessage;
-
 import javax.websocket.EncodeException;
 import javax.websocket.Encoder;
 import javax.websocket.EndpointConfig;

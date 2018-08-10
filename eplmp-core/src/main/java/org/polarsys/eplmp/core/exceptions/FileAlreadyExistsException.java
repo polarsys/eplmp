@@ -14,7 +14,7 @@ package org.polarsys.eplmp.core.exceptions;
 import org.polarsys.eplmp.core.common.BinaryResource;
 
 import java.text.MessageFormat;
-import java.util.Locale;
+
 
 /**
  *
@@ -22,27 +22,21 @@ import java.util.Locale;
  */
 public class FileAlreadyExistsException extends EntityAlreadyExistsException {
     private final String mFullName;
-    
-    
-    public FileAlreadyExistsException(String pMessage) {
-        super(pMessage);
-        mFullName=null;
-    }
-    
-    public FileAlreadyExistsException(Locale pLocale, BinaryResource pFile) {
-        this(pLocale,pFile.getFullName());
+
+    public FileAlreadyExistsException(BinaryResource pFile) {
+        this(pFile.getFullName());
     }
 
-    public FileAlreadyExistsException(Locale pLocale, String pFullName) {
-        this(pLocale,pFullName, null);
+    public FileAlreadyExistsException(String pFullName) {
+        this(pFullName, null);
     }
     
-    public FileAlreadyExistsException(Locale pLocale, BinaryResource pFile, Throwable pCause) {
-        this(pLocale,pFile.getFullName(),pCause);
+    public FileAlreadyExistsException(BinaryResource pFile, Throwable pCause) {
+        this(pFile.getFullName(),pCause);
     }
     
-    public FileAlreadyExistsException(Locale pLocale, String pFullName, Throwable pCause) {
-        super(pLocale,pCause);
+    public FileAlreadyExistsException(String pFullName, Throwable pCause) {
+        super(pCause);
         mFullName=pFullName;
     }
 

@@ -12,23 +12,22 @@
 package org.polarsys.eplmp.server.rest.file;
 
 
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.*;
 import org.polarsys.eplmp.core.common.Account;
 import org.polarsys.eplmp.core.common.BinaryResource;
 import org.polarsys.eplmp.core.common.User;
 import org.polarsys.eplmp.core.common.Workspace;
 import org.polarsys.eplmp.core.document.*;
+import org.polarsys.eplmp.core.exceptions.NotAllowedException;
 import org.polarsys.eplmp.core.security.UserGroupMapping;
 import org.polarsys.eplmp.core.services.*;
 import org.polarsys.eplmp.core.sharing.SharedDocument;
 import org.polarsys.eplmp.core.util.Tools;
 import org.polarsys.eplmp.server.auth.AuthConfig;
-import org.polarsys.eplmp.server.rest.exceptions.SharedResourceAccessException;
 import org.polarsys.eplmp.server.util.PartImpl;
 import org.polarsys.eplmp.server.util.ResourceUtil;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.mockito.*;
 
 import javax.ejb.SessionContext;
 import javax.servlet.http.HttpServletRequestWrapper;
@@ -44,9 +43,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 public class DocumentBinaryResourceTest {
@@ -122,7 +119,6 @@ public class DocumentBinaryResourceTest {
      * @throws Exception
      */
     @Test
-    @Ignore
     public void uploadFileWithSpecialCharactersToDocumentTemplates() throws Exception {
 
         //Given
@@ -148,8 +144,8 @@ public class DocumentBinaryResourceTest {
 
         //Then
         assertNotNull(response);
-        assertEquals(response.getStatus(), 201);
-        assertEquals(response.getStatusInfo(), Response.Status.CREATED);
+        assertEquals(201, response.getStatus());
+        assertEquals(Response.Status.CREATED, response.getStatusInfo());
 
         //delete tem file
         uploadedFile1.deleteOnExit();
@@ -161,7 +157,6 @@ public class DocumentBinaryResourceTest {
      * @throws Exception
      */
     @Test
-    @Ignore
     public void uploadSeveralFilesToDocumentsTemplates() throws Exception {
 
         //Given
@@ -190,8 +185,7 @@ public class DocumentBinaryResourceTest {
 
         //Then
         assertNotNull(response);
-        assertEquals(response.getStatus(), 200);
-        assertEquals(response.getStatusInfo(), Response.Status.OK);
+        assertEquals(Response.Status.NO_CONTENT, response.getStatusInfo());
 
         //delete temp files
         uploadedFile1.deleteOnExit();
@@ -210,14 +204,16 @@ public class DocumentBinaryResourceTest {
 
         //Given
         Request request = Mockito.mock(Request.class);
+        DocumentRevision documentRevision = new DocumentRevision();
 
         String fullName = ResourceUtil.WORKSPACE_ID + "/documents/" + ResourceUtil.DOCUMENT_ID + "/" + ResourceUtil.VERSION + "/" + ResourceUtil.ITERATION + "/" + ResourceUtil.FILENAME1;
 
         BinaryResource binaryResource = new BinaryResource(ResourceUtil.FILENAME1, ResourceUtil.DOCUMENT_SIZE, new Date());
         Mockito.when(documentService.canAccess(new DocumentIterationKey(ResourceUtil.WORKSPACE_ID, ResourceUtil.DOCUMENT_ID, ResourceUtil.VERSION, ResourceUtil.ITERATION))).thenReturn(false);
         Mockito.when(documentService.getBinaryResource(fullName)).thenReturn(binaryResource);
+        Mockito.when(documentService.getDocumentRevision(Matchers.any(DocumentRevisionKey.class))).thenReturn(documentRevision);
         Mockito.when(storageManager.getBinaryResourceInputStream(binaryResource)).thenReturn(new FileInputStream(new File(ResourceUtil.getFilePath(ResourceUtil.SOURCE_FILE_STORAGE + ResourceUtil.FILENAME1))));
-        Mockito.when(publicEntityManager.getPublicDocumentRevision(Matchers.any(DocumentRevisionKey.class))).thenReturn(new DocumentRevision());
+        Mockito.when(publicEntityManager.getPublicDocumentRevision(Matchers.any(DocumentRevisionKey.class))).thenReturn(documentRevision);
         Mockito.when(publicEntityManager.getPublicBinaryResourceForDocument(fullName)).thenReturn(binaryResource);
         Mockito.when(contextManager.isCallerInRole(UserGroupMapping.REGULAR_USER_ROLE_ID)).thenReturn(false);
         Mockito.when(publicEntityManager.canAccess(Matchers.any(DocumentIterationKey.class))).thenReturn(true);
@@ -337,7 +333,7 @@ public class DocumentBinaryResourceTest {
         try {
             Response response = documentBinaryResource.downloadDocumentFile(request, ResourceUtil.WORKSPACE_ID, ResourceUtil.DOCUMENT_ID, ResourceUtil.VERSION, ResourceUtil.ITERATION, ResourceUtil.FILENAME1, ResourceUtil.FILE_TYPE, null, ResourceUtil.RANGE, null, null, null);
             assertTrue(false);
-        } catch (SharedResourceAccessException e) {
+        } catch (NotAllowedException e) {
             assertTrue(true);
         }
 

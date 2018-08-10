@@ -11,7 +11,6 @@
 package org.polarsys.eplmp.server;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -26,63 +25,53 @@ import org.polarsys.eplmp.core.services.IProductManagerLocal;
 import org.polarsys.eplmp.server.converters.CADConverter;
 import org.polarsys.eplmp.server.converters.ConversionResult;
 
-import javax.persistence.EntityManager;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.net.URI;
 import java.nio.file.Paths;
 import java.util.Arrays;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyLong;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ConverterBeanTest {
 
     @Mock
-    BeanLocator locator;
+    private BeanLocator locator;
 
     @Mock
-    EntityManager em;
+    private IProductManagerLocal product;
 
     @Mock
-    IProductManagerLocal product;
-
-    @Mock
-    IBinaryStorageManagerLocal storage;
+    private IBinaryStorageManagerLocal storage;
 
     @InjectMocks
-    ConverterBean bean;
+    private ConverterBean bean;
 
     @Mock
-    PartIterationKey ipk;
+    private PartIterationKey ipk;
 
     @Mock
-    PartIteration partIter;
+    private PartIteration partIter;
 
     @Mock
-    BinaryResource cadBinRes;
+    private BinaryResource cadBinRes;
 
     @Mock
-    CADConverter conv;
+    private CADConverter conv;
 
     @Mock
-    ConversionResult result;
+    private ConversionResult result;
 
     @Mock
-    Geometry lod;
+    private Geometry lod;
 
     @Mock
-    BinaryResource attachedFile;
+    private BinaryResource attachedFile;
 
     @Before
     public void setup() throws Exception {
         when(cadBinRes.getName()).thenReturn("foo.dae");
-        when(em.find(PartIteration.class, ipk)).thenReturn(partIter);
         when(storage.getBinaryResourceInputStream(cadBinRes))
                 .thenReturn(new ByteArrayInputStream("fake content".getBytes()));
 
@@ -90,8 +79,10 @@ public class ConverterBeanTest {
                 .thenReturn(lod);
         when(storage.getBinaryResourceOutputStream(lod)).thenReturn(new ByteArrayOutputStream());
 
-        when(product.saveFileInPartIteration(eq(ipk), anyString(), eq("attachedfiles"), anyLong()))
+        when(product.saveFileInPartIteration(eq(ipk), anyString(), eq(PartIteration.ATTACHED_FILES_SUBTYPE), anyLong()))
                 .thenReturn(attachedFile, attachedFile);
+        when(product.getPartIteration(eq(ipk)))
+                .thenReturn(partIter);
         when(storage.getBinaryResourceOutputStream(attachedFile)).thenReturn(new ByteArrayOutputStream());
 
         when(conv.canConvertToOBJ("dae")).thenReturn(true);
@@ -108,7 +99,6 @@ public class ConverterBeanTest {
     }
 
     @Test
-    @Ignore
     public void testNominalConvert() throws Exception {
         // * test *
         bean.convertCADFileToOBJ(ipk, cadBinRes);
@@ -117,7 +107,7 @@ public class ConverterBeanTest {
         verify(conv).convert(any(URI.class), any(URI.class));
         verify(product).saveGeometryInPartIteration(eq(ipk), anyString(), anyInt(), anyLong(), any(double[].class));
         verify(storage).getBinaryResourceOutputStream(lod);
-        verify(product, times(2)).saveFileInPartIteration(eq(ipk), anyString(), eq("attachedfiles"), anyLong());
+        verify(product, times(2)).saveFileInPartIteration(eq(ipk), anyString(), eq(PartIteration.ATTACHED_FILES_SUBTYPE), anyLong());
         verify(storage, times(2)).getBinaryResourceOutputStream(attachedFile);
     }
 

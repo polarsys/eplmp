@@ -18,7 +18,6 @@ import org.polarsys.eplmp.core.exceptions.StorageException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Date;
-import java.util.List;
 
 public interface IBinaryStorageManagerLocal {
     InputStream getBinaryResourceInputStream(BinaryResource binaryResource) throws StorageException;
@@ -32,5 +31,5 @@ public interface IBinaryStorageManagerLocal {
     void renameFile(BinaryResource binaryResource, String pNewName) throws StorageException, FileNotFoundException;
     String getExternalStorageURI(BinaryResource binaryResource);
     String getShortenExternalStorageURI(BinaryResource binaryResource);
-    void deleteWorkspaceFolder(String workspaceId, List<BinaryResource> binaryResourcesInWorkspace) throws StorageException;
+    void deleteWorkspaceFolder(String workspaceId) throws StorageException;
 }

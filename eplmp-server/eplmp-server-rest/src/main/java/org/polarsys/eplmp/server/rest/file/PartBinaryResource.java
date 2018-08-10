@@ -10,6 +10,7 @@
   *******************************************************************************/
 package org.polarsys.eplmp.server.rest.file;
 
+import io.swagger.annotations.*;
 import org.polarsys.eplmp.core.common.BinaryResource;
 import org.polarsys.eplmp.core.exceptions.*;
 import org.polarsys.eplmp.core.exceptions.NotAllowedException;
@@ -25,11 +26,12 @@ import org.polarsys.eplmp.core.util.FileIO;
 import org.polarsys.eplmp.core.util.HashUtils;
 import org.polarsys.eplmp.server.auth.AuthConfig;
 import org.polarsys.eplmp.server.auth.jwt.JWTokenFactory;
-import org.polarsys.eplmp.server.rest.exceptions.*;
+import org.polarsys.eplmp.server.rest.exceptions.FileConversionException;
+import org.polarsys.eplmp.server.rest.exceptions.PreconditionFailedException;
+import org.polarsys.eplmp.server.rest.exceptions.RequestedRangeNotSatisfiableException;
 import org.polarsys.eplmp.server.rest.file.util.BinaryResourceDownloadMeta;
 import org.polarsys.eplmp.server.rest.file.util.BinaryResourceDownloadResponseBuilder;
 import org.polarsys.eplmp.server.rest.file.util.BinaryResourceUpload;
-import io.swagger.annotations.*;
 
 import javax.annotation.security.DeclareRoles;
 import javax.annotation.security.RolesAllowed;
@@ -59,10 +61,7 @@ import java.util.logging.Logger;
 public class PartBinaryResource {
 
     private static final Logger LOGGER = Logger.getLogger(PartBinaryResource.class.getName());
-    public static final String NATIVE_CAD_SUBTYPE = "nativecad";
-    public static final String ATTACHED_FILES_SUBTYPE = "attachedfiles";
     private static final String UTF8_ENCODING = "UTF-8";
-
 
     @Inject
     private IBinaryStorageManagerLocal storageManager;
@@ -93,9 +92,10 @@ public class PartBinaryResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Upload success"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
-    @Path("/{iteration}/" + NATIVE_CAD_SUBTYPE)
+    @Path("/{iteration}/" + PartIteration.NATIVE_CAD_SUBTYPE)
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @RolesAllowed({UserGroupMapping.REGULAR_USER_ROLE_ID})
     public Response uploadNativeCADFile(
@@ -105,7 +105,7 @@ public class PartBinaryResource {
             @ApiParam(required = true, value = "Part version") @PathParam("version") final String version,
             @ApiParam(required = true, value = "Part iteration") @PathParam("iteration") final int iteration)
             throws EntityNotFoundException, EntityAlreadyExistsException, UserNotActiveException,
-            AccessRightException, NotAllowedException, CreationException {
+            AccessRightException, NotAllowedException, CreationException, WorkspaceNotEnabledException {
 
         try {
 
@@ -140,9 +140,10 @@ public class PartBinaryResource {
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Upload success"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
-    @Path("/{iteration}/" + ATTACHED_FILES_SUBTYPE)
+    @Path("/{iteration}/" + PartIteration.ATTACHED_FILES_SUBTYPE)
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @RolesAllowed({UserGroupMapping.REGULAR_USER_ROLE_ID})
     public Response uploadAttachedFiles(
@@ -152,7 +153,7 @@ public class PartBinaryResource {
             @ApiParam(required = true, value = "Part version") @PathParam("version") final String version,
             @ApiParam(required = true, value = "Part iteration") @PathParam("iteration") final int iteration)
             throws EntityNotFoundException, EntityAlreadyExistsException, UserNotActiveException, AccessRightException,
-            NotAllowedException, CreationException {
+            NotAllowedException, CreationException, WorkspaceNotEnabledException {
 
         try {
 
@@ -163,10 +164,10 @@ public class PartBinaryResource {
 
             for (Part formPart : formParts) {
                 fileName = Normalizer.normalize(formPart.getSubmittedFileName(), Normalizer.Form.NFC);
-                BinaryResource binaryResource = productService.saveFileInPartIteration(partPK, fileName, ATTACHED_FILES_SUBTYPE, 0);
+                BinaryResource binaryResource = productService.saveFileInPartIteration(partPK, fileName, PartIteration.ATTACHED_FILES_SUBTYPE, 0);
                 OutputStream outputStream = storageManager.getBinaryResourceOutputStream(binaryResource);
                 long length = BinaryResourceUpload.uploadBinary(outputStream, formPart);
-                productService.saveFileInPartIteration(partPK, fileName, ATTACHED_FILES_SUBTYPE, length);
+                productService.saveFileInPartIteration(partPK, fileName, PartIteration.ATTACHED_FILES_SUBTYPE, length);
             }
 
             if (formParts.size() == 1) {
@@ -181,11 +182,12 @@ public class PartBinaryResource {
     }
 
     @GET
-    @ApiOperation(value = "Download part file",
+    @ApiOperation(value = "Download part file without a sub type",
             response = File.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Download success"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("/{iteration}/{fileName}")
@@ -204,17 +206,17 @@ public class PartBinaryResource {
             @ApiParam(required = false, value = "Password for private resource") @HeaderParam("password") String password,
             @ApiParam(required = false, value = "Shared entity token") @QueryParam("token") String accessToken)
             throws EntityNotFoundException, UserNotActiveException, AccessRightException, NotAllowedException,
-            PreconditionFailedException, NotModifiedException, RequestedRangeNotSatisfiableException,
-            UnMatchingUuidException, SharedResourceAccessException {
+            PreconditionFailedException, RequestedRangeNotSatisfiableException, WorkspaceNotEnabledException {
         return downloadPartFile(request, workspaceId, partNumber, version, iteration, null, fileName, type, output, range, uuid, password, accessToken);
     }
 
     @GET
-    @ApiOperation(value = "Download part file",
+    @ApiOperation(value = "Download part file with a sub type",
             response = File.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Download success"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("/{iteration}/{subType}/{fileName}")
@@ -234,13 +236,13 @@ public class PartBinaryResource {
             @ApiParam(required = false, value = "Password for private resource") @HeaderParam("password") String password,
             @ApiParam(required = false, value = "Shared entity token") @QueryParam("token") String accessToken)
             throws EntityNotFoundException, UserNotActiveException, AccessRightException, NotAllowedException,
-            PreconditionFailedException, NotModifiedException, RequestedRangeNotSatisfiableException,
-            UnMatchingUuidException, SharedResourceAccessException {
+            PreconditionFailedException, RequestedRangeNotSatisfiableException, WorkspaceNotEnabledException {
 
         BinaryResource binaryResource;
         String decodedFileName = fileName;
         InputStream binaryContentInputStream;
 
+        boolean isWorkingCopy = false;
         try {
             decodedFileName = URLDecoder.decode(fileName, UTF8_ENCODING);
         } catch (UnsupportedEncodingException e) {
@@ -262,7 +264,7 @@ public class PartBinaryResource {
             if (accessToken != null && !accessToken.isEmpty()) {
                 String decodedUUID = JWTokenFactory.validateSharedResourceToken(authConfig.getJWTKey(), accessToken);
                 if (null == decodedUUID || !decodedUUID.equals(sharedEntity.getUuid())) {
-                    throw new SharedResourceAccessException();
+                    throw new NotAllowedException("NotAllowedException73");
                 }
             } else {
                 // Check uuid & access right
@@ -270,6 +272,18 @@ public class PartBinaryResource {
             }
 
             binaryResource = publicEntityManager.getBinaryResourceForSharedEntity(fullName);
+            // sharedEntity is always a SharedPart
+
+            if (sharedEntity instanceof SharedPart) {
+
+                SharedPart part = (SharedPart) sharedEntity;
+
+                PartRevision partRevision = part.getPartRevision();
+
+                PartIteration workingIteration = partRevision.getWorkingCopy();
+
+                isWorkingCopy = partRevision.getLastIteration().equals(workingIteration);
+            }
 
         } else {
             // Check access right
@@ -278,14 +292,19 @@ public class PartBinaryResource {
                 String decodedEntityKey = JWTokenFactory.validateEntityToken(authConfig.getJWTKey(), accessToken);
                 boolean tokenValid = new PartRevisionKey(workspaceId, partNumber, version).toString().equals(decodedEntityKey);
                 if (!tokenValid) {
-                    throw new SharedResourceAccessException();
+                    throw new NotAllowedException("NotAllowedException73");
                 }
                 binaryResource = publicEntityManager.getBinaryResourceForSharedEntity(fullName);
             } else {
                 if (!canAccess(new PartIterationKey(workspaceId, partNumber, version, iteration))) {
-                    throw new SharedResourceAccessException();
+                    throw new NotAllowedException("NotAllowedException73");
                 }
                 binaryResource = getBinaryResource(fullName);
+                PartRevision partRevision = productService.getPartRevision(new PartRevisionKey(workspaceId, partNumber, version));
+                PartIteration workingIteration = partRevision.getWorkingCopy();
+                if(workingIteration != null){
+                    isWorkingCopy = workingIteration.getIteration() == iteration;
+                }
             }
         }
 
@@ -296,8 +315,11 @@ public class PartBinaryResource {
         if (rb != null) {
             return rb.build();
         }
+
+        boolean isToBeCached = !isWorkingCopy;
+
         try {
-            if (ATTACHED_FILES_SUBTYPE.equals(subType) && output != null && !output.isEmpty()) {
+            if (PartIteration.ATTACHED_FILES_SUBTYPE.equals(subType) && output != null && !output.isEmpty()) {
                 binaryContentInputStream = getConvertedBinaryResource(binaryResource, output);
                 if (range == null || range.isEmpty()) {
                     binaryResourceDownloadMeta.setLength(0);
@@ -305,7 +327,7 @@ public class PartBinaryResource {
             } else {
                 binaryContentInputStream = storageManager.getBinaryResourceInputStream(binaryResource);
             }
-            return BinaryResourceDownloadResponseBuilder.prepareResponse(binaryContentInputStream, binaryResourceDownloadMeta, range);
+            return BinaryResourceDownloadResponseBuilder.prepareResponse(binaryContentInputStream, binaryResourceDownloadMeta, range, isToBeCached);
         } catch (StorageException | FileConversionException e) {
             return BinaryResourceDownloadResponseBuilder.downloadError(e, fullName);
         }
@@ -317,8 +339,9 @@ public class PartBinaryResource {
      * @param binaryResource The binary resource
      * @param outputFormat   The wanted output
      * @return The binary resource stream in the wanted output
-     * @throws org.polarsys.eplmp.server.rest.exceptions.FileConversionException
+     * @throws FileConversionException
      */
+
     private InputStream getConvertedBinaryResource(BinaryResource binaryResource, String outputFormat) throws FileConversionException {
         try {
             return onDemandConverterManager.getPartConvertedResource(outputFormat, binaryResource);
@@ -327,12 +350,12 @@ public class PartBinaryResource {
         }
     }
 
-    private boolean canAccess(PartIterationKey partIKey) throws UserNotActiveException, EntityNotFoundException {
+    private boolean canAccess(PartIterationKey partIKey) throws UserNotActiveException, EntityNotFoundException, WorkspaceNotEnabledException {
         return publicEntityManager.canAccess(partIKey) || contextManager.isCallerInRole(UserGroupMapping.REGULAR_USER_ROLE_ID) && productService.canAccess(partIKey);
     }
 
     private BinaryResource getBinaryResource(String fullName)
-            throws NotAllowedException, AccessRightException, UserNotActiveException, EntityNotFoundException {
+            throws NotAllowedException, AccessRightException, UserNotActiveException, EntityNotFoundException, WorkspaceNotEnabledException {
         BinaryResource publicBinaryResourceForPart = publicEntityManager.getPublicBinaryResourceForPart(fullName);
         if (publicBinaryResourceForPart != null) {
             return publicBinaryResourceForPart;
@@ -341,9 +364,9 @@ public class PartBinaryResource {
     }
 
     private void checkUuidValidity(SharedEntity sharedEntity, String workspaceId, String partNumber, String version, int iteration, String password)
-            throws UnMatchingUuidException, SharedResourceAccessException, NotAllowedException {
+            throws NotAllowedException {
         if (!(sharedEntity instanceof SharedPart)) {
-            throw new UnMatchingUuidException();
+            throw new NotAllowedException("NotAllowedException73");
         }
 
         checkUuidExpiredDate(sharedEntity);
@@ -356,28 +379,28 @@ public class PartBinaryResource {
                 !partRevision.getPartMasterNumber().equals(partNumber) ||
                 !partRevision.getVersion().equals(version) ||
                 (null != lastCheckedInIteration && lastCheckedInIteration.getIteration() < iteration)) {
-            throw new UnMatchingUuidException();
+            throw new NotAllowedException("NotAllowedException73");
         }
     }
 
-    private void checkUuidPassword(SharedEntity sharedEntity, String password) throws SharedResourceAccessException {
+    private void checkUuidPassword(SharedEntity sharedEntity, String password) throws NotAllowedException {
         String entityPassword = sharedEntity.getPassword();
         if (entityPassword != null && !entityPassword.isEmpty()) {
             try {
                 if (password == null || password.isEmpty() || !entityPassword.equals(HashUtils.md5Sum(password))) {
-                    throw new SharedResourceAccessException();
+                    throw new NotAllowedException("NotAllowedException73");
                 }
             } catch (NoSuchAlgorithmException | UnsupportedEncodingException e) {
-                throw new SharedResourceAccessException();
+                throw new NotAllowedException("NotAllowedException73");
             }
         }
     }
 
-    private void checkUuidExpiredDate(SharedEntity sharedEntity) throws SharedResourceAccessException {
+    private void checkUuidExpiredDate(SharedEntity sharedEntity) throws NotAllowedException {
         // Check shared entity expired
         if (sharedEntity.getExpireDate() != null && sharedEntity.getExpireDate().getTime() < new Date().getTime()) {
             shareService.deleteSharedEntityIfExpired(sharedEntity);
-            throw new SharedResourceAccessException();
+            throw new NotAllowedException("NotAllowedException73");
         }
     }
 

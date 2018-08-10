@@ -10,9 +10,10 @@
   *******************************************************************************/
 package org.polarsys.eplmp.server.rest;
 
-import org.polarsys.eplmp.core.security.UserGroupMapping;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.Authorization;
+import org.polarsys.eplmp.core.security.UserGroupMapping;
 
 import javax.annotation.security.DeclareRoles;
 import javax.annotation.security.RolesAllowed;
@@ -21,7 +22,8 @@ import javax.inject.Inject;
 import javax.ws.rs.Path;
 
 @RequestScoped
-@Api(hidden = true, value = "changeItems", description = "Operations about change items")
+@Api(hidden = true, value = "changeItems", description = "Operations about change items",
+        authorizations = {@Authorization(value = "authorization")})
 @DeclareRoles(UserGroupMapping.REGULAR_USER_ROLE_ID)
 @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
 public class ChangeItemsResource {

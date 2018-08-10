@@ -11,6 +11,9 @@
 
 package org.polarsys.eplmp.server.rest;
 
+import io.swagger.annotations.*;
+import org.dozer.DozerBeanMapperSingletonWrapper;
+import org.dozer.Mapper;
 import org.polarsys.eplmp.core.exceptions.*;
 import org.polarsys.eplmp.core.hooks.SNSWebhookApp;
 import org.polarsys.eplmp.core.hooks.SimpleWebhookApp;
@@ -20,9 +23,6 @@ import org.polarsys.eplmp.core.security.UserGroupMapping;
 import org.polarsys.eplmp.core.services.IWebhookManagerLocal;
 import org.polarsys.eplmp.server.rest.dto.WebhookAppParameterDTO;
 import org.polarsys.eplmp.server.rest.dto.WebhookDTO;
-import io.swagger.annotations.*;
-import org.dozer.DozerBeanMapperSingletonWrapper;
-import org.dozer.Mapper;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.security.DeclareRoles;
@@ -36,7 +36,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 @RequestScoped
-@Api(hidden = true, value = "webhook", description = "Operations about webhooks")
+@Api(hidden = true, value = "webhook", description = "Operations about webhooks",
+        authorizations = {@Authorization(value = "authorization")})
 @DeclareRoles(UserGroupMapping.REGULAR_USER_ROLE_ID)
 @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
 public class WebhookResource {
@@ -56,18 +57,19 @@ public class WebhookResource {
 
 
     @GET
-    @ApiOperation(value = "Get webhooks",
+    @ApiOperation(value = "Get webhooks in given workspace",
             response = WebhookDTO.class,
             responseContainer = "List")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of WebhookDTOs. It can be an empty list."),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Produces(MediaType.APPLICATION_JSON)
     public WebhookDTO[] getWebhooks(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId
-    ) throws WorkspaceNotFoundException, AccountNotFoundException, AccessRightException {
+    ) throws EntityNotFoundException, AccessRightException {
         List<Webhook> webHooks = webhookManager.getWebHooks(workspaceId);
         List<WebhookDTO> webHookDTOs = new ArrayList<>();
         for (Webhook webhook : webHooks) {
@@ -78,11 +80,12 @@ public class WebhookResource {
 
     @GET
     @Path("/{webhookId}")
-    @ApiOperation(value = "Get webhook",
+    @ApiOperation(value = "Get webhook by id",
             response = WebhookDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of WebhookDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 404, message = "Not found"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
@@ -90,26 +93,26 @@ public class WebhookResource {
     public WebhookDTO getWebhook(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Webhook id") @PathParam("webhookId") int webhookId
-    ) throws WorkspaceNotFoundException, AccountNotFoundException, AccessRightException, WebhookNotFoundException {
+    ) throws EntityNotFoundException, AccessRightException, WebhookNotFoundException {
         Webhook webHook = webhookManager.getWebHook(workspaceId, webhookId);
         WebhookDTO dto = mapper.map(webHook, WebhookDTO.class);
         return dto;
     }
 
     @POST
-    @ApiOperation(value = "Create webhook",
+    @ApiOperation(value = "Create a new webhook in given workspace",
             response = WebhookDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 201, message = "Successful creation of webhook"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Produces(MediaType.APPLICATION_JSON)
     public WebhookDTO createWebhook(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Webhook definition") WebhookDTO webhookDTO
-    ) throws AccessRightException, UserNotActiveException, AccountNotFoundException, WorkspaceNotFoundException,
-            UserNotFoundException, WorkspaceNotEnabledException, WebhookNotFoundException {
+    ) throws AccessRightException, UserNotActiveException, EntityNotFoundException, WorkspaceNotEnabledException{
         Webhook webHook = webhookManager.createWebhook(workspaceId, webhookDTO.getName(), webhookDTO.isActive());
         WebhookApp webhookApp = configureWebhook(workspaceId, webHook.getId(), webhookDTO);
         webHook.setWebhookApp(webhookApp);
@@ -118,11 +121,12 @@ public class WebhookResource {
 
     @PUT
     @Path("/{webhookId}")
-    @ApiOperation(value = "Update webhook",
+    @ApiOperation(value = "Update a webhook",
             response = WebhookDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 201, message = "Successful update of webhook"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 404, message = "Webhook not found"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
@@ -131,12 +135,33 @@ public class WebhookResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Webhook id") @PathParam("webhookId") Integer webhookId,
             @ApiParam(required = true, value = "Webhook definition") WebhookDTO webhookDTO
-    ) throws AccessRightException, AccountNotFoundException, WorkspaceNotFoundException, WebhookNotFoundException {
+    ) throws AccessRightException, EntityNotFoundException {
         Webhook webHook = webhookManager.updateWebHook(workspaceId, webhookId, webhookDTO.getName(), webhookDTO.isActive());
         WebhookApp webhookApp = configureWebhook(workspaceId, webhookId, webhookDTO);
         webHook.setWebhookApp(webhookApp);
         return mapper.map(webHook, WebhookDTO.class);
     }
+
+    @DELETE
+    @Path("/{webhookId}")
+    @ApiOperation(value = "Delete a webhook",
+            response = Response.class)
+    @ApiResponses(value = {
+            @ApiResponse(code = 201, message = "Successful delete of webhook"),
+            @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
+            @ApiResponse(code = 404, message = "Webhook not found"),
+            @ApiResponse(code = 500, message = "Internal server error")
+    })
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response deleteWebhook(
+            @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
+            @ApiParam(required = true, value = "Webhook id") @PathParam("webhookId") int webhookId
+    ) throws AccessRightException, EntityNotFoundException {
+        webhookManager.deleteWebhook(workspaceId, webhookId);
+        return Response.noContent().build();
+    }
+
 
     private WebhookApp configureWebhook(String workspaceId, int webhookId, WebhookDTO webhookDTO) throws WorkspaceNotFoundException, AccessRightException, WebhookNotFoundException, AccountNotFoundException {
         List<WebhookAppParameterDTO> parameters = webhookDTO.getParameters();
@@ -204,25 +229,5 @@ public class WebhookResource {
         }
         return webhookManager.configureSimpleWebhook(workspaceId, webhookId, method, uri, authorization);
     }
-
-    @DELETE
-    @Path("/{webhookId}")
-    @ApiOperation(value = "Delete webhook",
-            response = Response.class)
-    @ApiResponses(value = {
-            @ApiResponse(code = 201, message = "Successful delete of webhook"),
-            @ApiResponse(code = 401, message = "Unauthorized"),
-            @ApiResponse(code = 404, message = "Webhook not found"),
-            @ApiResponse(code = 500, message = "Internal server error")
-    })
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response deleteWebhook(
-            @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
-            @ApiParam(required = true, value = "Webhook id") @PathParam("webhookId") int webhookId
-    ) throws WorkspaceNotFoundException, AccessRightException, WebhookNotFoundException, AccountNotFoundException {
-        webhookManager.deleteWebhook(workspaceId, webhookId);
-        return Response.noContent().build();
-    }
-
 
 }

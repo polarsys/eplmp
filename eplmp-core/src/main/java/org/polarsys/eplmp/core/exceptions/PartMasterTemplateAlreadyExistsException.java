@@ -14,7 +14,7 @@ package org.polarsys.eplmp.core.exceptions;
 import org.polarsys.eplmp.core.product.PartMasterTemplate;
 
 import java.text.MessageFormat;
-import java.util.Locale;
+
 
 /**
  *
@@ -30,12 +30,12 @@ public class PartMasterTemplateAlreadyExistsException extends EntityAlreadyExist
     }
 
 
-    public PartMasterTemplateAlreadyExistsException(Locale pLocale, PartMasterTemplate pPartMTemplate) {
-        this(pLocale, pPartMTemplate, null);
+    public PartMasterTemplateAlreadyExistsException(PartMasterTemplate pPartMTemplate) {
+        this(pPartMTemplate, null);
     }
 
-    public PartMasterTemplateAlreadyExistsException(Locale pLocale, PartMasterTemplate pPartMTemplate, Throwable pCause) {
-        super(pLocale, pCause);
+    public PartMasterTemplateAlreadyExistsException(PartMasterTemplate pPartMTemplate, Throwable pCause) {
+        super( pCause);
         mPartMTemplate=pPartMTemplate;
     }
 

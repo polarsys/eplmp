@@ -14,7 +14,7 @@ package org.polarsys.eplmp.core.exceptions;
 import org.polarsys.eplmp.core.meta.ListOfValues;
 
 import java.text.MessageFormat;
-import java.util.Locale;
+
 
 /**
  *
@@ -29,12 +29,12 @@ public class ListOfValuesAlreadyExistsException extends EntityAlreadyExistsExcep
         mLov=null;
     }
 
-    public ListOfValuesAlreadyExistsException(Locale pLocale, ListOfValues pLov) {
-        this(pLocale, pLov, null);
+    public ListOfValuesAlreadyExistsException(ListOfValues pLov) {
+        this(pLov, null);
     }
 
-    public ListOfValuesAlreadyExistsException(Locale pLocale, ListOfValues pLov, Throwable pCause) {
-        super(pLocale, pCause);
+    public ListOfValuesAlreadyExistsException(ListOfValues pLov, Throwable pCause) {
+        super( pCause);
         mLov=pLov;
     }
 

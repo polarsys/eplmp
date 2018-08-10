@@ -14,7 +14,7 @@ package org.polarsys.eplmp.core.exceptions;
 import org.polarsys.eplmp.core.workflow.Role;
 
 import java.text.MessageFormat;
-import java.util.Locale;
+
 
 /**
  * @author Taylor Labejof
@@ -22,12 +22,12 @@ import java.util.Locale;
 public class RoleAlreadyExistsException extends EntityAlreadyExistsException {
     private final Role mRole;
 
-    public RoleAlreadyExistsException(Locale pLocale, Role pRole) {
-        this(pLocale, pRole, null);
+    public RoleAlreadyExistsException(Role pRole) {
+        this(pRole, null);
     }
 
-    public RoleAlreadyExistsException(Locale pLocale, Role pRole, Throwable pCause) {
-        super(pLocale, pCause);
+    public RoleAlreadyExistsException(Role pRole, Throwable pCause) {
+        super( pCause);
         mRole=pRole;
     }
 

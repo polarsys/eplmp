@@ -11,12 +11,10 @@
 
 package org.polarsys.eplmp.core.exceptions;
 
-import java.util.Locale;
-
 public class ConvertedResourceException extends ApplicationException {
 
-    public ConvertedResourceException(Locale pLocale, Throwable pCause) {
-        super(pLocale, pCause);
+    public ConvertedResourceException(Throwable pCause) {
+        super(pCause);
     }
 
     @Override

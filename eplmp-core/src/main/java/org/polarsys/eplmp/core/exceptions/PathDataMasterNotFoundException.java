@@ -12,7 +12,7 @@
 package org.polarsys.eplmp.core.exceptions;
 
 import java.text.MessageFormat;
-import java.util.Locale;
+
 
 /**
  *
@@ -22,27 +22,22 @@ public class PathDataMasterNotFoundException extends EntityNotFoundException {
     private final Integer mPathDataMasterId;
     private final String mPathDataMasterPath;
 
-    public PathDataMasterNotFoundException(String pMessage) {
-        super(pMessage);
-        mPathDataMasterId=null;
-        mPathDataMasterPath=null;
-    }
-    public PathDataMasterNotFoundException(Locale pLocale, String pPathDataMasterPath) {
-        this(pLocale, pPathDataMasterPath, null);
+    public PathDataMasterNotFoundException(String pPathDataMasterPath) {
+        this(pPathDataMasterPath, null);
     }
 
-    public PathDataMasterNotFoundException(Locale pLocale, String pPathDataMasterPath, Throwable pCause) {
-        super(pLocale, pCause);
+    public PathDataMasterNotFoundException(String pPathDataMasterPath, Throwable pCause) {
+        super( pCause);
         mPathDataMasterPath=pPathDataMasterPath;
         mPathDataMasterId=null;
     }
 
-    public PathDataMasterNotFoundException(Locale pLocale, Integer pPathDataMasterId) {
-        this(pLocale, pPathDataMasterId, null);
+    public PathDataMasterNotFoundException(Integer pPathDataMasterId) {
+        this(pPathDataMasterId, null);
     }
 
-    public PathDataMasterNotFoundException(Locale pLocale, Integer pPathDataMasterId, Throwable pCause) {
-        super(pLocale, pCause);
+    public PathDataMasterNotFoundException(Integer pPathDataMasterId, Throwable pCause) {
+        super( pCause);
         mPathDataMasterId=pPathDataMasterId;
         mPathDataMasterPath=null;
     }

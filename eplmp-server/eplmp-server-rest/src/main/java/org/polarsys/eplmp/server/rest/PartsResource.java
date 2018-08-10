@@ -1,15 +1,19 @@
 /*******************************************************************************
- * Copyright (c) 2017 DocDoku.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
- * <p>
- * Contributors:
- * DocDoku - initial API and implementation
- *******************************************************************************/
+  * Copyright (c) 2017 DocDoku.
+  * All rights reserved. This program and the accompanying materials
+  * are made available under the terms of the Eclipse Public License v1.0
+  * which accompanies this distribution, and is available at
+  * http://www.eclipse.org/legal/epl-v10.html
+  *
+  * Contributors:
+  *    DocDoku - initial API and implementation
+  *******************************************************************************/
+
 package org.polarsys.eplmp.server.rest;
 
+import io.swagger.annotations.*;
+import org.dozer.DozerBeanMapperSingletonWrapper;
+import org.dozer.Mapper;
 import org.polarsys.eplmp.core.change.ModificationNotification;
 import org.polarsys.eplmp.core.common.User;
 import org.polarsys.eplmp.core.configuration.ProductStructureFilter;
@@ -30,9 +34,6 @@ import org.polarsys.eplmp.server.rest.collections.QueryResult;
 import org.polarsys.eplmp.server.rest.dto.*;
 import org.polarsys.eplmp.server.rest.file.util.BinaryResourceUpload;
 import org.polarsys.eplmp.server.rest.util.SearchQueryParser;
-import io.swagger.annotations.*;
-import org.dozer.DozerBeanMapperSingletonWrapper;
-import org.dozer.Mapper;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.security.DeclareRoles;
@@ -52,7 +53,8 @@ import java.nio.file.Files;
 import java.util.*;
 
 @RequestScoped
-@Api(hidden = true, value = "parts", description = "Operation about parts")
+@Api(hidden = true, value = "parts", description = "Operation about parts",
+        authorizations = {@Authorization(value = "authorization")})
 @DeclareRoles(UserGroupMapping.REGULAR_USER_ROLE_ID)
 @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
 public class PartsResource {
@@ -99,12 +101,13 @@ public class PartsResource {
     }
 
     @GET
-    @ApiOperation(value = "Get part revisions",
+    @ApiOperation(value = "Get part revisions in workspace",
             response = PartRevisionDTO.class,
             responseContainer = "List")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of PartRevisionDTOs. It can be an empty list."),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Produces(MediaType.APPLICATION_JSON)
@@ -112,8 +115,8 @@ public class PartsResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = false, value = "Start offset", defaultValue = "0") @QueryParam("start") int start,
             @ApiParam(required = false, value = "Max results", defaultValue = "20") @QueryParam("length") int length)
-            throws EntityNotFoundException, AccessRightException, UserNotActiveException {
-
+            throws EntityNotFoundException, AccessRightException, UserNotActiveException, WorkspaceNotEnabledException {
+        // potential OOM => should restrict length
         List<PartRevision> partRevisions = productService.getPartRevisions(Tools.stripTrailingSlash(workspaceId), start, length);
         List<PartRevisionDTO> partRevisionDTOs = new ArrayList<>();
 
@@ -130,29 +133,31 @@ public class PartsResource {
     }
 
     @GET
-    @ApiOperation(value = "Count part revisions",
+    @ApiOperation(value = "Count part revisions in workspace",
             response = CountDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of PartRevisionDTO count"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("count")
     @Produces(MediaType.APPLICATION_JSON)
     public CountDTO getTotalNumberOfParts(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId)
-            throws EntityNotFoundException, AccessRightException, UserNotActiveException {
+            throws EntityNotFoundException, AccessRightException, UserNotActiveException, WorkspaceNotEnabledException {
 
         return new CountDTO(productService.getPartsInWorkspaceCount(Tools.stripTrailingSlash(workspaceId)));
     }
 
     @GET
-    @ApiOperation(value = "Get part revisions",
+    @ApiOperation(value = "Get part revisions in workspace",
             response = PartRevisionDTO.class,
             responseContainer = "List")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of PartRevisionDTOs. It can be an empty list."),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("tags/{tagId}")
@@ -160,7 +165,7 @@ public class PartsResource {
     public Response getPartRevisionsByTag(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Tag id") @PathParam("tagId") String tagId)
-            throws EntityNotFoundException, AccessRightException, UserNotActiveException {
+            throws EntityNotFoundException, AccessRightException, UserNotActiveException, WorkspaceNotEnabledException {
 
         PartRevision[] partRevisions = productService.findPartRevisionsByTag(Tools.stripTrailingSlash(workspaceId), tagId);
         List<PartRevisionDTO> partRevisionDTOs = new ArrayList<>();
@@ -178,12 +183,13 @@ public class PartsResource {
     }
 
     @GET
-    @ApiOperation(value = "Search part revisions",
+    @ApiOperation(value = "Search part revisions in workspace",
             response = PartRevisionDTO.class,
             responseContainer = "List")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of PartRevisionDTOs. It can be an empty list."),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("search")
@@ -207,7 +213,7 @@ public class PartsResource {
             @ApiParam(required = false, value = "Start offset", defaultValue = "0") @QueryParam("from") int from,
             @ApiParam(required = false, value = "Max results", defaultValue = "10") @QueryParam("size") int size,
             @ApiParam(required = false, value = "Search mode (false for history / true for head only)") @QueryParam("fetchHeadOnly") boolean fetchHeadOnly)
-            throws EntityNotFoundException, UserNotActiveException, AccessRightException, NotAllowedException {
+            throws EntityNotFoundException, UserNotActiveException, AccessRightException, NotAllowedException, WorkspaceNotEnabledException {
 
         PartSearchQuery partSearchQuery = SearchQueryParser.parsePartStringQuery(workspaceId, uri.getQueryParameters());
 
@@ -231,12 +237,13 @@ public class PartsResource {
     }
 
     @GET
-    @ApiOperation(value = "Get custom queries",
+    @ApiOperation(value = "Get custom queries in workspace",
             response = QueryDTO.class,
             responseContainer = "List")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of QueryDTOs. It can be an empty list."),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("queries")
@@ -244,8 +251,7 @@ public class PartsResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response getCustomQueries(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId)
-            throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException,
-            WorkspaceNotEnabledException {
+            throws EntityNotFoundException, UserNotActiveException, WorkspaceNotEnabledException {
 
         List<Query> queries = productService.getQueries(workspaceId);
         List<QueryDTO> queryDTOs = new ArrayList<>();
@@ -257,23 +263,24 @@ public class PartsResource {
     }
 
     @POST
-    @ApiOperation(value = "Run custom queries",
-            response = String.class)
+    @ApiOperation(value = "Run custom query in workspace",
+            response = File.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of QueryDTOs. It can be an empty list."),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("queries")
     @Consumes(MediaType.APPLICATION_JSON)
-    @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_OCTET_STREAM})
+    @Produces(MediaType.APPLICATION_OCTET_STREAM)
     public Response runCustomQuery(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = false, value = "Save the query flag", defaultValue = "false") @QueryParam("save") boolean save,
-            @ApiParam(required = false, value = "Choose export type", defaultValue = "json") @QueryParam("export") String exportType,
+            @ApiParam(required = false, value = "Choose export type", defaultValue = "JSON") @QueryParam("export") String exportType,
             @ApiParam(required = true, value = "Query to run") QueryDTO queryDTO)
             throws EntityNotFoundException, UserNotActiveException, AccessRightException, CreationException,
-            QueryAlreadyExistsException, EntityConstraintException, NotAllowedException {
+            EntityAlreadyExistsException, EntityConstraintException, NotAllowedException, WorkspaceNotEnabledException {
 
         Query query = mapper.map(queryDTO, Query.class);
         QueryResult queryResult = getQueryResult(workspaceId, query, exportType);
@@ -288,11 +295,12 @@ public class PartsResource {
 
 
     @GET
-    @ApiOperation(value = "Filter part master with config spec",
+    @ApiOperation(value = "Filter part master with in baseline : resolve part iteration",
             response = PartIterationDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of PartIterationDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{partNumber}/filter/{baselineId}")
@@ -301,11 +309,10 @@ public class PartsResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Part number") @PathParam("partNumber") String partNumber,
             @ApiParam(required = true, value = "Baseline id") @PathParam("baselineId") int baselineId)
-            throws UserNotFoundException, WorkspaceNotFoundException, UserNotActiveException,
-            BaselineNotFoundException, PartMasterNotFoundException, WorkspaceNotEnabledException {
+            throws EntityNotFoundException, UserNotActiveException, WorkspaceNotEnabledException {
 
-        ProductStructureFilter filter = filterService.getBaselinePSFilter(baselineId);
         PartMaster partMaster = productService.getPartMaster(new PartMasterKey(workspaceId, partNumber));
+        ProductStructureFilter filter = filterService.getBaselinePSFilter(baselineId);
         List<PartIteration> partIterations = filter.filter(partMaster);
         if (!partIterations.isEmpty()) {
             return Response.ok().entity(Tools.mapPartIterationToPartIterationDTO(partIterations.get(0))).build();
@@ -316,18 +323,19 @@ public class PartsResource {
 
     @GET
     @Path("{partNumber}/latest-revision")
-    @ApiOperation(value = "Get part latest revision",
+    @ApiOperation(value = "Get part master latest available revision",
             response = PartRevisionDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of PartRevisionDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Produces(MediaType.APPLICATION_JSON)
     public Response getLatestPartRevision(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Part number") @PathParam("partNumber") String partNumber)
-            throws EntityNotFoundException, AccessRightException, UserNotActiveException {
+            throws EntityNotFoundException, AccessRightException, UserNotActiveException, WorkspaceNotEnabledException {
 
         PartMasterKey masterKey = new PartMasterKey(workspaceId, partNumber);
         PartMaster partMaster = productService.getPartMaster(masterKey);
@@ -342,13 +350,13 @@ public class PartsResource {
 
     }
 
-    // TODO : set the right response class, and use it from generated API
     @POST
-    @ApiOperation(value = "Export custom query",
-            response = Response.class)
+    @ApiOperation(value = "Run and export a custom query",
+            response = File.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of PartIterationDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("query-export")
@@ -357,25 +365,23 @@ public class PartsResource {
     public Response exportCustomQuery(
             @Context HttpServletRequest request,
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
-            @ApiParam(required = false, value = "Choose export type", defaultValue = "json") @QueryParam("export") String exportType,
+            @ApiParam(required = false, value = "Choose export type", defaultValue = "JSON") @QueryParam("export") String exportType,
             @ApiParam(required = true, value = "Query to export") QueryDTO queryDTO)
-            throws BaselineNotFoundException, ProductInstanceMasterNotFoundException, EntityConstraintException,
-            WorkspaceNotFoundException, UserNotFoundException, NotAllowedException, PartMasterNotFoundException,
-            ConfigurationItemNotFoundException, UserNotActiveException, WorkspaceNotEnabledException {
+            throws EntityNotFoundException, EntityConstraintException, NotAllowedException,
+            UserNotActiveException, WorkspaceNotEnabledException {
 
         Query query = mapper.map(queryDTO, Query.class);
         User user = userManager.whoAmI(workspaceId);
-        Locale locale = new Locale(user.getLanguage());
-        return export(workspaceId, query, request, exportType, locale);
+        return export(workspaceId, query, request, exportType, user.getLocale());
     }
 
-    // TODO : set the right response class, and use it from generated API
     @GET
-    @ApiOperation(value = "Export existing query",
-            response = Response.class)
+    @ApiOperation(value = "Run and export an existing query",
+            response = File.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful export"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("queries/{queryId}/format/{export}")
@@ -385,14 +391,13 @@ public class PartsResource {
             @Context HttpServletRequest request,
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Query id") @PathParam("queryId") int queryId,
-            @ApiParam(required = true, value = "Choose export type", defaultValue = "json") @PathParam("export") String exportType)
+            @ApiParam(required = true, value = "Choose export type", defaultValue = "JSON") @PathParam("export") String exportType)
             throws EntityNotFoundException, UserNotActiveException, AccessRightException, CreationException,
-            QueryAlreadyExistsException, EntityConstraintException, NotAllowedException {
+            EntityAlreadyExistsException, EntityConstraintException, NotAllowedException, WorkspaceNotEnabledException {
 
         User user = userManager.checkWorkspaceReadAccess(workspaceId);
-        Locale locale = new Locale(user != null ? user.getLanguage() : "en");
         Query query = productService.loadQuery(workspaceId, queryId);
-        return export(workspaceId, query, request, exportType, locale);
+        return export(workspaceId, query, request, exportType, user.getLocale());
     }
 
     @DELETE
@@ -401,6 +406,7 @@ public class PartsResource {
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful deletion of QueryDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("queries/{queryId}")
@@ -408,7 +414,7 @@ public class PartsResource {
     public Response deleteQuery(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Query id") @PathParam("queryId") int queryId)
-            throws EntityNotFoundException, UserNotActiveException, AccessRightException {
+            throws EntityNotFoundException, UserNotActiveException, AccessRightException, WorkspaceNotEnabledException {
 
         productService.deleteQuery(workspaceId, queryId);
         return Response.noContent().build();
@@ -421,13 +427,14 @@ public class PartsResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful deletion of PartRevisionDTOs. It can be an empty list."),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("checkedout")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getCheckedOutPartRevisions(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId)
-            throws EntityNotFoundException, UserNotActiveException, AccessRightException {
+            throws EntityNotFoundException, UserNotActiveException, AccessRightException, WorkspaceNotEnabledException {
 
         PartRevision[] checkedOutPartRevisions = productService.getCheckedOutPartRevisions(workspaceId);
         List<PartRevisionDTO> partRevisionDTOs = new ArrayList<>();
@@ -451,25 +458,26 @@ public class PartsResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of PartRevisionDTO count"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("countCheckedOut")
     @Produces(MediaType.APPLICATION_JSON)
     public CountDTO getCheckedOutNumberOfItems(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId)
-            throws UserNotFoundException, WorkspaceNotFoundException, UserNotActiveException, AccessRightException,
-            AccountNotFoundException, WorkspaceNotEnabledException {
+            throws EntityNotFoundException, UserNotActiveException, AccessRightException, WorkspaceNotEnabledException {
 
         return new CountDTO(productService.getCheckedOutPartRevisions(workspaceId).length);
     }
 
     @GET
-    @ApiOperation(value = "Search part numbers",
+    @ApiOperation(value = "Search for available part numbers in given workspace",
             response = LightPartMasterDTO.class,
             responseContainer = "List")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of LightPartMasterDTOs. It can be an empty list."),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("numbers")
@@ -477,7 +485,7 @@ public class PartsResource {
     public Response searchPartNumbers(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Query") @QueryParam("q") String q)
-            throws EntityNotFoundException, AccessRightException {
+            throws EntityNotFoundException, AccessRightException, WorkspaceNotEnabledException {
 
         String search = "%" + q + "%";
         List<PartMaster> partMasters = productService.findPartMasters(Tools.stripTrailingSlash(workspaceId), search, search, 8);
@@ -493,7 +501,7 @@ public class PartsResource {
 
 
     @POST
-    @ApiOperation(value = "Create new part",
+    @ApiOperation(value = "Create a new part master and its first revision",
             response = PartRevisionDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of PartRevisionDTO"),
@@ -505,7 +513,7 @@ public class PartsResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Part to create") PartCreationDTO partCreationDTO)
             throws EntityNotFoundException, EntityAlreadyExistsException, CreationException, AccessRightException,
-            NotAllowedException {
+            NotAllowedException, WorkspaceNotEnabledException {
 
         String pWorkflowModelId = partCreationDTO.getWorkflowModelId();
         RoleMappingDTO[] roleMappingDTOs = partCreationDTO.getRoleMapping();
@@ -539,11 +547,11 @@ public class PartsResource {
     })
     @Path("parts_last_iter")
     @Produces(MediaType.APPLICATION_JSON)
-    public PartIterationDTO[] searchPartsLastIterationToLink(
+    public PartIterationDTO[] searchPartsLastIterationWithReferenceOrName(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Query") @QueryParam("q") String q,
             @ApiParam(required = false, value = "Max results", defaultValue = "15") @QueryParam("l") int limit)
-            throws EntityNotFoundException, UserNotActiveException {
+            throws EntityNotFoundException, UserNotActiveException, WorkspaceNotEnabledException {
 
         int maxResults = limit == 0 ? 15 : limit;
         PartRevision[] partRs = productService.getPartRevisionsWithReferenceOrName(workspaceId, q, maxResults);
@@ -560,11 +568,12 @@ public class PartsResource {
     }
 
     @POST
-    @ApiOperation(value = "Import part attributes from file",
+    @ApiOperation(value = "Import part iteration attributes from file",
             response = Response.class)
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful import"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("import")
@@ -608,12 +617,13 @@ public class PartsResource {
     }
 
     @GET
-    @ApiOperation(value = "Get current imports",
+    @ApiOperation(value = "Get imports currently running for given file",
             response = ImportDTO.class,
             responseContainer = "List")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of ImportDTOs. It can be an empty list."),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("imports/{filename}")
@@ -622,8 +632,7 @@ public class PartsResource {
     public Response getImports(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "File name") @PathParam("filename") String filename)
-            throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException,
-            WorkspaceNotEnabledException {
+            throws EntityNotFoundException, UserNotActiveException, WorkspaceNotEnabledException {
 
         List<Import> imports = productService.getImports(workspaceId, filename);
         List<ImportDTO> importDTOs = new ArrayList<>();
@@ -636,11 +645,12 @@ public class PartsResource {
     }
 
     @GET
-    @ApiOperation(value = "Get import",
+    @ApiOperation(value = "Get import by id",
             response = ImportDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of ImportDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("import/{importId}")
@@ -649,8 +659,7 @@ public class PartsResource {
     public ImportDTO getImport(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Import id") @PathParam("importId") String importId)
-            throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException,
-            AccessRightException, WorkspaceNotEnabledException {
+            throws EntityNotFoundException, UserNotActiveException, AccessRightException, WorkspaceNotEnabledException {
 
         Import anImport = productService.getImport(workspaceId, importId);
         return mapper.map(anImport, ImportDTO.class);
@@ -662,6 +671,7 @@ public class PartsResource {
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful deletion of ImportDTOs"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("import/{importId}")
@@ -670,8 +680,7 @@ public class PartsResource {
     public Response deleteImport(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Import id") @PathParam("importId") String importId)
-            throws UserNotFoundException, WorkspaceNotFoundException, UserNotActiveException,
-            AccessRightException, WorkspaceNotEnabledException {
+            throws EntityNotFoundException, UserNotActiveException, AccessRightException, WorkspaceNotEnabledException {
 
         productService.removeImport(workspaceId, importId);
         return Response.noContent().build();
@@ -684,6 +693,7 @@ public class PartsResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of ImportPreview."),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Consumes(MediaType.MULTIPART_FORM_DATA)
@@ -770,7 +780,7 @@ public class PartsResource {
      * @throws UserNotActiveException  If the user is disabled
      */
     private List<ModificationNotificationDTO> getModificationNotificationDTOs(PartRevision partRevision)
-            throws EntityNotFoundException, AccessRightException, UserNotActiveException {
+            throws EntityNotFoundException, AccessRightException, UserNotActiveException, WorkspaceNotEnabledException {
 
         PartIterationKey iterationKey = new PartIterationKey(partRevision.getKey(), partRevision.getLastIterationNumber());
         List<ModificationNotification> notifications = productService.getModificationNotifications(iterationKey);

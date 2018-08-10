@@ -11,14 +11,14 @@
 
 package org.polarsys.eplmp.server.extras;
 
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.font.PDFont;
+import org.apache.pdfbox.pdmodel.font.PDType0Font;
 import org.polarsys.eplmp.core.meta.InstanceAttribute;
 import org.polarsys.eplmp.core.meta.InstanceTextAttribute;
 import org.polarsys.eplmp.core.workflow.Activity;
 import org.polarsys.eplmp.core.workflow.Task;
 import org.polarsys.eplmp.core.workflow.Workflow;
-import org.apache.pdfbox.pdmodel.PDDocument;
-import org.apache.pdfbox.pdmodel.font.PDFont;
-import org.apache.pdfbox.pdmodel.font.PDType0Font;
 import rst.pdfbox.layout.elements.Document;
 import rst.pdfbox.layout.elements.Frame;
 import rst.pdfbox.layout.elements.Paragraph;
@@ -28,7 +28,6 @@ import rst.pdfbox.layout.elements.render.VerticalLayoutHint;
 import rst.pdfbox.layout.shape.Rect;
 import rst.pdfbox.layout.shape.Stroke;
 import rst.pdfbox.layout.text.Alignment;
-import rst.pdfbox.layout.text.BaseFont;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -39,10 +38,12 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Creates a title block to append to other documents
+ * Creates a title block to append to other documents.
  *
  * @author Morgan Guimard
  */
+
+
 public class TitleBlockWriter {
 
     private static final Integer DOCUMENT_TITLE_SIZE = 18;
@@ -65,24 +66,34 @@ public class TitleBlockWriter {
 
     private static final java.awt.Color SEPARATOR_COLOR = java.awt.Color.black;
     private static final java.awt.Color LIGHT_SEPARATOR_COLOR = java.awt.Color.lightGray;
+    private static final char SUBSTITUTION_CHAR = '?';
 
-    private static final PDFont TEXT_REGULAR_FONT = BaseFont.Helvetica.getPlainFont();
-    private static final PDFont TEXT_BOLD_FONT = BaseFont.Helvetica.getBoldFont();
-    private static final PDFont TEXT_ITALIC_FONT = BaseFont.Helvetica.getItalicFont();
+    private PDFont webIconFont;
+    private PDFont regularTextFont;
+    private PDFont boldTextFont;
+    private PDFont italicTextFont;
 
-    private PDFont iconFont;
 
     private static final Logger LOGGER = Logger.getLogger(TitleBlockWriter.class.getName());
-    private static final String ICON_FONT_FILE = "org/polarsys/eplmp/server/extras/fonts/fontawesome-webfont.ttf";
+    private static final String ICON_FONT_WEB_FILE = "org/polarsys/eplmp/server/extras/fonts/fontawesome-webfont.ttf";
+    private static final String ICON_FONT_REGULAR_FILE = "org/apache/pdfbox/resources/ttf/LiberationSans-Regular.ttf";
+    private static final String ICON_FONT_BOLD_FILE = "org/polarsys/eplmp/server/extras/fonts/liberation-sans.bold.ttf";
+    private static final String ICON_FONT_ITALIC_FILE = "org/polarsys/eplmp/server/extras/fonts/liberation-sans.italic.ttf";
+
 
     private Document document;
     private TitleBlockData data;
 
+
+    public TitleBlockWriter() {
+    }
+
     public TitleBlockWriter(TitleBlockData pData) {
         data = pData;
         document = new Document(PAGE_MARGIN_LEFT, PAGE_MARGIN_RIGHT, PAGE_MARGIN_TOP, PAGE_MARGIN_BOTTOM);
-        loadIconFont();
+        loadIconFonts();
     }
+
 
     public byte[] createTitleBlock() throws IOException {
 
@@ -98,78 +109,86 @@ public class TitleBlockWriter {
         return documentToByteArray(document);
     }
 
-    private void writeEntityInfo() throws IOException {
+    private void writeEntityInfo() {
 
-        Paragraph titleParagraph = new Paragraph();
-        titleParagraph.addText(data.getTitle(), DOCUMENT_TITLE_SIZE, TEXT_BOLD_FONT);
-        document.add(titleParagraph, new VerticalLayoutHint(Alignment.Left, 0, 0, 0, TITLE_MARGIN_BOTTOM));
+        try {
+            Paragraph titleParagraph = new Paragraph();
+            titleParagraph.addText(getTextWithSymbol(data.getTitle(), boldTextFont), DOCUMENT_TITLE_SIZE, boldTextFont);
+            document.add(titleParagraph, new VerticalLayoutHint(Alignment.Left, 0, 0, 0, TITLE_MARGIN_BOTTOM));
 
-        Paragraph paragraph = new Paragraph();
-        paragraph.addText(data.getBundleString("original.author"), TEXT_SIZE, TEXT_BOLD_FONT);
-        space(paragraph);
-        paragraph.addText(data.getAuthorName(), TEXT_SIZE, TEXT_REGULAR_FONT);
-        breakLine(paragraph);
-        paragraph.addText(data.getBundleString("iteration.date"), TEXT_SIZE, TEXT_BOLD_FONT);
-        space(paragraph);
-        paragraph.addText(data.getCreationDate(), TEXT_SIZE, TEXT_REGULAR_FONT);
-        breakLine(paragraph);
-        paragraph.addText(data.getBundleString("iteration"), TEXT_SIZE, TEXT_BOLD_FONT);
-        space(paragraph);
-        paragraph.addText(data.getCurrentIteration(), TEXT_SIZE, TEXT_REGULAR_FONT);
-        breakLine(paragraph);
-        paragraph.addText(data.getBundleString("iteration.date"), TEXT_SIZE, TEXT_BOLD_FONT);
-        space(paragraph);
-        paragraph.addText(data.getIterationDate(), TEXT_SIZE, TEXT_REGULAR_FONT);
-        breakLine(paragraph);
-
-        String revisionNote = data.getRevisionNote();
-
-        if (revisionNote != null) {
-            paragraph.addText(data.getBundleString("iteration.note"), TEXT_SIZE, TEXT_BOLD_FONT);
+            Paragraph paragraph = new Paragraph();
+            paragraph.addText(data.getBundleString("original.author"), TEXT_SIZE, boldTextFont);
             space(paragraph);
-            paragraph.addText(revisionNote, TEXT_SIZE, TEXT_REGULAR_FONT);
-        }
+            paragraph.addText(getTextWithSymbol(data.getAuthorName(), regularTextFont), TEXT_SIZE, regularTextFont);
+            breakLine(paragraph);
+            paragraph.addText(data.getBundleString("iteration.date"), TEXT_SIZE, boldTextFont);
+            space(paragraph);
+            paragraph.addText(data.getCreationDate(), TEXT_SIZE, regularTextFont);
+            breakLine(paragraph);
+            paragraph.addText(data.getBundleString("iteration"), TEXT_SIZE, boldTextFont);
+            space(paragraph);
+            paragraph.addText(data.getCurrentIteration(), TEXT_SIZE, regularTextFont);
+            breakLine(paragraph);
+            paragraph.addText(data.getBundleString("iteration.date"), TEXT_SIZE, boldTextFont);
+            space(paragraph);
+            paragraph.addText(data.getIterationDate(), TEXT_SIZE, regularTextFont);
+            breakLine(paragraph);
 
-        document.add(paragraph, new VerticalLayoutHint(Alignment.Left, 0, 0, 0, 5));
+            String revisionNote = data.getRevisionNote();
 
-        String description = data.getDescription();
+            if (revisionNote != null) {
+                paragraph.addText(data.getBundleString("iteration.note"), TEXT_SIZE, boldTextFont);
+                space(paragraph);
+                paragraph.addText(revisionNote, TEXT_SIZE, regularTextFont);
+            }
 
-        if (description != null && !description.isEmpty()) {
-            drawLightHorizontalSeparator();
-            Paragraph descriptionParagraph = new Paragraph();
-            descriptionParagraph.addText(description, TEXT_SIZE, TEXT_ITALIC_FONT);
-            document.add(descriptionParagraph);
+            document.add(paragraph, new VerticalLayoutHint(Alignment.Left, 0, 0, 0, 5));
+
+            String description = data.getDescription();
+
+            if (description != null && !description.isEmpty()) {
+                drawLightHorizontalSeparator();
+                Paragraph descriptionParagraph = new Paragraph();
+                descriptionParagraph.addText(description, TEXT_SIZE, italicTextFont);
+                document.add(descriptionParagraph);
+            }
+        } catch (IOException e) {
+            LOGGER.log(Level.WARNING, null, e);
         }
 
     }
 
 
-    private void writeAttributes() throws IOException {
+    private void writeAttributes() {
 
         List<InstanceAttribute> instanceAttributes = data.getInstanceAttributes();
 
-        if (!instanceAttributes.isEmpty()) {
+        try {
+            if (!instanceAttributes.isEmpty()) {
 
-            resetLayout();
-            drawHorizontalSeparator();
+                resetLayout();
+                drawHorizontalSeparator();
 
-            Paragraph mapTitle = new Paragraph();
-            mapTitle.addText(data.getBundleString("attributes"), TITLE_MAP_SIZE, TEXT_BOLD_FONT);
-            breakLine(mapTitle);
+                Paragraph mapTitle = new Paragraph();
+                mapTitle.addText(data.getBundleString("attributes"), TITLE_MAP_SIZE, boldTextFont);
+                breakLine(mapTitle);
 
-            document.add(mapTitle, new VerticalLayoutHint(Alignment.Left, 0, 0, 0, MAP_TITLE_MARGIN_BOTTOM));
+                document.add(mapTitle, new VerticalLayoutHint(Alignment.Left, 0, 0, 0, MAP_TITLE_MARGIN_BOTTOM));
 
-            InstanceAttribute headerAttribute = new InstanceTextAttribute(
-                    data.getBundleString("attributes.name"),
-                    data.getBundleString("attributes.value"),
-                    false
-            );
+                InstanceAttribute headerAttribute = new InstanceTextAttribute(
+                        data.getBundleString("attributes.name"),
+                        data.getBundleString("attributes.value"),
+                        false
+                );
 
-            writeAttribute(headerAttribute, true);
+                writeAttribute(headerAttribute, true);
 
-            for (InstanceAttribute attr : instanceAttributes) {
-                writeAttribute(attr, false);
+                for (InstanceAttribute attr : instanceAttributes) {
+                    writeAttribute(attr, false);
+                }
             }
+        } catch (IOException e) {
+            LOGGER.log(Level.WARNING, null, e);
         }
 
     }
@@ -182,20 +201,24 @@ public class TitleBlockWriter {
         document.add(new ColumnLayout(4, CELLS_SPACING));
 
         Paragraph keyParagraph = new Paragraph();
-        keyParagraph.addText(attr.getName(), TEXT_SIZE, TEXT_BOLD_FONT);
+        keyParagraph.addText(attr.getName(), TEXT_SIZE, boldTextFont);
         document.add(keyParagraph);
 
         document.add(ColumnLayout.NEWCOLUMN);
 
         Paragraph valueParagraph = new Paragraph();
         valueParagraph.setMaxWidth(360.0f);
-        valueParagraph.addText(String.valueOf(attr.getValue()), TEXT_SIZE, isHeaderRow ? TEXT_BOLD_FONT : TEXT_REGULAR_FONT);
+        valueParagraph.addText(String.valueOf(attr.getValue()), TEXT_SIZE, isHeaderRow ? boldTextFont : regularTextFont);
         document.add(valueParagraph);
 
     }
 
-    private void writeLifeCycleState() throws IOException {
-        drawWorkflow(data.getWorkflow());
+    private void writeLifeCycleState() {
+        try {
+            drawWorkflow(data.getWorkflow());
+        } catch (IOException e) {
+            LOGGER.log(Level.WARNING, null, e);
+        }
     }
 
     private void drawWorkflow(Workflow workflow) throws IOException {
@@ -203,7 +226,7 @@ public class TitleBlockWriter {
             resetLayout();
             drawHorizontalSeparator();
             Paragraph paragraph = new Paragraph();
-            paragraph.addText(data.getBundleString("lifecycle"), TITLE_MAP_SIZE, TEXT_BOLD_FONT);
+            paragraph.addText(data.getBundleString("lifecycle"), TITLE_MAP_SIZE, boldTextFont);
             document.add(paragraph, new VerticalLayoutHint(Alignment.Left, 0, 0, 0, 10));
 
             for (Activity activity : workflow.getActivities()) {
@@ -215,7 +238,7 @@ public class TitleBlockWriter {
     private void drawActivity(Activity activity) throws IOException {
 
         Paragraph activityTitle = new Paragraph();
-        activityTitle.addText(activity.getLifeCycleState(), TEXT_SIZE, TEXT_BOLD_FONT);
+        activityTitle.addText(activity.getLifeCycleState(), TEXT_SIZE, boldTextFont);
         breakLine(activityTitle);
         document.add(activityTitle);
 
@@ -247,9 +270,9 @@ public class TitleBlockWriter {
 
         Paragraph left = new Paragraph();
         document.add(new ColumnLayout(2, CELLS_SPACING));
-        left.addText(iconMessage, TEXT_SIZE, iconFont);
+        left.addText(iconMessage, TEXT_SIZE, webIconFont);
         space(left);
-        left.addText(task.getTitle(), TEXT_SIZE, TEXT_BOLD_FONT);
+        left.addText(task.getTitle(), TEXT_SIZE, boldTextFont);
 
         document.add(left, new VerticalLayoutHint(Alignment.Left, 0, 0, 0, 0));
 
@@ -258,7 +281,7 @@ public class TitleBlockWriter {
         Date closureDate = task.getClosureDate();
         Paragraph right = new Paragraph();
         if (closureDate != null) {
-            right.addText(data.format(closureDate), TEXT_SIZE, TEXT_ITALIC_FONT);
+            right.addText(data.format(closureDate), TEXT_SIZE, italicTextFont);
         }
         document.add(right, new VerticalLayoutHint(Alignment.Right, 0, 0, 0, 0));
 
@@ -267,15 +290,15 @@ public class TitleBlockWriter {
         document.add(new ColumnLayout(4, CELLS_SPACING));
 
         Paragraph taskDetailsLeft = new Paragraph();
-        taskDetailsLeft.addText(taskMessage, TEXT_SIZE, TEXT_ITALIC_FONT);
+        taskDetailsLeft.addText(taskMessage, TEXT_SIZE, italicTextFont);
         space(taskDetailsLeft);
-        taskDetailsLeft.addText(task.getWorker().getName(), TEXT_SIZE, TEXT_BOLD_FONT);
+        taskDetailsLeft.addText(task.getWorker().getName(), TEXT_SIZE, boldTextFont);
         document.add(taskDetailsLeft, new VerticalLayoutHint(Alignment.Left, 0, 0, 10, 10));
 
         document.add(ColumnLayout.NEWCOLUMN);
 
         Paragraph taskDetailsRight = new Paragraph();
-        taskDetailsRight.addText(task.getClosureComment(), SMALL_TEXT_SIZE, TEXT_ITALIC_FONT);
+        taskDetailsRight.addText(task.getClosureComment(), SMALL_TEXT_SIZE, italicTextFont);
         document.add(taskDetailsRight, new VerticalLayoutHint(Alignment.Left, 0, 0, 10, 10));
         taskDetailsRight.setMaxWidth(360.0f);
 
@@ -301,11 +324,11 @@ public class TitleBlockWriter {
     }
 
     private void breakLine(Paragraph p) throws IOException {
-        p.addText("\n", TEXT_SIZE, TEXT_REGULAR_FONT);
+        p.addText("\n", TEXT_SIZE, regularTextFont);
     }
 
     private void space(Paragraph p) throws IOException {
-        p.addText(" ", TEXT_SIZE, TEXT_REGULAR_FONT);
+        p.addText(" ", TEXT_SIZE, regularTextFont);
     }
 
     private void resetLayout() {
@@ -321,14 +344,46 @@ public class TitleBlockWriter {
         document.add(frame);
     }
 
-    private void loadIconFont() {
+    private void loadIconFonts() {
         PDDocument pdDocument = document.getPDDocument();
-
-        try (InputStream inputStream = TitleBlockWriter.class.getClassLoader()
-                .getResourceAsStream(ICON_FONT_FILE)) {
-            iconFont = PDType0Font.load(pdDocument, inputStream);
+        try (InputStream inputStream0 = TitleBlockWriter.class.getClassLoader()
+                .getResourceAsStream(ICON_FONT_WEB_FILE);
+             InputStream inputStream1 = TitleBlockWriter.class.getClassLoader()
+                     .getResourceAsStream(ICON_FONT_REGULAR_FILE);
+             InputStream inputStream2 = TitleBlockWriter.class.getClassLoader()
+                     .getResourceAsStream(ICON_FONT_BOLD_FILE);
+             InputStream inputStream3 = TitleBlockWriter.class.getClassLoader()
+                     .getResourceAsStream(ICON_FONT_ITALIC_FILE)) {
+            webIconFont = PDType0Font.load(pdDocument, inputStream0);
+            regularTextFont = PDType0Font.load(pdDocument, inputStream1);
+            boldTextFont = PDType0Font.load(pdDocument, inputStream2);
+            italicTextFont = PDType0Font.load(pdDocument, inputStream3);
         } catch (IOException e) {
             LOGGER.log(Level.SEVERE, null, e);
+        }
+    }
+
+    private String getTextWithSymbol(String text, PDFont font) throws IOException {
+
+        StringBuilder nonSymbolBuffer = new StringBuilder();
+        for (char character : text.toCharArray()) {
+            if (isCharacterEncodeable(character, font)) {
+                nonSymbolBuffer.append(character);
+            } else {
+                nonSymbolBuffer.append(SUBSTITUTION_CHAR);
+            }
+        }
+        return nonSymbolBuffer.toString();
+    }
+
+
+    private boolean isCharacterEncodeable(char character, PDFont font) throws IOException {
+        try {
+            font.encode(Character.toString(character));
+            return true;
+        } catch (IllegalArgumentException iae) {
+            LOGGER.log(Level.WARNING, "Character cannot be encoded", iae);
+            return false;
         }
     }
 }

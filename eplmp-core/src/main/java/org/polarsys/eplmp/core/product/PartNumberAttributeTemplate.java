@@ -10,7 +10,8 @@
   *******************************************************************************/
 package org.polarsys.eplmp.core.product;
 
-import org.polarsys.eplmp.core.meta.*;
+import org.polarsys.eplmp.core.meta.InstanceAttribute;
+import org.polarsys.eplmp.core.meta.InstanceAttributeTemplate;
 
 import javax.persistence.Entity;
 import javax.persistence.Table;

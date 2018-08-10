@@ -11,7 +11,6 @@
 package org.polarsys.eplmp.server;
 
 import org.polarsys.eplmp.core.services.ITaskManagerLocal;
-import org.polarsys.eplmp.core.services.IUserManagerLocal;
 import org.polarsys.eplmp.core.workflow.TaskKey;
 
 import javax.inject.Inject;
@@ -22,8 +21,6 @@ import javax.interceptor.InvocationContext;
 @CheckActivity
 @Interceptor
 public class ActivityCheckerInterceptor {
-    @Inject
-    private IUserManagerLocal userManager;
 
     @Inject
     private ITaskManagerLocal taskManager;

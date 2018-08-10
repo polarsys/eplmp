@@ -18,33 +18,39 @@ import org.polarsys.eplmp.core.product.PartMaster;
 import org.polarsys.eplmp.core.product.PartMasterKey;
 import org.polarsys.eplmp.core.product.PartRevision;
 
+import javax.enterprise.context.RequestScoped;
+import javax.inject.Inject;
 import javax.persistence.*;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
 import java.util.List;
-import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+@RequestScoped
 public class PartMasterDAO {
 
+    public static final String WORKSPACE_ID = "workspaceId";
+
+    @Inject
     private EntityManager em;
-    private Locale mLocale;
+
+    @Inject
+    private PartRevisionDAO partRevisionDAO;
+
+    @Inject
+    private WorkflowDAO workflowDAO;
+
     private static final Logger LOGGER = Logger.getLogger(PartMasterDAO.class.getName());
 
-    public PartMasterDAO(Locale pLocale, EntityManager pEM) {
-        em = pEM;
-        mLocale = pLocale;
+    public PartMasterDAO() {
     }
-
-    public PartMasterDAO(EntityManager pEM) {
-        em = pEM;
-        mLocale = Locale.getDefault();
-    }
-
 
     public PartMaster loadPartM(PartMasterKey pKey) throws PartMasterNotFoundException {
         PartMaster partM = em.find(PartMaster.class, pKey);
         if (partM == null) {
-            throw new PartMasterNotFoundException(mLocale, pKey.getNumber());
+            throw new PartMasterNotFoundException(pKey.getNumber());
         } else {
             return partM;
         }
@@ -55,15 +61,14 @@ public class PartMasterDAO {
             return em.getReference(PartMaster.class, pKey);
         } catch (EntityNotFoundException pENFEx) {
             LOGGER.log(Level.FINEST,null,pENFEx);
-            throw new PartMasterNotFoundException(mLocale, pKey.getNumber());
+            throw new PartMasterNotFoundException(pKey.getNumber());
         }
     }
 
     public void createPartM(PartMaster pPartM) throws PartMasterAlreadyExistsException, CreationException {
         try {
             PartRevision firstRev = pPartM.getLastRevision();
-            if(firstRev!=null && firstRev.getWorkflow()!=null){
-                WorkflowDAO workflowDAO = new WorkflowDAO(em);
+            if(firstRev!=null && firstRev.getWorkflow()!=null) {
                 workflowDAO.createWorkflow(firstRev.getWorkflow());
             }
             //the EntityExistsException is thrown only when flush occurs
@@ -71,18 +76,17 @@ public class PartMasterDAO {
             em.flush();
         } catch (EntityExistsException pEEEx) {
             LOGGER.log(Level.FINEST,null,pEEEx);
-            throw new PartMasterAlreadyExistsException(mLocale, pPartM);
+            throw new PartMasterAlreadyExistsException(pPartM);
         } catch (PersistenceException pPEx) {
             //EntityExistsException is case sensitive
             //whereas MySQL is not thus PersistenceException could be
             //thrown instead of EntityExistsException
             LOGGER.log(Level.FINEST,null,pPEx);
-            throw new CreationException(mLocale);
+            throw new CreationException();
         }
     }
 
     public void removePartM(PartMaster pPartM) {
-        PartRevisionDAO partRevisionDAO = new PartRevisionDAO(mLocale, em);
         for(PartRevision partRevision:pPartM.getPartRevisions()){
             partRevisionDAO.removeRevision(partRevision);
         }
@@ -93,7 +97,7 @@ public class PartMasterDAO {
         return em.createNamedQuery("PartMaster.findByNameOrNumber", PartMaster.class)
             .setParameter("partNumber", partNumber)
             .setParameter("partName", partName)
-            .setParameter("workspaceId", workspaceId)
+            .setParameter(WORKSPACE_ID, workspaceId)
             .setMaxResults(maxResults)
             .getResultList();
     }
@@ -108,7 +112,7 @@ public class PartMasterDAO {
                 + "WHERE m2.workspace.id = :workspaceId "
                 + "AND m2.type = :type "
                 + ")", String.class);
-        query.setParameter("workspaceId", pWorkspaceId);
+        query.setParameter(WORKSPACE_ID, pWorkspaceId);
         query.setParameter("type", pType);
         partMId = query.getSingleResult();
         return partMId;
@@ -116,7 +120,7 @@ public class PartMasterDAO {
 
     public List<PartMaster> getPartMasters(String pWorkspaceId, int pStart, int pMaxResults) {
         return em.createNamedQuery("PartMaster.findByWorkspace", PartMaster.class)
-                .setParameter("workspaceId", pWorkspaceId)
+                .setParameter(WORKSPACE_ID, pWorkspaceId)
                 .setFirstResult(pStart)
                 .setMaxResults(pMaxResults)
                 .getResultList();
@@ -138,9 +142,19 @@ public class PartMasterDAO {
         return result != null ? result.longValue() : 0L;
     }
 
-    public List<PartMaster> getAllByWorkspace(String workspaceId) {
+    public List<PartMaster> getPaginatedByWorkspace(String workspaceId, int limit, int offset) {
         return em.createNamedQuery("PartMaster.findByWorkspace",PartMaster.class)
-                .setParameter("workspaceId",workspaceId)
+                .setParameter(WORKSPACE_ID,workspaceId)
+                .setFirstResult(offset)
+                .setMaxResults(limit)
                 .getResultList();
+    }
+
+    public Long getCountByWorkspace(String workspaceId) {
+        CriteriaBuilder cb = em.getCriteriaBuilder();
+        CriteriaQuery<Long> countQuery = cb.createQuery(Long.class);
+        Root<PartMaster> pm = countQuery.from(PartMaster.class);
+        countQuery.select(cb.count(pm)).where(cb.equal(pm.get("workspace").get("id"), workspaceId));
+        return em.createQuery(countQuery).getSingleResult();
     }
 }

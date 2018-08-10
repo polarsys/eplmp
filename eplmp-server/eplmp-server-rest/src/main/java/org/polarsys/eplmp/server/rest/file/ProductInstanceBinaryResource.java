@@ -11,8 +11,12 @@
 
 package org.polarsys.eplmp.server.rest.file;
 
+import io.swagger.annotations.*;
 import org.polarsys.eplmp.core.common.BinaryResource;
+import org.polarsys.eplmp.core.configuration.PathDataMaster;
+import org.polarsys.eplmp.core.configuration.ProductInstanceIteration;
 import org.polarsys.eplmp.core.configuration.ProductInstanceIterationKey;
+import org.polarsys.eplmp.core.configuration.ProductInstanceMasterKey;
 import org.polarsys.eplmp.core.exceptions.*;
 import org.polarsys.eplmp.core.exceptions.NotAllowedException;
 import org.polarsys.eplmp.core.security.UserGroupMapping;
@@ -21,11 +25,11 @@ import org.polarsys.eplmp.core.services.IContextManagerLocal;
 import org.polarsys.eplmp.core.services.IProductInstanceManagerLocal;
 import org.polarsys.eplmp.core.services.IPublicEntityManagerLocal;
 import org.polarsys.eplmp.server.helpers.Streams;
-import org.polarsys.eplmp.server.rest.exceptions.*;
+import org.polarsys.eplmp.server.rest.exceptions.PreconditionFailedException;
+import org.polarsys.eplmp.server.rest.exceptions.RequestedRangeNotSatisfiableException;
 import org.polarsys.eplmp.server.rest.file.util.BinaryResourceDownloadMeta;
 import org.polarsys.eplmp.server.rest.file.util.BinaryResourceDownloadResponseBuilder;
 import org.polarsys.eplmp.server.rest.file.util.BinaryResourceUpload;
-import io.swagger.annotations.*;
 
 import javax.annotation.security.DeclareRoles;
 import javax.annotation.security.RolesAllowed;
@@ -46,13 +50,15 @@ import java.io.OutputStream;
 import java.net.URLEncoder;
 import java.text.Normalizer;
 import java.util.Collection;
+import java.util.List;
 
 /**
  * @author Asmae CHADID on 30/03/15.
  **/
 
 @RequestScoped
-@Api(hidden = true, value = "productInstanceBinary", description = "Operations about product instances files")
+@Api(hidden = true, value = "productInstanceBinary", description = "Operations about product instances files",
+        authorizations = {@Authorization(value = "authorization")})
 @DeclareRoles({UserGroupMapping.REGULAR_USER_ROLE_ID})
 @RolesAllowed({UserGroupMapping.REGULAR_USER_ROLE_ID})
 public class ProductInstanceBinaryResource {
@@ -78,6 +84,7 @@ public class ProductInstanceBinaryResource {
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Upload success"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("iterations/{iteration}")
@@ -90,7 +97,7 @@ public class ProductInstanceBinaryResource {
             @ApiParam(required = true, value = "Serial number") @PathParam("serialNumber") String serialNumber,
             @ApiParam(required = true, value = "Product instance iteration") @PathParam("iteration") int iteration)
             throws EntityNotFoundException, UserNotActiveException, NotAllowedException,
-            AccessRightException, EntityAlreadyExistsException, CreationException {
+            AccessRightException, EntityAlreadyExistsException, CreationException, WorkspaceNotEnabledException {
 
 
         try {
@@ -100,6 +107,10 @@ public class ProductInstanceBinaryResource {
 
             for (Part formPart : formParts) {
                 fileName = uploadAFile(workspaceId, formPart, iterationKey);
+            }
+
+            if (fileName == null) {
+                return Response.status(Response.Status.BAD_REQUEST).build();
             }
 
             if (formParts.size() == 1) {
@@ -120,6 +131,7 @@ public class ProductInstanceBinaryResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Download success"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("iterations/{iteration}/{fileName}")
@@ -135,8 +147,8 @@ public class ProductInstanceBinaryResource {
             @ApiParam(required = false, value = "Type") @QueryParam("type") String type,
             @ApiParam(required = false, value = "Output") @QueryParam("output") String output)
             throws EntityNotFoundException, UserNotActiveException, AccessRightException,
-            NotAllowedException, PreconditionFailedException, NotModifiedException,
-            RequestedRangeNotSatisfiableException, UnMatchingUuidException, SharedResourceAccessException {
+            NotAllowedException, PreconditionFailedException,
+            RequestedRangeNotSatisfiableException, WorkspaceNotEnabledException {
 
 
         String fullName = workspaceId + "/product-instances/" + serialNumber + "/iterations/" + iteration + "/" + fileName;
@@ -149,9 +161,16 @@ public class ProductInstanceBinaryResource {
             return rb.build();
         }
         InputStream binaryContentInputStream = null;
+
+        ProductInstanceMasterKey productInstanceMasterKey = new ProductInstanceMasterKey(serialNumber, workspaceId, configurationItemId);
+
+        boolean workingCopy = productInstanceManagerLocal.getProductInstanceIterations(productInstanceMasterKey).size() == iteration;
+
+        boolean isToBeCached = !workingCopy;
+
         try {
             binaryContentInputStream = storageManager.getBinaryResourceInputStream(binaryResource);
-            return BinaryResourceDownloadResponseBuilder.prepareResponse(binaryContentInputStream, binaryResourceDownloadMeta, range);
+            return BinaryResourceDownloadResponseBuilder.prepareResponse(binaryContentInputStream, binaryResourceDownloadMeta, range, isToBeCached);
         } catch (StorageException e) {
             Streams.close(binaryContentInputStream);
             return BinaryResourceDownloadResponseBuilder.downloadError(e, fullName);
@@ -168,6 +187,7 @@ public class ProductInstanceBinaryResource {
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Upload success"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("pathdata/{pathDataId}/iterations/{iteration}")
@@ -181,7 +201,7 @@ public class ProductInstanceBinaryResource {
             @ApiParam(required = true, value = "Product instance iteration") @PathParam("iteration") int iteration,
             @ApiParam(required = true, value = "PathDataMaster Id") @PathParam("pathDataId") int pathDataId)
             throws EntityNotFoundException, UserNotActiveException, NotAllowedException, AccessRightException,
-            EntityAlreadyExistsException, CreationException {
+            EntityAlreadyExistsException, CreationException, WorkspaceNotEnabledException {
 
         try {
             String fileName = null;
@@ -208,6 +228,7 @@ public class ProductInstanceBinaryResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Download success"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("pathdata/{pathDataId}/{fileName}")
@@ -223,8 +244,8 @@ public class ProductInstanceBinaryResource {
             @ApiParam(required = false, value = "Type") @QueryParam("type") String type,
             @ApiParam(required = false, value = "Output") @QueryParam("output") String output)
             throws EntityNotFoundException, UserNotActiveException, AccessRightException,
-            NotAllowedException, PreconditionFailedException, NotModifiedException,
-            RequestedRangeNotSatisfiableException, UnMatchingUuidException, SharedResourceAccessException {
+            NotAllowedException, PreconditionFailedException,
+            RequestedRangeNotSatisfiableException, WorkspaceNotEnabledException {
 
 
         String fullName = workspaceId + "/product-instances/" + serialNumber + "/pathdata/" + pathDataId + "/" + fileName;
@@ -238,9 +259,13 @@ public class ProductInstanceBinaryResource {
         }
 
         InputStream binaryContentInputStream = null;
+
+        // TODO : It seems this method is not used anywhere (to be confirmed). This variable is set only for refactoring consideration
+        boolean isToBeCached = false;
+
         try {
             binaryContentInputStream = storageManager.getBinaryResourceInputStream(binaryResource);
-            return BinaryResourceDownloadResponseBuilder.prepareResponse(binaryContentInputStream, binaryResourceDownloadMeta, range);
+            return BinaryResourceDownloadResponseBuilder.prepareResponse(binaryContentInputStream, binaryResourceDownloadMeta, range, isToBeCached);
         } catch (StorageException e) {
             Streams.close(binaryContentInputStream);
             return BinaryResourceDownloadResponseBuilder.downloadError(e, fullName);
@@ -253,6 +278,7 @@ public class ProductInstanceBinaryResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Download success"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("pathdata/{pathDataId}/iterations/{iteration}/{fileName}")
@@ -269,8 +295,7 @@ public class ProductInstanceBinaryResource {
             @ApiParam(required = false, value = "Type") @QueryParam("type") String type,
             @ApiParam(required = false, value = "Output") @QueryParam("output") String output)
             throws EntityNotFoundException, UserNotActiveException, AccessRightException, NotAllowedException,
-            PreconditionFailedException, NotModifiedException, RequestedRangeNotSatisfiableException,
-            UnMatchingUuidException, SharedResourceAccessException {
+            PreconditionFailedException, RequestedRangeNotSatisfiableException, WorkspaceNotEnabledException {
 
 
         String fullName = workspaceId + "/product-instances/" + serialNumber + "/pathdata/" + pathDataId + "/iterations/" + iteration + '/' + fileName;
@@ -285,9 +310,25 @@ public class ProductInstanceBinaryResource {
 
         InputStream binaryContentInputStream = null;
 
+        ProductInstanceIterationKey productInstanceIterationKey = new ProductInstanceIterationKey(serialNumber, workspaceId, configurationItemId, iteration);
+        ProductInstanceIteration productInstanceIteration = productInstanceManagerLocal.getProductInstanceIteration(productInstanceIterationKey).getProductInstanceMaster().getLastIteration();
+        List<PathDataMaster> pathDataMasterList = productInstanceIteration.getPathDataMasterList();
+
+        PathDataMaster pathDataMaster = pathDataMasterList.stream()
+                .filter(x -> pathDataId == x.getId())
+                .findAny()
+                .orElse(null);
+
+        boolean workingCopy = false;
+        if(pathDataMaster != null && pathDataMaster.getLastIteration() != null){
+            workingCopy = pathDataMaster.getLastIteration().getIteration() == iteration;
+        }
+
+        boolean isToBeCached = !workingCopy;
+
         try {
             binaryContentInputStream = storageManager.getBinaryResourceInputStream(binaryResource);
-            return BinaryResourceDownloadResponseBuilder.prepareResponse(binaryContentInputStream, binaryResourceDownloadMeta, range);
+            return BinaryResourceDownloadResponseBuilder.prepareResponse(binaryContentInputStream, binaryResourceDownloadMeta, range, isToBeCached);
         } catch (StorageException e) {
             Streams.close(binaryContentInputStream);
             return BinaryResourceDownloadResponseBuilder.downloadError(e, fullName);
@@ -295,7 +336,7 @@ public class ProductInstanceBinaryResource {
     }
 
     private BinaryResource getBinaryResource(String fullName)
-            throws NotAllowedException, AccessRightException, UserNotActiveException, EntityNotFoundException {
+            throws NotAllowedException, AccessRightException, UserNotActiveException, EntityNotFoundException, WorkspaceNotEnabledException {
 
         if (contextManager.isCallerInRole(UserGroupMapping.REGULAR_USER_ROLE_ID)) {
             return productInstanceManagerLocal.getBinaryResource(fullName);
@@ -305,7 +346,7 @@ public class ProductInstanceBinaryResource {
     }
 
     private BinaryResource getPathDataBinaryResource(String fullName)
-            throws NotAllowedException, AccessRightException, UserNotActiveException, EntityNotFoundException {
+            throws NotAllowedException, AccessRightException, UserNotActiveException, EntityNotFoundException, WorkspaceNotEnabledException {
         if (contextManager.isCallerInRole(UserGroupMapping.REGULAR_USER_ROLE_ID)) {
             return productInstanceManagerLocal.getPathDataBinaryResource(fullName);
         } else {
@@ -315,7 +356,7 @@ public class ProductInstanceBinaryResource {
 
 
     private String uploadAFile(String workspaceId, Part formPart, ProductInstanceIterationKey pdtIterationKey)
-            throws EntityNotFoundException, EntityAlreadyExistsException, AccessRightException, NotAllowedException, CreationException, UserNotActiveException, StorageException, IOException {
+            throws EntityNotFoundException, EntityAlreadyExistsException, AccessRightException, NotAllowedException, CreationException, UserNotActiveException, StorageException, IOException, WorkspaceNotEnabledException {
 
         String fileName = Normalizer.normalize(formPart.getSubmittedFileName(), Normalizer.Form.NFC);
         // Init the binary resource with a null length
@@ -327,7 +368,7 @@ public class ProductInstanceBinaryResource {
     }
 
     private String uploadAFileToPathData(String workspaceId, Part formPart, String configurationItemId, String serialNumber, int pathDataId, int iteration)
-            throws EntityNotFoundException, EntityAlreadyExistsException, AccessRightException, NotAllowedException, CreationException, UserNotActiveException, StorageException, IOException {
+            throws EntityNotFoundException, EntityAlreadyExistsException, AccessRightException, NotAllowedException, CreationException, UserNotActiveException, StorageException, IOException, WorkspaceNotEnabledException {
 
         String fileName = Normalizer.normalize(formPart.getSubmittedFileName(), Normalizer.Form.NFC);
         // Init the binary resource with a null length
@@ -339,7 +380,7 @@ public class ProductInstanceBinaryResource {
     }
 
     private String uploadAFileToPathDataIteration(String workspaceId, Part formPart, String configurationItemId, String serialNumber, int pathDataId, int iteration)
-            throws EntityNotFoundException, EntityAlreadyExistsException, AccessRightException, NotAllowedException, CreationException, UserNotActiveException, StorageException, IOException {
+            throws EntityNotFoundException, EntityAlreadyExistsException, AccessRightException, NotAllowedException, CreationException, UserNotActiveException, StorageException, IOException, WorkspaceNotEnabledException {
 
         String fileName = Normalizer.normalize(formPart.getSubmittedFileName(), Normalizer.Form.NFC);
         // Init the binary resource with a null length

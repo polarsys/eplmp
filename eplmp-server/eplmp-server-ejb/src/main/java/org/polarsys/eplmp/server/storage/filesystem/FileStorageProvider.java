@@ -11,17 +11,16 @@
 
 package org.polarsys.eplmp.server.storage.filesystem;
 
+import org.apache.commons.io.FileUtils;
 import org.polarsys.eplmp.core.common.BinaryResource;
 import org.polarsys.eplmp.core.exceptions.FileNotFoundException;
 import org.polarsys.eplmp.core.exceptions.StorageException;
 import org.polarsys.eplmp.core.util.FileIO;
 import org.polarsys.eplmp.core.util.Tools;
 import org.polarsys.eplmp.server.storage.StorageProvider;
-import org.apache.commons.io.FileUtils;
 
 import java.io.*;
 import java.util.Date;
-import java.util.List;
 import java.util.logging.Logger;
 
 
@@ -152,7 +151,7 @@ public class FileStorageProvider implements StorageProvider {
     }
 
     @Override
-    public void deleteWorkspaceFolder(String workspaceId, List<BinaryResource> binaryResourcesInWorkspace) throws StorageException {
+    public void deleteWorkspaceFolder(String workspaceId) throws StorageException {
         if(workspaceId != null && !workspaceId.isEmpty()){
             try{
                 File rootFolder = new File(vaultPath + "/" + workspaceId);

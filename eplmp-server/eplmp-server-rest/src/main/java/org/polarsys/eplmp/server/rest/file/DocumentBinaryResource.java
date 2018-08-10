@@ -10,6 +10,7 @@
   *******************************************************************************/
 package org.polarsys.eplmp.server.rest.file;
 
+import io.swagger.annotations.*;
 import org.polarsys.eplmp.core.common.BinaryResource;
 import org.polarsys.eplmp.core.document.DocumentIteration;
 import org.polarsys.eplmp.core.document.DocumentIterationKey;
@@ -26,12 +27,13 @@ import org.polarsys.eplmp.core.util.HashUtils;
 import org.polarsys.eplmp.server.auth.AuthConfig;
 import org.polarsys.eplmp.server.auth.jwt.JWTokenFactory;
 import org.polarsys.eplmp.server.helpers.Streams;
-import org.polarsys.eplmp.server.rest.exceptions.*;
+import org.polarsys.eplmp.server.rest.exceptions.FileConversionException;
+import org.polarsys.eplmp.server.rest.exceptions.PreconditionFailedException;
+import org.polarsys.eplmp.server.rest.exceptions.RequestedRangeNotSatisfiableException;
 import org.polarsys.eplmp.server.rest.file.util.BinaryResourceDownloadMeta;
 import org.polarsys.eplmp.server.rest.file.util.BinaryResourceDownloadResponseBuilder;
 import org.polarsys.eplmp.server.rest.file.util.BinaryResourceUpload;
 import org.polarsys.eplmp.server.rest.interceptors.Compress;
-import io.swagger.annotations.*;
 
 import javax.annotation.security.DeclareRoles;
 import javax.annotation.security.RolesAllowed;
@@ -84,10 +86,12 @@ public class DocumentBinaryResource {
 
     @POST
     @ApiOperation(value = "Upload document file",
-            response = Response.class)
+            response = Response.class,
+            authorizations = {@Authorization(value = "authorization")})
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Upload success"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @ApiImplicitParams({
@@ -103,7 +107,7 @@ public class DocumentBinaryResource {
             @ApiParam(required = true, value = "Workspace version") @PathParam("version") final String version,
             @ApiParam(required = true, value = "Document iteration") @PathParam("iteration") final int iteration)
             throws EntityNotFoundException, EntityAlreadyExistsException, UserNotActiveException, AccessRightException,
-            NotAllowedException, CreationException {
+            NotAllowedException, CreationException, WorkspaceNotEnabledException {
 
         try {
             String fileName = null;
@@ -114,24 +118,27 @@ public class DocumentBinaryResource {
                 fileName = uploadAFile(formPart, docPK);
             }
 
+            if (fileName == null) {
+                return Response.status(Response.Status.BAD_REQUEST).build();
+            }
+
             if (formParts.size() == 1) {
-                // todo prevent NPE for filename
                 return BinaryResourceUpload.tryToRespondCreated(request.getRequestURI() + URLEncoder.encode(fileName, "UTF-8"));
             }
-            return Response.noContent().build();
 
+            return Response.noContent().build();
         } catch (IOException | ServletException | StorageException e) {
             return BinaryResourceUpload.uploadError(e);
         }
     }
 
-    // TODO use uuid as QueryParam
     @GET
     @ApiOperation(value = "Download document file",
             response = File.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Download success"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("/{iteration}/{fileName}")
@@ -151,8 +158,7 @@ public class DocumentBinaryResource {
             @ApiParam(required = false, value = "Password for private resource") @HeaderParam("password") String password,
             @ApiParam(required = false, value = "Shared entity token") @QueryParam("token") String accessToken)
             throws EntityNotFoundException, UserNotActiveException, AccessRightException, NotAllowedException,
-            NotModifiedException, PreconditionFailedException, RequestedRangeNotSatisfiableException,
-            UnMatchingUuidException, SharedResourceAccessException {
+            PreconditionFailedException, RequestedRangeNotSatisfiableException, WorkspaceNotEnabledException {
 
         BinaryResource binaryResource;
         String decodedFileName = fileName;
@@ -164,6 +170,8 @@ public class DocumentBinaryResource {
 
         String fullName = workspaceId + "/documents/" + FileIO.encode(documentId) + "/" + version + "/" + iteration + "/" + decodedFileName;
 
+        boolean isWorkingCopy = false;
+
         if (uuid != null && !uuid.isEmpty()) {
             SharedEntity sharedEntity = shareService.findSharedEntityForGivenUUID(uuid);
 
@@ -172,7 +180,7 @@ public class DocumentBinaryResource {
                 String decodedUUID = JWTokenFactory.validateSharedResourceToken(authConfig.getJWTKey(), accessToken);
 
                 if (null == decodedUUID || !decodedUUID.equals(sharedEntity.getUuid())) {
-                    throw new SharedResourceAccessException();
+                    throw new NotAllowedException("NotAllowedException73");
                 }
 
             } else {
@@ -182,6 +190,20 @@ public class DocumentBinaryResource {
 
             binaryResource = publicEntityManager.getBinaryResourceForSharedEntity(fullName);
 
+            // sharedEntity is always a SharedDocument
+
+            if (sharedEntity instanceof SharedDocument) {
+
+                SharedDocument document = (SharedDocument) sharedEntity;
+
+                DocumentRevision documentRevision = document.getDocumentRevision();
+
+                DocumentIteration workingIteration = documentRevision.getWorkingCopy();
+
+                isWorkingCopy = documentRevision.getLastIteration().equals(workingIteration);
+
+            }
+
         } else {
             // Check access right
 
@@ -189,16 +211,20 @@ public class DocumentBinaryResource {
                 String decodedEntityKey = JWTokenFactory.validateEntityToken(authConfig.getJWTKey(), accessToken);
                 boolean tokenValid = new DocumentRevisionKey(workspaceId, documentId, version).toString().equals(decodedEntityKey);
                 if (!tokenValid) {
-                    throw new SharedResourceAccessException();
+                    throw new NotAllowedException("NotAllowedException73");
                 }
                 binaryResource = publicEntityManager.getBinaryResourceForSharedEntity(fullName);
             } else {
                 if (!canAccess(new DocumentIterationKey(workspaceId, documentId, version, iteration))) {
-                    throw new SharedResourceAccessException();
+                    throw new NotAllowedException("NotAllowedException73");
                 }
                 binaryResource = getBinaryResource(fullName);
+                DocumentRevision docRevision = documentService.getDocumentRevision(new DocumentRevisionKey(workspaceId, documentId, version));
+                DocumentIteration workingIteration = docRevision.getWorkingCopy();
+                if (workingIteration != null) {
+                    isWorkingCopy = workingIteration.getIteration() == iteration;
+                }
             }
-
         }
 
         BinaryResourceDownloadMeta binaryResourceDownloadMeta = new BinaryResourceDownloadMeta(binaryResource, output, type);
@@ -211,6 +237,8 @@ public class DocumentBinaryResource {
 
         InputStream binaryContentInputStream = null;
 
+        boolean isToBeCached = !isWorkingCopy;
+
         try {
 
             if (output != null && !output.isEmpty()) {
@@ -222,7 +250,7 @@ public class DocumentBinaryResource {
                 binaryContentInputStream = storageManager.getBinaryResourceInputStream(binaryResource);
             }
 
-            return BinaryResourceDownloadResponseBuilder.prepareResponse(binaryContentInputStream, binaryResourceDownloadMeta, range);
+            return BinaryResourceDownloadResponseBuilder.prepareResponse(binaryContentInputStream, binaryResourceDownloadMeta, range, isToBeCached);
 
         } catch (StorageException | FileConversionException e) {
             Streams.close(binaryContentInputStream);
@@ -232,7 +260,7 @@ public class DocumentBinaryResource {
     }
 
     private String uploadAFile(Part formPart, DocumentIterationKey docPK)
-            throws EntityNotFoundException, EntityAlreadyExistsException, AccessRightException, NotAllowedException, CreationException, UserNotActiveException, StorageException, IOException {
+            throws EntityNotFoundException, EntityAlreadyExistsException, AccessRightException, NotAllowedException, CreationException, UserNotActiveException, StorageException, IOException, WorkspaceNotEnabledException {
 
         String fileName = Normalizer.normalize(formPart.getSubmittedFileName(), Normalizer.Form.NFC);
         // Init the binary resource with a null length
@@ -249,7 +277,7 @@ public class DocumentBinaryResource {
      * @param binaryResource The binary resource
      * @param outputFormat   The wanted output
      * @return The binary resource stream in the wanted output
-     * @throws org.polarsys.eplmp.server.rest.exceptions.FileConversionException
+     * @throws FileConversionException
      */
     private InputStream getConvertedBinaryResource(BinaryResource binaryResource, String outputFormat) throws FileConversionException {
         try {
@@ -266,7 +294,7 @@ public class DocumentBinaryResource {
     }
 
     private BinaryResource getBinaryResource(String fullName)
-            throws NotAllowedException, AccessRightException, UserNotActiveException, EntityNotFoundException {
+            throws NotAllowedException, AccessRightException, UserNotActiveException, EntityNotFoundException, WorkspaceNotEnabledException {
         BinaryResource binaryResource = publicEntityManager.getPublicBinaryResourceForDocument(fullName);
         if (binaryResource != null) {
             return binaryResource;
@@ -276,9 +304,9 @@ public class DocumentBinaryResource {
     }
 
     private void checkUuidValidity(SharedEntity sharedEntity, String workspaceId, String documentId, String version, int iteration, String password)
-            throws UnMatchingUuidException, SharedResourceAccessException, NotAllowedException {
+            throws NotAllowedException {
         if (!(sharedEntity instanceof SharedDocument)) {
-            throw new UnMatchingUuidException();
+            throw new NotAllowedException("NotAllowedException73");
         }
 
         checkUuidExpiredDate(sharedEntity);
@@ -291,28 +319,28 @@ public class DocumentBinaryResource {
                 !documentRevision.getDocumentMasterId().equals(documentId) ||
                 !documentRevision.getVersion().equals(version) ||
                 (null != lastCheckedInIteration && lastCheckedInIteration.getIteration() < iteration)) {
-            throw new UnMatchingUuidException();
+            throw new NotAllowedException("NotAllowedException73");
         }
     }
 
-    private void checkUuidPassword(SharedEntity sharedEntity, String password) throws SharedResourceAccessException {
+    private void checkUuidPassword(SharedEntity sharedEntity, String password) throws NotAllowedException {
         String entityPassword = sharedEntity.getPassword();
         if (entityPassword != null && !entityPassword.isEmpty()) {
             try {
                 if (password == null || password.isEmpty() || !entityPassword.equals(HashUtils.md5Sum(password))) {
-                    throw new SharedResourceAccessException();
+                    throw new NotAllowedException("NotAllowedException73");
                 }
             } catch (NoSuchAlgorithmException | UnsupportedEncodingException e) {
-                throw new SharedResourceAccessException();
+                throw new NotAllowedException("NotAllowedException73");
             }
         }
     }
 
-    private void checkUuidExpiredDate(SharedEntity sharedEntity) throws SharedResourceAccessException {
+    private void checkUuidExpiredDate(SharedEntity sharedEntity) throws NotAllowedException {
         // Check shared entity expired
         if (sharedEntity.getExpireDate() != null && sharedEntity.getExpireDate().getTime() < new Date().getTime()) {
             shareService.deleteSharedEntityIfExpired(sharedEntity);
-            throw new SharedResourceAccessException();
+            throw new NotAllowedException("NotAllowedException73");
         }
     }
 

@@ -21,7 +21,7 @@ import java.io.Serializable;
  * @author Charles Fallourd on 23/03/16.
  */
 @XmlRootElement
-@ApiModel(value="UserGroupDTO", description="This class is a representation of a {@link org.polarsys.eplmp.core.common.UserGroup} entity")
+@ApiModel(value="UserGroupDTO", description="This class is a representation of an {@link org.polarsys.eplmp.core.common.UserGroup} entity")
 public class UserGroupDTO implements Serializable{
 
     @ApiModelProperty(value = "User group id")

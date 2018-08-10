@@ -10,6 +10,8 @@
   *******************************************************************************/
 package org.polarsys.eplmp.server.rest.writers;
 
+import org.dozer.DozerBeanMapperSingletonWrapper;
+import org.dozer.Mapper;
 import org.polarsys.eplmp.core.common.User;
 import org.polarsys.eplmp.core.configuration.*;
 import org.polarsys.eplmp.core.document.DocumentIteration;
@@ -32,8 +34,6 @@ import org.polarsys.eplmp.core.util.Tools;
 import org.polarsys.eplmp.server.export.ExcelGenerator;
 import org.polarsys.eplmp.server.rest.collections.QueryResult;
 import org.polarsys.eplmp.server.rest.dto.InstanceAttributeDTO;
-import org.dozer.DozerBeanMapperSingletonWrapper;
-import org.dozer.Mapper;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
@@ -93,7 +93,8 @@ public class QueryResultMessageBodyWriter implements MessageBodyWriter<QueryResu
         } else if (queryResult.getExportType().equals(QueryResult.ExportType.XLS)) {
             httpHeaders.putSingle("Content-Type", "application/octet-stream");
             httpHeaders.putSingle("Content-Disposition", "attachment; filename=\"TSR.csv\"");
-            excelGenerator.generateXLSResponse(queryResult, new Locale(queryResult.getQuery().getAuthor().getLanguage()), "");
+            User author = queryResult.getQuery().getAuthor();
+            excelGenerator.generateXLSResponse(queryResult, author.getLocale(), "");
         } else {
             throw new IllegalArgumentException();
         }
@@ -228,7 +229,6 @@ public class QueryResultMessageBodyWriter implements MessageBodyWriter<QueryResu
                 }
 
                 jg.write(QueryField.PART_ITERATION_LINKED_DOCUMENTS, sb.toString());
-
             }
 
             for (String attributeSelect : partIterationSelectedAttributes) {
@@ -350,6 +350,7 @@ public class QueryResultMessageBodyWriter implements MessageBodyWriter<QueryResu
             }
 
             jg.writeEnd();
+            jg.flush();
         }
 
         jg.writeEnd();

@@ -10,15 +10,15 @@
   *******************************************************************************/
 package org.polarsys.eplmp.server.rest.dto;
 
-import org.polarsys.eplmp.core.product.RotationType;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import org.polarsys.eplmp.core.product.RotationType;
 
 import javax.xml.bind.annotation.XmlRootElement;
 import java.io.Serializable;
 
 @XmlRootElement
-@ApiModel(value="CADInstanceDTO", description="This class is the representation of an {@link org.polarsys.eplmp.core.product.CADInstance} entity")
+@ApiModel(value="CADInstanceDTO", description="This class is the representation of a {@link org.polarsys.eplmp.core.product.CADInstance} entity")
 public class CADInstanceDTO implements Serializable {
 
     @ApiModelProperty(value = "Rotation around x Axis")

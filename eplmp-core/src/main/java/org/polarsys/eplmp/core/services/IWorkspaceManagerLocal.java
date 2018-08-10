@@ -11,11 +11,11 @@
 
 package org.polarsys.eplmp.core.services;
 
+import org.polarsys.eplmp.core.admin.WorkspaceBackOptions;
 import org.polarsys.eplmp.core.admin.WorkspaceFrontOptions;
 import org.polarsys.eplmp.core.common.Account;
 import org.polarsys.eplmp.core.common.Workspace;
 import org.polarsys.eplmp.core.exceptions.*;
-import org.polarsys.eplmp.core.admin.WorkspaceBackOptions;
 
 /**
  * @author Morgan Guimard
@@ -25,19 +25,19 @@ import org.polarsys.eplmp.core.admin.WorkspaceBackOptions;
 public interface IWorkspaceManagerLocal {
     long getDiskUsageInWorkspace(String workspaceId) throws AccountNotFoundException;
 
-    void deleteWorkspace(String workspaceId);
+    void deleteWorkspace(String workspaceId) throws WorkspaceNotFoundException, AccountNotFoundException, AccessRightException;
 
-    Workspace changeAdmin(String workspaceId, String login) throws WorkspaceNotFoundException, AccountNotFoundException, UserNotFoundException, UserNotActiveException, AccessRightException, WorkspaceNotEnabledException;
+    Workspace changeAdmin(String workspaceId, String login) throws WorkspaceNotFoundException, AccountNotFoundException, UserNotFoundException, UserNotActiveException, AccessRightException, WorkspaceNotEnabledException, NotAllowedException;
 
     Workspace enableWorkspace(String workspaceId, boolean enabled) throws WorkspaceNotFoundException;
 
     void updateWorkspaceBackOptions(WorkspaceBackOptions pWorkspaceBackOptions) throws WorkspaceNotFoundException, AccountNotFoundException, AccessRightException;
 
     WorkspaceBackOptions getWorkspaceBackOptions(String workspaceId) throws WorkspaceNotFoundException, AccountNotFoundException, AccessRightException;
-    Workspace getWorkspace(String pWorkspaceId) throws WorkspaceNotFoundException, AccountNotFoundException;
+    Workspace getWorkspace(String pWorkspaceId) throws WorkspaceNotFoundException, AccountNotFoundException, UserNotFoundException, UserNotActiveException, WorkspaceNotEnabledException;
     Workspace createWorkspace(String pID, Account pAdmin, String pDescription, boolean pFolderLocked) throws FolderAlreadyExistsException, UserAlreadyExistsException, WorkspaceAlreadyExistsException, CreationException,  NotAllowedException;
     Workspace updateWorkspace(String workspaceId, String description, boolean isFolderLocked) throws AccessRightException, AccountNotFoundException, WorkspaceNotFoundException;
     void updateWorkspaceFrontOptions(WorkspaceFrontOptions pWorkspaceFrontOptions) throws AccessRightException, AccountNotFoundException, WorkspaceNotFoundException;
-    WorkspaceFrontOptions getWorkspaceFrontOptions(String workspaceId) throws AccountNotFoundException, WorkspaceNotFoundException;
+    WorkspaceFrontOptions getWorkspaceFrontOptions(String workspaceId) throws AccountNotFoundException, WorkspaceNotFoundException, UserNotFoundException, UserNotActiveException, WorkspaceNotEnabledException;
 
 }

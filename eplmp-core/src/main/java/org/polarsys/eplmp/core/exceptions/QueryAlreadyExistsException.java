@@ -14,7 +14,7 @@ package org.polarsys.eplmp.core.exceptions;
 import org.polarsys.eplmp.core.query.Query;
 
 import java.text.MessageFormat;
-import java.util.Locale;
+
 
 /**
  * @author Morgan Guimard
@@ -22,12 +22,12 @@ import java.util.Locale;
 public class QueryAlreadyExistsException extends EntityAlreadyExistsException {
     private final Query mQuery;
 
-    public QueryAlreadyExistsException(Locale pLocale, Query query) {
-        this(pLocale, query, null);
+    public QueryAlreadyExistsException(Query query) {
+        this(query, null);
     }
 
-    public QueryAlreadyExistsException(Locale pLocale, Query pQuery, Throwable pCause) {
-        super(pLocale, pCause);
+    public QueryAlreadyExistsException(Query pQuery, Throwable pCause) {
+        super( pCause);
         mQuery=pQuery;
     }
 

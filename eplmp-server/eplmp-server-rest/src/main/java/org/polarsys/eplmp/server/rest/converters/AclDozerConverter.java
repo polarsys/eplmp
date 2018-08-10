@@ -11,13 +11,13 @@
 
 package org.polarsys.eplmp.server.rest.converters;
 
+import org.dozer.DozerConverter;
 import org.polarsys.eplmp.core.common.User;
 import org.polarsys.eplmp.core.common.UserGroup;
 import org.polarsys.eplmp.core.security.ACL;
 import org.polarsys.eplmp.core.security.ACLUserEntry;
 import org.polarsys.eplmp.core.security.ACLUserGroupEntry;
 import org.polarsys.eplmp.server.rest.dto.ACLDTO;
-import org.dozer.DozerConverter;
 
 import java.util.Map;
 
@@ -30,9 +30,9 @@ public class AclDozerConverter extends DozerConverter<ACL, ACLDTO> {
     }
 
     @Override
-    public ACLDTO convertTo(ACL acl, ACLDTO aclDTO) {
+    public ACLDTO convertTo(ACL acl, ACLDTO pAclDTO) {
 
-        aclDTO = new ACLDTO();
+        ACLDTO aclDTO = new ACLDTO();
 
         if (acl != null) {
 

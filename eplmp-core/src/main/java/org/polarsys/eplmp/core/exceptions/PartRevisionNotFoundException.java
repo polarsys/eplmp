@@ -16,7 +16,7 @@ import org.polarsys.eplmp.core.common.Version;
 import org.polarsys.eplmp.core.product.PartRevisionKey;
 
 import java.text.MessageFormat;
-import java.util.Locale;
+
 
 /**
  *
@@ -32,24 +32,24 @@ public class PartRevisionNotFoundException extends EntityNotFoundException {
         mPartRStringVersion=null;
     }
 
-    public PartRevisionNotFoundException(Locale pLocale, PartRevisionKey pPartRPK) {
-        this(pLocale, pPartRPK, null);
+    public PartRevisionNotFoundException(PartRevisionKey pPartRPK) {
+        this(pPartRPK, null);
     }
 
-    public PartRevisionNotFoundException(Locale pLocale, PartRevisionKey pPartRPK, Throwable pCause) {
-        this(pLocale, pPartRPK.getPartMaster().getNumber(), pPartRPK.getVersion(), pCause);
+    public PartRevisionNotFoundException(PartRevisionKey pPartRPK, Throwable pCause) {
+        this(pPartRPK.getPartMaster().getNumber(), pPartRPK.getVersion(), pCause);
     }
 
-    public PartRevisionNotFoundException(Locale pLocale, String pPartMNumber, Version pPartRVersion) {
-        this(pLocale, pPartMNumber, pPartRVersion.toString(), null);
+    public PartRevisionNotFoundException(String pPartMNumber, Version pPartRVersion) {
+        this(pPartMNumber, pPartRVersion.toString(), null);
     }
 
-    public PartRevisionNotFoundException(Locale pLocale, String pPartMNumber, String pPartRStringVersion) {
-        this(pLocale, pPartMNumber, pPartRStringVersion, null);
+    public PartRevisionNotFoundException(String pPartMNumber, String pPartRStringVersion) {
+        this(pPartMNumber, pPartRStringVersion, null);
     }
 
-    public PartRevisionNotFoundException(Locale pLocale, String pPartMNumber, String pPartRStringVersion, Throwable pCause) {
-        super(pLocale, pCause);
+    public PartRevisionNotFoundException(String pPartMNumber, String pPartRStringVersion, Throwable pCause) {
+        super( pCause);
         mPartMNumber=pPartMNumber;
         mPartRStringVersion=pPartRStringVersion;
     }

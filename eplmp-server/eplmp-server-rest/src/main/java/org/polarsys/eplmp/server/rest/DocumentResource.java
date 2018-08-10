@@ -10,7 +10,10 @@
   *******************************************************************************/
 package org.polarsys.eplmp.server.rest;
 
-import org.polarsys.eplmp.core.common.*;
+import io.swagger.annotations.*;
+import org.dozer.DozerBeanMapperSingletonWrapper;
+import org.dozer.Mapper;
+import org.polarsys.eplmp.core.common.BinaryResource;
 import org.polarsys.eplmp.core.configuration.PathDataMaster;
 import org.polarsys.eplmp.core.configuration.ProductInstanceMaster;
 import org.polarsys.eplmp.core.document.DocumentIteration;
@@ -23,7 +26,7 @@ import org.polarsys.eplmp.core.meta.InstanceAttribute;
 import org.polarsys.eplmp.core.meta.Tag;
 import org.polarsys.eplmp.core.product.PartIteration;
 import org.polarsys.eplmp.core.product.PartLink;
-import org.polarsys.eplmp.core.security.*;
+import org.polarsys.eplmp.core.security.UserGroupMapping;
 import org.polarsys.eplmp.core.services.IDocumentManagerLocal;
 import org.polarsys.eplmp.core.services.IDocumentWorkflowManagerLocal;
 import org.polarsys.eplmp.core.services.IProductManagerLocal;
@@ -32,9 +35,6 @@ import org.polarsys.eplmp.core.util.FileIO;
 import org.polarsys.eplmp.core.workflow.Workflow;
 import org.polarsys.eplmp.server.rest.dto.*;
 import org.polarsys.eplmp.server.rest.dto.product.ProductInstanceMasterDTO;
-import io.swagger.annotations.*;
-import org.dozer.DozerBeanMapperSingletonWrapper;
-import org.dozer.Mapper;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.security.DeclareRoles;
@@ -49,7 +49,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @RequestScoped
-@Api(hidden = true, value = "document", description = "Operations about document")
+@Api(hidden = true, value = "document", description = "Operations about document",
+        authorizations = {@Authorization(value = "authorization")})
 @DeclareRoles(UserGroupMapping.REGULAR_USER_ROLE_ID)
 @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
 public class DocumentResource {
@@ -74,11 +75,12 @@ public class DocumentResource {
     }
 
     @GET
-    @ApiOperation(value = "Get document",
+    @ApiOperation(value = "Get document revision",
             response = DocumentRevisionDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of DocumentRevisionDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Produces(MediaType.APPLICATION_JSON)
@@ -86,7 +88,7 @@ public class DocumentResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Document master id") @PathParam("documentId") String documentId,
             @ApiParam(required = true, value = "Document version") @PathParam("documentVersion") String documentVersion)
-            throws EntityNotFoundException, AccessRightException, NotAllowedException, UserNotActiveException {
+            throws EntityNotFoundException, AccessRightException, NotAllowedException, UserNotActiveException, WorkspaceNotEnabledException {
 
         DocumentRevisionKey documentRevisionKey = new DocumentRevisionKey(workspaceId, documentId, documentVersion);
         DocumentRevision docR = documentService.getDocumentRevision(documentRevisionKey);
@@ -104,11 +106,12 @@ public class DocumentResource {
 
 
     @PUT
-    @ApiOperation(value = "Checkin document",
+    @ApiOperation(value = "Checkin document revision",
             response = DocumentRevisionDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of checked in DocumentRevisionDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("/checkin")
@@ -118,7 +121,7 @@ public class DocumentResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Document master id") @PathParam("documentId") String documentId,
             @ApiParam(required = true, value = "Document version") @PathParam("documentVersion") String documentVersion)
-            throws NotAllowedException, EntityNotFoundException, AccessRightException, UserNotActiveException {
+            throws NotAllowedException, EntityNotFoundException, AccessRightException, UserNotActiveException, WorkspaceNotEnabledException {
         DocumentRevision docR = documentService.checkInDocument(new DocumentRevisionKey(workspaceId, documentId, documentVersion));
         DocumentRevisionDTO docRsDTO = mapper.map(docR, DocumentRevisionDTO.class);
         docRsDTO.setPath(docR.getLocation().getCompletePath());
@@ -126,11 +129,12 @@ public class DocumentResource {
     }
 
     @PUT
-    @ApiOperation(value = "Checkout document",
+    @ApiOperation(value = "Checkout document revision",
             response = DocumentRevisionDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of checked out DocumentRevisionDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("/checkout")
@@ -141,7 +145,7 @@ public class DocumentResource {
             @ApiParam(required = true, value = "Document master id") @PathParam("documentId") String documentId,
             @ApiParam(required = true, value = "Document version") @PathParam("documentVersion") String documentVersion)
             throws EntityNotFoundException, NotAllowedException, CreationException, AccessRightException,
-            UserNotActiveException, EntityAlreadyExistsException {
+            UserNotActiveException, EntityAlreadyExistsException, WorkspaceNotEnabledException {
 
         DocumentRevision docR = documentService.checkOutDocument(new DocumentRevisionKey(workspaceId, documentId, documentVersion));
         DocumentRevisionDTO docRsDTO = mapper.map(docR, DocumentRevisionDTO.class);
@@ -151,11 +155,12 @@ public class DocumentResource {
     }
 
     @PUT
-    @ApiOperation(value = "Undo checkout document",
+    @ApiOperation(value = "Undo checkout document revision",
             response = DocumentRevisionDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of undo checked out DocumentRevisionDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("/undocheckout")
@@ -165,7 +170,7 @@ public class DocumentResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Document master id") @PathParam("documentId") String documentId,
             @ApiParam(required = true, value = "Document version") @PathParam("documentVersion") String documentVersion)
-            throws EntityNotFoundException, NotAllowedException, UserNotActiveException, AccessRightException {
+            throws EntityNotFoundException, NotAllowedException, UserNotActiveException, AccessRightException, WorkspaceNotEnabledException {
         DocumentRevision docR = documentService.undoCheckOutDocument(new DocumentRevisionKey(workspaceId, documentId, documentVersion));
         DocumentRevisionDTO docRsDTO = mapper.map(docR, DocumentRevisionDTO.class);
         docRsDTO.setPath(docR.getLocation().getCompletePath());
@@ -174,11 +179,12 @@ public class DocumentResource {
     }
 
     @PUT
-    @ApiOperation(value = "Move document to folder",
+    @ApiOperation(value = "Move document revision to given folder",
             response = DocumentRevisionDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of updated DocumentRevisionDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("/move")
@@ -189,7 +195,7 @@ public class DocumentResource {
             @ApiParam(required = true, value = "Document master id") @PathParam("documentId") String documentId,
             @ApiParam(required = true, value = "Document version") @PathParam("documentVersion") String documentVersion,
             @ApiParam(required = true, value = "Document revision to move") DocumentCreationDTO docCreationDTO)
-            throws EntityNotFoundException, NotAllowedException, AccessRightException, UserNotActiveException {
+            throws EntityNotFoundException, NotAllowedException, AccessRightException, UserNotActiveException, WorkspaceNotEnabledException {
         String parentFolderPath = docCreationDTO.getPath();
         String newCompletePath = Tools.stripTrailingSlash(parentFolderPath);
         DocumentRevisionKey docRsKey = new DocumentRevisionKey(workspaceId, documentId, documentVersion);
@@ -201,11 +207,12 @@ public class DocumentResource {
     }
 
     @PUT
-    @ApiOperation(value = "Subscribe to notifications on change events",
+    @ApiOperation(value = "Subscribe to notifications on change events for given document revision",
             response = Response.class)
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful change event subscription"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("/notification/iterationChange/subscribe")
@@ -213,17 +220,18 @@ public class DocumentResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Document master id") @PathParam("documentId") String documentId,
             @ApiParam(required = true, value = "Document version") @PathParam("documentVersion") String documentVersion)
-            throws EntityNotFoundException, AccessRightException, NotAllowedException, UserNotActiveException {
+            throws EntityNotFoundException, AccessRightException, NotAllowedException, UserNotActiveException, WorkspaceNotEnabledException {
         documentService.subscribeToIterationChangeEvent(new DocumentRevisionKey(workspaceId, documentId, documentVersion));
         return Response.noContent().build();
     }
 
     @PUT
-    @ApiOperation(value = "Unsubscribe from notifications on change events",
+    @ApiOperation(value = "Unsubscribe from notifications on change events for given document revision",
             response = Response.class)
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful change event un-subscription"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("/notification/iterationChange/unsubscribe")
@@ -231,17 +239,18 @@ public class DocumentResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Document master id") @PathParam("documentId") String documentId,
             @ApiParam(required = true, value = "Document version") @PathParam("documentVersion") String documentVersion)
-            throws EntityNotFoundException, UserNotActiveException, AccessRightException {
+            throws EntityNotFoundException, UserNotActiveException, AccessRightException, WorkspaceNotEnabledException {
         documentService.unsubscribeToIterationChangeEvent(new DocumentRevisionKey(workspaceId, documentId, documentVersion));
         return Response.noContent().build();
     }
 
     @PUT
-    @ApiOperation(value = "Subscribe to notifications on state events",
+    @ApiOperation(value = "Subscribe to notifications on state events for given document revision",
             response = Response.class)
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful state event subscription"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("/notification/stateChange/subscribe")
@@ -249,17 +258,18 @@ public class DocumentResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Document master id") @PathParam("documentId") String documentId,
             @ApiParam(required = true, value = "Document version") @PathParam("documentVersion") String documentVersion)
-            throws EntityNotFoundException, AccessRightException, NotAllowedException, UserNotActiveException {
+            throws EntityNotFoundException, AccessRightException, NotAllowedException, UserNotActiveException, WorkspaceNotEnabledException {
         documentService.subscribeToStateChangeEvent(new DocumentRevisionKey(workspaceId, documentId, documentVersion));
         return Response.noContent().build();
     }
 
     @PUT
-    @ApiOperation(value = "Unsubscribe to notifications on state events",
+    @ApiOperation(value = "Unsubscribe to notifications on state events for given document revision",
             response = Response.class)
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful state event un-subscription"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("/notification/stateChange/unsubscribe")
@@ -267,7 +277,7 @@ public class DocumentResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Document master id") @PathParam("documentId") String documentId,
             @ApiParam(required = true, value = "Document version") @PathParam("documentVersion") String documentVersion)
-            throws EntityNotFoundException, UserNotActiveException, AccessRightException {
+            throws EntityNotFoundException, UserNotActiveException, AccessRightException, WorkspaceNotEnabledException {
         documentService.unsubscribeToStateChangeEvent(new DocumentRevisionKey(workspaceId, documentId, documentVersion));
         return Response.noContent().build();
     }
@@ -278,6 +288,7 @@ public class DocumentResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of updated DocumentIterationDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("/iterations/{docIteration}")
@@ -289,7 +300,7 @@ public class DocumentResource {
             @ApiParam(required = true, value = "Document version") @PathParam("documentVersion") String documentVersion,
             @ApiParam(required = true, value = "Document iteration") @PathParam("docIteration") int docIteration,
             @ApiParam(required = true, value = "Document iteration to update") DocumentIterationDTO documentIterationDTO)
-            throws EntityNotFoundException, NotAllowedException, AccessRightException, UserNotActiveException {
+            throws EntityNotFoundException, NotAllowedException, AccessRightException, UserNotActiveException, WorkspaceNotEnabledException {
         String pRevisionNote = documentIterationDTO.getRevisionNote();
 
         List<DocumentRevisionDTO> linkedDocs = documentIterationDTO.getLinkedDocuments();
@@ -326,12 +337,13 @@ public class DocumentResource {
     }
 
     @PUT
-    @ApiOperation(value = "Create a new version of the document",
+    @ApiOperation(value = "Create a new version of the document revision",
             response = DocumentRevisionDTO.class,
             responseContainer = "List")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of created DocumentRevisionDTO version, and its previous version"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("/newVersion")
@@ -343,7 +355,7 @@ public class DocumentResource {
             @ApiParam(required = true, value = "Document version") @PathParam("documentVersion") String documentVersion,
             @ApiParam(required = true, value = "New version of document to create") DocumentCreationDTO docCreationDTO)
             throws EntityNotFoundException, EntityAlreadyExistsException, NotAllowedException, AccessRightException,
-            CreationException, UserNotActiveException {
+            CreationException, UserNotActiveException, WorkspaceNotEnabledException {
         String pTitle = docCreationDTO.getTitle();
         String pDescription = docCreationDTO.getDescription();
         String pWorkflowModelId = docCreationDTO.getWorkflowModelId();
@@ -382,11 +394,12 @@ public class DocumentResource {
     }
 
     @PUT
-    @ApiOperation(value = "Release document",
+    @ApiOperation(value = "Release document revision",
             response = DocumentRevisionDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of released DocumentRevisionDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("/release")
@@ -396,7 +409,7 @@ public class DocumentResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Document master id") @PathParam("documentId") String documentId,
             @ApiParam(required = true, value = "Document version") @PathParam("documentVersion") String documentVersion)
-            throws EntityNotFoundException, UserNotActiveException, AccessRightException, NotAllowedException {
+            throws EntityNotFoundException, UserNotActiveException, AccessRightException, NotAllowedException, WorkspaceNotEnabledException {
 
         DocumentRevisionKey revisionKey = new DocumentRevisionKey(workspaceId, documentId, documentVersion);
         DocumentRevision docR = documentService.releaseDocumentRevision(revisionKey);
@@ -404,11 +417,12 @@ public class DocumentResource {
     }
 
     @PUT
-    @ApiOperation(value = "Set document as obsolete",
+    @ApiOperation(value = "Set document revision as obsolete",
             response = DocumentRevisionDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of obsolete DocumentRevisionDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("/obsolete")
@@ -418,7 +432,7 @@ public class DocumentResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Document master id") @PathParam("documentId") String documentId,
             @ApiParam(required = true, value = "Document version") @PathParam("documentVersion") String documentVersion)
-            throws EntityNotFoundException, UserNotActiveException, AccessRightException, NotAllowedException {
+            throws EntityNotFoundException, UserNotActiveException, AccessRightException, NotAllowedException, WorkspaceNotEnabledException {
 
         DocumentRevisionKey revisionKey = new DocumentRevisionKey(workspaceId, documentId, documentVersion);
         DocumentRevision docR = documentService.markDocumentRevisionAsObsolete(revisionKey);
@@ -426,11 +440,12 @@ public class DocumentResource {
     }
 
     @PUT
-    @ApiOperation(value = "Set the tags of the document",
+    @ApiOperation(value = "Set the tags of the document revision",
             response = DocumentRevisionDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of updated DocumentRevisionDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("/tags")
@@ -441,7 +456,7 @@ public class DocumentResource {
             @ApiParam(required = true, value = "Document master id") @PathParam("documentId") String documentId,
             @ApiParam(required = true, value = "Document version") @PathParam("documentVersion") String documentVersion,
             @ApiParam(required = true, value = "Tag list to save") TagListDTO tagListDTO)
-            throws EntityNotFoundException, NotAllowedException, AccessRightException, UserNotActiveException {
+            throws EntityNotFoundException, NotAllowedException, AccessRightException, UserNotActiveException, WorkspaceNotEnabledException {
 
         List<TagDTO> tagDTOs = tagListDTO.getTags();
         String[] tagsLabel = new String[tagDTOs.size()];
@@ -458,11 +473,12 @@ public class DocumentResource {
     }
 
     @POST
-    @ApiOperation(value = "Add tags to document",
+    @ApiOperation(value = "Add tags to document revision",
             response = DocumentRevisionDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of updated DocumentRevisionDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("/tags")
@@ -473,7 +489,7 @@ public class DocumentResource {
             @ApiParam(required = true, value = "Document master id") @PathParam("documentId") String documentId,
             @ApiParam(required = true, value = "Document version") @PathParam("documentVersion") String documentVersion,
             @ApiParam(required = true, value = "Tag list to add") TagListDTO tagListDTO)
-            throws EntityNotFoundException, UserNotActiveException, AccessRightException, NotAllowedException {
+            throws EntityNotFoundException, UserNotActiveException, AccessRightException, NotAllowedException, WorkspaceNotEnabledException {
 
         DocumentRevisionKey docRPK = new DocumentRevisionKey(workspaceId, documentId, documentVersion);
         DocumentRevision docR = documentService.getDocumentRevision(docRPK);
@@ -497,11 +513,12 @@ public class DocumentResource {
     }
 
     @DELETE
-    @ApiOperation(value = "Remove tags from document",
+    @ApiOperation(value = "Remove tags from document revision",
             response = DocumentRevisionDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of updated DocumentRevisionDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("/tags/{tagName}")
@@ -510,7 +527,7 @@ public class DocumentResource {
             @ApiParam(required = true, value = "Document master id") @PathParam("documentId") String documentId,
             @ApiParam(required = true, value = "Document version") @PathParam("documentVersion") String documentVersion,
             @ApiParam(required = true, value = "Tag name") @PathParam("tagName") String tagName)
-            throws EntityNotFoundException, NotAllowedException, AccessRightException, UserNotActiveException {
+            throws EntityNotFoundException, NotAllowedException, AccessRightException, UserNotActiveException, WorkspaceNotEnabledException {
         DocumentRevision documentRevision = documentService.removeTag(new DocumentRevisionKey(workspaceId, documentId, documentVersion), tagName);
         DocumentRevisionDTO documentRevisionDTO = mapper.map(documentRevision, DocumentRevisionDTO.class);
         documentRevisionDTO.setPath(documentRevision.getLocation().getCompletePath());
@@ -519,11 +536,12 @@ public class DocumentResource {
         return documentRevisionDTO;
     }
 
-    @ApiOperation(value = "Delete the document",
+    @ApiOperation(value = "Delete the document revision",
             response = Response.class)
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful deletion of DocumentRevisionDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @DELETE
@@ -532,18 +550,19 @@ public class DocumentResource {
             @ApiParam(required = true, value = "Document master id") @PathParam("documentId") String documentId,
             @ApiParam(required = true, value = "Document version") @PathParam("documentVersion") String documentVersion)
             throws EntityNotFoundException, NotAllowedException, AccessRightException, UserNotActiveException,
-            EntityConstraintException {
+            EntityConstraintException, WorkspaceNotEnabledException {
 
         documentService.deleteDocumentRevision(new DocumentRevisionKey(workspaceId, documentId, documentVersion));
         return Response.noContent().build();
     }
 
     @PUT
-    @ApiOperation(value = "Rename attached files of document",
+    @ApiOperation(value = "Rename attached files of document iteration",
             response = FileDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of updated FileDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("/iterations/{docIteration}/files/{fileName}")
@@ -557,7 +576,7 @@ public class DocumentResource {
             @ApiParam(required = true, value = "File name") @PathParam("fileName") String fileName,
             @ApiParam(required = true, value = "File to rename") FileDTO fileDTO)
             throws EntityNotFoundException, NotAllowedException, AccessRightException, UserNotActiveException,
-            FileAlreadyExistsException, CreationException, StorageException {
+            EntityAlreadyExistsException, CreationException, StorageException, WorkspaceNotEnabledException {
 
         String fileFullName = workspaceId + "/documents/" + FileIO.encode(documentId) + "/" + documentVersion + "/" + docIteration + "/" + fileName;
         BinaryResource binaryResource = documentService.renameFileInDocument(fileFullName, fileDTO.getShortName());
@@ -565,11 +584,12 @@ public class DocumentResource {
     }
 
     @DELETE
-    @ApiOperation(value = "Remove attached file from document",
+    @ApiOperation(value = "Remove attached file from document iteration",
             response = Response.class)
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful deletion of file"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("/iterations/{docIteration}/files/{fileName}")
@@ -579,18 +599,19 @@ public class DocumentResource {
             @ApiParam(required = true, value = "Document version") @PathParam("documentVersion") String documentVersion,
             @ApiParam(required = true, value = "Document iteration") @PathParam("docIteration") int docIteration,
             @ApiParam(required = true, value = "File name") @PathParam("fileName") String fileName)
-            throws EntityNotFoundException, NotAllowedException, AccessRightException, UserNotActiveException {
+            throws EntityNotFoundException, NotAllowedException, AccessRightException, UserNotActiveException, WorkspaceNotEnabledException {
         String fileFullName = workspaceId + "/documents/" + FileIO.encode(documentId) + "/" + documentVersion + "/" + docIteration + "/" + fileName;
         documentService.removeFileFromDocument(fileFullName);
         return Response.noContent().build();
     }
 
     @POST
-    @ApiOperation(value = "Create a shared document",
+    @ApiOperation(value = "Create a shared document for given document revision",
             response = SharedDocumentDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of created SharedDocumentDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("share")
@@ -601,7 +622,7 @@ public class DocumentResource {
             @ApiParam(required = true, value = "Document master id") @PathParam("documentId") String documentId,
             @ApiParam(required = true, value = "Document version") @PathParam("documentVersion") String documentVersion,
             @ApiParam(required = true, value = "Shared document to create") SharedDocumentDTO pSharedDocumentDTO)
-            throws EntityNotFoundException, UserNotActiveException, AccessRightException, NotAllowedException {
+            throws EntityNotFoundException, UserNotActiveException, AccessRightException, NotAllowedException, WorkspaceNotEnabledException {
 
         String password = pSharedDocumentDTO.getPassword();
         Date expireDate = pSharedDocumentDTO.getExpireDate();
@@ -615,11 +636,12 @@ public class DocumentResource {
 
 
     @PUT
-    @ApiOperation(value = "Publish a document",
+    @ApiOperation(value = "Publish a document revision",
             response = Response.class)
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful publication"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("publish")
@@ -628,17 +650,18 @@ public class DocumentResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Document master id") @PathParam("documentId") String documentId,
             @ApiParam(required = true, value = "Document version") @PathParam("documentVersion") String documentVersion)
-            throws EntityNotFoundException, UserNotActiveException, AccessRightException, NotAllowedException {
+            throws EntityNotFoundException, UserNotActiveException, AccessRightException, NotAllowedException, WorkspaceNotEnabledException {
         documentService.setDocumentPublicShared(new DocumentRevisionKey(workspaceId, documentId, documentVersion), true);
         return Response.noContent().build();
     }
 
     @PUT
-    @ApiOperation(value = "Un-publish a document",
+    @ApiOperation(value = "Un-publish a document revision",
             response = Response.class)
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful un-publication"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("unpublish")
@@ -647,17 +670,18 @@ public class DocumentResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Document master id") @PathParam("documentId") String documentId,
             @ApiParam(required = true, value = "Document version") @PathParam("documentVersion") String documentVersion)
-            throws EntityNotFoundException, UserNotActiveException, AccessRightException, NotAllowedException {
+            throws EntityNotFoundException, UserNotActiveException, AccessRightException, NotAllowedException, WorkspaceNotEnabledException {
         documentService.setDocumentPublicShared(new DocumentRevisionKey(workspaceId, documentId, documentVersion), false);
         return Response.noContent().build();
     }
 
     @PUT
-    @ApiOperation(value = "Update document's ACL",
+    @ApiOperation(value = "Update document revision ACL",
             response = Response.class)
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful ACL removal"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("acl")
@@ -667,7 +691,7 @@ public class DocumentResource {
             @ApiParam(required = true, value = "Document master id") @PathParam("documentId") String documentId,
             @ApiParam(required = true, value = "Document version") @PathParam("documentVersion") String documentVersion,
             @ApiParam(required = true, value = "ACL rules to set") ACLDTO acl)
-            throws EntityNotFoundException, AccessRightException, UserNotActiveException, NotAllowedException {
+            throws EntityNotFoundException, AccessRightException, UserNotActiveException, NotAllowedException, WorkspaceNotEnabledException {
         DocumentRevisionKey documentRevisionKey = new DocumentRevisionKey(workspaceId, documentId, documentVersion);
 
         if (acl.hasEntries()) {
@@ -679,12 +703,13 @@ public class DocumentResource {
     }
 
     @GET
-    @ApiOperation(value = "Get document's aborted workflow history",
+    @ApiOperation(value = "Get document revision aborted workflow history",
             response = WorkflowDTO.class,
             responseContainer = "List")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of aborted WorkflowDTOs. It can be an empty list."),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("aborted-workflows")
@@ -693,7 +718,7 @@ public class DocumentResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Document master id") @PathParam("documentId") String documentId,
             @ApiParam(required = true, value = "Document version") @PathParam("documentVersion") String documentVersion)
-            throws EntityNotFoundException, AccessRightException, UserNotActiveException {
+            throws EntityNotFoundException, AccessRightException, UserNotActiveException, WorkspaceNotEnabledException {
         Workflow[] abortedWorkflowList = documentWorkflowService.getAbortedWorkflow(new DocumentRevisionKey(workspaceId, documentId, documentVersion));
         List<WorkflowDTO> abortedWorkflowDTOList = new ArrayList<>();
 
@@ -703,17 +728,18 @@ public class DocumentResource {
 
         Collections.sort(abortedWorkflowDTOList);
 
-        return Response.ok(new GenericEntity<List<WorkflowDTO>>((List<WorkflowDTO>) abortedWorkflowDTOList) {
+        return Response.ok(new GenericEntity<List<WorkflowDTO>>(abortedWorkflowDTOList) {
         }).build();
     }
 
     @GET
-    @ApiOperation(value = "Get inverse documents links",
+    @ApiOperation(value = "Get inverse document revisions links",
             response = DocumentRevisionDTO.class,
             responseContainer = "List")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of DocumentRevisionDTO pointing to this document. It can be an empty list."),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{iteration}/inverse-document-link")
@@ -723,25 +749,25 @@ public class DocumentResource {
             @ApiParam(required = true, value = "Document master id") @PathParam("documentId") String documentId,
             @ApiParam(required = true, value = "Document version") @PathParam("documentVersion") String documentVersion,
             @ApiParam(required = true, value = "Document iteration") @PathParam("iteration") int iteration)
-            throws UserNotFoundException, WorkspaceNotFoundException, UserNotActiveException,
-            DocumentRevisionNotFoundException, DocumentIterationNotFoundException, WorkspaceNotEnabledException {
+            throws EntityNotFoundException, UserNotActiveException, WorkspaceNotEnabledException {
 
         DocumentRevisionKey docKey = new DocumentRevisionKey(workspaceId, documentId, documentVersion);
         List<DocumentIteration> documents = documentService.getInverseDocumentsLink(docKey);
         Set<DocumentRevisionDTO> documentRevisionDTOs = documents.stream()
                 .map(doc -> new DocumentRevisionDTO(doc.getWorkspaceId(), doc.getDocumentMasterId(), doc.getTitle(), doc.getVersion()))
                 .collect(Collectors.toSet());
-        return Response.ok(new GenericEntity<List<DocumentRevisionDTO>>((List<DocumentRevisionDTO>) new ArrayList<>(documentRevisionDTOs)) {
+        return Response.ok(new GenericEntity<List<DocumentRevisionDTO>>(new ArrayList<>(documentRevisionDTOs)) {
         }).build();
     }
 
     @GET
-    @ApiOperation(value = "Get inverse parts links",
+    @ApiOperation(value = "Get inverse part revisions links",
             response = PartRevisionDTO.class,
             responseContainer = "List")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of PartRevisionDTO pointing to this document. It can be an empty list."),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{iteration}/inverse-part-link")
@@ -751,16 +777,14 @@ public class DocumentResource {
             @ApiParam(required = true, value = "Document master id") @PathParam("documentId") String documentId,
             @ApiParam(required = true, value = "Document version") @PathParam("documentVersion") String documentVersion,
             @ApiParam(required = true, value = "Document iteration") @PathParam("iteration") int iteration)
-            throws UserNotFoundException, WorkspaceNotFoundException, UserNotActiveException,
-            PartRevisionNotFoundException, PartIterationNotFoundException,
-            DocumentRevisionNotFoundException, WorkspaceNotEnabledException {
+            throws EntityNotFoundException, UserNotActiveException, WorkspaceNotEnabledException {
 
         DocumentRevisionKey docKey = new DocumentRevisionKey(workspaceId, documentId, documentVersion);
         List<PartIteration> parts = productService.getInversePartsLink(docKey);
         Set<PartRevisionDTO> partRevisionDTOs = parts.stream()
                 .map(part -> new PartRevisionDTO(workspaceId, part.getNumber(), part.getPartName(), part.getVersion()))
                 .collect(Collectors.toSet());
-        return Response.ok(new GenericEntity<List<PartRevisionDTO>>((List<PartRevisionDTO>) new ArrayList<>(partRevisionDTOs)) {
+        return Response.ok(new GenericEntity<List<PartRevisionDTO>>(new ArrayList<>(partRevisionDTOs)) {
         }).build();
     }
 
@@ -771,6 +795,7 @@ public class DocumentResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of ProductInstanceMasterDTO pointing to this document. It can be an empty list."),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{iteration}/inverse-product-instances-link")
@@ -780,9 +805,7 @@ public class DocumentResource {
             @ApiParam(required = true, value = "Document master id") @PathParam("documentId") String documentId,
             @ApiParam(required = true, value = "Document version") @PathParam("documentVersion") String documentVersion,
             @ApiParam(required = true, value = "Document iteration") @PathParam("iteration") int iteration)
-            throws UserNotFoundException, WorkspaceNotFoundException, UserNotActiveException,
-            PartRevisionNotFoundException, PartIterationNotFoundException,
-            DocumentRevisionNotFoundException, WorkspaceNotEnabledException {
+            throws  UserNotActiveException, EntityNotFoundException, WorkspaceNotEnabledException {
 
         DocumentRevisionKey docKey = new DocumentRevisionKey(workspaceId, documentId, documentVersion);
         Set<ProductInstanceMaster> productInstanceMasterList = productService.getInverseProductInstancesLink(docKey);
@@ -790,7 +813,7 @@ public class DocumentResource {
         for (ProductInstanceMaster productInstanceMaster : productInstanceMasterList) {
             productInstanceMasterDTOs.add(mapper.map(productInstanceMaster, ProductInstanceMasterDTO.class));
         }
-        return Response.ok(new GenericEntity<List<ProductInstanceMasterDTO>>((List<ProductInstanceMasterDTO>) new ArrayList<>(productInstanceMasterDTOs)) {
+        return Response.ok(new GenericEntity<List<ProductInstanceMasterDTO>>(new ArrayList<>(productInstanceMasterDTOs)) {
         }).build();
     }
 
@@ -801,6 +824,7 @@ public class DocumentResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of PathDataMasterDTO pointing to this document. It can be an empty list."),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{iteration}/inverse-path-data-link")
@@ -810,9 +834,7 @@ public class DocumentResource {
             @ApiParam(required = true, value = "Document master id") @PathParam("documentId") String documentId,
             @ApiParam(required = true, value = "Document version") @PathParam("documentVersion") String documentVersion,
             @ApiParam(required = true, value = "Document iteration") @PathParam("iteration") int iteration)
-            throws UserNotFoundException, WorkspaceNotFoundException, UserNotActiveException,
-            PartRevisionNotFoundException, PartIterationNotFoundException, DocumentRevisionNotFoundException,
-            ConfigurationItemNotFoundException, PartUsageLinkNotFoundException, WorkspaceNotEnabledException {
+            throws EntityNotFoundException, UserNotActiveException, WorkspaceNotEnabledException {
 
         DocumentRevisionKey docKey = new DocumentRevisionKey(workspaceId, documentId, documentVersion);
         Set<PathDataMaster> pathDataMasters = productService.getInversePathDataLink(docKey);
@@ -833,13 +855,13 @@ public class DocumentResource {
             pathDataMasterDTOs.add(dto);
         }
 
-        return Response.ok(new GenericEntity<List<PathDataMasterDTO>>((List<PathDataMasterDTO>) new ArrayList<>(pathDataMasterDTOs)) {
+        return Response.ok(new GenericEntity<List<PathDataMasterDTO>>(new ArrayList<>(pathDataMasterDTOs)) {
         }).build();
 
     }
 
     private void setDocumentRevisionDTOWorkflow(DocumentRevision documentRevision, DocumentRevisionDTO documentRevisionDTO)
-            throws EntityNotFoundException, UserNotActiveException, AccessRightException {
+            throws EntityNotFoundException, UserNotActiveException, AccessRightException, WorkspaceNotEnabledException {
         Workflow currentWorkflow = documentWorkflowService.getCurrentWorkflow(documentRevision.getKey());
         if (currentWorkflow != null) {
             documentRevisionDTO.setWorkflow(mapper.map(currentWorkflow, WorkflowDTO.class));

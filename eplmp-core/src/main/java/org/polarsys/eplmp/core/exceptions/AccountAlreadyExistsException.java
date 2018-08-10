@@ -12,7 +12,7 @@
 package org.polarsys.eplmp.core.exceptions;
 
 import java.text.MessageFormat;
-import java.util.Locale;
+
 
 /**
  *
@@ -20,24 +20,19 @@ import java.util.Locale;
  */
 public class AccountAlreadyExistsException extends EntityAlreadyExistsException {
     private final String mLogin;
-    
-    public AccountAlreadyExistsException(String pMessage) {
-        super(pMessage);
-        mLogin = null;
-    }
-    
-    public AccountAlreadyExistsException(Locale pLocale, String pLogin) {
-        this(pLocale, pLogin, null);
+
+    public AccountAlreadyExistsException(String pLogin) {
+        this(pLogin, null);
     }
 
-    public AccountAlreadyExistsException(Locale pLocale, String pLogin, Throwable pCause) {
-        super(pLocale, pCause);
-        mLogin=pLogin;
+    public AccountAlreadyExistsException(String pLogin, Throwable pCause) {
+        super(pCause);
+        mLogin = pLogin;
     }
 
     @Override
     public String getLocalizedMessage() {
         String message = getBundleDefaultMessage();
-        return MessageFormat.format(message,mLogin);     
+        return MessageFormat.format(message, mLogin);
     }
 }

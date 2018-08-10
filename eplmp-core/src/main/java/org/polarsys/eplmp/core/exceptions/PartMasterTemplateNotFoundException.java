@@ -12,7 +12,7 @@
 package org.polarsys.eplmp.core.exceptions;
 
 import java.text.MessageFormat;
-import java.util.Locale;
+
 
 /**
  *
@@ -21,17 +21,12 @@ import java.util.Locale;
 public class PartMasterTemplateNotFoundException extends EntityNotFoundException {
     private final String mPartMTemplateId;
 
-    public PartMasterTemplateNotFoundException(String pMessage) {
-        super(pMessage);
-        mPartMTemplateId=null;
+    public PartMasterTemplateNotFoundException(String pPartMTemplateID) {
+        this(pPartMTemplateID, null);
     }
 
-    public PartMasterTemplateNotFoundException(Locale pLocale, String pPartMTemplateID) {
-        this(pLocale, pPartMTemplateID, null);
-    }
-
-    public PartMasterTemplateNotFoundException(Locale pLocale, String pPartMTemplateId, Throwable pCause) {
-        super(pLocale, pCause);
+    public PartMasterTemplateNotFoundException(String pPartMTemplateId, Throwable pCause) {
+        super( pCause);
         mPartMTemplateId=pPartMTemplateId;
     }
 

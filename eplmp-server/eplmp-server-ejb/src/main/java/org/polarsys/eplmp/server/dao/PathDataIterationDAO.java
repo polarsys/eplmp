@@ -14,20 +14,20 @@ package org.polarsys.eplmp.server.dao;
 import org.polarsys.eplmp.core.configuration.PathDataIteration;
 import org.polarsys.eplmp.core.configuration.ProductInstanceIteration;
 
+import javax.enterprise.context.RequestScoped;
+import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+@RequestScoped
 public class PathDataIterationDAO {
 
+    @Inject
     private EntityManager em;
 
     private static final Logger LOGGER = Logger.getLogger(PathDataIterationDAO.class.getName());
-
-    public PathDataIterationDAO(EntityManager pEM) {
-        em = pEM;
-    }
 
     public void createPathDataIteration(PathDataIteration pathDataIteration){
         try {

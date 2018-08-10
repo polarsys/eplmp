@@ -11,6 +11,9 @@
 
 package org.polarsys.eplmp.server.rest;
 
+import io.swagger.annotations.*;
+import org.dozer.DozerBeanMapperSingletonWrapper;
+import org.dozer.Mapper;
 import org.polarsys.eplmp.core.document.DocumentRevision;
 import org.polarsys.eplmp.core.document.DocumentRevisionKey;
 import org.polarsys.eplmp.core.exceptions.*;
@@ -27,9 +30,6 @@ import org.polarsys.eplmp.server.auth.AuthConfig;
 import org.polarsys.eplmp.server.auth.jwt.JWTokenFactory;
 import org.polarsys.eplmp.server.rest.dto.DocumentRevisionDTO;
 import org.polarsys.eplmp.server.rest.dto.PartRevisionDTO;
-import io.swagger.annotations.*;
-import org.dozer.DozerBeanMapperSingletonWrapper;
-import org.dozer.Mapper;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.RequestScoped;
@@ -71,11 +71,12 @@ public class SharedResource {
 
     @GET
     @Path("{workspaceId}/documents/{documentId}-{documentVersion}")
-    @ApiOperation(value = "Get document revision",
+    @ApiOperation(value = "Get public shared document revision",
             response = DocumentRevisionDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of DocumentRevisionDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Produces(MediaType.APPLICATION_JSON)
@@ -83,8 +84,8 @@ public class SharedResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Document master id") @PathParam("documentId") String documentId,
             @ApiParam(required = true, value = "Document version") @PathParam("documentVersion") String documentVersion)
-            throws AccessRightException, NotAllowedException, WorkspaceNotFoundException, UserNotFoundException,
-            DocumentRevisionNotFoundException, UserNotActiveException, WorkspaceNotEnabledException {
+            throws AccessRightException, NotAllowedException, EntityNotFoundException,
+            UserNotActiveException, WorkspaceNotEnabledException {
 
         // Try public shared
         DocumentRevisionKey docKey = new DocumentRevisionKey(workspaceId, documentId, documentVersion);
@@ -108,11 +109,12 @@ public class SharedResource {
 
     @GET
     @Path("{workspaceId}/parts/{partNumber}-{partVersion}")
-    @ApiOperation(value = "Get part revision",
+    @ApiOperation(value = "Get public shared part revision",
             response = PartRevisionDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of DocumentRevisionDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Produces(MediaType.APPLICATION_JSON)
@@ -120,7 +122,7 @@ public class SharedResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Part number") @PathParam("partNumber") String partNumber,
             @ApiParam(required = true, value = "Part version") @PathParam("partVersion") String partVersion)
-            throws UserNotFoundException, WorkspaceNotFoundException, UserNotActiveException, PartRevisionNotFoundException, AccessRightException, WorkspaceNotEnabledException {
+            throws EntityNotFoundException, UserNotActiveException, AccessRightException, WorkspaceNotEnabledException {
 
         // Try public shared
         PartRevisionKey partKey = new PartRevisionKey(workspaceId, partNumber, partVersion);
@@ -142,7 +144,7 @@ public class SharedResource {
 
     @GET
     @Path("{uuid}/documents")
-    @ApiOperation(value = "Get shared document",
+    @ApiOperation(value = "Get shared document from resource token",
             response = DocumentRevisionDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of DocumentRevisionDTO"),
@@ -174,7 +176,7 @@ public class SharedResource {
 
     @GET
     @Path("{uuid}/parts")
-    @ApiOperation(value = "Get shared part",
+    @ApiOperation(value = "Get shared part from resource token",
             response = PartRevisionDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of PartRevisionDTO"),

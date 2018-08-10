@@ -11,7 +11,7 @@
 
 package org.polarsys.eplmp.core.exceptions;
 
-import java.util.Locale;
+
 
 /**
  *
@@ -19,8 +19,8 @@ import java.util.Locale;
  */
 public class PathToPathCyclicException extends ApplicationException {
 
-    public PathToPathCyclicException(Locale pLocale) {
-        super(pLocale);
+    public PathToPathCyclicException() {
+        super();
     }
 
     @Override

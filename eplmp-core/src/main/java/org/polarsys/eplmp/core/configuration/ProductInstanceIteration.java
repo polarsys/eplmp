@@ -140,7 +140,7 @@ public class ProductInstanceIteration implements Serializable, FileHolder {
 
     /**
      * Set of optional usage links (actually their path from the root node)
-     * that have been excluded from the baseline.
+     * that have been included into the baseline.
      * <p>
      * Paths are strings made of ordered lists of usage link ids joined by "-".
      */
@@ -355,10 +355,6 @@ public class ProductInstanceIteration implements Serializable, FileHolder {
     }
 
     public boolean isOptionalLinkRetained(String link) {
-        return !isOptionalLinkExcluded(link);
-    }
-
-    public boolean isOptionalLinkExcluded(String link) {
         return optionalUsageLinks.contains(link);
     }
 

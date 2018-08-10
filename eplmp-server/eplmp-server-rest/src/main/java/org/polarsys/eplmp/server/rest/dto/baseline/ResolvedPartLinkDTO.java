@@ -11,16 +11,16 @@
 
 package org.polarsys.eplmp.server.rest.dto.baseline;
 
-import org.polarsys.eplmp.server.rest.dto.LightPartLinkDTO;
-import org.polarsys.eplmp.server.rest.dto.PartIterationDTO;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import org.polarsys.eplmp.server.rest.dto.LightPartLinkDTO;
+import org.polarsys.eplmp.server.rest.dto.PartIterationDTO;
 
 import javax.xml.bind.annotation.XmlRootElement;
 import java.io.Serializable;
 
 @XmlRootElement
-@ApiModel(value="ResolvedPartLinkDTO", description="This class is the representation of a {@link org.polarsys.eplmp.core.product.PartLink} and its resolved {@link org.polarsys.eplmp.core.product.PartIteration} in context")
+@ApiModel(value="ResolvedPartLinkDTO", description="This class is the representation of a {@link org.polarsys.eplmp.core.product.PartLink} and its resolved {@link org.polarsys.eplmp.core.product.PartIteration} in a given context (ConfigSpec)")
 public class ResolvedPartLinkDTO implements Serializable {
 
     @ApiModelProperty(value = "Resolved part iteration")

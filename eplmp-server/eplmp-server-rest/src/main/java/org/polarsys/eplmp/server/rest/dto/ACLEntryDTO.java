@@ -11,9 +11,9 @@
 
 package org.polarsys.eplmp.server.rest.dto;
 
-import org.polarsys.eplmp.core.security.ACLPermission;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import org.polarsys.eplmp.core.security.ACLPermission;
 
 import javax.xml.bind.annotation.XmlRootElement;
 import java.io.Serializable;
@@ -21,6 +21,7 @@ import java.io.Serializable;
 @XmlRootElement
 @ApiModel(value = "ACLEntryDTO", description = "This class holds permission data")
 public class ACLEntryDTO implements Serializable {
+
     @ApiModelProperty(value = "Member id")
     private String key;
 

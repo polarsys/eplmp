@@ -19,39 +19,34 @@ import org.polarsys.eplmp.core.exceptions.RoleNotFoundException;
 import org.polarsys.eplmp.core.workflow.Role;
 import org.polarsys.eplmp.core.workflow.RoleKey;
 
+import javax.enterprise.context.RequestScoped;
+import javax.inject.Inject;
 import javax.persistence.EntityExistsException;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceException;
 import java.util.List;
-import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
  * @author Morgan Guimard
  */
+@RequestScoped
 public class RoleDAO {
 
+    @Inject
     private EntityManager em;
-    private Locale mLocale;
 
     private static final Logger LOGGER = Logger.getLogger(RoleDAO.class.getName());
 
-    public RoleDAO(Locale pLocale, EntityManager pEM) {
-        mLocale=pLocale;
-        em=pEM;
+    public RoleDAO() {
     }
 
-    public RoleDAO(EntityManager pEM) {
-        mLocale=Locale.getDefault();
-        em=pEM;
-    }
+    public Role loadRole(RoleKey pRoleKey) throws RoleNotFoundException {
 
-    public Role loadRole(RoleKey roleKey) throws RoleNotFoundException {
-
-        Role role = em.find(Role.class, roleKey);
+        Role role = em.find(Role.class, pRoleKey);
         if (role == null) {
-            throw new RoleNotFoundException(mLocale, roleKey);
+            throw new RoleNotFoundException(pRoleKey);
         } else {
             return role;
         }
@@ -68,10 +63,10 @@ public class RoleDAO {
             em.flush();
         } catch (EntityExistsException pEEEx) {
             LOGGER.log(Level.FINEST,null,pEEEx);
-            throw new RoleAlreadyExistsException(mLocale, pRole);
+            throw new RoleAlreadyExistsException(pRole);
         } catch (PersistenceException pPEx) {
             LOGGER.log(Level.FINEST,null,pPEx);
-            throw new CreationException(mLocale);
+            throw new CreationException();
         }
     }
 

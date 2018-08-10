@@ -10,6 +10,9 @@
   *******************************************************************************/
 package org.polarsys.eplmp.server.rest;
 
+import io.swagger.annotations.*;
+import org.dozer.DozerBeanMapperSingletonWrapper;
+import org.dozer.Mapper;
 import org.polarsys.eplmp.core.configuration.DocumentBaseline;
 import org.polarsys.eplmp.core.configuration.DocumentCollection;
 import org.polarsys.eplmp.core.document.DocumentRevisionKey;
@@ -19,11 +22,8 @@ import org.polarsys.eplmp.core.security.UserGroupMapping;
 import org.polarsys.eplmp.core.services.IDocumentBaselineManagerLocal;
 import org.polarsys.eplmp.server.rest.dto.baseline.BaselinedDocumentDTO;
 import org.polarsys.eplmp.server.rest.dto.baseline.DocumentBaselineDTO;
-import org.polarsys.eplmp.server.rest.util.FileDownloadTools;
 import org.polarsys.eplmp.server.rest.util.DocumentBaselineFileExport;
-import io.swagger.annotations.*;
-import org.dozer.DozerBeanMapperSingletonWrapper;
-import org.dozer.Mapper;
+import org.polarsys.eplmp.server.rest.util.FileDownloadTools;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.security.DeclareRoles;
@@ -35,25 +35,20 @@ import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.File;
-import java.io.UnsupportedEncodingException;
-import java.net.URI;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 /**
  * @author Taylor LABEJOF
  */
 
 @RequestScoped
-@Api(hidden = true, value = "documentBaseline", description = "Operations about document baselines")
+@Api(hidden = true, value = "documentBaseline", description = "Operations about document baselines",
+        authorizations = {@Authorization(value = "authorization")})
 @DeclareRoles(UserGroupMapping.REGULAR_USER_ROLE_ID)
 @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
 public class DocumentBaselinesResource {
-
-    private static final Logger LOGGER = Logger.getLogger(DocumentBaselinesResource.class.getName());
 
     @Inject
     private IDocumentBaselineManagerLocal documentBaselineService;
@@ -75,18 +70,19 @@ public class DocumentBaselinesResource {
      * @return The list of baselines
      */
     @GET
-    @ApiOperation(value = "Get baselines",
+    @ApiOperation(value = "Get document baselines",
             response = DocumentBaselineDTO.class,
             responseContainer = "List")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of checked out DocumentBaselineDTOs. It can be an empty list."),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Produces(MediaType.APPLICATION_JSON)
     public Response getDocumentBaselines(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId)
-            throws EntityNotFoundException, UserNotActiveException {
+            throws EntityNotFoundException, UserNotActiveException, WorkspaceNotEnabledException {
         List<DocumentBaseline> documentBaselines = documentBaselineService.getBaselines(workspaceId);
         List<DocumentBaselineDTO> baselinesDTO = new ArrayList<>();
         for (DocumentBaseline documentBaseline : documentBaselines) {
@@ -105,28 +101,29 @@ public class DocumentBaselinesResource {
      * @return the created baseline
      */
     @POST
-    @ApiOperation(value = "Create baseline",
+    @ApiOperation(value = "Create a new document baseline",
             response = DocumentBaselineDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 201, message = "Successful retrieval of created DocumentBaselineDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Consumes(MediaType.APPLICATION_JSON)
     public Response createDocumentBaseline(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Document baseline to create") DocumentBaselineDTO documentBaselineDTO)
-            throws EntityNotFoundException, UserNotActiveException, AccessRightException, NotAllowedException {
+            throws EntityNotFoundException, UserNotActiveException, AccessRightException, NotAllowedException, WorkspaceNotEnabledException {
 
         List<BaselinedDocumentDTO> baselinedDocumentsDTO = documentBaselineDTO.getBaselinedDocuments();
-        List<DocumentRevisionKey> documentRevisionKeys = new ArrayList<>();
-
-        for (BaselinedDocumentDTO document : baselinedDocumentsDTO) {
-            documentRevisionKeys.add(new DocumentRevisionKey(workspaceId, document.getDocumentMasterId(), document.getVersion()));
-        }
+        List<DocumentRevisionKey> documentRevisionKeys = baselinedDocumentsDTO.stream()
+                .map(document -> new DocumentRevisionKey(workspaceId, document.getDocumentMasterId(), document.getVersion()))
+                .collect(Collectors.toList());
 
         DocumentBaseline baseline = documentBaselineService.createBaseline(workspaceId, documentBaselineDTO.getName(), documentBaselineDTO.getType(), documentBaselineDTO.getDescription(), documentRevisionKeys);
-        return prepareCreatedResponse(getBaseline(workspaceId, baseline.getId()));
+        DocumentBaselineDTO baselineDTO = getBaseline(workspaceId, baseline.getId());
+
+        return Tools.prepareCreatedResponse(String.valueOf(baselineDTO.getId()), baselineDTO);
     }
 
 
@@ -138,11 +135,12 @@ public class DocumentBaselinesResource {
      * @return A response if the baseline was deleted
      */
     @DELETE
-    @ApiOperation(value = "Delete a baseline",
+    @ApiOperation(value = "Delete a document baseline",
             response = Response.class)
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful deletion of DocumentBaselineDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{baselineId}")
@@ -150,7 +148,7 @@ public class DocumentBaselinesResource {
     public Response deleteBaseline(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Baseline id") @PathParam("baselineId") int baselineId)
-            throws EntityNotFoundException, AccessRightException, UserNotActiveException {
+            throws EntityNotFoundException, AccessRightException, UserNotActiveException, WorkspaceNotEnabledException {
 
         documentBaselineService.deleteBaseline(workspaceId, baselineId);
         return Response.noContent().build();
@@ -164,11 +162,12 @@ public class DocumentBaselinesResource {
      * @return The specif baseline
      */
     @GET
-    @ApiOperation(value = "Get baseline",
+    @ApiOperation(value = "Get document baseline by id",
             response = DocumentBaselineDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of DocumentBaselineDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{baselineId}")
@@ -176,7 +175,7 @@ public class DocumentBaselinesResource {
     public DocumentBaselineDTO getBaseline(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Baseline id") @PathParam("baselineId") int baselineId)
-            throws EntityNotFoundException, UserNotActiveException {
+            throws EntityNotFoundException, UserNotActiveException, WorkspaceNotEnabledException {
 
         DocumentBaseline documentBaseline = documentBaselineService.getBaselineLight(workspaceId, baselineId);
         DocumentCollection documentCollection = documentBaselineService.getACLFilteredDocumentCollection(workspaceId, baselineId);
@@ -199,6 +198,7 @@ public class DocumentBaselinesResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of DocumentBaselineDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{baselineId}-light")
@@ -206,24 +206,25 @@ public class DocumentBaselinesResource {
     public DocumentBaselineDTO getBaselineLight(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Baseline id") @PathParam("baselineId") int baselineId)
-            throws EntityNotFoundException, UserNotActiveException {
+            throws EntityNotFoundException, UserNotActiveException, WorkspaceNotEnabledException {
         DocumentBaseline documentBaseline = documentBaselineService.getBaselineLight(workspaceId, baselineId);
         return mapper.map(documentBaseline, DocumentBaselineDTO.class);
     }
 
     @GET
-    @ApiOperation(value = "Export files",
+    @ApiOperation(value = "Export document baseline's files",
             response = File.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful files export, download a zipped file containing requested files."),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{baselineId}/export-files")
     public Response exportDocumentFiles(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Baseline id") @PathParam("baselineId") int baselineId)
-            throws BaselineNotFoundException, WorkspaceNotFoundException, UserNotActiveException, UserNotFoundException, WorkspaceNotEnabledException {
+            throws EntityNotFoundException, WorkspaceNotEnabledException, UserNotActiveException {
 
         DocumentBaselineFileExport documentBaselineFileExport = new DocumentBaselineFileExport(workspaceId, baselineId);
 
@@ -237,19 +238,4 @@ public class DocumentBaselinesResource {
                 .entity(documentBaselineFileExport).build();
     }
 
-
-    /**
-     * Try to put a document baseline in a response
-     *
-     * @param baselineDTO The document baseline to add
-     * @return a Response object with created baseline as entity
-     */
-    private Response prepareCreatedResponse(DocumentBaselineDTO baselineDTO) {
-        try {
-            return Response.created(URI.create(URLEncoder.encode(String.valueOf(baselineDTO.getId()), "UTF-8"))).entity(baselineDTO).build();
-        } catch (UnsupportedEncodingException ex) {
-            LOGGER.log(Level.WARNING, null, ex);
-            return Response.ok().entity(baselineDTO).build();
-        }
-    }
 }

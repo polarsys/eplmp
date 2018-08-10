@@ -12,7 +12,7 @@
 package org.polarsys.eplmp.core.exceptions;
 
 import java.text.MessageFormat;
-import java.util.Locale;
+
 
 /**
  *
@@ -26,12 +26,12 @@ public class LayerNotFoundException extends EntityNotFoundException {
         mLayer=-1;
     }
 
-    public LayerNotFoundException(Locale pLocale, int pLayer) {
-        this(pLocale, pLayer, null);
+    public LayerNotFoundException(int pLayer) {
+        this(pLayer, null);
     }
 
-    public LayerNotFoundException(Locale pLocale, int pLayer, Throwable pCause) {
-        super(pLocale, pCause);
+    public LayerNotFoundException(int pLayer, Throwable pCause) {
+        super( pCause);
         mLayer=pLayer;
     }
 

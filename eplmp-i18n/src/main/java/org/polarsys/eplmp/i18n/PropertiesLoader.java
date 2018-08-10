@@ -15,6 +15,8 @@ package org.polarsys.eplmp.i18n;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Locale;
 import java.util.Properties;
 import java.util.logging.Level;
@@ -22,16 +24,17 @@ import java.util.logging.Logger;
 
 /**
  * Properties files helper
+ *
+ * @author Morgan Guimard
  * * */
 public class PropertiesLoader {
 
-    public final static String[] SUPPORTED_LANGUAGES = {"fr", "en", "ru"};
+    private static final String[] SUPPORTED_LANGUAGES = {"fr", "en", "ru"};
+
+    private static final Logger LOGGER = Logger.getLogger(PropertiesLoader.class.getName());
 
     private PropertiesLoader() {
     }
-
-
-    private final static Logger LOGGER = Logger.getLogger(PropertiesLoader.class.getName());
 
     /**
      * Load from given class resources an UTF8 encoded properties file with a lang suffix.
@@ -65,4 +68,10 @@ public class PropertiesLoader {
         return properties;
     }
 
+    /**
+     * Get the list of supported languages
+     * * */
+    public static List<String> getSupportedLanguages() {
+        return Arrays.asList(SUPPORTED_LANGUAGES);
+    }
 }

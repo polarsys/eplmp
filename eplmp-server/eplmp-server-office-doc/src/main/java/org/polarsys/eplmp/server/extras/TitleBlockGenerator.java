@@ -11,10 +11,10 @@
 
 package org.polarsys.eplmp.server.extras;
 
-import org.polarsys.eplmp.core.document.DocumentIteration;
-import org.polarsys.eplmp.core.product.PartIteration;
 import org.apache.pdfbox.io.MemoryUsageSetting;
 import org.apache.pdfbox.multipdf.PDFMergerUtility;
+import org.polarsys.eplmp.core.document.DocumentIteration;
+import org.polarsys.eplmp.core.product.PartIteration;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -24,10 +24,11 @@ import java.util.Locale;
 import java.util.logging.Logger;
 
 /**
+ * This class define the default pdf generation for both part and document.
+ * This behaviour can be overridden.
+ *
  * @author Morgan Guimard
- *         <p>
- *         This class define the default pdf generation for both part and document.
- *         This behaviour can be overridden:
+ *
  * @see PartTitleBlockData
  * @see DocumentTitleBlockData
  */

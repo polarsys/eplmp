@@ -13,13 +13,12 @@
 package org.polarsys.eplmp.server.configuration.spec;
 
 import org.polarsys.eplmp.core.configuration.ProductConfiguration;
-import org.polarsys.eplmp.core.product.*;
+import org.polarsys.eplmp.core.product.ConfigurationItem;
+import org.polarsys.eplmp.core.product.Effectivity;
+import org.polarsys.eplmp.core.product.SerialNumberBasedEffectivity;
 import org.polarsys.eplmp.core.util.AlphanumericComparator;
-import org.polarsys.eplmp.core.util.Tools;
 
-import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.List;
 
 /**
  * A kind of {@link EffectivityConfigSpec} based on serial number.
@@ -35,7 +34,7 @@ public class SerialNumberBasedEffectivityConfigSpec extends EffectivityConfigSpe
      */
     private String number;
 
-    private final static Comparator<CharSequence> STRING_COMPARATOR = new AlphanumericComparator();
+    private static final Comparator<CharSequence> STRING_COMPARATOR = new AlphanumericComparator();
 
 
     public SerialNumberBasedEffectivityConfigSpec(String number, ConfigurationItem configurationItem) {

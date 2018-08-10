@@ -11,17 +11,18 @@
 
 package org.polarsys.eplmp.server.rest;
 
+import io.swagger.annotations.*;
+import org.dozer.DozerBeanMapperSingletonWrapper;
+import org.dozer.Mapper;
 import org.polarsys.eplmp.core.exceptions.EntityNotFoundException;
 import org.polarsys.eplmp.core.exceptions.UserNotActiveException;
+import org.polarsys.eplmp.core.exceptions.WorkspaceNotEnabledException;
 import org.polarsys.eplmp.core.security.UserGroupMapping;
 import org.polarsys.eplmp.core.security.WorkspaceUserGroupMembership;
 import org.polarsys.eplmp.core.security.WorkspaceUserMembership;
 import org.polarsys.eplmp.core.services.IUserManagerLocal;
 import org.polarsys.eplmp.server.rest.dto.WorkspaceUserGroupMemberShipDTO;
 import org.polarsys.eplmp.server.rest.dto.WorkspaceUserMemberShipDTO;
-import io.swagger.annotations.*;
-import org.dozer.DozerBeanMapperSingletonWrapper;
-import org.dozer.Mapper;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.security.DeclareRoles;
@@ -42,7 +43,8 @@ import java.util.List;
  * @author Morgan Guimard
  */
 @RequestScoped
-@Api(hidden = true, value = "workspaceMemberships", description = "Operations about workspace memberships")
+@Api(hidden = true, value = "workspaceMemberships", description = "Operations about workspace memberships",
+        authorizations = {@Authorization(value = "authorization")})
 @DeclareRoles(UserGroupMapping.REGULAR_USER_ROLE_ID)
 @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
 public class WorkspaceMembershipResource {
@@ -67,13 +69,14 @@ public class WorkspaceMembershipResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of WorkspaceUserMemberShipDTOs. It can be an empty list."),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("users")
     @Produces(MediaType.APPLICATION_JSON)
     public WorkspaceUserMemberShipDTO[] getWorkspaceUserMemberShips(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId)
-            throws EntityNotFoundException, UserNotActiveException {
+            throws EntityNotFoundException, UserNotActiveException, WorkspaceNotEnabledException {
 
         WorkspaceUserMembership[] workspaceUserMemberships = userManager.getWorkspaceUserMemberships(workspaceId);
         WorkspaceUserMemberShipDTO[] workspaceUserMemberShipDTO = new WorkspaceUserMemberShipDTO[workspaceUserMemberships.length];
@@ -84,7 +87,7 @@ public class WorkspaceMembershipResource {
     }
 
     @GET
-    @ApiOperation(value = "Get workspace's user membership for current user",
+    @ApiOperation(value = "Get workspace's user membership for authenticated user",
             response = WorkspaceUserMemberShipDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of WorkspaceUserMemberShipDTO"),
@@ -94,26 +97,27 @@ public class WorkspaceMembershipResource {
     @Path("users/me")
     @Produces(MediaType.APPLICATION_JSON)
     public WorkspaceUserMemberShipDTO getWorkspaceSpecificUserMemberShips(@ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId)
-            throws EntityNotFoundException, UserNotActiveException {
+            throws EntityNotFoundException, UserNotActiveException, WorkspaceNotEnabledException {
 
         WorkspaceUserMembership workspaceUserMemberships = userManager.getWorkspaceSpecificUserMemberships(workspaceId);
         return mapper.map(workspaceUserMemberships, WorkspaceUserMemberShipDTO.class);
     }
 
     @GET
-    @ApiOperation(value = "Get workspace's group membership for current user",
+    @ApiOperation(value = "Get workspace's group membership for authenticated user",
             response = WorkspaceUserGroupMemberShipDTO.class,
             responseContainer = "List")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of WorkspaceUserGroupMemberShipDTOs. It can be an empty list."),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("usergroups")
     @Produces(MediaType.APPLICATION_JSON)
     public WorkspaceUserGroupMemberShipDTO[] getWorkspaceUserGroupMemberShips(
             @ApiParam(required = true, value = "Workspace id")  @PathParam("workspaceId") String workspaceId)
-            throws EntityNotFoundException, UserNotActiveException {
+            throws EntityNotFoundException, UserNotActiveException, WorkspaceNotEnabledException {
 
         WorkspaceUserGroupMembership[] workspaceUserGroupMemberships = userManager.getWorkspaceUserGroupMemberships(workspaceId);
         WorkspaceUserGroupMemberShipDTO[] workspaceUserGroupMemberShipDTO = new WorkspaceUserGroupMemberShipDTO[workspaceUserGroupMemberships.length];
@@ -124,19 +128,20 @@ public class WorkspaceMembershipResource {
     }
 
     @GET
-    @ApiOperation(value = "Get workspace's group membership for current user",
+    @ApiOperation(value = "Get workspace's group membership for authenticated user",
             response = WorkspaceUserGroupMemberShipDTO.class,
             responseContainer = "List")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of WorkspaceUserGroupMemberShipDTOs. It can be an empty list."),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("usergroups/me")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getWorkspaceSpecificUserGroupMemberShips(
             @ApiParam(required = true, value = "Workspace id")  @PathParam("workspaceId") String workspaceId)
-            throws EntityNotFoundException, UserNotActiveException {
+            throws EntityNotFoundException, UserNotActiveException, WorkspaceNotEnabledException {
 
         WorkspaceUserGroupMembership[] workspaceUserGroupMemberships = userManager.getWorkspaceSpecificUserGroupMemberships(workspaceId);
         List<WorkspaceUserGroupMemberShipDTO> workspaceUserGroupMemberShipDTO = new ArrayList<>();

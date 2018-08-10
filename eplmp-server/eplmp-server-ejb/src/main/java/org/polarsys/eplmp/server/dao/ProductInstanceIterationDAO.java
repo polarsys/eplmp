@@ -16,28 +16,23 @@ import org.polarsys.eplmp.core.configuration.ProductBaseline;
 import org.polarsys.eplmp.core.configuration.ProductInstanceIteration;
 import org.polarsys.eplmp.core.configuration.ProductInstanceIterationKey;
 import org.polarsys.eplmp.core.exceptions.ProductInstanceIterationNotFoundException;
-import org.polarsys.eplmp.core.exceptions.ProductInstanceMasterNotFoundException;
 
+import javax.enterprise.context.RequestScoped;
+import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import java.util.List;
-import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+@RequestScoped
 public class ProductInstanceIterationDAO {
 
+    @Inject
     private EntityManager em;
-    private Locale mLocale;
 
     private static final Logger LOGGER = Logger.getLogger(ProductInstanceIterationDAO.class.getName());
 
-    public ProductInstanceIterationDAO(EntityManager pEM) {
-        em = pEM;
-    }
-
-    public ProductInstanceIterationDAO(Locale pLocale, EntityManager pEM) {
-        em = pEM;
-        mLocale = pLocale;
+    public ProductInstanceIterationDAO() {
     }
 
     public void createProductInstanceIteration(ProductInstanceIteration productInstanceIteration){
@@ -50,10 +45,10 @@ public class ProductInstanceIterationDAO {
     }
 
 
-    public ProductInstanceIteration loadProductInstanceIteration(ProductInstanceIterationKey pId) throws ProductInstanceMasterNotFoundException, ProductInstanceIterationNotFoundException {
+    public ProductInstanceIteration loadProductInstanceIteration(ProductInstanceIterationKey pId) throws ProductInstanceIterationNotFoundException {
         ProductInstanceIteration productInstanceIteration = em.find(ProductInstanceIteration.class, pId);
         if (productInstanceIteration == null) {
-            throw new ProductInstanceIterationNotFoundException(mLocale, pId);
+            throw new ProductInstanceIterationNotFoundException(pId);
         } else {
             return productInstanceIteration;
         }

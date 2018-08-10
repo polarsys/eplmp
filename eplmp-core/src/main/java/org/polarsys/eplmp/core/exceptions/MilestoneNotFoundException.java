@@ -12,7 +12,7 @@
 package org.polarsys.eplmp.core.exceptions;
 
 import java.text.MessageFormat;
-import java.util.Locale;
+
 
 /**
  *
@@ -22,24 +22,18 @@ public class MilestoneNotFoundException extends EntityNotFoundException {
     private final int mChange;
     private final String mTitle;
 
-    public MilestoneNotFoundException(String pMessage) {
-        super(pMessage);
-        mTitle=null;
-        mChange=-1;
+    public MilestoneNotFoundException(int pChange) {
+        this(pChange, null);
     }
 
-    public MilestoneNotFoundException(Locale pLocale, int pChange) {
-        this(pLocale, pChange, null);
-    }
-
-    public MilestoneNotFoundException(Locale pLocale, int pChange, Throwable pCause) {
-        super(pLocale, pCause);
+    public MilestoneNotFoundException(int pChange, Throwable pCause) {
+        super(pCause);
         mChange =pChange;
         mTitle=null;
     }
 
-    public MilestoneNotFoundException(Locale pLocale, String pTitle) {
-        super(pLocale, null);
+    public MilestoneNotFoundException(String pTitle) {
+        super();
         mTitle = pTitle;
         mChange = -1;
     }

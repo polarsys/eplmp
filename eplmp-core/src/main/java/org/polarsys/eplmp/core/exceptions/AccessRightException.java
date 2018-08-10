@@ -15,7 +15,7 @@ import org.polarsys.eplmp.core.common.Account;
 import org.polarsys.eplmp.core.common.User;
 
 import java.text.MessageFormat;
-import java.util.Locale;
+
 
 /**
  *
@@ -24,27 +24,22 @@ import java.util.Locale;
 public class AccessRightException extends ApplicationException {
     private final String mName;
 
-    public AccessRightException(String pMessage) {
-        super(pMessage);
-        mName=null;
-    }
-    
-    public AccessRightException(Locale pLocale, User pUser) {
-        this(pLocale, pUser.toString());
-    }
-    
-    public AccessRightException(Locale pLocale, Account pAccount) {
-        this(pLocale, pAccount.toString());
+    public AccessRightException(String pName) {
+        super();
+        mName = pName;
     }
 
-    public AccessRightException(Locale pLocale, String pName) {
-        super(pLocale);
-        mName=pName;
+    public AccessRightException(User pUser) {
+        this(pUser.toString());
+    }
+
+    public AccessRightException(Account pAccount) {
+        this(pAccount.toString());
     }
 
     @Override
     public String getLocalizedMessage() {
         String message = getBundleDefaultMessage();
-        return MessageFormat.format(message,mName);     
+        return MessageFormat.format(message, mName);
     }
 }

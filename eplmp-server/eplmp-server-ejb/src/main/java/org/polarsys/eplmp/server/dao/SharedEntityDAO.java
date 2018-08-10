@@ -18,27 +18,24 @@ import org.polarsys.eplmp.core.sharing.SharedDocument;
 import org.polarsys.eplmp.core.sharing.SharedEntity;
 import org.polarsys.eplmp.core.sharing.SharedPart;
 
+import javax.enterprise.context.RequestScoped;
+import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.TypedQuery;
-import java.util.Locale;
+
 
 /**
  * @author Morgan Guimard
  */
+
+@RequestScoped
 public class SharedEntityDAO {
 
+    @Inject
     private EntityManager em;
-    private Locale mLocale;
 
-    public SharedEntityDAO(Locale pLocale, EntityManager pEM) {
-        mLocale=pLocale;
-        em=pEM;
-    }
-
-    public SharedEntityDAO(EntityManager pEM) {
-        mLocale=Locale.getDefault();
-        em=pEM;
+    public SharedEntityDAO() {
     }
 
     public boolean isSharedDocument(String pUuid){
@@ -53,7 +50,7 @@ public class SharedEntityDAO {
 
         SharedDocument sharedDocument = em.find(SharedDocument.class, pUuid);
         if (sharedDocument == null) {
-            throw new SharedEntityNotFoundException(mLocale, pUuid);
+            throw new SharedEntityNotFoundException(pUuid);
         } else {
             return sharedDocument;
         }
@@ -64,11 +61,10 @@ public class SharedEntityDAO {
 
         SharedPart sharedPart = em.find(SharedPart.class, pUuid);
         if (sharedPart == null) {
-            throw new SharedEntityNotFoundException(mLocale, pUuid);
+            throw new SharedEntityNotFoundException(pUuid);
         } else {
             return sharedPart;
         }
-
     }
 
     public void createSharedDocument(SharedDocument pSharedDocument) {
@@ -106,13 +102,12 @@ public class SharedEntityDAO {
         try {
             return query.setParameter("pUuid", pUuid).getSingleResult();
         }catch(NoResultException ex){
-            throw new SharedEntityNotFoundException(mLocale, pUuid);
+            throw new SharedEntityNotFoundException(pUuid);
         }
 
     }
 
     public void deleteSharedEntity(SharedEntity pSharedEntity) {
-
         try {
             SharedEntity sharedEntity = loadSharedEntity(pSharedEntity.getUuid());
             if(pSharedEntity instanceof SharedDocument){
@@ -121,6 +116,7 @@ public class SharedEntityDAO {
                 deleteSharedPart((SharedPart) sharedEntity);
             }
         } catch (SharedEntityNotFoundException e) {
+
         }
 
     }

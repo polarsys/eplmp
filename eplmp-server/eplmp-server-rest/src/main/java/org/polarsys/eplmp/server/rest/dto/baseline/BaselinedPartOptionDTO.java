@@ -18,7 +18,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import java.io.Serializable;
 
 @XmlRootElement
-@ApiModel(value="BaselinedPartOptionDTO", description="This class holds part status and iteration information")
+@ApiModel(value="BaselinedPartOptionDTO", description="This class holds status and iteration information of a {@link org.polarsys.eplmp.core.configuration.BaselinedPart} entity")
 public class BaselinedPartOptionDTO implements Serializable {
 
     @ApiModelProperty(value = "Part version")

@@ -10,6 +10,7 @@
   *******************************************************************************/
 package org.polarsys.eplmp.server.rest.file;
 
+import io.swagger.annotations.*;
 import org.polarsys.eplmp.core.common.BinaryResource;
 import org.polarsys.eplmp.core.document.DocumentMasterTemplateKey;
 import org.polarsys.eplmp.core.exceptions.*;
@@ -20,14 +21,12 @@ import org.polarsys.eplmp.core.services.IDocumentManagerLocal;
 import org.polarsys.eplmp.core.services.IOnDemandConverterManagerLocal;
 import org.polarsys.eplmp.server.helpers.Streams;
 import org.polarsys.eplmp.server.rest.exceptions.FileConversionException;
-import org.polarsys.eplmp.server.rest.exceptions.NotModifiedException;
 import org.polarsys.eplmp.server.rest.exceptions.PreconditionFailedException;
 import org.polarsys.eplmp.server.rest.exceptions.RequestedRangeNotSatisfiableException;
 import org.polarsys.eplmp.server.rest.file.util.BinaryResourceDownloadMeta;
 import org.polarsys.eplmp.server.rest.file.util.BinaryResourceDownloadResponseBuilder;
 import org.polarsys.eplmp.server.rest.file.util.BinaryResourceUpload;
 import org.polarsys.eplmp.server.rest.interceptors.Compress;
-import io.swagger.annotations.*;
 
 import javax.annotation.security.DeclareRoles;
 import javax.annotation.security.RolesAllowed;
@@ -51,7 +50,8 @@ import java.util.Collection;
 import java.util.logging.Logger;
 
 @RequestScoped
-@Api(hidden = true, value = "documentTemplateBinary", description = "Operations about document templates files")
+@Api(hidden = true, value = "documentTemplateBinary", description = "Operations about document templates files",
+        authorizations = {@Authorization(value = "authorization")})
 @DeclareRoles({UserGroupMapping.REGULAR_USER_ROLE_ID})
 @RolesAllowed({UserGroupMapping.REGULAR_USER_ROLE_ID})
 public class DocumentTemplateBinaryResource {
@@ -77,6 +77,7 @@ public class DocumentTemplateBinaryResource {
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Upload success"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Consumes(MediaType.MULTIPART_FORM_DATA)
@@ -85,7 +86,7 @@ public class DocumentTemplateBinaryResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") final String workspaceId,
             @ApiParam(required = true, value = "Template id") @PathParam("templateId") final String templateId)
             throws EntityNotFoundException, EntityAlreadyExistsException, UserNotActiveException, AccessRightException,
-            NotAllowedException, CreationException {
+            NotAllowedException, CreationException, WorkspaceNotEnabledException {
 
         try {
             BinaryResource binaryResource;
@@ -103,9 +104,14 @@ public class DocumentTemplateBinaryResource {
                 documentService.saveFileInTemplate(templatePK, fileName, length);
             }
 
+            if (fileName == null){
+                return Response.status(Response.Status.BAD_REQUEST).build();
+            }
+
             if (formParts.size() == 1) {
                 return BinaryResourceUpload.tryToRespondCreated(request.getRequestURI() + URLEncoder.encode(fileName, "UTF-8"));
             }
+
             return Response.noContent().build();
 
         } catch (IOException | ServletException | StorageException e) {
@@ -120,6 +126,7 @@ public class DocumentTemplateBinaryResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Download success"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("/{fileName}")
@@ -134,7 +141,7 @@ public class DocumentTemplateBinaryResource {
             @ApiParam(required = false, value = "Type") @QueryParam("type") String type,
             @ApiParam(required = false, value = "Output") @QueryParam("output") String output)
             throws EntityNotFoundException, UserNotActiveException, AccessRightException, NotAllowedException,
-            PreconditionFailedException, NotModifiedException, RequestedRangeNotSatisfiableException {
+            PreconditionFailedException, RequestedRangeNotSatisfiableException, WorkspaceNotEnabledException {
 
 
         String fullName = workspaceId + "/document-templates/" + templateId + "/" + fileName;
@@ -148,6 +155,10 @@ public class DocumentTemplateBinaryResource {
         }
 
         InputStream binaryContentInputStream = null;
+
+        // Set to false because templates are never historized
+        boolean isToBeCached = false;
+
         try {
             if (output != null && !output.isEmpty()) {
                 binaryContentInputStream = getConvertedBinaryResource(binaryResource, output);
@@ -157,7 +168,7 @@ public class DocumentTemplateBinaryResource {
             } else {
                 binaryContentInputStream = storageManager.getBinaryResourceInputStream(binaryResource);
             }
-            return BinaryResourceDownloadResponseBuilder.prepareResponse(binaryContentInputStream, binaryResourceDownloadMeta, range);
+            return BinaryResourceDownloadResponseBuilder.prepareResponse(binaryContentInputStream, binaryResourceDownloadMeta, range, isToBeCached);
         } catch (StorageException | FileConversionException e) {
             Streams.close(binaryContentInputStream);
             return BinaryResourceDownloadResponseBuilder.downloadError(e, fullName);
@@ -170,7 +181,7 @@ public class DocumentTemplateBinaryResource {
      * @param binaryResource The binary resource
      * @param output         The wanted output
      * @return The binary resource stream in the wanted output
-     * @throws org.polarsys.eplmp.server.rest.exceptions.FileConversionException
+     * @throws FileConversionException
      */
     private InputStream getConvertedBinaryResource(BinaryResource binaryResource, String output) throws FileConversionException {
         try {

@@ -10,11 +10,13 @@
   *******************************************************************************/
 package org.polarsys.eplmp.server.rest;
 
-import org.polarsys.eplmp.core.exceptions.*;
+import io.swagger.annotations.*;
+import org.polarsys.eplmp.core.exceptions.AccessRightException;
+import org.polarsys.eplmp.core.exceptions.EntityNotFoundException;
+import org.polarsys.eplmp.core.exceptions.WorkspaceNotEnabledException;
 import org.polarsys.eplmp.core.security.UserGroupMapping;
 import org.polarsys.eplmp.core.services.IProductManagerLocal;
 import org.polarsys.eplmp.server.rest.dto.ModificationNotificationDTO;
-import io.swagger.annotations.*;
 
 import javax.annotation.security.DeclareRoles;
 import javax.annotation.security.RolesAllowed;
@@ -32,7 +34,8 @@ import javax.ws.rs.core.Response;
  */
 
 @RequestScoped
-@Api(hidden = true, value = "modificationNotifications", description = "Operations about modification notifications")
+@Api(hidden = true, value = "modificationNotifications", description = "Operations about modification notifications",
+        authorizations = {@Authorization(value = "authorization")})
 @DeclareRoles(UserGroupMapping.REGULAR_USER_ROLE_ID)
 @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
 public class ModificationNotificationResource {
@@ -44,11 +47,12 @@ public class ModificationNotificationResource {
     }
 
     @PUT
-    @ApiOperation(value = "Acknowledge modification notification",
+    @ApiOperation(value = "Acknowledge a modification notification",
             response = Response.class)
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful acknowledge of ModificationNotification"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("/{notificationId}")
@@ -57,7 +61,7 @@ public class ModificationNotificationResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Notification id") @PathParam("notificationId") int notificationId,
             @ApiParam(required = true, value = "Modification notification to acknowledge") ModificationNotificationDTO notificationDTO)
-            throws UserNotFoundException, AccessRightException, PartRevisionNotFoundException, WorkspaceNotFoundException, WorkspaceNotEnabledException {
+            throws EntityNotFoundException, AccessRightException, WorkspaceNotEnabledException {
 
         productService.updateModificationNotification(workspaceId, notificationId, notificationDTO.getAckComment());
         return Response.noContent().build();

@@ -10,6 +10,9 @@
   *******************************************************************************/
 package org.polarsys.eplmp.server.rest;
 
+import io.swagger.annotations.*;
+import org.dozer.DozerBeanMapperSingletonWrapper;
+import org.dozer.Mapper;
 import org.polarsys.eplmp.core.configuration.ProductConfiguration;
 import org.polarsys.eplmp.core.exceptions.*;
 import org.polarsys.eplmp.core.exceptions.NotAllowedException;
@@ -22,9 +25,6 @@ import org.polarsys.eplmp.server.rest.dto.ACLDTO;
 import org.polarsys.eplmp.server.rest.dto.LightPartLinkDTO;
 import org.polarsys.eplmp.server.rest.dto.LightPartLinkListDTO;
 import org.polarsys.eplmp.server.rest.dto.baseline.ProductConfigurationDTO;
-import io.swagger.annotations.*;
-import org.dozer.DozerBeanMapperSingletonWrapper;
-import org.dozer.Mapper;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.security.DeclareRoles;
@@ -43,7 +43,8 @@ import java.util.Map;
  * @author Morgan Guimard
  */
 @RequestScoped
-@Api(hidden = true, value = "productConfigurations", description = "Operations about product configurations")
+@Api(hidden = true, value = "productConfigurations", description = "Operations about product configurations",
+        authorizations = {@Authorization(value = "authorization")})
 @DeclareRoles(UserGroupMapping.REGULAR_USER_ROLE_ID)
 @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
 public class ProductConfigurationsResource {
@@ -71,13 +72,13 @@ public class ProductConfigurationsResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of ProductConfigurationDTOs. It can be an empty list."),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Produces(MediaType.APPLICATION_JSON)
     public Response getAllConfigurations(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId)
-            throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException,
-            ConfigurationItemNotFoundException, WorkspaceNotEnabledException {
+            throws EntityNotFoundException, UserNotActiveException, WorkspaceNotEnabledException {
         List<ProductConfiguration> allProductConfigurations = productBaselineService.getAllProductConfigurations(workspaceId);
         return makeList(allProductConfigurations);
     }
@@ -91,14 +92,14 @@ public class ProductConfigurationsResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of ProductConfigurationDTOs. It can be an empty list."),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Produces(MediaType.APPLICATION_JSON)
     public Response getConfigurationsForProduct(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Configuration item id filter") @PathParam("ciId") String ciId)
-            throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException,
-            ConfigurationItemNotFoundException, WorkspaceNotEnabledException {
+            throws EntityNotFoundException, UserNotActiveException, WorkspaceNotEnabledException {
 
         ConfigurationItemKey ciKey = new ConfigurationItemKey(workspaceId, ciId);
         List<ProductConfiguration> allProductConfigurations = productBaselineService.getAllProductConfigurationsByConfigurationItemId(ciKey);
@@ -108,11 +109,12 @@ public class ProductConfigurationsResource {
 
 
     @GET
-    @ApiOperation(value = "Get product configuration",
+    @ApiOperation(value = "Get product configuration by id",
             response = ProductConfigurationDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of ProductConfigurationDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{ciId}/configurations/{productConfigurationId}")
@@ -121,10 +123,8 @@ public class ProductConfigurationsResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Configuration item id") @PathParam("ciId") String ciId,
             @ApiParam(required = true, value = "Product configuration id") @PathParam("productConfigurationId") int productConfigurationId)
-            throws UserNotFoundException, WorkspaceNotFoundException, UserNotActiveException,
-            ProductConfigurationNotFoundException, EntityConstraintException, NotAllowedException,
-            AccessRightException, ConfigurationItemNotFoundException, PartUsageLinkNotFoundException,
-            PartMasterNotFoundException, WorkspaceNotEnabledException {
+            throws EntityNotFoundException, UserNotActiveException, EntityConstraintException, NotAllowedException,
+            AccessRightException, WorkspaceNotEnabledException {
 
         ConfigurationItemKey ciKey = new ConfigurationItemKey(workspaceId, ciId);
         ProductConfiguration productConfiguration = productBaselineService.getProductConfiguration(ciKey, productConfigurationId);
@@ -157,11 +157,12 @@ public class ProductConfigurationsResource {
     }
 
     @POST
-    @ApiOperation(value = "Create product configuration",
+    @ApiOperation(value = "Create a new product configuration",
             response = ProductConfigurationDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of created ProductConfigurationDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Consumes(MediaType.APPLICATION_JSON)
@@ -169,8 +170,7 @@ public class ProductConfigurationsResource {
     public ProductConfigurationDTO createConfiguration(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Product configuration to create") ProductConfigurationDTO pProductConfigurationDTO)
-            throws UserNotFoundException, WorkspaceNotFoundException, UserNotActiveException,
-            ConfigurationItemNotFoundException, CreationException, AccessRightException,
+            throws EntityNotFoundException, UserNotActiveException, CreationException, AccessRightException,
             WorkspaceNotEnabledException {
 
         String ciId = pProductConfigurationDTO.getConfigurationItemId();
@@ -195,6 +195,7 @@ public class ProductConfigurationsResource {
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful ACL update"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{ciId}/configurations/{productConfigurationId}/acl")
@@ -204,8 +205,7 @@ public class ProductConfigurationsResource {
             @ApiParam(required = true, value = "Configuration item id") @PathParam("ciId") String pCiId,
             @ApiParam(required = true, value = "Product configuration id") @PathParam("productConfigurationId") int productConfigurationId,
             @ApiParam(required = true, value = "ACL rules to set") ACLDTO acl)
-            throws UserNotFoundException, WorkspaceNotFoundException, UserNotActiveException,
-            ProductConfigurationNotFoundException, AccessRightException, WorkspaceNotEnabledException {
+            throws EntityNotFoundException, UserNotActiveException, AccessRightException, WorkspaceNotEnabledException {
 
         ConfigurationItemKey ciKey = new ConfigurationItemKey(workspaceId, pCiId);
 
@@ -224,6 +224,7 @@ public class ProductConfigurationsResource {
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful deletion of ProductConfigurationDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{ciId}/configurations/{productConfigurationId}")
@@ -232,8 +233,7 @@ public class ProductConfigurationsResource {
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Configuration item id") @PathParam("ciId") String ciId,
             @ApiParam(required = true, value = "Product configuration id") @PathParam("productConfigurationId") int productConfigurationId)
-            throws UserNotFoundException, WorkspaceNotFoundException, UserNotActiveException,
-            ProductConfigurationNotFoundException, AccessRightException, WorkspaceNotEnabledException {
+            throws EntityNotFoundException, UserNotActiveException, AccessRightException, WorkspaceNotEnabledException {
 
         ConfigurationItemKey ciKey = new ConfigurationItemKey(workspaceId, ciId);
         productBaselineService.deleteProductConfiguration(ciKey, productConfigurationId);

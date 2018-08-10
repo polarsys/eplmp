@@ -1,13 +1,13 @@
 /*******************************************************************************
- * Copyright (c) 2017 DocDoku.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
- * <p>
- * Contributors:
- * DocDoku - initial API and implementation
- *******************************************************************************/
+  * Copyright (c) 2017 DocDoku.
+  * All rights reserved. This program and the accompanying materials
+  * are made available under the terms of the Eclipse Public License v1.0
+  * which accompanies this distribution, and is available at
+  * http://www.eclipse.org/legal/epl-v10.html
+  *
+  * Contributors:
+  *    DocDoku - initial API and implementation
+  *******************************************************************************/
 
 package org.polarsys.eplmp.server.rest;
 
@@ -29,7 +29,10 @@ import org.dozer.Mapper;
 import org.polarsys.eplmp.core.common.Account;
 import org.polarsys.eplmp.core.common.OAuthProvider;
 import org.polarsys.eplmp.core.common.ProvidedAccount;
-import org.polarsys.eplmp.core.exceptions.*;
+import org.polarsys.eplmp.core.exceptions.AccountAlreadyExistsException;
+import org.polarsys.eplmp.core.exceptions.CreationException;
+import org.polarsys.eplmp.core.exceptions.EntityNotFoundException;
+import org.polarsys.eplmp.core.exceptions.ProvidedAccountNotFoundException;
 import org.polarsys.eplmp.core.security.UserGroupMapping;
 import org.polarsys.eplmp.core.services.IAccountManagerLocal;
 import org.polarsys.eplmp.core.services.IContextManagerLocal;
@@ -97,27 +100,22 @@ public class AuthResource {
 
     @POST
     @Path("/login")
-    @ApiOperation(value = "Try to authenticate",
-            response = AccountDTO.class)
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "Successful login"),
+    @ApiOperation(value = "Try to authenticate with credentials", response = AccountDTO.class, authorizations = {})
+    @ApiResponses(value = { @ApiResponse(code = 200, message = "Successful login"),
             @ApiResponse(code = 403, message = "Unsuccessful login"),
-            @ApiResponse(code = 500, message = "Internal server error")
-    })
+            @ApiResponse(code = 500, message = "Internal server error") })
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response login(
-            @Context HttpServletRequest request,
-            @Context HttpServletResponse response,
+    public Response login(@Context HttpServletRequest request, @Context HttpServletResponse response,
             @ApiParam(required = true, value = "Login request") LoginRequestDTO loginRequestDTO)
-            throws AccountNotFoundException {
+                    throws EntityNotFoundException {
 
         String login = loginRequestDTO.getLogin();
         String password = loginRequestDTO.getPassword();
 
         Account account = accountManager.authenticateAccount(login, password);
 
-        if (oAuthManager.isProvidedAccount(account)) {
+        if (null != account && oAuthManager.isProvidedAccount(account)) {
             return Response.status(403).build();
         }
 
@@ -140,9 +138,9 @@ public class AuthResource {
                 session.setAttribute("groups", userGroupMapping.getGroupName());
             }
 
-            Response.ResponseBuilder responseBuilder = Response.ok()
-                    .entity(mapper.map(account, AccountDTO.class));
-
+            AccountDTO accountDTO = mapper.map(account, AccountDTO.class);
+            accountDTO.setAdmin(UserGroupMapping.ADMIN_ROLE_ID.equals(userGroupMapping.getGroupName()));
+            Response.ResponseBuilder responseBuilder = Response.ok().entity(accountDTO);
             if (authConfig.isJwtEnabled()) {
                 responseBuilder.header("jwt", JWTokenFactory.createAuthToken(authConfig.getJWTKey(), userGroupMapping));
             }
@@ -155,21 +153,18 @@ public class AuthResource {
             }
             return Response.status(Response.Status.FORBIDDEN).build();
         }
-
     }
 
     @POST
     @Path("/recovery")
-    @ApiOperation(value = "Send password recovery request",
-            response = Response.class)
-    @ApiResponses(value = {
-            @ApiResponse(code = 204, message = "Successful request"),
-            @ApiResponse(code = 500, message = "Internal server error")
-    })
+    @ApiOperation(value = "Send password recovery request", response = Response.class, authorizations = {})
+    @ApiResponses(value = { @ApiResponse(code = 204, message = "Successful request"),
+            @ApiResponse(code = 403, message = "Forbidden"),
+            @ApiResponse(code = 500, message = "Internal server error") })
     @Produces(MediaType.APPLICATION_JSON)
     public Response sendPasswordRecovery(
             @ApiParam(required = true, value = "Password recovery request") PasswordRecoveryRequestDTO passwordRecoveryRequestDTO)
-            throws AccountNotFoundException {
+                    throws EntityNotFoundException {
         String login = passwordRecoveryRequestDTO.getLogin();
         Account account = accountManager.getAccount(login);
 
@@ -183,31 +178,24 @@ public class AuthResource {
 
     @POST
     @Path("/recover")
-    @ApiOperation(value = "Recover password",
-            response = Response.class)
-    @ApiResponses(value = {
-            @ApiResponse(code = 204, message = "Successful recover request"),
-            @ApiResponse(code = 500, message = "Internal server error")
-    })
+    @ApiOperation(value = "Recover account password", response = Response.class, authorizations = {})
+    @ApiResponses(value = { @ApiResponse(code = 204, message = "Successful recover request"),
+            @ApiResponse(code = 500, message = "Internal server error") })
     @Produces(MediaType.APPLICATION_JSON)
     public Response sendPasswordRecover(
             @ApiParam(required = true, value = "Password recovery process") PasswordRecoverDTO passwordRecoverDTO)
-            throws PasswordRecoveryRequestNotFoundException {
+                    throws EntityNotFoundException {
         userManager.recoverPassword(passwordRecoverDTO.getUuid(), passwordRecoverDTO.getNewPassword());
         return Response.noContent().build();
     }
 
     @GET
     @Path("/logout")
-    @ApiOperation(value = "Log out connected user",
-            response = Response.class)
-    @ApiResponses(value = {
-            @ApiResponse(code = 204, message = "Successful logout"),
-            @ApiResponse(code = 500, message = "Internal server error")
-    })
+    @ApiOperation(value = "Log out connected user", response = Response.class, authorizations = {})
+    @ApiResponses(value = { @ApiResponse(code = 204, message = "Successful logout"),
+            @ApiResponse(code = 500, message = "Internal server error") })
     @Produces(MediaType.APPLICATION_JSON)
-    public Response logout(
-            @Context HttpServletRequest request) {
+    public Response logout(@Context HttpServletRequest request) {
 
         if (authConfig.isSessionEnabled()) {
             request.getSession().invalidate();
@@ -225,13 +213,10 @@ public class AuthResource {
 
     @GET
     @Path("/providers")
-    @ApiOperation(value = "Get supported providers",
-            response = OAuthProviderPublicDTO.class,
-            responseContainer = "List")
+    @ApiOperation(value = "Get registered OAuth providers", response = OAuthProviderPublicDTO.class, responseContainer = "List", authorizations = {})
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of providers. It can be an empty list."),
-            @ApiResponse(code = 500, message = "Internal server error")
-    })
+            @ApiResponse(code = 500, message = "Internal server error") })
     @Produces(MediaType.APPLICATION_JSON)
     public Response getProviders() {
         List<OAuthProvider> providers = oAuthManager.getProviders();
@@ -251,16 +236,14 @@ public class AuthResource {
 
     @GET
     @Path("/providers/{id}")
-    @ApiOperation(value = "Get provider details",
-            response = OAuthProviderPublicDTO.class)
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "Successful retrieval of provider."),
+    @ApiOperation(value = "Get OAuth provider details", response = OAuthProviderPublicDTO.class, authorizations = {})
+    @ApiResponses(value = { @ApiResponse(code = 200, message = "Successful retrieval of provider."),
             @ApiResponse(code = 404, message = "Provider not found"),
-            @ApiResponse(code = 500, message = "Internal server error")
-    })
+            @ApiResponse(code = 500, message = "Internal server error") })
     @Produces(MediaType.APPLICATION_JSON)
     public OAuthProviderPublicDTO getProvider(
-            @ApiParam(required = true, value = "Password recovery process") @PathParam("id") Integer providerId) throws OAuthProviderNotFoundException {
+            @ApiParam(required = true, value = "Provider id") @PathParam("id") Integer providerId)
+                    throws EntityNotFoundException {
         OAuthProvider provider = oAuthManager.getProvider(providerId);
         OAuthProviderPublicDTO oAuthProviderPublicDTO = mapper.map(provider, OAuthProviderPublicDTO.class);
         oAuthProviderPublicDTO.setSigningKeys(getSigningKeys(provider.getJwkSetURL()));
@@ -288,23 +271,17 @@ public class AuthResource {
         }
     }
 
-
     @POST
     @Path("/oauth")
-    @ApiOperation(value = "Try to authenticate with oauth",
-            response = AccountDTO.class)
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "Successful login"),
+    @ApiOperation(value = "Try to authenticate with OAuth", response = AccountDTO.class, authorizations = {})
+    @ApiResponses(value = { @ApiResponse(code = 200, message = "Successful login"),
             @ApiResponse(code = 403, message = "Unsuccessful login"),
-            @ApiResponse(code = 500, message = "Internal server error")
-    })
+            @ApiResponse(code = 500, message = "Internal server error") })
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response oAuthLogin(
-            @Context HttpServletRequest request,
-            @Context HttpServletResponse response,
+    public Response oAuthLogin(@Context HttpServletRequest request, @Context HttpServletResponse response,
             @ApiParam(required = true, value = "OAuth login request") OAuthLoginRequestDTO oAuthLoginRequestDTO)
-            throws AccountNotFoundException, OAuthProviderNotFoundException {
+                    throws EntityNotFoundException {
 
         // Get provider configuration to fill settings
         Integer providerId = oAuthLoginRequestDTO.getProviderId();
@@ -343,7 +320,7 @@ public class AuthResource {
         } catch (ProvidedAccountNotFoundException e) {
             // If not : create an account.
             // get an available login
-            //String login = findAvailableLogin(sub);
+            // String login = findAvailableLogin(sub);
             String login = oAuthManager.findAvailableLogin(sub);
 
             try {
@@ -370,7 +347,8 @@ public class AuthResource {
         return responseBuilder.build();
     }
 
-    private IDTokenClaimsSet validateToken(OAuthProvider provider, OAuthLoginRequestDTO oAuthLoginRequestDTO) throws MalformedURLException, ParseException, BadJOSEException, JOSEException {
+    private IDTokenClaimsSet validateToken(OAuthProvider provider, OAuthLoginRequestDTO oAuthLoginRequestDTO)
+            throws MalformedURLException, ParseException, BadJOSEException, JOSEException {
         Issuer iss = new Issuer(provider.getIssuer());
         ClientID clientID = new ClientID(provider.getClientID());
         Nonce nonce = new Nonce(oAuthLoginRequestDTO.getNonce());

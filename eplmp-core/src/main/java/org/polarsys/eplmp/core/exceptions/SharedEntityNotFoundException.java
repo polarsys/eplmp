@@ -11,7 +11,7 @@
 package org.polarsys.eplmp.core.exceptions;
 
 import java.text.MessageFormat;
-import java.util.Locale;
+
 
 /**
  * @author Morgan Guimard
@@ -19,13 +19,8 @@ import java.util.Locale;
 public class SharedEntityNotFoundException extends EntityNotFoundException {
     private final String uuid;
 
-    public SharedEntityNotFoundException(String pMessage) {
-        super(pMessage);
-        uuid=null;
-    }
-
-    public SharedEntityNotFoundException(Locale pLocale, String pUuid) {
-        super(pLocale);
+    public SharedEntityNotFoundException(String pUuid) {
+        super();
         uuid=pUuid;
     }
 

@@ -11,6 +11,9 @@
 
 package org.polarsys.eplmp.server.rest;
 
+import io.swagger.annotations.*;
+import org.dozer.DozerBeanMapperSingletonWrapper;
+import org.dozer.Mapper;
 import org.polarsys.eplmp.core.common.Account;
 import org.polarsys.eplmp.core.common.Organization;
 import org.polarsys.eplmp.core.exceptions.*;
@@ -21,9 +24,6 @@ import org.polarsys.eplmp.core.services.IOrganizationManagerLocal;
 import org.polarsys.eplmp.server.rest.dto.AccountDTO;
 import org.polarsys.eplmp.server.rest.dto.OrganizationDTO;
 import org.polarsys.eplmp.server.rest.dto.UserDTO;
-import io.swagger.annotations.*;
-import org.dozer.DozerBeanMapperSingletonWrapper;
-import org.dozer.Mapper;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.security.DeclareRoles;
@@ -39,7 +39,8 @@ import java.util.Collections;
 import java.util.List;
 
 @RequestScoped
-@Api(value = "organizations", description = "Operations about organizations")
+@Api(value = "organizations", description = "Operations about organizations",
+        authorizations = {@Authorization(value = "authorization")})
 @Path("organizations")
 @DeclareRoles(UserGroupMapping.REGULAR_USER_ROLE_ID)
 @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
@@ -72,7 +73,7 @@ public class OrganizationResource {
     })
     @Produces(MediaType.APPLICATION_JSON)
     public OrganizationDTO getOrganization()
-            throws AccountNotFoundException {
+            throws EntityNotFoundException {
 
         try {
             Organization organization = organizationManager.getMyOrganization();
@@ -93,7 +94,7 @@ public class OrganizationResource {
     @Produces(MediaType.APPLICATION_JSON)
     public OrganizationDTO createOrganization(
             @ApiParam(required = true, value = "Organization to create") OrganizationDTO organizationDTO)
-            throws NotAllowedException, AccountNotFoundException, OrganizationAlreadyExistsException, CreationException {
+            throws NotAllowedException, EntityNotFoundException, EntityAlreadyExistsException, CreationException {
 
         Organization organization = organizationManager.createOrganization(organizationDTO.getName(), organizationDTO.getDescription());
         return mapper.map(organization, OrganizationDTO.class);
@@ -105,13 +106,14 @@ public class OrganizationResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of updated OrganizationDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     public OrganizationDTO updateOrganization(
             @ApiParam(required = true, value = "Updated organization") OrganizationDTO organizationDTO)
-            throws AccountNotFoundException, AccessRightException, OrganizationNotFoundException {
+            throws EntityNotFoundException, AccessRightException {
 
         Organization organization = organizationManager.getMyOrganization();
         organization.setDescription(organizationDTO.getDescription());
@@ -125,11 +127,12 @@ public class OrganizationResource {
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful deletion of OrganizationDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Produces(MediaType.APPLICATION_JSON)
     public Response deleteOrganization()
-            throws AccountNotFoundException, OrganizationNotFoundException, AccessRightException {
+            throws EntityNotFoundException, AccessRightException {
 
         Organization organization = organizationManager.getMyOrganization();
         organizationManager.deleteOrganization(organization.getName());
@@ -144,11 +147,12 @@ public class OrganizationResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of AccountDTOs. It can be an empty list."),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Produces(MediaType.APPLICATION_JSON)
     public Response getMembers()
-            throws AccountNotFoundException, OrganizationNotFoundException, AccessRightException {
+            throws EntityNotFoundException, AccessRightException {
 
         Organization organization = organizationManager.getMyOrganization();
         List<Account> accounts = organization.getMembers();
@@ -169,12 +173,13 @@ public class OrganizationResource {
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful member add operation"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Produces(MediaType.APPLICATION_JSON)
     public Response addMember(
             @ApiParam(required = true, value = "User to add") UserDTO userDTO)
-            throws AccountNotFoundException, OrganizationNotFoundException, AccessRightException {
+            throws EntityNotFoundException, AccessRightException {
 
         Organization organization = organizationManager.getMyOrganization();
         Account member = accountManager.getAccount(userDTO.getLogin());
@@ -190,12 +195,13 @@ public class OrganizationResource {
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful member removal operation"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Produces(MediaType.APPLICATION_JSON)
     public Response removeMember(
             @ApiParam(required = true, value = "User to remove") UserDTO userDTO)
-            throws OrganizationNotFoundException, AccountNotFoundException, AccessRightException {
+            throws EntityNotFoundException, AccessRightException {
 
 
         Organization organization = organizationManager.getMyOrganization();
@@ -213,13 +219,14 @@ public class OrganizationResource {
     @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful member moved operation"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Produces(MediaType.APPLICATION_JSON)
     public Response moveMember(
             @ApiParam(required = true, value = "User to move up") UserDTO userDTO,
             @ApiParam(required = true, value = "Direction (up/down)") @QueryParam("direction") String direction)
-            throws AccountNotFoundException, OrganizationNotFoundException, AccessRightException {
+            throws EntityNotFoundException, AccessRightException {
 
         if ("up".equals(direction)) {
             moveMemberUp(userDTO.getLogin());
@@ -253,4 +260,5 @@ public class OrganizationResource {
             organizationManager.updateOrganization(organization);
         }
     }
+
 }

@@ -14,30 +14,34 @@ import org.polarsys.eplmp.core.change.ModificationNotification;
 import org.polarsys.eplmp.core.product.PartIterationKey;
 import org.polarsys.eplmp.core.product.PartRevisionKey;
 
+import javax.enterprise.context.RequestScoped;
+import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import java.util.List;
 
+@RequestScoped
 public class ModificationNotificationDAO {
 
-    private EntityManager em;
+    public static final String WORKSPACE_ID = "workspaceId";
+    public static final String PART_NUMBER = "partNumber";
+    public static final String VERSION = "version";
 
-    public ModificationNotificationDAO(EntityManager pEM) {
-        em = pEM;
-    }
+    @Inject
+    private EntityManager em;
 
     public void removeModificationNotifications(PartIterationKey pPartIPK){
         em.createNamedQuery("ModificationNotification.removeAllOnPartIteration")
-                .setParameter("workspaceId", pPartIPK.getWorkspaceId())
-                .setParameter("partNumber", pPartIPK.getPartMasterNumber())
-                .setParameter("version", pPartIPK.getPartRevisionVersion())
+                .setParameter(WORKSPACE_ID, pPartIPK.getWorkspaceId())
+                .setParameter(PART_NUMBER, pPartIPK.getPartMasterNumber())
+                .setParameter(VERSION, pPartIPK.getPartRevisionVersion())
                 .setParameter("iteration", pPartIPK.getIteration()).executeUpdate();
     }
 
     public void removeModificationNotifications(PartRevisionKey pPartRPK){
         em.createNamedQuery("ModificationNotification.removeAllOnPartRevision")
-                .setParameter("workspaceId", pPartRPK.getWorkspaceId())
-                .setParameter("partNumber", pPartRPK.getPartMasterNumber())
-                .setParameter("version", pPartRPK.getVersion()).executeUpdate();
+                .setParameter(WORKSPACE_ID, pPartRPK.getWorkspaceId())
+                .setParameter(PART_NUMBER, pPartRPK.getPartMasterNumber())
+                .setParameter(VERSION, pPartRPK.getVersion()).executeUpdate();
     }
 
     public void createModificationNotification(ModificationNotification pNotification) {
@@ -50,9 +54,9 @@ public class ModificationNotificationDAO {
 
     public List<ModificationNotification> getModificationNotifications(PartIterationKey pPartIPK) {
         return em.createNamedQuery("ModificationNotification.findByImpactedPartIteration", ModificationNotification.class)
-                .setParameter("workspaceId", pPartIPK.getWorkspaceId())
-                .setParameter("partNumber", pPartIPK.getPartMasterNumber())
-                .setParameter("version", pPartIPK.getPartRevisionVersion())
+                .setParameter(WORKSPACE_ID, pPartIPK.getWorkspaceId())
+                .setParameter(PART_NUMBER, pPartIPK.getPartMasterNumber())
+                .setParameter(VERSION, pPartIPK.getPartRevisionVersion())
                 .setParameter("iteration", pPartIPK.getIteration()).getResultList();
     }
 

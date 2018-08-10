@@ -12,7 +12,7 @@
 package org.polarsys.eplmp.core.exceptions;
 
 import java.text.MessageFormat;
-import java.util.Locale;
+
 
 /**
  * @author Florent Garin
@@ -20,18 +20,12 @@ import java.util.Locale;
 public class PasswordRecoveryRequestNotFoundException extends EntityNotFoundException {
     private final String mRecoveryUUID;
 
-
-    public PasswordRecoveryRequestNotFoundException(String pMessage) {
-        super(pMessage);
-        mRecoveryUUID = null;
+    public PasswordRecoveryRequestNotFoundException(String recoveryUUID) {
+        this(recoveryUUID, null);
     }
 
-    public PasswordRecoveryRequestNotFoundException(Locale pLocale, String recoveryUUID) {
-        this(pLocale, recoveryUUID, null);
-    }
-
-    public PasswordRecoveryRequestNotFoundException(Locale pLocale, String recoveryUUID, Throwable pCause) {
-        super(pLocale, pCause);
+    public PasswordRecoveryRequestNotFoundException(String recoveryUUID, Throwable pCause) {
+        super( pCause);
         mRecoveryUUID = recoveryUUID;
     }
 

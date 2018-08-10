@@ -14,11 +14,7 @@ package org.polarsys.eplmp.core.services;
 import org.polarsys.eplmp.core.change.ModificationNotification;
 import org.polarsys.eplmp.core.common.BinaryResource;
 import org.polarsys.eplmp.core.common.User;
-import org.polarsys.eplmp.core.configuration.PathDataMaster;
-import org.polarsys.eplmp.core.configuration.ProductBaseline;
-import org.polarsys.eplmp.core.configuration.ProductInstanceMaster;
-import org.polarsys.eplmp.core.configuration.ProductStructureFilter;
-import org.polarsys.eplmp.core.configuration.ResolvedDocumentLink;
+import org.polarsys.eplmp.core.configuration.*;
 import org.polarsys.eplmp.core.document.DocumentRevisionKey;
 import org.polarsys.eplmp.core.exceptions.*;
 import org.polarsys.eplmp.core.meta.InstanceAttribute;
@@ -215,7 +211,7 @@ public interface IProductManagerLocal {
 
     Component filterProductStructure(ConfigurationItemKey ciKey, ProductStructureFilter filter, List<PartLink> path, Integer depth) throws ConfigurationItemNotFoundException, WorkspaceNotFoundException, NotAllowedException, UserNotFoundException, UserNotActiveException, PartUsageLinkNotFoundException, AccessRightException, PartMasterNotFoundException, EntityConstraintException, WorkspaceNotEnabledException;
 
-    Component filterProductStructureOnLinkType(ConfigurationItemKey ciKey, ProductStructureFilter filter, String configSpecType, String path, String linkType) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, ConfigurationItemNotFoundException, PartUsageLinkNotFoundException, ProductInstanceMasterNotFoundException, BaselineNotFoundException, WorkspaceNotEnabledException;
+    Component filterProductStructureOnLinkType(ConfigurationItemKey ciKey, ProductStructureFilter filter, String configSpecType, String path, String linkType) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, ConfigurationItemNotFoundException, PartUsageLinkNotFoundException, ProductInstanceMasterNotFoundException, BaselineNotFoundException, WorkspaceNotEnabledException, NotAllowedException, EntityConstraintException, PartMasterNotFoundException;
 
     Set<PartRevision> getWritablePartRevisionsFromPath(ConfigurationItemKey configurationItemKey, String path) throws EntityConstraintException, PartMasterNotFoundException, NotAllowedException, UserNotFoundException, WorkspaceNotFoundException, UserNotActiveException, ConfigurationItemNotFoundException, PartUsageLinkNotFoundException, WorkspaceNotEnabledException;
 

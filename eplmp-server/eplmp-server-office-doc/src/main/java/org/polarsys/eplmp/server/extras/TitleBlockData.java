@@ -22,10 +22,10 @@ import java.util.Properties;
 
 
 /**
+ * This class define the default PDF generation for both part and document.
+ * This behaviour can be overridden.
+ *
  * @author Morgan Guimard
- *         <p>
- *         This class define the default pdf generation for both part and document.
- *         This behaviour can be overridden:
  * @see PartTitleBlockData
  * @see DocumentTitleBlockData
  */

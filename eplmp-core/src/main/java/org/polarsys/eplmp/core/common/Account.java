@@ -14,6 +14,7 @@ package org.polarsys.eplmp.core.common;
 import javax.persistence.Table;
 import java.io.Serializable;
 import java.util.Date;
+import java.util.Locale;
 
 /**
  * The Account class holds personal user data applicable inside the whole application.
@@ -106,6 +107,10 @@ public class Account implements Serializable, Cloneable {
 
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
+    }
+
+    public Locale getLocale() {
+        return new Locale(this.language);
     }
 
     @Override

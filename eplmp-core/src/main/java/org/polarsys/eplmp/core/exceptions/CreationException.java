@@ -11,24 +11,21 @@
 
 package org.polarsys.eplmp.core.exceptions;
 
-import java.util.Locale;
-
 /**
  *
  * @author Florent Garin
  */
 public class CreationException extends ApplicationException {
 
+    public CreationException() {}
+
     public CreationException(String pMessage) {
         super(pMessage);
     }
     
-    public CreationException(Locale pLocale) {
-        this(pLocale, null);
-    }
 
-    public CreationException(Locale pLocale, Throwable pCause) {
-        super(pLocale, pCause);
+    public CreationException(Throwable pCause) {
+        super(pCause);
     }
 
     @Override

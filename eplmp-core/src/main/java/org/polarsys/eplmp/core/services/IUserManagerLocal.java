@@ -22,18 +22,24 @@ import org.polarsys.eplmp.core.security.WorkspaceUserMembership;
  *
  * @author Florent Garin
  */
-public interface IUserManagerLocal{
+public interface IUserManagerLocal {
 
     void recoverPassword(String pPasswdRRUuid, String pPassword) throws PasswordRecoveryRequestNotFoundException;
+
     PasswordRecoveryRequest createPasswordRecoveryRequest(Account account);
+
     Workspace[] getAdministratedWorkspaces() throws AccountNotFoundException;
+
     Workspace[] getWorkspacesWhereCallerIsActive();
 
     User whoAmI(String pWorkspaceId) throws WorkspaceNotFoundException, UserNotFoundException, UserNotActiveException, WorkspaceNotEnabledException;
+
     void addUserInWorkspace(String pWorkspaceId, String pLogin) throws AccessRightException, AccountNotFoundException, WorkspaceNotFoundException, UserAlreadyExistsException, FolderAlreadyExistsException, CreationException;
-    Workspace removeUser(String pWorkspaceId, String login) throws UserNotFoundException, AccessRightException, AccountNotFoundException, WorkspaceNotFoundException, FolderNotFoundException,  EntityConstraintException, UserNotActiveException, DocumentRevisionNotFoundException;
+
+    Workspace removeUser(String pWorkspaceId, String login) throws UserNotFoundException, AccessRightException, AccountNotFoundException, WorkspaceNotFoundException, FolderNotFoundException, EntityConstraintException, UserNotActiveException, DocumentRevisionNotFoundException;
 
     UserGroup getUserGroup(UserGroupKey pKey) throws WorkspaceNotFoundException, UserGroupNotFoundException, UserNotFoundException, UserNotActiveException, AccountNotFoundException, WorkspaceNotEnabledException;
+
     UserGroup[] getUserGroups(String pWorkspaceId) throws WorkspaceNotFoundException, UserNotFoundException, UserNotActiveException, AccountNotFoundException, WorkspaceNotEnabledException;
 
     UserGroup removeUserFromGroup(UserGroupKey pGroupKey, String logins) throws AccessRightException, UserGroupNotFoundException, AccountNotFoundException, WorkspaceNotFoundException;
@@ -42,12 +48,14 @@ public interface IUserManagerLocal{
 
     void passivateUserGroup(String pWorkspaceId, String groupId) throws AccessRightException, AccountNotFoundException, WorkspaceNotFoundException;
 
-    void removeUsers(String pWorkspaceId, String[] pLogins) throws UserNotFoundException, AccessRightException, AccountNotFoundException, WorkspaceNotFoundException, FolderNotFoundException,  EntityConstraintException, UserNotActiveException, DocumentRevisionNotFoundException;
+    void removeUsers(String pWorkspaceId, String[] pLogins) throws UserNotFoundException, AccessRightException, AccountNotFoundException, WorkspaceNotFoundException, FolderNotFoundException, EntityConstraintException, UserNotActiveException, DocumentRevisionNotFoundException;
 
     void passivateUser(String pWorkspaceId, String login) throws AccessRightException, AccountNotFoundException, WorkspaceNotFoundException;
 
     void removeUserGroups(String pWorkspaceId, String[] pIds) throws UserGroupNotFoundException, AccessRightException, AccountNotFoundException, WorkspaceNotFoundException, EntityConstraintException;
+
     void addUserInGroup(UserGroupKey pGroupKey, String pLogin) throws AccessRightException, UserGroupNotFoundException, AccountNotFoundException, WorkspaceNotFoundException, UserAlreadyExistsException, FolderAlreadyExistsException, CreationException;
+
     void removeUserFromGroup(UserGroupKey pGroupKey, String[] pLogins) throws AccessRightException, UserGroupNotFoundException, AccountNotFoundException, WorkspaceNotFoundException;
 
     boolean hasWorkspaceWriteAccess(User user, String pWorkspaceId) throws WorkspaceNotFoundException, WorkspaceNotEnabledException;
@@ -63,6 +71,7 @@ public interface IUserManagerLocal{
     void grantGroupAccess(String pWorkspaceId, String[] pGroupIds, boolean pReadOnly) throws AccessRightException, AccountNotFoundException, WorkspaceNotFoundException, UserGroupNotFoundException;
 
     void activateUsers(String pWorkspaceId, String[] pLogins) throws AccessRightException, AccountNotFoundException, WorkspaceNotFoundException;
+
     void passivateUsers(String pWorkspaceId, String[] pLogins) throws AccessRightException, AccountNotFoundException, WorkspaceNotFoundException;
 
     void activateUserGroups(String pWorkspaceId, String[] pGroupIds) throws AccessRightException, AccountNotFoundException, WorkspaceNotFoundException;
@@ -74,13 +83,19 @@ public interface IUserManagerLocal{
     void passivateUserGroups(String pWorkspaceId, String[] pGroupIds) throws AccessRightException, AccountNotFoundException, WorkspaceNotFoundException;
 
     WorkspaceUserMembership getWorkspaceSpecificUserMemberships(String workspaceId) throws AccountNotFoundException, UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, WorkspaceNotEnabledException;
+
     WorkspaceUserMembership[] getWorkspaceUserMemberships(String pWorkspaceId) throws WorkspaceNotFoundException, UserNotFoundException, UserNotActiveException, AccountNotFoundException, WorkspaceNotEnabledException;
+
     WorkspaceUserGroupMembership[] getWorkspaceSpecificUserGroupMemberships(String workspaceId) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, UserGroupNotFoundException, WorkspaceNotEnabledException;
+
     WorkspaceUserGroupMembership[] getWorkspaceUserGroupMemberships(String pWorkspaceId) throws WorkspaceNotFoundException, UserNotFoundException, UserNotActiveException, AccountNotFoundException, WorkspaceNotEnabledException;
 
     Account checkAdmin(String pWorkspaceId) throws AccessRightException, AccountNotFoundException, WorkspaceNotFoundException;
+
     Account checkAdmin(Workspace pWorkspace) throws AccessRightException, AccountNotFoundException;
+
     User checkWorkspaceReadAccess(String pWorkspaceId) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, WorkspaceNotEnabledException;
+
     User checkWorkspaceWriteAccess(String pWorkspaceId) throws UserNotFoundException, WorkspaceNotFoundException, AccessRightException, WorkspaceNotEnabledException;
 
     UserGroup[] getUserGroupsForUser(UserKey userKey) throws UserNotFoundException;
@@ -90,4 +105,6 @@ public interface IUserManagerLocal{
     User[] getUsers(String pWorkspaceId) throws WorkspaceNotFoundException, AccessRightException, AccountNotFoundException, UserNotFoundException, UserNotActiveException, WorkspaceNotEnabledException;
 
     UserGroup createUserGroup(String pId, String workspaceId) throws UserGroupAlreadyExistsException, AccessRightException, AccountNotFoundException, CreationException, WorkspaceNotFoundException;
+
+    boolean isUserEnabled(String login, String pWorkspaceId) throws AccountNotFoundException, WorkspaceNotFoundException, UserNotFoundException;
 }

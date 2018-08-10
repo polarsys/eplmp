@@ -18,7 +18,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import java.io.Serializable;
 
 @XmlRootElement
-@ApiModel(value="IterationNoteDTO", description="Use this class to provide iteration notes when check in entities")
+@ApiModel(value="IterationNoteDTO", description="Use this class to provide iteration notes when checking in documents or parts")
 public class IterationNoteDTO implements Serializable {
 
     @ApiModelProperty(value = "Iteration note value")

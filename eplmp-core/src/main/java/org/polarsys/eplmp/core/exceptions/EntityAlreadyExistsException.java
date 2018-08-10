@@ -11,8 +11,6 @@
 
 package org.polarsys.eplmp.core.exceptions;
 
-import java.util.Locale;
-
 /**
  * Base class for implementing an Exception that represents a failed attempt
  * to create an entity because it already exists in the persistent store.
@@ -25,11 +23,11 @@ public abstract class EntityAlreadyExistsException extends ApplicationException 
         super(pMessage);
     }
 
-    public EntityAlreadyExistsException(Locale pLocale) {
-        super(pLocale);
+    public EntityAlreadyExistsException() {
+        super();
     }
 
-    public EntityAlreadyExistsException(Locale pLocale, Throwable pCause) {
-        super(pLocale, pCause);
+    public EntityAlreadyExistsException(Throwable pCause) {
+        super(pCause);
     }
 }

@@ -10,14 +10,17 @@
   *******************************************************************************/
 package org.polarsys.eplmp.server.rest;
 
-import org.polarsys.eplmp.core.exceptions.*;
+import io.swagger.annotations.*;
+import org.dozer.DozerBeanMapperSingletonWrapper;
+import org.dozer.Mapper;
+import org.polarsys.eplmp.core.exceptions.AccessRightException;
+import org.polarsys.eplmp.core.exceptions.EntityNotFoundException;
+import org.polarsys.eplmp.core.exceptions.UserNotActiveException;
+import org.polarsys.eplmp.core.exceptions.WorkspaceNotEnabledException;
 import org.polarsys.eplmp.core.security.UserGroupMapping;
 import org.polarsys.eplmp.core.services.IWorkflowManagerLocal;
 import org.polarsys.eplmp.core.workflow.Workflow;
 import org.polarsys.eplmp.server.rest.dto.WorkflowDTO;
-import io.swagger.annotations.*;
-import org.dozer.DozerBeanMapperSingletonWrapper;
-import org.dozer.Mapper;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.security.DeclareRoles;
@@ -39,7 +42,8 @@ import java.util.List;
  * @author Morgan Guimard
  */
 @RequestScoped
-@Api(hidden = true, value = "workflows", description = "Operations about workflow instances")
+@Api(hidden = true, value = "workflows", description = "Operations about workflow instances",
+        authorizations = {@Authorization(value = "authorization")})
 @DeclareRoles(UserGroupMapping.REGULAR_USER_ROLE_ID)
 @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
 public class WorkflowResource {
@@ -58,11 +62,12 @@ public class WorkflowResource {
     }
 
     @GET
-    @ApiOperation(value = "Get instantiated workflow",
+    @ApiOperation(value = "Get instantiated workflow in workspace",
             response = WorkflowDTO.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of WorkflowDTO"),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{workflowId}")
@@ -70,7 +75,7 @@ public class WorkflowResource {
     public WorkflowDTO getWorkflowInstance(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Workflow id") @PathParam("workflowId") int workflowId)
-            throws EntityNotFoundException, UserNotActiveException, AccessRightException {
+            throws EntityNotFoundException, UserNotActiveException, AccessRightException, WorkspaceNotEnabledException {
 
         Workflow workflow = workflowService.getWorkflow(workspaceId, workflowId);
         return mapper.map(workflow, WorkflowDTO.class);
@@ -83,6 +88,7 @@ public class WorkflowResource {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful retrieval of WorkflowDTOs. It can be an empty list."),
             @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Path("{workflowId}/aborted")
@@ -90,8 +96,7 @@ public class WorkflowResource {
     public Response getWorkflowAbortedWorkflowList(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Workflow id") @PathParam("workflowId") int workflowId)
-            throws UserNotFoundException, WorkspaceNotFoundException, UserNotActiveException,
-            WorkflowNotFoundException, AccessRightException, WorkspaceNotEnabledException {
+            throws EntityNotFoundException, UserNotActiveException, AccessRightException, WorkspaceNotEnabledException {
 
         Workflow[] abortedWorkflowList = workflowService.getWorkflowAbortedWorkflowList(workspaceId, workflowId);
 
