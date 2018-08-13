@@ -142,7 +142,10 @@ public class AccountResourceTest {
 
         Assert.assertEquals(Response.Status.OK.getStatusCode(), res.getStatus());
 
-
+        Mockito.when(contextManager.isCallerInRole(UserGroupMapping.ADMIN_ROLE_ID)).thenReturn(true);
+        res = accountResource.updateAccount(null, accountDTO);
+        Object entity = res.getEntity();
+        Assert.assertTrue(((AccountDTO) entity).isAdmin());
     }
 
     @Test

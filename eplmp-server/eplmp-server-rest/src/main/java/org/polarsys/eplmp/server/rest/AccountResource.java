@@ -129,7 +129,10 @@ public class AccountResource {
         }
 
         Account account = accountManager.updateAccount(accountDTO.getName(), accountDTO.getEmail(), accountDTO.getLanguage(), accountDTO.getNewPassword(), accountDTO.getTimeZone());
-        return Response.ok().entity(mapper.map(account, AccountDTO.class)).build();
+        //Correction for ( issue-1177 )
+        AccountDTO accountDTOResult =  mapper.map(account, AccountDTO.class);
+        accountDTOResult.setAdmin(contextManager.isCallerInRole(UserGroupMapping.ADMIN_ROLE_ID));
+        return Response.ok().entity(accountDTOResult).build();
     }
 
     @POST
