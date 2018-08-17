@@ -452,6 +452,10 @@ public class WorkspaceResource {
             return Response.status(Response.Status.BAD_REQUEST).build();
         }
         WorkspaceUserMembership workspaceUserMembership = userManager.grantUserAccess(workspaceId, userDTO.getLogin(), userDTO.getMembership() == WorkspaceMembership.READ_ONLY);
+        if(workspaceUserMembership == null) {
+
+            return  Response.status(Response.Status.BAD_REQUEST).build();
+        }
         return Response.ok(mapper.map(workspaceUserMembership.getMember(), UserDTO.class)).build();
     }
 
