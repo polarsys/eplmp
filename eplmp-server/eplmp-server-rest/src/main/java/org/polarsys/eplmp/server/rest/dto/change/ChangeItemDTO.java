@@ -19,6 +19,8 @@ import org.polarsys.eplmp.server.rest.dto.ACLDTO;
 import org.polarsys.eplmp.server.rest.dto.DocumentIterationDTO;
 import org.polarsys.eplmp.server.rest.dto.PartIterationDTO;
 
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.io.Serializable;
@@ -26,6 +28,7 @@ import java.util.Date;
 import java.util.List;
 
 @XmlRootElement
+@XmlAccessorType(XmlAccessType.FIELD)
 @ApiModel(value = "ChangeItemDTO", description = "This class is the representation of a {@link org.polarsys.eplmp.core.change.ChangeItem} entity")
 public class ChangeItemDTO implements Serializable {
 

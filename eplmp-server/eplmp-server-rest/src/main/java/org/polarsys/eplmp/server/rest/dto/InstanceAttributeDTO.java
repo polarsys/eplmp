@@ -13,7 +13,7 @@ package org.polarsys.eplmp.server.rest.dto;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.*;
 import java.io.Serializable;
 import java.util.List;
 
@@ -21,6 +21,7 @@ import java.util.List;
  * @author Yassine Belouad
  */
 @XmlRootElement
+@XmlAccessorType(XmlAccessType.FIELD)
 @ApiModel(value="InstanceAttributeDTO", description="This class is the representation of an {@link org.polarsys.eplmp.core.meta.InstanceAttribute} entity")
 public class InstanceAttributeDTO implements Serializable {
 
@@ -128,6 +129,7 @@ public class InstanceAttributeDTO implements Serializable {
         this.workspaceId = workspaceId;
     }
 
+    @XmlType(name = "IntansAttributeType")
     public enum Type {
         TEXT, NUMBER, DATE, BOOLEAN, URL, LOV, LONG_TEXT, PART_NUMBER
     }

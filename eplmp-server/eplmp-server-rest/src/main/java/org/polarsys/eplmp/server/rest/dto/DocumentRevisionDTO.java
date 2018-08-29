@@ -15,9 +15,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import org.polarsys.eplmp.core.meta.RevisionStatus;
 
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlTransient;
+import javax.xml.bind.annotation.*;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
@@ -26,6 +24,7 @@ import java.util.List;
  * @author Florent Garin
  */
 @XmlRootElement
+@XmlAccessorType(XmlAccessType.FIELD)
 @ApiModel(value="DocumentRevisionDTO", description="This class is the representation of a {@link org.polarsys.eplmp.core.document.DocumentRevision} entity")
 public class DocumentRevisionDTO implements Serializable, Comparable<DocumentRevisionDTO> {
 
@@ -42,6 +41,7 @@ public class DocumentRevisionDTO implements Serializable, Comparable<DocumentRev
     private String version;
 
     @ApiModelProperty(value = "Document type")
+    @XmlElement(name = "DocumentRevisionDTOType")
     private String type;
 
     @ApiModelProperty(value = "Document author")

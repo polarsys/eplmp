@@ -13,6 +13,8 @@ package org.polarsys.eplmp.server.rest.dto;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.io.Serializable;
@@ -23,6 +25,7 @@ import java.util.List;
  * @author Florent Garin
  */
 @XmlRootElement
+@XmlAccessorType(XmlAccessType.FIELD)
 @ApiModel(value="DocumentIterationDTO", description="This class is the representation of a {@link org.polarsys.eplmp.core.document.DocumentIteration} entity")
 public class DocumentIterationDTO implements Serializable {
 
