@@ -219,7 +219,7 @@ public class ChangeIssuesResource {
     @Path("{issueId}/tags")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public ChangeItemDTO saveChangeItemTags(
+    public ChangeIssueDTO saveChangeItemTags(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Issue id") @PathParam("issueId") int issueId,
             @ApiParam(required = true, value = "Tag list to add") TagListDTO tagListDTO)
@@ -356,6 +356,7 @@ public class ChangeIssuesResource {
     })
     @Path("{issueId}/acl")
     @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
     public ChangeIssueDTO updateChangeIssueACL(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String pWorkspaceId,
             @ApiParam(required = true, value = "Issue id") @PathParam("issueId") int issueId,

@@ -36,7 +36,7 @@ public class ActivityDTO implements Serializable {
     private String lifeCycleState;
 
     @ApiModelProperty(value = "Workflow type")
-    private Type type;
+    private ActivityType type;
 
     @ApiModelProperty(value = "Tasks to complete")
     private Integer tasksToComplete;
@@ -57,7 +57,7 @@ public class ActivityDTO implements Serializable {
         tasks = new ArrayList<>();
     }
 
-    public ActivityDTO(int step, List<TaskDTO> tasks, String lifeCycleState, Type type, Integer tasksToComplete, boolean complete, boolean stopped, boolean inProgress, boolean toDo, Integer relaunchStep) {
+    public ActivityDTO(int step, List<TaskDTO> tasks, String lifeCycleState, ActivityType type, Integer tasksToComplete, boolean complete, boolean stopped, boolean inProgress, boolean toDo, Integer relaunchStep) {
         this.step = step;
         this.relaunchStep = relaunchStep;
         this.tasks = tasks;
@@ -78,11 +78,11 @@ public class ActivityDTO implements Serializable {
         this.tasksToComplete = tasksToComplete;
     }
 
-    public Type getType() {
+    public ActivityType getType() {
         return type;
     }
 
-    public void setType(Type type) {
+    public void setType(ActivityType type) {
         this.type = type;
     }
 
@@ -150,8 +150,4 @@ public class ActivityDTO implements Serializable {
         this.relaunchStep = relaunchStep;
     }
 
-    public enum Type {
-        SEQUENTIAL,
-        PARALLEL
-    }
 }

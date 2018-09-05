@@ -370,6 +370,7 @@ public class ChangeOrdersResource {
     })
     @Path("{orderId}/acl")
     @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
     public ChangeOrderDTO updateChangeOrderACL(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String pWorkspaceId,
             @ApiParam(required = true, value = "Order id") @PathParam("orderId") int orderId,

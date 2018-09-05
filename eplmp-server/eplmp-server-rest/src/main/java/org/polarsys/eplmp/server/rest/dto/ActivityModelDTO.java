@@ -13,6 +13,7 @@ package org.polarsys.eplmp.server.rest.dto;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import org.polarsys.eplmp.core.workflow.Activity;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -38,7 +39,7 @@ public class ActivityModelDTO implements Serializable {
     private String lifeCycleState;
 
     @ApiModelProperty(value = "Type of the workflow model")
-    private Type type;
+    private ActivityType type;
 
     @ApiModelProperty(value = "Amount of tasks to complete")
     private Integer tasksToComplete;
@@ -47,7 +48,7 @@ public class ActivityModelDTO implements Serializable {
         this.taskModels = new ArrayList<>();
     }
 
-    public ActivityModelDTO(int step, List<TaskModelDTO> taskModels, String lifeCycleState, Type type, Integer tasksToComplete, Integer relaunchStep) {
+    public ActivityModelDTO(int step, List<TaskModelDTO> taskModels, String lifeCycleState, ActivityType type, Integer tasksToComplete, Integer relaunchStep) {
         this.step = step;
         this.relaunchStep = relaunchStep;
         this.taskModels = taskModels;
@@ -76,11 +77,11 @@ public class ActivityModelDTO implements Serializable {
         return this.taskModels;
     }
 
-    public Type getType() {
+    public ActivityType getType() {
         return type;
     }
 
-    public void setType(Type type) {
+    public void setType(ActivityType type) {
         this.type = type;
     }
 
@@ -108,7 +109,4 @@ public class ActivityModelDTO implements Serializable {
         this.relaunchStep = relaunchStep;
     }
 
-    public enum Type {
-        SEQUENTIAL, PARALLEL
-    }
 }

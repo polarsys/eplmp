@@ -19,6 +19,7 @@ import org.polarsys.eplmp.core.product.InstancePartNumberAttribute;
 import org.polarsys.eplmp.core.product.PartMasterKey;
 import org.polarsys.eplmp.core.util.DateUtils;
 import org.polarsys.eplmp.server.rest.dto.InstanceAttributeDTO;
+import org.polarsys.eplmp.server.rest.dto.InstanceAttributeType;
 import org.polarsys.eplmp.server.rest.dto.NameValuePairDTO;
 
 import java.util.ArrayList;
@@ -43,29 +44,29 @@ public class InstanceAttributeDozerConverter extends DozerConverter<InstanceAttr
         if (dto == null)
             dto = new InstanceAttributeDTO();
 
-        InstanceAttributeDTO.Type type;
+        InstanceAttributeType type;
         String value = "";
 
         if (source instanceof InstanceBooleanAttribute) {
-            type = InstanceAttributeDTO.Type.BOOLEAN;
+            type = InstanceAttributeType.BOOLEAN;
             value = source.getValue() + "";
         } else if (source instanceof InstanceTextAttribute) {
-            type = InstanceAttributeDTO.Type.TEXT;
+            type = InstanceAttributeType.TEXT;
             value = source.getValue() + "";
         } else if (source instanceof InstanceNumberAttribute) {
-            type = InstanceAttributeDTO.Type.NUMBER;
+            type = InstanceAttributeType.NUMBER;
             value = source.getValue() + "";
         } else if (source instanceof InstanceDateAttribute) {
-            type = InstanceAttributeDTO.Type.DATE;
+            type = InstanceAttributeType.DATE;
             Date date = ((InstanceDateAttribute) source).getDateValue();
             if (date != null) {
                 value = DateUtils.format(date);
             }
         } else if (source instanceof InstanceURLAttribute) {
-            type = InstanceAttributeDTO.Type.URL;
+            type = InstanceAttributeType.URL;
             value = source.getValue() + "";
         } else if (source instanceof InstanceListOfValuesAttribute) {
-            type = InstanceAttributeDTO.Type.LOV;
+            type = InstanceAttributeType.LOV;
             value = ((InstanceListOfValuesAttribute) source).getIndexValue() + "";
 
             List<NameValuePair> items = ((InstanceListOfValuesAttribute) source).getItems();
@@ -75,10 +76,10 @@ public class InstanceAttributeDozerConverter extends DozerConverter<InstanceAttr
             }
             dto.setItems(itemsDTO);
         } else if (source instanceof InstanceLongTextAttribute) {
-            type = InstanceAttributeDTO.Type.LONG_TEXT;
+            type = InstanceAttributeType.LONG_TEXT;
             value = source.getValue() + "";
         } else if (source instanceof InstancePartNumberAttribute) {
-            type = InstanceAttributeDTO.Type.PART_NUMBER;
+            type = InstanceAttributeType.PART_NUMBER;
             InstancePartNumberAttribute attribute = (InstancePartNumberAttribute) source;
             value = attribute.getPartMasterValue() == null ? "" : attribute.getPartMasterValue().getNumber();
         } else {

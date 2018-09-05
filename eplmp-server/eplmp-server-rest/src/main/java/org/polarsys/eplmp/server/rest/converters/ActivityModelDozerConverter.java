@@ -19,6 +19,7 @@ import org.polarsys.eplmp.core.workflow.ParallelActivityModel;
 import org.polarsys.eplmp.core.workflow.SequentialActivityModel;
 import org.polarsys.eplmp.core.workflow.TaskModel;
 import org.polarsys.eplmp.server.rest.dto.ActivityModelDTO;
+import org.polarsys.eplmp.server.rest.dto.ActivityType;
 import org.polarsys.eplmp.server.rest.dto.TaskModelDTO;
 
 import java.util.ArrayList;
@@ -42,7 +43,7 @@ public class ActivityModelDozerConverter extends DozerConverter<ActivityModel, A
             taskModelsDTO.add(mapper.map(activityModel.getTaskModels().get(i), TaskModelDTO.class));
         }
 
-        ActivityModelDTO.Type type;
+        ActivityType type;
         Integer tasksToComplete = null;
         Integer relaunchStep = null;
 
@@ -51,9 +52,9 @@ public class ActivityModelDozerConverter extends DozerConverter<ActivityModel, A
         }
 
         if (activityModel instanceof SequentialActivityModel) {
-            type = ActivityModelDTO.Type.SEQUENTIAL;
+            type = ActivityType.SEQUENTIAL;
         } else if (activityModel instanceof ParallelActivityModel) {
-            type = ActivityModelDTO.Type.PARALLEL;
+            type = ActivityType.PARALLEL;
             tasksToComplete = ((ParallelActivityModel) activityModel).getTasksToComplete();
         } else {
             throw new IllegalArgumentException("ActivityModel type not supported");

@@ -52,7 +52,7 @@ public class TaskDTO implements Serializable {
     private UserDTO worker;
 
     @ApiModelProperty(value = "Task status")
-    private Status status;
+    private TaskStatus status;
 
     @ApiModelProperty(value = "Workspace id")
     private String workspaceId;
@@ -126,11 +126,11 @@ public class TaskDTO implements Serializable {
         this.closureDate = (date != null) ? (Date) date.clone() : null;
     }
 
-    public Status getStatus() {
+    public TaskStatus getStatus() {
         return status;
     }
 
-    public void setStatus(Status status) {
+    public void setStatus(TaskStatus status) {
         this.status = status;
     }
 
@@ -214,7 +214,4 @@ public class TaskDTO implements Serializable {
         this.assignedGroups = assignedGroups;
     }
 
-    public enum Status {
-        NOT_STARTED, IN_PROGRESS, APPROVED, REJECTED, NOT_TO_BE_DONE
-    }
 }

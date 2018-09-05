@@ -23,6 +23,7 @@ import org.polarsys.eplmp.core.meta.InstanceAttribute;
 import org.polarsys.eplmp.core.meta.InstanceTextAttribute;
 import org.polarsys.eplmp.core.services.IProductManagerLocal;
 import org.polarsys.eplmp.server.rest.dto.InstanceAttributeDTO;
+import org.polarsys.eplmp.server.rest.dto.InstanceAttributeType;
 
 import javax.ws.rs.core.Response;
 import java.util.ArrayList;
@@ -67,7 +68,7 @@ public class AttributesResourceTest {
         Assert.assertEquals(null, attr.getValue());
         Assert.assertEquals(false, attr.isLocked());
         Assert.assertEquals(false, attr.isMandatory());
-        Assert.assertEquals(InstanceAttributeDTO.Type.TEXT, attr.getType());
+        Assert.assertEquals(InstanceAttributeType.TEXT, attr.getType());
 
     }
 
@@ -96,6 +97,6 @@ public class AttributesResourceTest {
         Assert.assertEquals(null, attr.getValue());
         Assert.assertEquals(false, attr.isLocked());
         Assert.assertEquals(false, attr.isMandatory());
-        Assert.assertEquals(InstanceAttributeDTO.Type.TEXT, attr.getType());
+        Assert.assertEquals(InstanceAttributeType.TEXT, attr.getType());
     }
 }
