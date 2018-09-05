@@ -102,8 +102,7 @@ public class AdminResource implements Serializable {
             @ApiResponse(code = 500, message = "Internal server error")
     })
     @Produces(MediaType.APPLICATION_JSON)
-    public JsonObject getDiskSpaceUsageStats()
-            throws EntityNotFoundException {
+    public JsonObject getDiskSpaceUsageStats() throws EntityNotFoundException {
 
         JsonObjectBuilder diskUsage = Json.createObjectBuilder();
 
@@ -117,6 +116,7 @@ public class AdminResource implements Serializable {
         return diskUsage.build();
 
     }
+
 
     @GET
     @Path("users-stats")
@@ -211,7 +211,7 @@ public class AdminResource implements Serializable {
     })
     @Produces(MediaType.APPLICATION_JSON)
     public JsonObject getPartsStats()
-            throws AccessRightException,EntityNotFoundException, UserNotActiveException, WorkspaceNotEnabledException {
+            throws AccessRightException, EntityNotFoundException, UserNotActiveException, WorkspaceNotEnabledException {
 
         JsonObjectBuilder partsStats = Json.createObjectBuilder();
 
@@ -376,8 +376,10 @@ public class AdminResource implements Serializable {
                 accountDTO.getLanguage(),
                 accountDTO.getNewPassword(),
                 accountDTO.getTimeZone());
-
-        return mapper.map(account, AccountDTO.class);
+        AccountDTO accountDToResult = mapper.map(account, AccountDTO.class);
+        accountDToResult.setAdmin(UserGroupMapping.ADMIN_ROLE_ID
+                .equals(accountManager.getUserGroupMapping(accountDTO.getLogin()).getGroupName()));
+        return accountDToResult;
     }
 
     @GET
@@ -415,7 +417,8 @@ public class AdminResource implements Serializable {
     @ApiOperation(value = "Get detailed provider",
             response = OAuthProviderDTO.class)
     @Produces(MediaType.APPLICATION_JSON)
-    public OAuthProviderDTO getDetailedProvider(@ApiParam(value = "Provider id", required = true) @PathParam("id") int providerId) throws OAuthProviderNotFoundException {
+    public OAuthProviderDTO getDetailedProvider(@ApiParam(value = "Provider id", required = true) @PathParam("id") int providerId)
+            throws OAuthProviderNotFoundException {
         OAuthProvider provider = oAuthManager.getProvider(providerId);
         return mapper.map(provider, OAuthProviderDTO.class);
     }
@@ -437,7 +440,8 @@ public class AdminResource implements Serializable {
 
         OAuthProvider provider = oAuthManager.createProvider(providerDTO.getName(), providerDTO.isEnabled(), providerDTO.getAuthority(),
                 providerDTO.getIssuer(), providerDTO.getClientID(), providerDTO.getJwsAlgorithm(),
-                providerDTO.getJwkSetURL(), providerDTO.getRedirectUri(), providerDTO.getSecret(), providerDTO.getScope(), providerDTO.getResponseType(),
+                providerDTO.getJwkSetURL(), providerDTO.getRedirectUri(),
+                providerDTO.getSecret(), providerDTO.getScope(), providerDTO.getResponseType(),
                 providerDTO.getAuthorizationEndpoint());
         return Response.ok().entity(mapper.map(provider, OAuthProviderDTO.class)).build();
     }
@@ -461,7 +465,8 @@ public class AdminResource implements Serializable {
 
         OAuthProvider provider = oAuthManager.updateProvider(id, providerDTO.getName(), providerDTO.isEnabled(), providerDTO.getAuthority(),
                 providerDTO.getIssuer(), providerDTO.getClientID(), providerDTO.getJwsAlgorithm(),
-                providerDTO.getJwkSetURL(), providerDTO.getRedirectUri(), providerDTO.getSecret(), providerDTO.getScope(), providerDTO.getResponseType(),
+                providerDTO.getJwkSetURL(), providerDTO.getRedirectUri(),
+                providerDTO.getSecret(), providerDTO.getScope(), providerDTO.getResponseType(),
                 providerDTO.getAuthorizationEndpoint());
         return Response.ok().entity(mapper.map(provider, OAuthProviderDTO.class)).build();
     }
@@ -472,10 +477,8 @@ public class AdminResource implements Serializable {
             @ApiResponse(code = 204, message = "Successful removal of auth provider"),
             @ApiResponse(code = 401, message = "Unauthorized"),
             @ApiResponse(code = 403, message = "Forbidden"),
-            @ApiResponse(code = 500, message = "Internal server error")
-    })
-    @ApiOperation(value = "Delete OAuth provider",
-            response = Response.class)
+            @ApiResponse(code = 500, message = "Internal server error")})
+    @ApiOperation(value = "Delete OAuth provider", response = Response.class)
     @Produces(MediaType.APPLICATION_JSON)
     public Response removeProvider(
             @ApiParam(value = "OAuthProvider id", required = true) @PathParam("id") int id)
