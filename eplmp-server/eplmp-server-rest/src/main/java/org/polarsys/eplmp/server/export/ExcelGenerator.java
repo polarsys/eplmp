@@ -33,6 +33,7 @@ import org.polarsys.eplmp.core.util.Tools;
 import org.polarsys.eplmp.server.helpers.LangHelper;
 import org.polarsys.eplmp.server.rest.collections.QueryResult;
 import org.polarsys.eplmp.server.rest.dto.InstanceAttributeDTO;
+import org.polarsys.eplmp.server.rest.dto.InstanceAttributeType;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -317,7 +318,7 @@ public class ExcelGenerator {
                                             && attrDTO.getType().name().equals(attributeSelectType)) {
 
                                         attributeValue = attribute.getValue() + "";
-                                        if (attrDTO.getType() == InstanceAttributeDTO.Type.DATE) {
+                                        if (attrDTO.getType() == InstanceAttributeType.DATE) {
                                             attributeValue = attribute.getValue() != null ?
                                                     DateUtils.format((Date) attribute.getValue()) : "";
                                         } else if (attribute instanceof InstanceListOfValuesAttribute) {
@@ -350,7 +351,7 @@ public class ExcelGenerator {
                                             && attrDTO.getType().name().equals(attributeSelectType)) {
 
                                         attributeValue = attribute.getValue() + "";
-                                        if (attrDTO.getType() == InstanceAttributeDTO.Type.DATE) {
+                                        if (attrDTO.getType() == InstanceAttributeType.DATE) {
                                             attributeValue = attribute.getValue() != null ?
                                                     DateUtils.format((Date) attribute.getValue()) : "";
                                         } else if (attribute instanceof InstanceListOfValuesAttribute) {

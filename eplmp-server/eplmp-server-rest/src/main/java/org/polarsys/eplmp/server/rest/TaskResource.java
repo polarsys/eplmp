@@ -259,7 +259,7 @@ public class TaskResource {
 
         TaskWrapper taskWrapper = taskManager.getTask(workspaceId, new TaskKey(new ActivityKey(workflowId, step), index));
 
-        TaskProcessDTO.Action action = taskProcessDTO.getAction();
+        TaskAction action = taskProcessDTO.getAction();
         TaskKey taskKey = taskWrapper.getTask().getKey();
         String comment = taskProcessDTO.getComment();
         String signature = taskProcessDTO.getSignature();
@@ -267,9 +267,9 @@ public class TaskResource {
         switch (taskWrapper.getHolderType()) {
             case "documents":
                 DocumentRevisionKey documentRevisionKey = new DocumentRevisionKey(taskWrapper.getWorkspaceId(), taskWrapper.getHolderReference(), taskWrapper.getHolderVersion());
-                if (TaskProcessDTO.Action.APPROVE.equals(action)) {
+                if (TaskAction.APPROVE.equals(action)) {
                     documentWorkflowManager.approveTaskOnDocument(workspaceId, taskKey, documentRevisionKey, comment, signature);
-                } else if (TaskProcessDTO.Action.REJECT.equals(action)) {
+                } else if (TaskAction.REJECT.equals(action)) {
                     documentWorkflowManager.rejectTaskOnDocument(workspaceId, taskKey, documentRevisionKey, comment, signature);
                 } else {
                     throw new BadRequestException();
@@ -277,16 +277,16 @@ public class TaskResource {
                 break;
             case "parts":
                 PartRevisionKey partRevisionKey = new PartRevisionKey(taskWrapper.getWorkspaceId(), taskWrapper.getHolderReference(), taskWrapper.getHolderVersion());
-                if (TaskProcessDTO.Action.APPROVE.equals(action)) {
+                if (TaskAction.APPROVE.equals(action)) {
                     partWorkflowManager.approveTaskOnPart(workspaceId, taskKey, partRevisionKey, comment, signature);
-                } else if (TaskProcessDTO.Action.REJECT.equals(action)) {
+                } else if (TaskAction.REJECT.equals(action)) {
                     partWorkflowManager.rejectTaskOnPart(workspaceId, taskKey, partRevisionKey, comment, signature);
                 }
                 break;
             case "workspace-workflows":
-                if (TaskProcessDTO.Action.APPROVE.equals(action)) {
+                if (TaskAction.APPROVE.equals(action)) {
                     workflowManager.approveTaskOnWorkspaceWorkflow(workspaceId, taskKey, comment, signature);
-                } else if (TaskProcessDTO.Action.REJECT.equals(action)) {
+                } else if (TaskAction.REJECT.equals(action)) {
                     workflowManager.rejectTaskOnWorkspaceWorkflow(workspaceId, taskKey, comment, signature);
                 }
                 break;

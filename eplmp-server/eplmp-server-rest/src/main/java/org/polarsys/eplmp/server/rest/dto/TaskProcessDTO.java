@@ -22,7 +22,7 @@ import java.io.Serializable;
 public class TaskProcessDTO implements Serializable {
 
     @ApiModelProperty(value = "Task process action")
-    private Action action;
+    private TaskAction action;
 
     @ApiModelProperty(value = "Task process comment")
     private String comment;
@@ -33,7 +33,7 @@ public class TaskProcessDTO implements Serializable {
     public TaskProcessDTO() {
     }
 
-    public TaskProcessDTO(Action action, String comment, String signature) {
+    public TaskProcessDTO(TaskAction action, String comment, String signature) {
         this.action = action;
         this.comment = comment;
         this.signature = signature;
@@ -55,16 +55,12 @@ public class TaskProcessDTO implements Serializable {
         this.signature = signature;
     }
 
-    public Action getAction() {
+    public TaskAction getAction() {
         return action;
     }
 
-    public void setAction(Action action) {
+    public void setAction(TaskAction action) {
         this.action = action;
     }
 
-    public enum Action {
-        APPROVE,
-        REJECT
-    }
 }

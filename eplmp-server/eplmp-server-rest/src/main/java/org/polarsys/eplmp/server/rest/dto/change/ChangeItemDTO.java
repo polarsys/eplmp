@@ -11,7 +11,6 @@
 
 package org.polarsys.eplmp.server.rest.dto.change;
 
-import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import org.polarsys.eplmp.core.change.ChangeItemCategory;
 import org.polarsys.eplmp.core.change.ChangeItemPriority;
@@ -20,14 +19,11 @@ import org.polarsys.eplmp.server.rest.dto.DocumentIterationDTO;
 import org.polarsys.eplmp.server.rest.dto.PartIterationDTO;
 
 import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 
-@XmlRootElement
-@ApiModel(value = "ChangeItemDTO", description = "This class is the representation of a {@link org.polarsys.eplmp.core.change.ChangeItem} entity")
-public class ChangeItemDTO implements Serializable {
+public abstract class ChangeItemDTO implements Serializable {
 
     @ApiModelProperty(value = "Change item id")
     private int id;

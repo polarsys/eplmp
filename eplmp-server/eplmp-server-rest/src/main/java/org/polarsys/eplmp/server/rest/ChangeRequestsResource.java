@@ -396,6 +396,7 @@ public class ChangeRequestsResource {
     })
     @Path("{requestId}/acl")
     @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
     public ChangeRequestDTO updateChangeRequestACL(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
             @ApiParam(required = true, value = "Request id") @PathParam("requestId") int requestId,

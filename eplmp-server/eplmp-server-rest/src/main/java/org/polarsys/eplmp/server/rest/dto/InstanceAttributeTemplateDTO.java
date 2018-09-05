@@ -28,7 +28,7 @@ public class InstanceAttributeTemplateDTO implements Serializable {
     private boolean mandatory;
 
     @ApiModelProperty(value = "Attribute template type")
-    private AttributeType attributeType;
+    private InstanceAttributeType attributeType;
 
     @ApiModelProperty(value = "Attribute template LOV name")
     private String lovName;
@@ -39,7 +39,7 @@ public class InstanceAttributeTemplateDTO implements Serializable {
     public InstanceAttributeTemplateDTO() {
     }
 
-    public InstanceAttributeTemplateDTO(String pName, AttributeType pAttributeType, boolean pMandatory, boolean locked) {
+    public InstanceAttributeTemplateDTO(String pName, InstanceAttributeType pAttributeType, boolean pMandatory, boolean locked) {
         name = pName;
         attributeType = pAttributeType;
         mandatory = pMandatory;
@@ -62,11 +62,11 @@ public class InstanceAttributeTemplateDTO implements Serializable {
         this.mandatory = mandatory;
     }
 
-    public InstanceAttributeTemplateDTO.AttributeType getAttributeType() {
+    public InstanceAttributeType getAttributeType() {
         return attributeType;
     }
 
-    public void setAttributeType(InstanceAttributeTemplateDTO.AttributeType attributeType) {
+    public void setAttributeType(InstanceAttributeType attributeType) {
         this.attributeType = attributeType;
     }
 
@@ -108,7 +108,5 @@ public class InstanceAttributeTemplateDTO implements Serializable {
         return name + "-" + attributeType;
     }
 
-    public enum AttributeType {
-        TEXT, NUMBER, DATE, BOOLEAN, URL, LOV, LONG_TEXT, PART_NUMBER
-    }
+
 }

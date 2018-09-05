@@ -26,10 +26,7 @@ import org.polarsys.eplmp.core.security.ACLPermission;
 import org.polarsys.eplmp.core.services.IWorkflowManagerLocal;
 import org.polarsys.eplmp.core.workflow.WorkflowModel;
 import org.polarsys.eplmp.core.workflow.WorkflowModelKey;
-import org.polarsys.eplmp.server.rest.dto.ACLDTO;
-import org.polarsys.eplmp.server.rest.dto.ACLEntryDTO;
-import org.polarsys.eplmp.server.rest.dto.ActivityModelDTO;
-import org.polarsys.eplmp.server.rest.dto.WorkflowModelDTO;
+import org.polarsys.eplmp.server.rest.dto.*;
 
 import javax.ws.rs.core.Response;
 import java.util.Arrays;
@@ -95,9 +92,9 @@ public class WorkflowModelResourceTest {
                 .thenReturn(workflowModel);
         WorkflowModelDTO workflowModelDTO = new WorkflowModelDTO();
         ActivityModelDTO activityModel1 = new ActivityModelDTO();
-        activityModel1.setType(ActivityModelDTO.Type.SEQUENTIAL);
+        activityModel1.setType(ActivityType.SEQUENTIAL);
         ActivityModelDTO activityModel2 = new ActivityModelDTO();
-        activityModel2.setType(ActivityModelDTO.Type.SEQUENTIAL);
+        activityModel2.setType(ActivityType.SEQUENTIAL);
         activityModel2.setRelaunchStep(0);
         workflowModelDTO.setActivityModels(Arrays.asList(activityModel1, activityModel2));
         WorkflowModelDTO result = workflowModelResource.updateWorkflowModel(workspaceId, workflowModelId, workflowModelDTO);
@@ -130,9 +127,9 @@ public class WorkflowModelResourceTest {
                 .thenReturn(workflowModel);
         WorkflowModelDTO workflowModelDTO = new WorkflowModelDTO();
         ActivityModelDTO activityModel1 = new ActivityModelDTO();
-        activityModel1.setType(ActivityModelDTO.Type.SEQUENTIAL);
+        activityModel1.setType(ActivityType.SEQUENTIAL);
         ActivityModelDTO activityModel2 = new ActivityModelDTO();
-        activityModel2.setType(ActivityModelDTO.Type.SEQUENTIAL);
+        activityModel2.setType(ActivityType.SEQUENTIAL);
         activityModel2.setRelaunchStep(0);
         workflowModelDTO.setActivityModels(Arrays.asList(activityModel1, activityModel2));
         WorkflowModelDTO result = workflowModelResource.createWorkflowModel(workspaceId, workflowModelDTO);

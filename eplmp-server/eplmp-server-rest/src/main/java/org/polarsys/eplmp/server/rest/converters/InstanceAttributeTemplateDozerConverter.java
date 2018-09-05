@@ -17,6 +17,7 @@ import org.polarsys.eplmp.core.meta.InstanceAttributeTemplate;
 import org.polarsys.eplmp.core.meta.ListOfValuesAttributeTemplate;
 import org.polarsys.eplmp.core.product.PartNumberAttributeTemplate;
 import org.polarsys.eplmp.server.rest.dto.InstanceAttributeTemplateDTO;
+import org.polarsys.eplmp.server.rest.dto.InstanceAttributeType;
 
 /**
  * @author Florent Garin
@@ -38,14 +39,14 @@ public class InstanceAttributeTemplateDozerConverter extends DozerConverter<Inst
         dto.setMandatory(instanceAttributeTemplate.isMandatory());
         if(instanceAttributeTemplate instanceof DefaultAttributeTemplate){
             DefaultAttributeTemplate defaultIA = (DefaultAttributeTemplate)instanceAttributeTemplate;
-            dto.setAttributeType(InstanceAttributeTemplateDTO.AttributeType.valueOf(defaultIA.getAttributeType().name()));
+            dto.setAttributeType(InstanceAttributeType.valueOf(defaultIA.getAttributeType().name()));
 
         }else if(instanceAttributeTemplate instanceof ListOfValuesAttributeTemplate){
             ListOfValuesAttributeTemplate lovIA=(ListOfValuesAttributeTemplate)instanceAttributeTemplate;
             dto.setLovName(lovIA.getLovName());
-            dto.setAttributeType(InstanceAttributeTemplateDTO.AttributeType.LOV);
+            dto.setAttributeType(InstanceAttributeType.LOV);
         }else if(instanceAttributeTemplate instanceof PartNumberAttributeTemplate){
-            dto.setAttributeType(InstanceAttributeTemplateDTO.AttributeType.PART_NUMBER);
+            dto.setAttributeType(InstanceAttributeType.PART_NUMBER);
         }
         return dto;
     }
@@ -54,9 +55,9 @@ public class InstanceAttributeTemplateDozerConverter extends DozerConverter<Inst
     public InstanceAttributeTemplate convertFrom(InstanceAttributeTemplateDTO dto, InstanceAttributeTemplate instanceAttributeTemplate) {
 
         InstanceAttributeTemplate data;
-        if (InstanceAttributeTemplateDTO.AttributeType.LOV.equals(dto.getAttributeType())) {
+        if (InstanceAttributeType.LOV.equals(dto.getAttributeType())) {
             data = new ListOfValuesAttributeTemplate();
-        }else if (InstanceAttributeTemplateDTO.AttributeType.PART_NUMBER.equals(dto.getAttributeType())){
+        }else if (InstanceAttributeType.PART_NUMBER.equals(dto.getAttributeType())){
             data = new PartNumberAttributeTemplate();
         }
         else {

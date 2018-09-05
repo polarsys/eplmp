@@ -12,6 +12,7 @@ package org.polarsys.eplmp.server.rest.dto;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import org.polarsys.eplmp.core.meta.InstanceAttribute;
 
 import javax.xml.bind.annotation.XmlRootElement;
 import java.io.Serializable;
@@ -37,7 +38,7 @@ public class InstanceAttributeDTO implements Serializable {
     private boolean locked;
 
     @ApiModelProperty(value = "Instance attribute type")
-    private Type type;
+    private InstanceAttributeType type;
 
     @ApiModelProperty(value = "Instance attribute value")
     private String value;
@@ -52,7 +53,7 @@ public class InstanceAttributeDTO implements Serializable {
 
     }
 
-    public InstanceAttributeDTO(String pName, Type pType, String pValue, Boolean pMandatory, Boolean pLocked) {
+    public InstanceAttributeDTO(String pName, InstanceAttributeType pType, String pValue, Boolean pMandatory, Boolean pLocked) {
         this.name = pName;
         this.type = pType;
         this.value = pValue;
@@ -61,7 +62,7 @@ public class InstanceAttributeDTO implements Serializable {
     }
 
     public InstanceAttributeDTO(String pName, String pType, String pValue, Boolean pMandatory, Boolean pLocked) {
-        this(pName, InstanceAttributeDTO.Type.valueOf(pType), pValue, pMandatory, pLocked);
+        this(pName, InstanceAttributeType.valueOf(pType), pValue, pMandatory, pLocked);
     }
 
     public String getName() {
@@ -80,11 +81,11 @@ public class InstanceAttributeDTO implements Serializable {
         this.value = value;
     }
 
-    public InstanceAttributeDTO.Type getType() {
+    public InstanceAttributeType getType() {
         return type;
     }
 
-    public void setType(InstanceAttributeDTO.Type type) {
+    public void setType(InstanceAttributeType type) {
         this.type = type;
     }
 
@@ -128,7 +129,4 @@ public class InstanceAttributeDTO implements Serializable {
         this.workspaceId = workspaceId;
     }
 
-    public enum Type {
-        TEXT, NUMBER, DATE, BOOLEAN, URL, LOV, LONG_TEXT, PART_NUMBER
-    }
 }
