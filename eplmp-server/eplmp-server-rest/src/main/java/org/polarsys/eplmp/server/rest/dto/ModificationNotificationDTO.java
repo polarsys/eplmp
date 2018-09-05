@@ -14,12 +14,15 @@ package org.polarsys.eplmp.server.rest.dto;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.io.Serializable;
 import java.util.Date;
 
 @XmlRootElement
+@XmlAccessorType(XmlAccessType.FIELD)
 @ApiModel(value="ModificationNotificationDTO", description="This class is a representation of a {@link org.polarsys.eplmp.core.change.ModificationNotification} entity")
 public class ModificationNotificationDTO implements Serializable {
 

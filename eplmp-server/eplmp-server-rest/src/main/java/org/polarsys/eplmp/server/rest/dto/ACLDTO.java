@@ -15,6 +15,8 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import org.polarsys.eplmp.core.security.ACLPermission;
 
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.io.Serializable;
@@ -24,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 
 @XmlRootElement
+@XmlAccessorType(XmlAccessType.FIELD)
 @ApiModel(value = "ACLDTO", description = "This class is the representation of an {@link org.polarsys.eplmp.core.security.ACL} entity")
 public class ACLDTO implements Serializable {
 
