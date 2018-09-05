@@ -129,7 +129,6 @@ public class AccountResource {
         }
 
         Account account = accountManager.updateAccount(accountDTO.getName(), accountDTO.getEmail(), accountDTO.getLanguage(), accountDTO.getNewPassword(), accountDTO.getTimeZone());
-        //Correction for ( issue-1177 )
         AccountDTO accountDTOResult =  mapper.map(account, AccountDTO.class);
         accountDTOResult.setAdmin(contextManager.isCallerInRole(UserGroupMapping.ADMIN_ROLE_ID));
         return Response.ok().entity(accountDTOResult).build();
