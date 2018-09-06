@@ -32,8 +32,8 @@ import java.util.Set;
 @Table(name="PRODUCTCONFIGURATION")
 @Entity
 @NamedQueries({
-        @NamedQuery(name="ProductConfiguration.findByWorkspace",query="SELECT p FROM ProductConfiguration p WHERE p.configurationItem.workspace.id = :workspaceId"),
-        @NamedQuery(name="ProductConfiguration.findByConfigurationItem",query="SELECT p FROM ProductConfiguration p WHERE  p.configurationItem.workspace.id = :workspaceId AND  p.configurationItem.id = :configurationItemId")
+        @NamedQuery(name="ProductConfiguration.findByWorkspace",query="SELECT p FROM ProductConfiguration p WHERE p.configurationItem.workspace.id = :workspaceId ORDER BY p.name"),
+        @NamedQuery(name="ProductConfiguration.findByConfigurationItem",query="SELECT p FROM ProductConfiguration p WHERE  p.configurationItem.workspace.id = :workspaceId AND  p.configurationItem.id = :configurationItemId ORDER BY p.name")
 })
 public class ProductConfiguration implements Serializable {
 

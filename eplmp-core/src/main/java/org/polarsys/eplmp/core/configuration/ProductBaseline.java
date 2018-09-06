@@ -36,9 +36,10 @@ import java.util.*;
 @Table(name = "PRODUCTBASELINE")
 @Entity
 @NamedQueries({
-        @NamedQuery(name = "ProductBaseline.findByConfigurationItemId", query = "SELECT b FROM ProductBaseline b WHERE b.configurationItem.id = :ciId AND b.configurationItem.workspace.id = :workspaceId"),
-        @NamedQuery(name = "ProductBaseline.getBaselinesForPartRevision", query = "SELECT b FROM ProductBaseline b WHERE b.partCollection IN (SELECT bl.partCollection FROM BaselinedPart bl WHERE bl.targetPart.partRevision = :partRevision)"),
-        @NamedQuery(name = "ProductBaseline.findObsoletePartRevisions", query = "SELECT pr FROM PartRevision pr JOIN ProductBaseline pb JOIN BaselinedPart bp WHERE pb = :productBaseline AND pb.partCollection.id = bp.partCollection.id AND bp.targetPart.partRevision.status = org.polarsys.eplmp.core.meta.RevisionStatus.OBSOLETE AND bp.targetPart.partRevision.partMasterWorkspaceId = :workspaceId")
+        @NamedQuery(name="ProductBaseline.findBaselines",query="SELECT b FROM ProductBaseline b WHERE b.configurationItem.workspace.id = :workspaceId ORDER BY b.name"),
+        @NamedQuery(name = "ProductBaseline.findByConfigurationItemId", query = "SELECT b FROM ProductBaseline b WHERE b.configurationItem.id = :ciId AND b.configurationItem.workspace.id = :workspaceId ORDER BY b.name"),
+        @NamedQuery(name = "ProductBaseline.getBaselinesForPartRevision", query = "SELECT b FROM ProductBaseline b WHERE b.partCollection IN (SELECT bl.partCollection FROM BaselinedPart bl WHERE bl.targetPart.partRevision = :partRevision) ORDER BY b.name"),
+        @NamedQuery(name = "ProductBaseline.findObsoletePartRevisions", query = "SELECT pr FROM PartRevision pr JOIN ProductBaseline pb JOIN BaselinedPart bp WHERE pb = :productBaseline AND pb.partCollection.id = bp.partCollection.id AND bp.targetPart.partRevision.status = org.polarsys.eplmp.core.meta.RevisionStatus.OBSOLETE AND bp.targetPart.partRevision.partMasterWorkspaceId = :workspaceId ORDER BY pr.version")
 
 })
 public class ProductBaseline implements Serializable {
