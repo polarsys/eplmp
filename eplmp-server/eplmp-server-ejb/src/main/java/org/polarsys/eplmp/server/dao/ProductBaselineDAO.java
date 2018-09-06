@@ -43,7 +43,7 @@ public class ProductBaselineDAO {
     }
 
     public List<ProductBaseline> findBaselines(String workspaceId) {
-        return em.createNamedQuery("ProductBaseline.findBaselines", ProductBaseline.class)
+        return em.createNamedQuery("ProductBaseline.findByWorkspace", ProductBaseline.class)
                 .setParameter(WORKSPACE_ID, workspaceId)
                 .getResultList();
     }
