@@ -385,31 +385,6 @@ public class ProductInstanceManagerBean implements IProductInstanceManagerLocal 
 
         PSFilterVisitorCallbacks callbacks = new PSFilterVisitorCallbacks() {
             @Override
-            public void onIndeterminateVersion(PartMaster partMaster, List<PartIteration> partIterations) throws NotAllowedException {
-                // Unused here
-            }
-
-            @Override
-            public void onIndeterminatePath(List<PartLink> pCurrentPath, List<PartIteration> pCurrentPathPartIterations) {
-                // Unused here
-            }
-
-            @Override
-            public void onUnresolvedPath(List<PartLink> pCurrentPath, List<PartIteration> partIterations) throws NotAllowedException {
-                // Unused here
-            }
-
-            @Override
-            public void onBranchDiscovered(List<PartLink> pCurrentPath, List<PartIteration> copyPartIteration) {
-                // Unused here
-            }
-
-            @Override
-            public void onOptionalPath(List<PartLink> path, List<PartIteration> partIterations) {
-                // Unused here
-            }
-
-            @Override
             public boolean onPathWalk(List<PartLink> path, List<PartMaster> parts) {
                 // Find pathData in previous iteration which is on this path. Copy it.
                 String pathAsString = Tools.getPathAsString(path);
@@ -489,10 +464,6 @@ public class ProductInstanceManagerBean implements IProductInstanceManagerLocal 
                 }
             }
 
-            @Override
-            public void onUnresolvedVersion(PartMaster partMaster) {
-                // Unused here
-            }
         };
 
         psFilterVisitor.visit(user, filter, partMaster, -1, callbacks);

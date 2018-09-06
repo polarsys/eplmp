@@ -19,11 +19,26 @@ import org.polarsys.eplmp.core.product.PartMaster;
 import java.util.List;
 
 public interface PSFilterVisitorCallbacks {
-    void onIndeterminateVersion(PartMaster partMaster, List<PartIteration> partIterations) throws NotAllowedException;
-    void onUnresolvedVersion(PartMaster partMaster) throws NotAllowedException;
-    void onIndeterminatePath(List<PartLink> pCurrentPath, List<PartIteration> pCurrentPathPartIterations) throws NotAllowedException;
-    void onUnresolvedPath(List<PartLink> pCurrentPath, List<PartIteration> partIterations) throws NotAllowedException;
-    void onBranchDiscovered(List<PartLink> pCurrentPath, List<PartIteration> copyPartIteration);
-    void onOptionalPath(List<PartLink> path, List<PartIteration> partIterations);
-    boolean onPathWalk(List<PartLink> path, List<PartMaster> parts);
+    default void onIndeterminateVersion(PartMaster partMaster, List<PartIteration> partIterations) throws NotAllowedException{
+        // Default void implementation
+    }
+    default  void onUnresolvedVersion(PartMaster partMaster) throws NotAllowedException{
+        // Default void implementation
+    }
+    default void onIndeterminatePath(List<PartLink> pCurrentPath, List<PartIteration> pCurrentPathPartIterations) throws NotAllowedException {
+        // Default void implementation
+    }
+    default void onUnresolvedPath(List<PartLink> pCurrentPath, List<PartIteration> partIterations) throws NotAllowedException {
+        // Default void implementation
+    }
+    default void onBranchDiscovered(List<PartLink> pCurrentPath, List<PartIteration> copyPartIteration) {
+        // Default void implementation
+    }
+    default void onOptionalPath(List<PartLink> path, List<PartIteration> partIterations) {
+        // Default void implementation
+    }
+    default boolean onPathWalk(List<PartLink> path, List<PartMaster> parts) {
+        // Default void implementation
+        return true;
+    }
 }

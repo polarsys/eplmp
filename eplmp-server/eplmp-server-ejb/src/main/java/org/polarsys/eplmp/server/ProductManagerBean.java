@@ -218,36 +218,6 @@ public class ProductManagerBean implements IProductManagerLocal {
 
         psFilterVisitor.visit(user, filter, ci.getDesignItem(), -1, new PSFilterVisitorCallbacks() {
             @Override
-            public void onIndeterminateVersion(PartMaster partMaster, List<PartIteration> partIterations) throws NotAllowedException {
-                // Unused here
-            }
-
-            @Override
-            public void onUnresolvedVersion(PartMaster partMaster) throws NotAllowedException {
-                // Unused here
-            }
-
-            @Override
-            public void onIndeterminatePath(List<PartLink> pCurrentPath, List<PartIteration> pCurrentPathPartIterations) throws NotAllowedException {
-                // Unused here
-            }
-
-            @Override
-            public void onUnresolvedPath(List<PartLink> pCurrentPath, List<PartIteration> partIterations) throws NotAllowedException {
-                // Unused here
-            }
-
-            @Override
-            public void onBranchDiscovered(List<PartLink> pCurrentPath, List<PartIteration> copyPartIteration) {
-                // Unused here
-            }
-
-            @Override
-            public void onOptionalPath(List<PartLink> path, List<PartIteration> partIterations) {
-                // Unused here
-            }
-
-            @Override
             public boolean onPathWalk(List<PartLink> path, List<PartMaster> parts) {
                 PartMaster pm = parts.get(parts.size() - 1);
 
@@ -2433,43 +2403,7 @@ public class ProductManagerBean implements IProductManagerLocal {
 
         User user = userManager.checkWorkspaceReadAccess(ciKey.getWorkspace());
 
-        PSFilterVisitorCallbacks callbacks = new PSFilterVisitorCallbacks() {
-            @Override
-            public void onIndeterminateVersion(PartMaster partMaster, List<PartIteration> partIterations) throws NotAllowedException {
-                // Unused here
-            }
-
-            @Override
-            public void onIndeterminatePath(List<PartLink> pCurrentPath, List<PartIteration> pCurrentPathPartIterations) {
-                // Unused here
-            }
-
-            @Override
-            public void onUnresolvedPath(List<PartLink> pCurrentPath, List<PartIteration> partIterations) throws NotAllowedException {
-                // Unused here
-            }
-
-            @Override
-            public void onBranchDiscovered(List<PartLink> pCurrentPath, List<PartIteration> copyPartIteration) {
-                // Unused here
-            }
-
-            @Override
-            public void onOptionalPath(List<PartLink> path, List<PartIteration> partIterations) {
-                // Unused here
-            }
-
-            @Override
-            public boolean onPathWalk(List<PartLink> path, List<PartMaster> parts) {
-                // Unused here
-                return true;
-            }
-
-            @Override
-            public void onUnresolvedVersion(PartMaster partMaster) {
-                // Unused here
-            }
-        };
+        PSFilterVisitorCallbacks callbacks = new PSFilterVisitorCallbacks(){};
 
         if (path == null) {
             ConfigurationItem ci = configurationItemDAO.loadConfigurationItem(ciKey);
@@ -2487,37 +2421,7 @@ public class ProductManagerBean implements IProductManagerLocal {
         User user = userManager.checkWorkspaceReadAccess(configurationItemKey.getWorkspace());
         Set<PartRevision> partRevisions = new HashSet<>();
 
-        psFilterVisitor.visit(user, new WIPPSFilter(user), decodePath(configurationItemKey, path), null, new PSFilterVisitorCallbacks() {
-            @Override
-            public void onIndeterminateVersion(PartMaster partMaster, List<PartIteration> partIterations) throws NotAllowedException {
-
-            }
-
-            @Override
-            public void onUnresolvedVersion(PartMaster partMaster) throws NotAllowedException {
-
-            }
-
-            @Override
-            public void onIndeterminatePath(List<PartLink> pCurrentPath, List<PartIteration> pCurrentPathPartIterations) throws NotAllowedException {
-
-            }
-
-            @Override
-            public void onUnresolvedPath(List<PartLink> pCurrentPath, List<PartIteration> partIterations) throws NotAllowedException {
-
-            }
-
-            @Override
-            public void onBranchDiscovered(List<PartLink> pCurrentPath, List<PartIteration> copyPartIteration) {
-
-            }
-
-            @Override
-            public void onOptionalPath(List<PartLink> path, List<PartIteration> partIterations) {
-
-            }
-
+        PSFilterVisitorCallbacks callbacks = new PSFilterVisitorCallbacks() {
             @Override
             public boolean onPathWalk(List<PartLink> path, List<PartMaster> parts) {
                 PartMaster pm = parts.get(parts.size() - 1);
@@ -2537,7 +2441,9 @@ public class ProductManagerBean implements IProductManagerLocal {
                 }
                 return true;
             }
-        });
+        };
+
+        psFilterVisitor.visit(user, new WIPPSFilter(user), decodePath(configurationItemKey, path), null, callbacks);
         return partRevisions;
     }
 
@@ -2554,39 +2460,9 @@ public class ProductManagerBean implements IProductManagerLocal {
 
         PSFilterVisitorCallbacks callbacks = new PSFilterVisitorCallbacks() {
             @Override
-            public void onIndeterminateVersion(PartMaster partMaster, List<PartIteration> partIterations) throws NotAllowedException {
-                // Unused here
-            }
-
-            @Override
-            public void onIndeterminatePath(List<PartLink> pCurrentPath, List<PartIteration> pCurrentPathPartIterations) {
-                // Unused here
-            }
-
-            @Override
-            public void onUnresolvedPath(List<PartLink> pCurrentPath, List<PartIteration> partIterations) throws NotAllowedException {
-                // Unused here
-            }
-
-            @Override
-            public void onBranchDiscovered(List<PartLink> pCurrentPath, List<PartIteration> copyPartIteration) {
-                // Unused here
-            }
-
-            @Override
-            public void onOptionalPath(List<PartLink> path, List<PartIteration> partIterations) {
-                // Unused here
-            }
-
-            @Override
             public boolean onPathWalk(List<PartLink> path, List<PartMaster> parts) {
                 discoveredPaths.add(Tools.getPathAsString(path));
                 return true;
-            }
-
-            @Override
-            public void onUnresolvedVersion(PartMaster partMaster) {
-                // Unused here
             }
         };
 
@@ -2991,43 +2867,8 @@ public class ProductManagerBean implements IProductManagerLocal {
 
         User user = userManager.checkWorkspaceReadAccess(workspace.getId());
 
-        psFilterVisitor.visit(user, new UpdatePartIterationPSFilter(user, partIteration), partMaster, -1, new PSFilterVisitorCallbacks() {
-            @Override
-            public void onIndeterminateVersion(PartMaster partMaster, List<PartIteration> partIterations) throws NotAllowedException {
-                // Unused here
-            }
-
-            @Override
-            public void onIndeterminatePath(List<PartLink> pCurrentPath, List<PartIteration> pCurrentPathPartIterations) {
-                // Unused here
-            }
-
-            @Override
-            public void onUnresolvedPath(List<PartLink> pCurrentPath, List<PartIteration> partIterations) throws NotAllowedException {
-                // Unused here
-            }
-
-            @Override
-            public void onBranchDiscovered(List<PartLink> pCurrentPath, List<PartIteration> copyPartIteration) {
-                // Unused here
-            }
-
-            @Override
-            public void onOptionalPath(List<PartLink> path, List<PartIteration> partIterations) {
-                // Unused here
-            }
-
-            @Override
-            public boolean onPathWalk(List<PartLink> path, List<PartMaster> parts) {
-                // Unused here
-                return true;
-            }
-
-            @Override
-            public void onUnresolvedVersion(PartMaster partMaster) {
-                // Unused here
-            }
-        });
+        PSFilterVisitorCallbacks callbacks = new PSFilterVisitorCallbacks() {};
+        psFilterVisitor.visit(user, new UpdatePartIterationPSFilter(user, partIteration), partMaster, -1, callbacks);
 
     }
 
@@ -3050,32 +2891,7 @@ public class ProductManagerBean implements IProductManagerLocal {
         LatestPSFilter latestPSFilter = new LatestPSFilter(user, true);
         final boolean[] hasModificationNotification = {false};
 
-        psFilterVisitor.visit(user, latestPSFilter, configurationItem.getDesignItem(), -1, new PSFilterVisitorCallbacks() {
-            @Override
-            public void onIndeterminateVersion(PartMaster partMaster, List<PartIteration> partIterations) throws NotAllowedException {
-                // Unused here
-            }
-
-            @Override
-            public void onIndeterminatePath(List<PartLink> pCurrentPath, List<PartIteration> pCurrentPathPartIterations) {
-                // Unused here
-            }
-
-            @Override
-            public void onUnresolvedPath(List<PartLink> pCurrentPath, List<PartIteration> partIterations) throws NotAllowedException {
-                // Unused here
-            }
-
-            @Override
-            public void onBranchDiscovered(List<PartLink> pCurrentPath, List<PartIteration> copyPartIteration) {
-                // Unused here
-            }
-
-            @Override
-            public void onOptionalPath(List<PartLink> path, List<PartIteration> partIterations) {
-                // Unused here
-            }
-
+        PSFilterVisitorCallbacks callbacks = new PSFilterVisitorCallbacks() {
             @Override
             public boolean onPathWalk(List<PartLink> path, List<PartMaster> parts) {
                 PartMaster partMaster = parts.get(parts.size() - 1);
@@ -3092,12 +2908,9 @@ public class ProductManagerBean implements IProductManagerLocal {
                 }
                 return true;
             }
+        };
 
-            @Override
-            public void onUnresolvedVersion(PartMaster partMaster) {
-                // Unused here
-            }
-        });
+        psFilterVisitor.visit(user, latestPSFilter, configurationItem.getDesignItem(), -1, callbacks);
 
         return hasModificationNotification[0];
     }
@@ -3151,31 +2964,7 @@ public class ProductManagerBean implements IProductManagerLocal {
         ConfigurationItem ci = configurationItemDAO.loadConfigurationItem(ciKey);
         PartMaster root = ci.getDesignItem();
 
-        psFilterVisitor.visit(user, psFilter, root, -1, new PSFilterVisitorCallbacks() {
-            @Override
-            public void onIndeterminateVersion(PartMaster partMaster, List<PartIteration> partIterations) throws NotAllowedException {
-                // Unused here
-            }
-
-            @Override
-            public void onIndeterminatePath(List<PartLink> pCurrentPath, List<PartIteration> pCurrentPathPartIterations) {
-                // Unused here
-            }
-
-            @Override
-            public void onUnresolvedPath(List<PartLink> pCurrentPath, List<PartIteration> partIterations) throws NotAllowedException {
-                // Unused here
-            }
-
-            @Override
-            public void onBranchDiscovered(List<PartLink> pCurrentPath, List<PartIteration> copyPartIteration) {
-                // Unused here
-            }
-
-            @Override
-            public void onOptionalPath(List<PartLink> path, List<PartIteration> partIterations) {
-                // Unused here
-            }
+        PSFilterVisitorCallbacks callbacks = new PSFilterVisitorCallbacks() {
 
             @Override
             public boolean onPathWalk(List<PartLink> path, List<PartMaster> parts) {
@@ -3241,12 +3030,9 @@ public class ProductManagerBean implements IProductManagerLocal {
                 }
                 return true;
             }
+        };
 
-            @Override
-            public void onUnresolvedVersion(PartMaster partMaster) {
-                // Unused here
-            }
-        });
+        psFilterVisitor.visit(user, psFilter, root, -1, callbacks);
 
         return result;
     }
@@ -3308,31 +3094,7 @@ public class ProductManagerBean implements IProductManagerLocal {
 
         final List<String> finalFilteredPathsFromQuery = filteredPathsFromQuery;
 
-        psFilterVisitor.visit(user, filter, root, -1, new PSFilterVisitorCallbacks() {
-            @Override
-            public void onIndeterminateVersion(PartMaster partMaster, List<PartIteration> partIterations) throws NotAllowedException {
-                // Unused here
-            }
-
-            @Override
-            public void onIndeterminatePath(List<PartLink> pCurrentPath, List<PartIteration> pCurrentPathPartIterations) {
-                // Unused here
-            }
-
-            @Override
-            public void onUnresolvedPath(List<PartLink> pCurrentPath, List<PartIteration> partIterations) throws NotAllowedException {
-                // Unused here
-            }
-
-            @Override
-            public void onBranchDiscovered(List<PartLink> pCurrentPath, List<PartIteration> copyPartIteration) {
-                // Unused here
-            }
-
-            @Override
-            public void onOptionalPath(List<PartLink> path, List<PartIteration> partIterations) {
-                // Unused here
-            }
+        PSFilterVisitorCallbacks callbacks = new PSFilterVisitorCallbacks() {
 
             @Override
             public boolean onPathWalk(List<PartLink> path, List<PartMaster> parts) {
@@ -3383,12 +3145,10 @@ public class ProductManagerBean implements IProductManagerLocal {
                 }
                 return true;
             }
+        };
 
-            @Override
-            public void onUnresolvedVersion(PartMaster partMaster) {
-                // Unused here
-            }
-        });
+        psFilterVisitor.visit(user, filter, root, -1, callbacks);
+
         return rows;
     }
 

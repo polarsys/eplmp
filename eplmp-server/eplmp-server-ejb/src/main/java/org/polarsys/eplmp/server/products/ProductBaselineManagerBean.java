@@ -127,18 +127,7 @@ public class ProductBaselineManagerBean implements IProductBaselineManagerLocal 
             }
 
             @Override
-            public void onBranchDiscovered(List<PartLink> pCurrentPath, List<PartIteration> copyPartIteration) {
-                // Unused here
-            }
-
-            @Override
-            public void onOptionalPath(List<PartLink> path, List<PartIteration> partIterations) {
-                // Unused here
-            }
-
-            @Override
             public boolean onPathWalk(List<PartLink> path, List<PartMaster> parts) {
-                // Unused here
                 String encodedPath = Tools.getPathAsString(path);
                 visitedPaths.add(encodedPath);
                 return true;
@@ -261,10 +250,6 @@ public class ProductBaselineManagerBean implements IProductBaselineManagerLocal 
         List<PathChoice> choices = new ArrayList<>();
 
         psFilterVisitor.visit(user, filter, configurationItem.getDesignItem(), -1, new PSFilterVisitorCallbacks() {
-            @Override
-            public void onIndeterminateVersion(PartMaster partMaster, List<PartIteration> partIterations) throws NotAllowedException {
-                // Unused here
-            }
 
             @Override
             public void onIndeterminatePath(List<PartLink> pCurrentPath, List<PartIteration> pCurrentPathPartIterations) {
@@ -272,29 +257,8 @@ public class ProductBaselineManagerBean implements IProductBaselineManagerLocal 
             }
 
             @Override
-            public void onUnresolvedPath(List<PartLink> pCurrentPath, List<PartIteration> partIterations) throws NotAllowedException {
-                // Unused here
-            }
-
-            @Override
-            public void onBranchDiscovered(List<PartLink> pCurrentPath, List<PartIteration> copyPartIteration) {
-                // Unused here
-            }
-
-            @Override
             public void onOptionalPath(List<PartLink> pCurrentPath, List<PartIteration> pCurrentPathPartIterations) {
                 addPartChoice(pCurrentPath, pCurrentPathPartIterations);
-            }
-
-            @Override
-            public boolean onPathWalk(List<PartLink> path, List<PartMaster> parts) {
-                // Unused here
-                return true;
-            }
-
-            @Override
-            public void onUnresolvedVersion(PartMaster partMaster) {
-                // Unused here
             }
 
             private void addPartChoice(List<PartLink> pCurrentPath, List<PartIteration> pCurrentPathPartIterations) {
@@ -326,37 +290,6 @@ public class ProductBaselineManagerBean implements IProductBaselineManagerLocal 
             @Override
             public void onIndeterminateVersion(PartMaster partMaster, List<PartIteration> partIterations) throws NotAllowedException {
                 parts.addAll(partIterations);
-            }
-
-            @Override
-            public void onIndeterminatePath(List<PartLink> pCurrentPath, List<PartIteration> pCurrentPathPartIterations) {
-                // Unused here
-            }
-
-            @Override
-            public void onUnresolvedPath(List<PartLink> pCurrentPath, List<PartIteration> partIterations) throws NotAllowedException {
-                // Unused here
-            }
-
-            @Override
-            public void onBranchDiscovered(List<PartLink> pCurrentPath, List<PartIteration> copyPartIteration) {
-                // Unused here
-            }
-
-            @Override
-            public void onOptionalPath(List<PartLink> path, List<PartIteration> partIterations) {
-                // Unused here
-            }
-
-            @Override
-            public boolean onPathWalk(List<PartLink> path, List<PartMaster> parts) {
-                // Unused here
-                return true;
-            }
-
-            @Override
-            public void onUnresolvedVersion(PartMaster partMaster) {
-                // Unused here
             }
         });
 
