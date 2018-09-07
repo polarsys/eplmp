@@ -114,7 +114,7 @@ public class JWTokenFactory {
 
 
         } catch (InvalidJwtException | MalformedClaimException | JsonParsingException | NullPointerException e) {
-            LOGGER.log(Level.SEVERE, "Cannot validate jwt token", e);
+            LOGGER.log(Level.FINE, "Cannot validate jwt token", e);
         }
 
         return null;
@@ -136,7 +136,7 @@ public class JWTokenFactory {
                 return subjectObject.getString(SHARED_ENTITY_UUID); // Npe
             }
         } catch (InvalidJwtException | MalformedClaimException | JsonParsingException | NullPointerException e) {
-            LOGGER.log(Level.SEVERE, "Cannot validate jwt token", e);
+            LOGGER.log(Level.FINE, "Cannot validate jwt token", e);
         }
 
         return null;
@@ -168,7 +168,7 @@ public class JWTokenFactory {
             }
 
         } catch (MalformedClaimException e) {
-            LOGGER.log(Level.SEVERE, "Cannot get expiration time from claims", e);
+            LOGGER.log(Level.FINE, "Cannot get expiration time from claims", e);
         }
 
     }
@@ -195,7 +195,7 @@ public class JWTokenFactory {
                 return subjectObject.getString(ENTITY_KEY); // Npe
             }
         } catch (InvalidJwtException | MalformedClaimException | JsonParsingException | NullPointerException e) {
-            LOGGER.log(Level.SEVERE, "Cannot validate jwt token", e);
+            LOGGER.log(Level.FINE, "Cannot validate jwt token", e);
         }
 
         return null;
