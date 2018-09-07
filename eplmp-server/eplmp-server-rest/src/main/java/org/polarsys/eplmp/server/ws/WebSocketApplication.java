@@ -17,15 +17,12 @@ import org.polarsys.eplmp.server.auth.AuthConfig;
 import org.polarsys.eplmp.server.auth.jwt.JWTokenFactory;
 import org.polarsys.eplmp.server.auth.jwt.JWTokenUserGroupMapping;
 
-import javax.ejb.Stateless;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 import javax.websocket.*;
 import javax.websocket.server.ServerEndpoint;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -37,7 +34,6 @@ import java.util.logging.Logger;
  * Authentication is made by passing a jwt token on first message.
  * <p>
  */
-@Stateless
 @ServerEndpoint(
         value = "/ws",
         decoders = {
@@ -50,6 +46,8 @@ import java.util.logging.Logger;
 public class WebSocketApplication {
 
     private static final Logger LOGGER = Logger.getLogger(WebSocketApplication.class.getName());
+
+    private static final String AUTH = "AUTH";
 
     @Inject
     @Any
@@ -64,12 +62,8 @@ public class WebSocketApplication {
     @Inject
     private AuthConfig authConfig;
 
-    private List<Session> unAuthenticatedSessions = new ArrayList<>();
-
     public WebSocketApplication() {
     }
-
-    private static final String AUTH = "AUTH";
 
     @OnError
     public void error(Session session, Throwable error) {
@@ -86,12 +80,12 @@ public class WebSocketApplication {
 
     @OnOpen
     public void open(Session session) {
-        unAuthenticatedSessions.add(session);
+        session.getUserProperties().put(AUTH, null);
     }
 
     @OnMessage
     public void message(Session session, WebSocketMessage message) {
-        if (unAuthenticatedSessions.contains(session)) {
+        if (null == session.getUserProperties().get(AUTH)) {
             authenticateOrClose(session, message);
             return;
         }
@@ -108,7 +102,6 @@ public class WebSocketApplication {
             LOGGER.log(Level.WARNING, "No modules for type " + message.getType());
         }
 
-
     }
 
     private void authenticateOrClose(Session session, WebSocketMessage message) {
@@ -124,7 +117,7 @@ public class WebSocketApplication {
                 UserGroupMapping userGroupMapping = jwTokenUserGroupMapping.getUserGroupMapping();
                 String login = userGroupMapping.getLogin();
                 if (login != null) {
-                    unAuthenticatedSessions.remove(session);
+                    session.getUserProperties().put(AUTH, jwt);
                     webSocketSessionsManager.addSession(login, session);
                     return;
                 }
@@ -155,12 +148,9 @@ public class WebSocketApplication {
     }
 
     private void unTrackSession(Session session) {
-        if (unAuthenticatedSessions.contains(session)) {
-            unAuthenticatedSessions.remove(session);
-        } else {
+        if (null != session.getUserProperties().get(AUTH)) {
             webSocketSessionsManager.removeSession(session);
         }
     }
-
 
 }
