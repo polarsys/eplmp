@@ -47,6 +47,7 @@ import java.io.OutputStream;
 import java.net.URLEncoder;
 import java.text.Normalizer;
 import java.util.Collection;
+import java.util.Locale;
 import java.util.logging.Logger;
 
 @RequestScoped
@@ -63,7 +64,8 @@ public class DocumentTemplateBinaryResource {
     private IDocumentManagerLocal documentService;
     @Inject
     private IOnDemandConverterManagerLocal onDemandConverterManager;
-
+    @Inject
+    private Locale userLocale;
 
     public DocumentTemplateBinaryResource() {
     }
@@ -159,9 +161,10 @@ public class DocumentTemplateBinaryResource {
         // Set to false because templates are never historized
         boolean isToBeCached = false;
 
+
         try {
             if (output != null && !output.isEmpty()) {
-                binaryContentInputStream = getConvertedBinaryResource(binaryResource, output);
+                binaryContentInputStream = getConvertedBinaryResource(binaryResource, output, userLocale);
                 if(range == null || range.isEmpty()){
                     binaryResourceDownloadMeta.setLength(0);
                 }
@@ -183,9 +186,9 @@ public class DocumentTemplateBinaryResource {
      * @return The binary resource stream in the wanted output
      * @throws FileConversionException
      */
-    private InputStream getConvertedBinaryResource(BinaryResource binaryResource, String output) throws FileConversionException {
+    private InputStream getConvertedBinaryResource(BinaryResource binaryResource, String output, Locale locale) throws FileConversionException {
         try {
-            return onDemandConverterManager.getDocumentConvertedResource(output, binaryResource);
+            return onDemandConverterManager.getDocumentConvertedResource(output, binaryResource, locale);
         } catch (Exception e) {
             throw new FileConversionException(e);
         }

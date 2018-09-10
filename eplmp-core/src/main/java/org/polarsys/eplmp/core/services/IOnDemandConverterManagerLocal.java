@@ -15,9 +15,10 @@ import org.polarsys.eplmp.core.common.BinaryResource;
 import org.polarsys.eplmp.core.exceptions.*;
 
 import java.io.InputStream;
+import java.util.Locale;
 
 public interface IOnDemandConverterManagerLocal {
-    InputStream getDocumentConvertedResource(String outputFormat, BinaryResource binaryResource)
+    InputStream getDocumentConvertedResource(String outputFormat, BinaryResource binaryResource, Locale locale)
             throws WorkspaceNotFoundException, UserNotActiveException, UserNotFoundException, ConvertedResourceException, WorkspaceNotEnabledException;
 
     InputStream getPartConvertedResource(String outputFormat, BinaryResource binaryResource)

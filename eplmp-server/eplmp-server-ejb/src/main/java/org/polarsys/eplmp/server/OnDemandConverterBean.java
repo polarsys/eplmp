@@ -24,6 +24,7 @@ import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 import java.io.InputStream;
+import java.util.Locale;
 
 
 /**
@@ -52,14 +53,13 @@ public class OnDemandConverterBean implements IOnDemandConverterManagerLocal {
     private IUserManagerLocal userManager;
 
     @Override
-    public InputStream getDocumentConvertedResource(String outputFormat, BinaryResource binaryResource)
+    public InputStream getDocumentConvertedResource(String outputFormat, BinaryResource binaryResource, Locale locale)
             throws WorkspaceNotFoundException, UserNotActiveException, UserNotFoundException, ConvertedResourceException, WorkspaceNotEnabledException {
 
         DocumentIteration docI = binaryResourceDAO.getDocumentHolder(binaryResource);
         OnDemandConverter selectedOnDemandConverter = selectOnDemandConverter(outputFormat, binaryResource);
-        User user = userManager.whoAmI(docI.getWorkspaceId());
         if (selectedOnDemandConverter != null) {
-            return selectedOnDemandConverter.getConvertedResource(outputFormat, binaryResource, docI, user.getLocale());
+            return selectedOnDemandConverter.getConvertedResource(outputFormat, binaryResource, docI, locale);
         }
 
         return null;

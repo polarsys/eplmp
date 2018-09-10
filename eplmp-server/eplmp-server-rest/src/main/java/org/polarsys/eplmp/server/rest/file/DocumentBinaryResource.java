@@ -12,6 +12,7 @@ package org.polarsys.eplmp.server.rest.file;
 
 import io.swagger.annotations.*;
 import org.polarsys.eplmp.core.common.BinaryResource;
+import org.polarsys.eplmp.core.common.User;
 import org.polarsys.eplmp.core.document.DocumentIteration;
 import org.polarsys.eplmp.core.document.DocumentIterationKey;
 import org.polarsys.eplmp.core.document.DocumentRevision;
@@ -54,6 +55,7 @@ import java.security.NoSuchAlgorithmException;
 import java.text.Normalizer;
 import java.util.Collection;
 import java.util.Date;
+import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -80,6 +82,8 @@ public class DocumentBinaryResource {
     private IPublicEntityManagerLocal publicEntityManager;
     @Inject
     private AuthConfig authConfig;
+    @Inject
+    private Locale userLocale;
 
     public DocumentBinaryResource() {
     }
@@ -242,7 +246,7 @@ public class DocumentBinaryResource {
         try {
 
             if (output != null && !output.isEmpty()) {
-                binaryContentInputStream = getConvertedBinaryResource(binaryResource, output);
+                binaryContentInputStream = getConvertedBinaryResource(binaryResource, output, userLocale);
                 if (range == null || range.isEmpty()) {
                     binaryResourceDownloadMeta.setLength(0);
                 }
@@ -279,9 +283,9 @@ public class DocumentBinaryResource {
      * @return The binary resource stream in the wanted output
      * @throws FileConversionException
      */
-    private InputStream getConvertedBinaryResource(BinaryResource binaryResource, String outputFormat) throws FileConversionException {
+    private InputStream getConvertedBinaryResource(BinaryResource binaryResource, String outputFormat, Locale locale) throws FileConversionException {
         try {
-            return onDemandConverterManager.getDocumentConvertedResource(outputFormat, binaryResource);
+            return onDemandConverterManager.getDocumentConvertedResource(outputFormat, binaryResource, locale);
         } catch (Exception e) {
             throw new FileConversionException(e);
         }
