@@ -11,6 +11,7 @@
 
 package org.polarsys.eplmp.server.resourcegetters;
 
+import org.jodconverter.office.OfficeException;
 import org.polarsys.eplmp.core.common.BinaryResource;
 import org.polarsys.eplmp.core.document.DocumentIteration;
 import org.polarsys.eplmp.core.exceptions.ConvertedResourceException;
@@ -71,7 +72,7 @@ public class OfficeOnDemandConverter implements OnDemandConverter {
             }
 
             return inputStream;
-        } catch (StorageException | IOException e) {
+        } catch (StorageException | IOException | OfficeException e) {
             throw new ConvertedResourceException(e);
         }
     }
@@ -90,12 +91,12 @@ public class OfficeOnDemandConverter implements OnDemandConverter {
             }
 
             return inputStream;
-        } catch (StorageException | IOException e) {
+        } catch (StorageException | IOException | OfficeException e) {
             throw new ConvertedResourceException(e);
         }
     }
 
-    private InputStream getPdfConvertedResource(BinaryResource binaryResource) throws StorageException, IOException {
+    private InputStream getPdfConvertedResource(BinaryResource binaryResource) throws StorageException, IOException, OfficeException {
 
         InputStream inputStream;
 
