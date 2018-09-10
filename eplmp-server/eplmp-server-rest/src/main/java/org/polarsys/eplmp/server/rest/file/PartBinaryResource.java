@@ -52,6 +52,7 @@ import java.security.NoSuchAlgorithmException;
 import java.text.Normalizer;
 import java.util.Collection;
 import java.util.Date;
+import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -79,6 +80,8 @@ public class PartBinaryResource {
     private IOnDemandConverterManagerLocal onDemandConverterManager;
     @Inject
     private AuthConfig authConfig;
+    @Inject
+    private Locale userLocale;
 
     public PartBinaryResource() {
     }
@@ -320,7 +323,7 @@ public class PartBinaryResource {
 
         try {
             if (PartIteration.ATTACHED_FILES_SUBTYPE.equals(subType) && output != null && !output.isEmpty()) {
-                binaryContentInputStream = getConvertedBinaryResource(binaryResource, output);
+                binaryContentInputStream = getConvertedBinaryResource(binaryResource, output, userLocale);
                 if (range == null || range.isEmpty()) {
                     binaryResourceDownloadMeta.setLength(0);
                 }
@@ -342,9 +345,9 @@ public class PartBinaryResource {
      * @throws FileConversionException
      */
 
-    private InputStream getConvertedBinaryResource(BinaryResource binaryResource, String outputFormat) throws FileConversionException {
+    private InputStream getConvertedBinaryResource(BinaryResource binaryResource, String outputFormat, Locale locale) throws FileConversionException {
         try {
-            return onDemandConverterManager.getPartConvertedResource(outputFormat, binaryResource);
+            return onDemandConverterManager.getPartConvertedResource(outputFormat, binaryResource, locale);
         } catch (Exception e) {
             throw new FileConversionException(e);
         }

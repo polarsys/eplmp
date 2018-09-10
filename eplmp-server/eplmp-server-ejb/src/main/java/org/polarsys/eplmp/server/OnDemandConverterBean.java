@@ -11,11 +11,10 @@
 package org.polarsys.eplmp.server;
 
 import org.polarsys.eplmp.core.common.BinaryResource;
-import org.polarsys.eplmp.core.common.User;
 import org.polarsys.eplmp.core.document.DocumentIteration;
 import org.polarsys.eplmp.core.exceptions.*;
 import org.polarsys.eplmp.core.product.PartIteration;
-import org.polarsys.eplmp.core.services.*;
+import org.polarsys.eplmp.core.services.IOnDemandConverterManagerLocal;
 import org.polarsys.eplmp.server.converters.OnDemandConverter;
 import org.polarsys.eplmp.server.dao.BinaryResourceDAO;
 
@@ -40,17 +39,6 @@ public class OnDemandConverterBean implements IOnDemandConverterManagerLocal {
     @Any
     private Instance<OnDemandConverter> documentResourceGetters;
 
-    @Inject
-    private IDocumentManagerLocal documentService;
-
-    @Inject
-    private IProductManagerLocal productService;
-
-    @Inject
-    private IContextManagerLocal contextManager;
-
-    @Inject
-    private IUserManagerLocal userManager;
 
     @Override
     public InputStream getDocumentConvertedResource(String outputFormat, BinaryResource binaryResource, Locale locale)
@@ -66,15 +54,14 @@ public class OnDemandConverterBean implements IOnDemandConverterManagerLocal {
     }
 
     @Override
-    public InputStream getPartConvertedResource(String outputFormat, BinaryResource binaryResource)
+    public InputStream getPartConvertedResource(String outputFormat, BinaryResource binaryResource, Locale locale)
             throws WorkspaceNotFoundException, UserNotActiveException, UserNotFoundException, ConvertedResourceException, WorkspaceNotEnabledException {
 
         PartIteration partIteration = binaryResourceDAO.getPartHolder(binaryResource);
         OnDemandConverter selectedOnDemandConverter = selectOnDemandConverter(outputFormat, binaryResource);
-        User user = userManager.whoAmI(partIteration.getWorkspaceId());
 
         if (selectedOnDemandConverter != null) {
-            return selectedOnDemandConverter.getConvertedResource(outputFormat, binaryResource, partIteration, user.getLocale());
+            return selectedOnDemandConverter.getConvertedResource(outputFormat, binaryResource, partIteration, locale);
         }
 
         return null;

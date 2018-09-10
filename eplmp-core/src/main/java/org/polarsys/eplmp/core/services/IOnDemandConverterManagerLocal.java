@@ -21,7 +21,7 @@ public interface IOnDemandConverterManagerLocal {
     InputStream getDocumentConvertedResource(String outputFormat, BinaryResource binaryResource, Locale locale)
             throws WorkspaceNotFoundException, UserNotActiveException, UserNotFoundException, ConvertedResourceException, WorkspaceNotEnabledException;
 
-    InputStream getPartConvertedResource(String outputFormat, BinaryResource binaryResource)
+    InputStream getPartConvertedResource(String outputFormat, BinaryResource binaryResource, Locale locale)
             throws WorkspaceNotFoundException, UserNotActiveException, UserNotFoundException, ConvertedResourceException, WorkspaceNotEnabledException;
 
 }
