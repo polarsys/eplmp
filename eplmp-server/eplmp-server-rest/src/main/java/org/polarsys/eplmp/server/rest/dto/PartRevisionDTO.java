@@ -35,10 +35,10 @@ public class PartRevisionDTO implements Serializable {
     @ApiModelProperty(value = "Part number")
     private String number;
 
-    @ApiModelProperty(value = "Part name")
+    @ApiModelProperty(value = "Part version")
     private String version;
 
-    @ApiModelProperty(value = "Part version")
+    @ApiModelProperty(value = "Part type")
     private String type;
 
     @ApiModelProperty(value = "Part name")
