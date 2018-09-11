@@ -15,7 +15,6 @@ import org.jodconverter.OfficeDocumentConverter;
 import org.jodconverter.office.LocalOfficeManager;
 import org.jodconverter.office.OfficeException;
 import org.jodconverter.office.OfficeManager;
-import org.polarsys.eplmp.server.converters.OnDemandConverter;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -33,7 +32,7 @@ import java.util.logging.Logger;
 public class FileConverter {
 
     private final OfficeConfig officeConfig;
-    private static final Logger LOGGER = Logger.getLogger(OnDemandConverter.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(FileConverter.class.getName());
 
     @Inject
     public FileConverter(OfficeConfig officeConfig) {
@@ -52,7 +51,7 @@ public class FileConverter {
             officeManager.start();
         } catch (OfficeException e) {
 
-            LOGGER.log(Level.INFO, "Office manager not started : "+e);
+            LOGGER.log(Level.SEVERE, "Office manager not started : "+e);
         }
     }
 
@@ -63,7 +62,7 @@ public class FileConverter {
             officeManager.stop();
         } catch (OfficeException e) {
 
-            LOGGER.log(Level.INFO, "Office manager not stopped : "+e);
+            LOGGER.log(Level.SEVERE,"Office manager not stopped : "+e);
         }
     }
 
@@ -87,5 +86,4 @@ public class FileConverter {
         converter.convert(fileToConvert, pdfFile);
         return pdfFile;
     }
-
 }

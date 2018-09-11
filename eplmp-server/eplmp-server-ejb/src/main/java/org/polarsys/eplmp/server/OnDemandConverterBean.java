@@ -14,14 +14,10 @@ import org.polarsys.eplmp.core.common.BinaryResource;
 import org.polarsys.eplmp.core.document.DocumentIteration;
 import org.polarsys.eplmp.core.exceptions.*;
 import org.polarsys.eplmp.core.product.PartIteration;
-import org.polarsys.eplmp.core.security.UserGroupMapping;
 import org.polarsys.eplmp.core.services.IOnDemandConverterManagerLocal;
 import org.polarsys.eplmp.server.converters.OnDemandConverter;
 import org.polarsys.eplmp.server.dao.BinaryResourceDAO;
 
-import javax.annotation.security.DeclareRoles;
-import javax.annotation.security.RolesAllowed;
-import javax.ejb.Local;
 import javax.ejb.Stateless;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
@@ -34,9 +30,6 @@ import java.util.Locale;
  * Resource Getter
  */
 
-@Local(IOnDemandConverterManagerLocal.class)
-@DeclareRoles({UserGroupMapping.REGULAR_USER_ROLE_ID, UserGroupMapping.GUEST_ROLE_ID})
-@RolesAllowed({UserGroupMapping.REGULAR_USER_ROLE_ID, UserGroupMapping.GUEST_ROLE_ID})
 @Stateless(name = "OnDemandConverterBean")
 public class OnDemandConverterBean implements IOnDemandConverterManagerLocal {
 
@@ -47,7 +40,6 @@ public class OnDemandConverterBean implements IOnDemandConverterManagerLocal {
     @Any
     private Instance<OnDemandConverter> documentResourceGetters;
 
-    @RolesAllowed({UserGroupMapping.REGULAR_USER_ROLE_ID, UserGroupMapping.GUEST_ROLE_ID})
     @Override
     public InputStream getDocumentConvertedResource(String outputFormat, BinaryResource binaryResource, Locale locale)
             throws WorkspaceNotFoundException, UserNotActiveException, UserNotFoundException, ConvertedResourceException, WorkspaceNotEnabledException {
@@ -61,7 +53,6 @@ public class OnDemandConverterBean implements IOnDemandConverterManagerLocal {
         return null;
     }
 
-    @RolesAllowed({UserGroupMapping.REGULAR_USER_ROLE_ID, UserGroupMapping.GUEST_ROLE_ID})
     @Override
     public InputStream getPartConvertedResource(String outputFormat, BinaryResource binaryResource, Locale locale)
             throws WorkspaceNotFoundException, UserNotActiveException, UserNotFoundException, ConvertedResourceException, WorkspaceNotEnabledException {
