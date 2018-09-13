@@ -53,7 +53,7 @@ public class FileConverterTest {
             Assert.assertNotNull(resourceAsStream);
             try{
 
-                fileConverter.convertToPDF("name", resourceAsStream);
+                fileConverter.convertToPDF("sample.txt", resourceAsStream);
                 Assert.fail("Should have thrown an IOException");
 
             }catch (IOException e ){
