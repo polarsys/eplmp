@@ -70,7 +70,7 @@ public class BinaryResourceDownloadResponseBuilder {
 
         responseBuilder = applyCachePolicyToResponse(responseBuilder, binaryResourceDownloadMeta.getETag(), binaryResourceDownloadMeta.getLastModified(), isToBeCached);
         if(xFrameOption != null && !xFrameOption.isEmpty()) {
-            responseBuilder.header("xFrameOptions", xFrameOption);
+            responseBuilder.header("X-Frame-Options", xFrameOption);
         }
         return responseBuilder.build();
     }
