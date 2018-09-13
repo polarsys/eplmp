@@ -48,7 +48,7 @@ public class BinaryResourceDownloadResponseBuilder {
      * @return A response builder with the header & the content.
      * @throws RequestedRangeNotSatisfiableException If the range is not satisfiable.
      */
-    public static Response prepareResponse(InputStream binaryContentInputStream, BinaryResourceDownloadMeta binaryResourceDownloadMeta, String range, boolean isToBeCached, String xFrameOption)
+    public static Response prepareResponse(InputStream binaryContentInputStream, BinaryResourceDownloadMeta binaryResourceDownloadMeta, String range, boolean isToBeCached, String xFrameOptions)
             throws RequestedRangeNotSatisfiableException {
 
         Response.ResponseBuilder responseBuilder;
@@ -69,8 +69,8 @@ public class BinaryResourceDownloadResponseBuilder {
         }
 
         responseBuilder = applyCachePolicyToResponse(responseBuilder, binaryResourceDownloadMeta.getETag(), binaryResourceDownloadMeta.getLastModified(), isToBeCached);
-        if(xFrameOption != null && !xFrameOption.isEmpty()) {
-            responseBuilder.header("X-Frame-Options", xFrameOption);
+        if(xFrameOptions != null && !xFrameOptions.isEmpty()) {
+            responseBuilder.header("X-Frame-Options", xFrameOptions);
         }
         return responseBuilder.build();
     }

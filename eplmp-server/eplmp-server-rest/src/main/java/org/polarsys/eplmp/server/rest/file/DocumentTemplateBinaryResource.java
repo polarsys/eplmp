@@ -28,7 +28,6 @@ import org.polarsys.eplmp.server.rest.file.util.BinaryResourceDownloadResponseBu
 import org.polarsys.eplmp.server.rest.file.util.BinaryResourceUpload;
 import org.polarsys.eplmp.server.rest.interceptors.Compress;
 
-import javax.annotation.Resource;
 import javax.annotation.security.DeclareRoles;
 import javax.annotation.security.RolesAllowed;
 import javax.enterprise.context.RequestScoped;
@@ -49,7 +48,6 @@ import java.net.URLEncoder;
 import java.text.Normalizer;
 import java.util.Collection;
 import java.util.Locale;
-import java.util.Properties;
 import java.util.logging.Logger;
 
 @RequestScoped

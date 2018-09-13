@@ -12,7 +12,6 @@ package org.polarsys.eplmp.server.rest.file;
 
 import io.swagger.annotations.*;
 import org.polarsys.eplmp.core.common.BinaryResource;
-import org.polarsys.eplmp.core.common.User;
 import org.polarsys.eplmp.core.document.DocumentIteration;
 import org.polarsys.eplmp.core.document.DocumentIterationKey;
 import org.polarsys.eplmp.core.document.DocumentRevision;
@@ -87,7 +86,7 @@ public class DocumentBinaryResource {
     @Inject
     private Locale userLocale;
     @Resource(name="security.config")
-    Properties properties;
+    private Properties properties;
 
     public DocumentBinaryResource() {
     }
