@@ -33,6 +33,7 @@ import org.polarsys.eplmp.server.rest.file.util.BinaryResourceDownloadMeta;
 import org.polarsys.eplmp.server.rest.file.util.BinaryResourceDownloadResponseBuilder;
 import org.polarsys.eplmp.server.rest.file.util.BinaryResourceUpload;
 
+import javax.annotation.Resource;
 import javax.annotation.security.DeclareRoles;
 import javax.annotation.security.RolesAllowed;
 import javax.enterprise.context.RequestScoped;
@@ -53,6 +54,7 @@ import java.text.Normalizer;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Locale;
+import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -82,6 +84,8 @@ public class PartBinaryResource {
     private AuthConfig authConfig;
     @Inject
     private Locale userLocale;
+    @Resource(name="security.config")
+    Properties properties;
 
     public PartBinaryResource() {
     }
@@ -330,7 +334,7 @@ public class PartBinaryResource {
             } else {
                 binaryContentInputStream = storageManager.getBinaryResourceInputStream(binaryResource);
             }
-            return BinaryResourceDownloadResponseBuilder.prepareResponse(binaryContentInputStream, binaryResourceDownloadMeta, range, isToBeCached);
+            return BinaryResourceDownloadResponseBuilder.prepareResponse(binaryContentInputStream, binaryResourceDownloadMeta, range, isToBeCached,properties.getProperty("xFrameOptions"));
         } catch (StorageException | FileConversionException e) {
             return BinaryResourceDownloadResponseBuilder.downloadError(e, fullName);
         }

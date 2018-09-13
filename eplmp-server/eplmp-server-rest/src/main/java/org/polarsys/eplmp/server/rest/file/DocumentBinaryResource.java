@@ -12,7 +12,6 @@ package org.polarsys.eplmp.server.rest.file;
 
 import io.swagger.annotations.*;
 import org.polarsys.eplmp.core.common.BinaryResource;
-import org.polarsys.eplmp.core.common.User;
 import org.polarsys.eplmp.core.document.DocumentIteration;
 import org.polarsys.eplmp.core.document.DocumentIterationKey;
 import org.polarsys.eplmp.core.document.DocumentRevision;
@@ -36,6 +35,7 @@ import org.polarsys.eplmp.server.rest.file.util.BinaryResourceDownloadResponseBu
 import org.polarsys.eplmp.server.rest.file.util.BinaryResourceUpload;
 import org.polarsys.eplmp.server.rest.interceptors.Compress;
 
+import javax.annotation.Resource;
 import javax.annotation.security.DeclareRoles;
 import javax.annotation.security.RolesAllowed;
 import javax.enterprise.context.RequestScoped;
@@ -56,6 +56,7 @@ import java.text.Normalizer;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Locale;
+import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -84,6 +85,8 @@ public class DocumentBinaryResource {
     private AuthConfig authConfig;
     @Inject
     private Locale userLocale;
+    @Resource(name="security.config")
+    private Properties properties;
 
     public DocumentBinaryResource() {
     }
@@ -254,7 +257,7 @@ public class DocumentBinaryResource {
                 binaryContentInputStream = storageManager.getBinaryResourceInputStream(binaryResource);
             }
 
-            return BinaryResourceDownloadResponseBuilder.prepareResponse(binaryContentInputStream, binaryResourceDownloadMeta, range, isToBeCached);
+            return BinaryResourceDownloadResponseBuilder.prepareResponse(binaryContentInputStream, binaryResourceDownloadMeta, range, isToBeCached,properties.getProperty("xFrameOptions"));
 
         } catch (StorageException | FileConversionException e) {
             Streams.close(binaryContentInputStream);

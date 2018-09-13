@@ -151,7 +151,7 @@ public class PartTemplateBinaryResource {
 
         try {
             binaryContentInputStream = storageManager.getBinaryResourceInputStream(binaryResource);
-            return BinaryResourceDownloadResponseBuilder.prepareResponse(binaryContentInputStream, binaryResourceDownloadMeta, range, isToBeCached);
+            return BinaryResourceDownloadResponseBuilder.prepareResponse(binaryContentInputStream, binaryResourceDownloadMeta, range, isToBeCached,null);
         } catch (StorageException e) {
             Streams.close(binaryContentInputStream);
             return BinaryResourceDownloadResponseBuilder.downloadError(e, fullName);
