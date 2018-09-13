@@ -29,6 +29,7 @@ import java.util.Locale;
 /**
  * Resource Getter
  */
+
 @Stateless(name = "OnDemandConverterBean")
 public class OnDemandConverterBean implements IOnDemandConverterManagerLocal {
 
@@ -38,7 +39,6 @@ public class OnDemandConverterBean implements IOnDemandConverterManagerLocal {
     @Inject
     @Any
     private Instance<OnDemandConverter> documentResourceGetters;
-
 
     @Override
     public InputStream getDocumentConvertedResource(String outputFormat, BinaryResource binaryResource, Locale locale)
