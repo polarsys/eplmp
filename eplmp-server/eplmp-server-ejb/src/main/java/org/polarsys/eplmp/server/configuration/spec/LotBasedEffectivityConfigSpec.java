@@ -40,11 +40,11 @@ public class LotBasedEffectivityConfigSpec extends EffectivityConfigSpec {
         super(configurationItem);
         this.lotId=lotId;
     }
+
     public LotBasedEffectivityConfigSpec(String lotId, ProductConfiguration configuration) {
         super(configuration);
         this.lotId=lotId;
     }
-
 
     @Override
     protected boolean isEffective(Effectivity eff){

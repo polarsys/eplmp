@@ -11,7 +11,6 @@
 
 package org.polarsys.eplmp.server.configuration;
 
-import org.polarsys.eplmp.core.common.User;
 import org.polarsys.eplmp.core.configuration.ProductStructureFilter;
 import org.polarsys.eplmp.core.exceptions.EntityConstraintException;
 import org.polarsys.eplmp.core.exceptions.NotAllowedException;
@@ -40,8 +39,8 @@ public class PSFilterVisitor {
     /**
      * Start the visitor with given part master
      * */
-    public Component visit(User pUser, ProductStructureFilter pFilter, PartMaster pNodeFrom, Integer pStopAtDepth, PSFilterVisitorCallbacks callbacks) throws PartMasterNotFoundException, EntityConstraintException, NotAllowedException {
-        this.workspaceId = pUser.getWorkspaceId();
+    public Component visit(String workspaceId, ProductStructureFilter pFilter, PartMaster pNodeFrom, Integer pStopAtDepth, PSFilterVisitorCallbacks callbacks) throws PartMasterNotFoundException, EntityConstraintException, NotAllowedException {
+        this.workspaceId = workspaceId;
         this.filter = pFilter;
         this.callbacks = callbacks;
 
@@ -63,8 +62,8 @@ public class PSFilterVisitor {
     /**
      * Start the visitor with given path
      * */
-    public Component visit(User pUser, ProductStructureFilter pFilter, List<PartLink> pStartingPath, Integer pStopAtDepth, PSFilterVisitorCallbacks callbacks) throws PartMasterNotFoundException, EntityConstraintException, NotAllowedException {
-        this.workspaceId = pUser.getWorkspaceId();
+    public Component visit(String workspaceId, ProductStructureFilter pFilter, List<PartLink> pStartingPath, Integer pStopAtDepth, PSFilterVisitorCallbacks callbacks) throws PartMasterNotFoundException, EntityConstraintException, NotAllowedException {
+        this.workspaceId = workspaceId;
         this.filter = pFilter;
         this.callbacks = callbacks;
 

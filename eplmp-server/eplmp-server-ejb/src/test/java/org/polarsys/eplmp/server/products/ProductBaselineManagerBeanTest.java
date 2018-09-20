@@ -93,9 +93,6 @@ public class ProductBaselineManagerBeanTest {
         Mockito.when(principal.getName()).thenReturn("user1");
     }
 
-    /**
-     * test the creation of Released baseline
-     */
     @Test
     public void createReleasedBaseline() throws UserNotFoundException, AccessRightException, WorkspaceNotFoundException, ConfigurationItemNotFoundException, NotAllowedException, UserNotActiveException, PartIterationNotFoundException, PartRevisionNotReleasedException, EntityConstraintException, PartMasterNotFoundException, CreationException, BaselineNotFoundException, PathToPathLinkAlreadyExistsException, WorkspaceNotEnabledException {
 
@@ -113,7 +110,7 @@ public class ProductBaselineManagerBeanTest {
         Mockito.when(configurationItemDAO.loadConfigurationItem(baselineRuleReleased.getConfigurationItemKey())).thenReturn(configurationItem);
 
         //When
-        ProductBaseline baseline = productBaselineService.createBaseline(baselineRuleReleased.getConfigurationItemKey(), baselineRuleReleased.getName(), baselineRuleReleased.getType(), baselineRuleReleased.getDescription(), new ArrayList<>(), baselineRuleReleased.getSubstituteLinks(), baselineRuleReleased.getOptionalUsageLinks());
+        ProductBaseline baseline = productBaselineService.createBaseline(baselineRuleReleased.getConfigurationItemKey(), baselineRuleReleased.getName(), baselineRuleReleased.getType(), baselineRuleReleased.getDescription(), new ArrayList<>(), baselineRuleReleased.getSubstituteLinks(), baselineRuleReleased.getOptionalUsageLinks(), null, null, null, false);
 
         //Then
         Assert.assertNotNull(baseline);
@@ -123,11 +120,6 @@ public class ProductBaselineManagerBeanTest {
 
     }
 
-    /**
-     * test the creation of a released baseline with a product that contains a part that has not been released yet
-     *
-     * @throws Exception PartRevisionNotReleasedException
-     */
     @Test(expected = NotAllowedException.class)
     public void createReleasedBaselineUsingPartNotReleased() throws Exception{
 
@@ -144,12 +136,10 @@ public class ProductBaselineManagerBeanTest {
         Mockito.when(configurationItemDAO.loadConfigurationItem(baselineRuleNotReleased.getConfigurationItemKey())).thenReturn(configurationItem);
 
         //When
-        productBaselineService.createBaseline(baselineRuleNotReleased.getConfigurationItemKey(), baselineRuleNotReleased.getName(), baselineRuleNotReleased.getType(), baselineRuleNotReleased.getDescription(),new ArrayList<>(), baselineRuleNotReleased.getSubstituteLinks(), baselineRuleNotReleased.getOptionalUsageLinks());
+        productBaselineService.createBaseline(baselineRuleNotReleased.getConfigurationItemKey(), baselineRuleNotReleased.getName(), baselineRuleNotReleased.getType(), baselineRuleNotReleased.getDescription(),new ArrayList<>(), baselineRuleNotReleased.getSubstituteLinks(), baselineRuleNotReleased.getOptionalUsageLinks(), null, null, null, false);
 
     }
-    /**
-     * test the creation of latest baseline
-     */
+
     @Test
     public void createLatestBaseline() throws UserNotFoundException, AccessRightException, WorkspaceNotFoundException, ConfigurationItemNotFoundException, EntityConstraintException, UserNotActiveException, NotAllowedException, PartIterationNotFoundException, PartRevisionNotReleasedException, PartMasterNotFoundException, CreationException, BaselineNotFoundException, PathToPathLinkAlreadyExistsException, WorkspaceNotEnabledException {
 
@@ -167,7 +157,7 @@ public class ProductBaselineManagerBeanTest {
         Mockito.when(configurationItemDAO.loadConfigurationItem(baselineRuleLatest.getConfigurationItemKey())).thenReturn(configurationItem);
 
         //When
-        ProductBaseline baseline = productBaselineService.createBaseline(baselineRuleLatest.getConfigurationItemKey(), baselineRuleLatest.getName(), baselineRuleLatest.getType(), baselineRuleLatest.getDescription(), new ArrayList<>(), baselineRuleLatest.getSubstituteLinks(), baselineRuleLatest.getOptionalUsageLinks());
+        ProductBaseline baseline = productBaselineService.createBaseline(baselineRuleLatest.getConfigurationItemKey(), baselineRuleLatest.getName(), baselineRuleLatest.getType(), baselineRuleLatest.getDescription(), new ArrayList<>(), baselineRuleLatest.getSubstituteLinks(), baselineRuleLatest.getOptionalUsageLinks(), null, null, null, false);
 
         //Then
         Assert.assertNotNull(baseline);
@@ -177,16 +167,6 @@ public class ProductBaselineManagerBeanTest {
 
     }
 
-    /**
-     * @throws UserNotFoundException
-     * @throws AccessRightException
-     * @throws WorkspaceNotFoundException
-     * @throws ConfigurationItemNotFoundException
-     * @throws NotAllowedException
-     * @throws UserNotActiveException
-     * @throws PartIterationNotFoundException
-     * @throws org.polarsys.eplmp.core.exceptions.PartRevisionNotReleasedException
-     */
     @Test
     public void createLatestBaselineWithCheckedPart() throws UserNotFoundException, AccessRightException, WorkspaceNotFoundException, ConfigurationItemNotFoundException, NotAllowedException, UserNotActiveException, PartIterationNotFoundException, PartRevisionNotReleasedException, EntityConstraintException, PartMasterNotFoundException, CreationException, BaselineNotFoundException, PathToPathLinkAlreadyExistsException, WorkspaceNotEnabledException {
 
@@ -204,7 +184,7 @@ public class ProductBaselineManagerBeanTest {
         Mockito.when(configurationItemDAO.loadConfigurationItem(baselineRuleReleased.getConfigurationItemKey())).thenReturn(configurationItem);
 
         //When
-        ProductBaseline baseline = productBaselineService.createBaseline(baselineRuleReleased.getConfigurationItemKey(), baselineRuleReleased.getName(), baselineRuleReleased.getType(), baselineRuleReleased.getDescription(), new ArrayList<>(), baselineRuleReleased.getSubstituteLinks(), baselineRuleReleased.getOptionalUsageLinks());
+        ProductBaseline baseline = productBaselineService.createBaseline(baselineRuleReleased.getConfigurationItemKey(), baselineRuleReleased.getName(), baselineRuleReleased.getType(), baselineRuleReleased.getDescription(), new ArrayList<>(), baselineRuleReleased.getSubstituteLinks(), baselineRuleReleased.getOptionalUsageLinks(), null, null, null, false);
 
         //Then
         Assert.assertNotNull(baseline);

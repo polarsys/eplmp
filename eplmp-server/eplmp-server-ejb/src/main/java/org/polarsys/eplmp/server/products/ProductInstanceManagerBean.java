@@ -364,7 +364,7 @@ public class ProductInstanceManagerBean implements IProductInstanceManagerLocal 
             nextIteration.setLinkedDocuments(newLinks);
 
             copyPathToPathLinks(nextIteration);
-            copyPathDataMasterList(workspaceId, user, lastIteration, nextIteration);
+            copyPathDataMasterList(workspaceId, lastIteration, nextIteration);
 
         } else {
             throw new NotAllowedException("NotAllowedException53");
@@ -374,7 +374,7 @@ public class ProductInstanceManagerBean implements IProductInstanceManagerLocal 
 
     }
 
-    private void copyPathDataMasterList(String workspaceId, User user, ProductInstanceIteration lastIteration, ProductInstanceIteration nextIteration) throws NotAllowedException, EntityConstraintException, PartMasterNotFoundException {
+    private void copyPathDataMasterList(String workspaceId, ProductInstanceIteration lastIteration, ProductInstanceIteration nextIteration) throws NotAllowedException, EntityConstraintException, PartMasterNotFoundException {
 
         List<PathDataMaster> pathDataMasterList = new ArrayList<>();
         ProductBaseline productBaseline = nextIteration.getBasedOn();
@@ -466,7 +466,7 @@ public class ProductInstanceManagerBean implements IProductInstanceManagerLocal 
 
         };
 
-        psFilterVisitor.visit(user, filter, partMaster, -1, callbacks);
+        psFilterVisitor.visit(workspaceId, filter, partMaster, -1, callbacks);
 
         nextIteration.setPathDataMasterList(pathDataMasterList);
 

@@ -33,7 +33,7 @@ import org.polarsys.eplmp.core.util.Tools;
 import org.polarsys.eplmp.core.workflow.*;
 import org.polarsys.eplmp.server.configuration.PSFilterVisitor;
 import org.polarsys.eplmp.server.configuration.PSFilterVisitorCallbacks;
-import org.polarsys.eplmp.server.configuration.filter.LatestPSFilter;
+import org.polarsys.eplmp.server.configuration.filter.LatestCheckedInPSFilter;
 import org.polarsys.eplmp.server.configuration.filter.UpdatePartIterationPSFilter;
 import org.polarsys.eplmp.server.configuration.filter.WIPPSFilter;
 import org.polarsys.eplmp.server.dao.*;
@@ -210,13 +210,14 @@ public class ProductManagerBean implements IProductManagerLocal {
     @Override
     public List<PartLink[]> findPartUsages(ConfigurationItemKey pKey, ProductStructureFilter filter, String search) throws WorkspaceNotFoundException, UserNotFoundException, UserNotActiveException, NotAllowedException, EntityConstraintException, PartMasterNotFoundException, ConfigurationItemNotFoundException, WorkspaceNotEnabledException {
 
-        User user = userManager.checkWorkspaceReadAccess(pKey.getWorkspace());
+        String workspaceId = pKey.getWorkspace();
+        userManager.checkWorkspaceReadAccess(workspaceId);
 
         List<PartLink[]> usagePaths = new ArrayList<>();
 
         ConfigurationItem ci = configurationItemDAO.loadConfigurationItem(pKey);
 
-        psFilterVisitor.visit(user, filter, ci.getDesignItem(), -1, new PSFilterVisitorCallbacks() {
+        psFilterVisitor.visit(workspaceId, filter, ci.getDesignItem(), -1, new PSFilterVisitorCallbacks() {
             @Override
             public boolean onPathWalk(List<PartLink> path, List<PartMaster> parts) {
                 PartMaster pm = parts.get(parts.size() - 1);
@@ -2400,16 +2401,16 @@ public class ProductManagerBean implements IProductManagerLocal {
     @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
     @Override
     public Component filterProductStructure(ConfigurationItemKey ciKey, ProductStructureFilter filter, List<PartLink> path, Integer pDepth) throws ConfigurationItemNotFoundException, WorkspaceNotFoundException, NotAllowedException, UserNotFoundException, UserNotActiveException, PartUsageLinkNotFoundException, AccessRightException, PartMasterNotFoundException, EntityConstraintException, WorkspaceNotEnabledException {
-
-        User user = userManager.checkWorkspaceReadAccess(ciKey.getWorkspace());
+        String workspaceId = ciKey.getWorkspace();
+        userManager.checkWorkspaceReadAccess(workspaceId);
 
         PSFilterVisitorCallbacks callbacks = new PSFilterVisitorCallbacks(){};
 
         if (path == null) {
             ConfigurationItem ci = configurationItemDAO.loadConfigurationItem(ciKey);
-            return psFilterVisitor.visit(user, filter, ci.getDesignItem(), pDepth, callbacks);
+            return psFilterVisitor.visit(workspaceId, filter, ci.getDesignItem(), pDepth, callbacks);
         } else {
-            return psFilterVisitor.visit(user, filter, path, pDepth, callbacks);
+            return psFilterVisitor.visit(workspaceId, filter, path, pDepth, callbacks);
         }
 
     }
@@ -2418,7 +2419,8 @@ public class ProductManagerBean implements IProductManagerLocal {
     @Override
     @RolesAllowed({UserGroupMapping.REGULAR_USER_ROLE_ID, UserGroupMapping.ADMIN_ROLE_ID})
     public Set<PartRevision> getWritablePartRevisionsFromPath(ConfigurationItemKey configurationItemKey, String path) throws EntityConstraintException, PartMasterNotFoundException, NotAllowedException, UserNotFoundException, WorkspaceNotFoundException, UserNotActiveException, ConfigurationItemNotFoundException, PartUsageLinkNotFoundException, WorkspaceNotEnabledException {
-        User user = userManager.checkWorkspaceReadAccess(configurationItemKey.getWorkspace());
+        String workspaceId = configurationItemKey.getWorkspace();
+        User user = userManager.checkWorkspaceReadAccess(workspaceId);
         Set<PartRevision> partRevisions = new HashSet<>();
 
         PSFilterVisitorCallbacks callbacks = new PSFilterVisitorCallbacks() {
@@ -2443,7 +2445,7 @@ public class ProductManagerBean implements IProductManagerLocal {
             }
         };
 
-        psFilterVisitor.visit(user, new WIPPSFilter(user), decodePath(configurationItemKey, path), null, callbacks);
+        psFilterVisitor.visit(workspaceId, new WIPPSFilter(user), decodePath(configurationItemKey, path), null, callbacks);
         return partRevisions;
     }
 
@@ -2452,7 +2454,8 @@ public class ProductManagerBean implements IProductManagerLocal {
     public Component filterProductStructureOnLinkType(ConfigurationItemKey ciKey, ProductStructureFilter filter, String configSpecType, String path, String linkType)
             throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, ConfigurationItemNotFoundException, PartUsageLinkNotFoundException, ProductInstanceMasterNotFoundException, BaselineNotFoundException, WorkspaceNotEnabledException, NotAllowedException, EntityConstraintException, PartMasterNotFoundException {
 
-        User user = userManager.checkWorkspaceReadAccess(ciKey.getWorkspace());
+        String workspaceId = ciKey.getWorkspace();
+        User user = userManager.checkWorkspaceReadAccess(workspaceId);
 
 
         // 1 Get flat list of paths in the structure for filtering path to path links
@@ -2467,7 +2470,7 @@ public class ProductManagerBean implements IProductManagerLocal {
         };
 
         ConfigurationItem ci = configurationItemDAO.loadConfigurationItem(ciKey);
-        psFilterVisitor.visit(user, filter, ci.getDesignItem(), -1, callbacks);
+        psFilterVisitor.visit(workspaceId, filter, ci.getDesignItem(), -1, callbacks);
 
         // 2 find all path to path source and target links in configuration item and retain only discovered paths
         Component component;
@@ -2864,31 +2867,30 @@ public class ProductManagerBean implements IProductManagerLocal {
 
         PartMaster partMaster = partIteration.getPartRevision().getPartMaster();
         Workspace workspace = partMaster.getWorkspace();
-
-        User user = userManager.checkWorkspaceReadAccess(workspace.getId());
+        String workspaceId = workspace.getId();
+        User user = userManager.checkWorkspaceReadAccess(workspaceId);
 
         PSFilterVisitorCallbacks callbacks = new PSFilterVisitorCallbacks() {};
-        psFilterVisitor.visit(user, new UpdatePartIterationPSFilter(user, partIteration), partMaster, -1, callbacks);
+        psFilterVisitor.visit(workspaceId, new UpdatePartIterationPSFilter(partIteration), partMaster, -1, callbacks);
 
     }
 
     @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
     @Override
     public ProductStructureFilter getLatestCheckedInPSFilter(String workspaceId) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, WorkspaceNotEnabledException {
-        User user = userManager.checkWorkspaceReadAccess(workspaceId);
-        return new LatestPSFilter(user);
+        userManager.checkWorkspaceReadAccess(workspaceId);
+        return new LatestCheckedInPSFilter(false);
     }
 
     @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
     @Override
     public boolean hasModificationNotification(ConfigurationItemKey ciKey) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, ConfigurationItemNotFoundException, NotAllowedException, EntityConstraintException, PartMasterNotFoundException, WorkspaceNotEnabledException {
-
-
-        User user = userManager.checkWorkspaceReadAccess(ciKey.getWorkspace());
+        String workspaceId = ciKey.getWorkspace();
+        userManager.checkWorkspaceReadAccess(workspaceId);
         ConfigurationItem configurationItem = configurationItemDAO.loadConfigurationItem(ciKey);
 
         List<String> visitedPartNumbers = new ArrayList<>();
-        LatestPSFilter latestPSFilter = new LatestPSFilter(user, true);
+        LatestCheckedInPSFilter latestCheckedInPSFilter = new LatestCheckedInPSFilter(true);
         final boolean[] hasModificationNotification = {false};
 
         PSFilterVisitorCallbacks callbacks = new PSFilterVisitorCallbacks() {
@@ -2897,7 +2899,7 @@ public class ProductManagerBean implements IProductManagerLocal {
                 PartMaster partMaster = parts.get(parts.size() - 1);
                 if (!visitedPartNumbers.contains(partMaster.getNumber()) && !hasModificationNotification[0]) {
                     visitedPartNumbers.add(partMaster.getNumber());
-                    List<PartIteration> partIterations = latestPSFilter.filter(partMaster);
+                    List<PartIteration> partIterations = latestCheckedInPSFilter.filter(partMaster);
                     // As we use a latest checked-in filter, partIterations array can be empty
                     if (!partIterations.isEmpty()) {
                         PartIteration partIteration = partIterations.get(partIterations.size() - 1);
@@ -2910,7 +2912,7 @@ public class ProductManagerBean implements IProductManagerLocal {
             }
         };
 
-        psFilterVisitor.visit(user, latestPSFilter, configurationItem.getDesignItem(), -1, callbacks);
+        psFilterVisitor.visit(workspaceId, latestCheckedInPSFilter, configurationItem.getDesignItem(), -1, callbacks);
 
         return hasModificationNotification[0];
     }
@@ -2958,7 +2960,7 @@ public class ProductManagerBean implements IProductManagerLocal {
     @Override
     public Map<String, Set<BinaryResource>> getBinariesInTree(Integer baselineId, String workspaceId, ConfigurationItemKey ciKey, ProductStructureFilter psFilter, boolean exportNativeCADFiles, boolean exportDocumentLinks) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, ConfigurationItemNotFoundException, NotAllowedException, EntityConstraintException, PartMasterNotFoundException, WorkspaceNotEnabledException {
 
-        User user = userManager.checkWorkspaceReadAccess(workspaceId);
+        userManager.checkWorkspaceReadAccess(workspaceId);
         Map<String, Set<BinaryResource>> result = new HashMap<>();
 
         ConfigurationItem ci = configurationItemDAO.loadConfigurationItem(ciKey);
@@ -3032,7 +3034,7 @@ public class ProductManagerBean implements IProductManagerLocal {
             }
         };
 
-        psFilterVisitor.visit(user, psFilter, root, -1, callbacks);
+        psFilterVisitor.visit(workspaceId, psFilter, root, -1, callbacks);
 
         return result;
     }
@@ -3147,7 +3149,7 @@ public class ProductManagerBean implements IProductManagerLocal {
             }
         };
 
-        psFilterVisitor.visit(user, filter, root, -1, callbacks);
+        psFilterVisitor.visit(workspaceId, filter, root, -1, callbacks);
 
         return rows;
     }
@@ -3195,12 +3197,8 @@ public class ProductManagerBean implements IProductManagerLocal {
         DocumentRevision documentRevision = documentRevisionDAO.loadDocR(docKey);
 
         List<PathDataIteration> pathDataIterations = documentLinkDAO.getInversefindPathData(documentRevision);
-        Set<PathDataMaster> productInstanceMasterSet = new HashSet<>();
-        for (PathDataIteration pathDataIteration : pathDataIterations) {
-            productInstanceMasterSet.add(pathDataIteration.getPathDataMaster());
-
-        }
-        return productInstanceMasterSet;
+        return pathDataIterations.stream()
+                .map(PathDataIteration::getPathDataMaster).collect(Collectors.toSet());
     }
 
     @RolesAllowed({UserGroupMapping.REGULAR_USER_ROLE_ID})
@@ -3243,7 +3241,7 @@ public class ProductManagerBean implements IProductManagerLocal {
 
         ci.addPathToPathLink(pathToPathLink);
 
-        checkCyclicPathToPathLink(ci, pathToPathLink, user, new ArrayList<>());
+        checkCyclicPathToPathLink(ci, pathToPathLink, new ArrayList<>());
 
         return pathToPathLink;
     }
@@ -3401,7 +3399,7 @@ public class ProductManagerBean implements IProductManagerLocal {
         return partRs.toArray(new PartRevision[partRs.size()]);
     }
 
-    private void checkCyclicPathToPathLink(ConfigurationItem ci, PathToPathLink startLink, User user, List<PathToPathLink> visitedLinks) throws PathToPathCyclicException {
+    private void checkCyclicPathToPathLink(ConfigurationItem ci, PathToPathLink startLink, List<PathToPathLink> visitedLinks) throws PathToPathCyclicException {
 
         List<PathToPathLink> nextPathToPathLinks = pathToPathLinkDAO.getNextPathToPathLinkInProduct(ci, startLink);
         for (PathToPathLink nextPathToPathLink : nextPathToPathLinks) {
@@ -3409,7 +3407,7 @@ public class ProductManagerBean implements IProductManagerLocal {
                 throw new PathToPathCyclicException();
             }
             visitedLinks.add(nextPathToPathLink);
-            checkCyclicPathToPathLink(ci, startLink, user, visitedLinks);
+            checkCyclicPathToPathLink(ci, startLink, visitedLinks);
         }
     }
 

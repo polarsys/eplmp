@@ -12,7 +12,6 @@
 
 package org.polarsys.eplmp.server.configuration.filter;
 
-import org.polarsys.eplmp.core.common.User;
 import org.polarsys.eplmp.core.configuration.ProductStructureFilter;
 import org.polarsys.eplmp.core.product.*;
 
@@ -32,25 +31,10 @@ import java.util.List;
 
 public class LatestReleasedPSFilter implements ProductStructureFilter, Serializable {
 
-    private User user;
     private boolean diverge = false;
 
-    public LatestReleasedPSFilter() {
-    }
-
-    public LatestReleasedPSFilter(User user) {
-        this.user = user;
-    }
-    public LatestReleasedPSFilter(User user, boolean diverge) {
-        this.user = user;
+    public LatestReleasedPSFilter(boolean diverge) {
         this.diverge = diverge;
-    }
-
-    public User getUser() {
-        return user;
-    }
-    public void setUser(User user) {
-        this.user = user;
     }
 
     @Override

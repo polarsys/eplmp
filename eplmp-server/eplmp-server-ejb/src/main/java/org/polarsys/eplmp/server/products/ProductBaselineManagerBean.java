@@ -26,9 +26,12 @@ import org.polarsys.eplmp.core.services.IUserManagerLocal;
 import org.polarsys.eplmp.core.util.Tools;
 import org.polarsys.eplmp.server.configuration.PSFilterVisitor;
 import org.polarsys.eplmp.server.configuration.PSFilterVisitorCallbacks;
-import org.polarsys.eplmp.server.configuration.filter.LatestPSFilter;
+import org.polarsys.eplmp.server.configuration.filter.LatestCheckedInPSFilter;
 import org.polarsys.eplmp.server.configuration.filter.ReleasedPSFilter;
+import org.polarsys.eplmp.server.configuration.spec.DateBasedEffectivityConfigSpec;
+import org.polarsys.eplmp.server.configuration.spec.LotBasedEffectivityConfigSpec;
 import org.polarsys.eplmp.server.configuration.spec.ProductBaselineCreationConfigSpec;
+import org.polarsys.eplmp.server.configuration.spec.SerialNumberBasedEffectivityConfigSpec;
 import org.polarsys.eplmp.server.dao.*;
 import org.polarsys.eplmp.server.factory.ACLFactory;
 
@@ -39,6 +42,7 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @DeclareRoles({UserGroupMapping.REGULAR_USER_ROLE_ID, UserGroupMapping.ADMIN_ROLE_ID})
 @Local(IProductBaselineManagerLocal.class)
@@ -86,9 +90,17 @@ public class ProductBaselineManagerBean implements IProductBaselineManagerLocal 
 
     @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
     @Override
-    public ProductBaseline createBaseline(ConfigurationItemKey ciKey, String name, ProductBaselineType pType, String description, List<PartIterationKey> partIterationKeys, List<String> substituteLinks, List<String> optionalUsageLinks) throws UserNotFoundException, AccessRightException, WorkspaceNotFoundException, ConfigurationItemNotFoundException, NotAllowedException, EntityConstraintException, PartMasterNotFoundException, CreationException, BaselineNotFoundException, PathToPathLinkAlreadyExistsException, WorkspaceNotEnabledException {
+    public ProductBaseline createBaseline(ConfigurationItemKey ciKey, String name, ProductBaselineType pType,
+                                          String description, List<PartIterationKey> partIterationKeys,
+                                          List<String> substituteLinks, List<String> optionalUsageLinks,
+                                          Date effectiveDate, String effectiveSerialNumber, String effectiveLotId,
+                                          boolean dryRun)
+            throws UserNotFoundException, AccessRightException, WorkspaceNotFoundException, ConfigurationItemNotFoundException,
+            NotAllowedException, EntityConstraintException, PartMasterNotFoundException, CreationException, BaselineNotFoundException,
+            PathToPathLinkAlreadyExistsException, WorkspaceNotEnabledException {
 
-        User user = userManager.checkWorkspaceWriteAccess(ciKey.getWorkspace());
+        String workspaceId = ciKey.getWorkspace();
+        User user = userManager.checkWorkspaceWriteAccess(workspaceId);
 
         if (null == name || name.isEmpty()) {
             throw new NotAllowedException("NotAllowedException61");
@@ -96,16 +108,36 @@ public class ProductBaselineManagerBean implements IProductBaselineManagerLocal 
 
         ConfigurationItem configurationItem = configurationItemDAO.loadConfigurationItem(ciKey);
 
-        List<PartIteration> partIterations = new ArrayList<>();
-        for (PartIterationKey piKey : partIterationKeys) {
-            partIterations.add(em.find(PartIteration.class, piKey));
-        }
-
-        ProductBaselineCreationConfigSpec filter = new ProductBaselineCreationConfigSpec(user, pType, partIterations, substituteLinks, optionalUsageLinks);
-
         List<String> visitedPaths = new ArrayList<>();
 
-        psFilterVisitor.visit(user, filter, configurationItem.getDesignItem(), -1, new PSFilterVisitorCallbacks() {
+        ProductConfigSpec filter;
+
+        switch(pType){
+
+            case EFFECTIVE_DATE:
+                filter = new DateBasedEffectivityConfigSpec(effectiveDate, configurationItem);
+            break;
+
+            case EFFECTIVE_SERIAL_NUMBER:
+                filter = new SerialNumberBasedEffectivityConfigSpec(effectiveSerialNumber, configurationItem);
+            break;
+
+            case EFFECTIVE_LOT_ID:
+                filter = new LotBasedEffectivityConfigSpec(effectiveLotId, configurationItem);
+            break;
+
+            case LATEST:
+            case RELEASED:
+            default:
+                List<PartIteration> partIterations = partIterationKeys.stream()
+                        .map(piKey -> em.find(PartIteration.class, piKey))
+                        .filter(Objects::nonNull)
+                        .collect(Collectors.toList());
+                filter = new ProductBaselineCreationConfigSpec(pType, partIterations, substituteLinks, optionalUsageLinks);
+                break;
+        }
+
+        psFilterVisitor.visit(workspaceId, filter, configurationItem.getDesignItem(), -1, new PSFilterVisitorCallbacks() {
             @Override
             public void onIndeterminateVersion(PartMaster partMaster, List<PartIteration> partIterations) throws NotAllowedException {
                 throw new NotAllowedException("NotAllowedException48");
@@ -139,8 +171,10 @@ public class ProductBaselineManagerBean implements IProductBaselineManagerLocal 
         DocumentCollection documentCollection = baseline.getDocumentCollection();
         PartCollection partCollection = baseline.getPartCollection();
 
-        partCollectionDAO.createPartCollection(partCollection);
-        documentCollectionDAO.createDocumentCollection(documentCollection);
+        if(!dryRun) {
+            partCollectionDAO.createPartCollection(partCollection);
+            documentCollectionDAO.createDocumentCollection(documentCollection);
+        }
 
         partCollection.setCreationDate(new Date());
         partCollection.setAuthor(user);
@@ -161,13 +195,17 @@ public class ProductBaselineManagerBean implements IProductBaselineManagerLocal 
         baseline.getSubstituteLinks().addAll(filter.getRetainedSubstituteLinks());
         baseline.getOptionalUsageLinks().addAll(filter.getRetainedOptionalUsageLinks());
 
-        productBaselineDAO.createBaseline(baseline);
+        if(!dryRun) {
+            productBaselineDAO.createBaseline(baseline);
+        }
 
         // Copy PathToPathLink list to baseline
         List<PathToPathLink> links = pathToPathLinkDAO.getPathToPathLinkFromPathList(configurationItem, visitedPaths);
         for (PathToPathLink link : links) {
             PathToPathLink clone = link.clone();
-            pathToPathLinkDAO.createPathToPathLink(clone);
+            if(!dryRun) {
+                pathToPathLinkDAO.createPathToPathLink(clone);
+            }
             baseline.addPathToPathLink(clone);
         }
 
@@ -236,20 +274,21 @@ public class ProductBaselineManagerBean implements IProductBaselineManagerLocal 
     @Override
     public List<PathChoice> getBaselineCreationPathChoices(ConfigurationItemKey ciKey, ProductBaselineType type) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, ConfigurationItemNotFoundException, PartMasterNotFoundException, NotAllowedException, EntityConstraintException, WorkspaceNotEnabledException {
 
-        User user = userManager.checkWorkspaceReadAccess(ciKey.getWorkspace());
+        String workspaceId = ciKey.getWorkspace();
+        userManager.checkWorkspaceReadAccess(workspaceId);
         ConfigurationItem configurationItem = configurationItemDAO.loadConfigurationItem(ciKey);
 
         ProductStructureFilter filter;
 
         if (type == null || type.equals(ProductBaselineType.RELEASED)) {
-            filter = new ReleasedPSFilter(user, true);
+            filter = new ReleasedPSFilter(true);
         } else {
-            filter = new LatestPSFilter(user, true);
+            filter = new LatestCheckedInPSFilter(true);
         }
 
         List<PathChoice> choices = new ArrayList<>();
 
-        psFilterVisitor.visit(user, filter, configurationItem.getDesignItem(), -1, new PSFilterVisitorCallbacks() {
+        psFilterVisitor.visit(workspaceId, filter, configurationItem.getDesignItem(), -1, new PSFilterVisitorCallbacks() {
 
             @Override
             public void onIndeterminatePath(List<PartLink> pCurrentPath, List<PartIteration> pCurrentPathPartIterations) {
@@ -278,15 +317,16 @@ public class ProductBaselineManagerBean implements IProductBaselineManagerLocal 
     @Override
     public List<PartIteration> getBaselineCreationVersionsChoices(ConfigurationItemKey ciKey) throws ConfigurationItemNotFoundException, UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, PartMasterNotFoundException, NotAllowedException, EntityConstraintException, WorkspaceNotEnabledException {
 
-        User user = userManager.checkWorkspaceReadAccess(ciKey.getWorkspace());
+        String workspaceId = ciKey.getWorkspace();
+        userManager.checkWorkspaceReadAccess(workspaceId);
 
         ConfigurationItem configurationItem = configurationItemDAO.loadConfigurationItem(ciKey);
 
         Set<PartIteration> parts = new HashSet<>();
 
-        ProductStructureFilter filter = new ReleasedPSFilter(user, true);
+        ProductStructureFilter filter = new ReleasedPSFilter(true);
 
-        psFilterVisitor.visit(user, filter, configurationItem.getDesignItem(), -1, new PSFilterVisitorCallbacks() {
+        psFilterVisitor.visit(workspaceId, filter, configurationItem.getDesignItem(), -1, new PSFilterVisitorCallbacks() {
             @Override
             public void onIndeterminateVersion(PartMaster partMaster, List<PartIteration> partIterations) throws NotAllowedException {
                 parts.addAll(partIterations);
@@ -441,41 +481,6 @@ public class ProductBaselineManagerBean implements IProductBaselineManagerLocal 
         }
     }
 
-    private User checkProductConfigurationWriteAccess(String workspaceId, ProductConfiguration productConfiguration, User user) throws UserNotFoundException, AccessRightException, WorkspaceNotFoundException, WorkspaceNotEnabledException {
-        if (user.isAdministrator()) {
-            // Check if it is the workspace's administrator
-            return user;
-        }
-        if (productConfiguration.getAcl() == null) {
-            // Check if the item haven't ACL
-            return userManager.checkWorkspaceWriteAccess(workspaceId);
-        } else if (productConfiguration.getAcl().hasWriteAccess(user)) {
-            // Check if there is a write access
-            return user;
-        } else {
-            // Else throw a AccessRightException
-            throw new AccessRightException(user);
-        }
-    }
-
-
-    private User checkProductConfigurationReadAccess(String workspaceId, ProductConfiguration productConfiguration, User user) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, AccessRightException, WorkspaceNotEnabledException {
-        if (user.isAdministrator()) {
-            // Check if it is the workspace's administrator
-            return user;
-        }
-        if (productConfiguration.getAcl() == null) {
-            // Check if the item haven't ACL
-            return userManager.checkWorkspaceReadAccess(workspaceId);
-        } else if (productConfiguration.getAcl().hasReadAccess(user)) {
-            // Check if there is a write access
-            return user;
-        } else {
-            // Else throw a AccessRightException
-            throw new AccessRightException(user);
-        }
-    }
-
     @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
     @Override
     public void removeACLFromConfiguration(ConfigurationItemKey ciKey, int productConfigurationId) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, ProductConfigurationNotFoundException, AccessRightException, WorkspaceNotEnabledException {
@@ -522,6 +527,41 @@ public class ProductBaselineManagerBean implements IProductBaselineManagerLocal 
         userManager.checkWorkspaceReadAccess(workspaceId);
         ProductBaseline baseline = productBaselineDAO.loadBaseline(baselineId);
         return pathToPathLinkDAO.getDistinctPathToPathLinkTypes(baseline);
+    }
+
+    private User checkProductConfigurationWriteAccess(String workspaceId, ProductConfiguration productConfiguration, User user) throws UserNotFoundException, AccessRightException, WorkspaceNotFoundException, WorkspaceNotEnabledException {
+        if (user.isAdministrator()) {
+            // Check if it is the workspace's administrator
+            return user;
+        }
+        if (productConfiguration.getAcl() == null) {
+            // Check if the item haven't ACL
+            return userManager.checkWorkspaceWriteAccess(workspaceId);
+        } else if (productConfiguration.getAcl().hasWriteAccess(user)) {
+            // Check if there is a write access
+            return user;
+        } else {
+            // Else throw a AccessRightException
+            throw new AccessRightException(user);
+        }
+    }
+
+
+    private User checkProductConfigurationReadAccess(String workspaceId, ProductConfiguration productConfiguration, User user) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, AccessRightException, WorkspaceNotEnabledException {
+        if (user.isAdministrator()) {
+            // Check if it is the workspace's administrator
+            return user;
+        }
+        if (productConfiguration.getAcl() == null) {
+            // Check if the item haven't ACL
+            return userManager.checkWorkspaceReadAccess(workspaceId);
+        } else if (productConfiguration.getAcl().hasReadAccess(user)) {
+            // Check if there is a write access
+            return user;
+        } else {
+            // Else throw a AccessRightException
+            throw new AccessRightException(user);
+        }
     }
 
 }

@@ -18,7 +18,7 @@ import org.polarsys.eplmp.core.product.ConfigurationItemKey;
 import org.polarsys.eplmp.core.security.UserGroupMapping;
 import org.polarsys.eplmp.core.services.IPSFilterManagerLocal;
 import org.polarsys.eplmp.core.services.IUserManagerLocal;
-import org.polarsys.eplmp.server.configuration.filter.LatestPSFilter;
+import org.polarsys.eplmp.server.configuration.filter.LatestCheckedInPSFilter;
 import org.polarsys.eplmp.server.configuration.filter.LatestReleasedPSFilter;
 import org.polarsys.eplmp.server.configuration.filter.ReleasedPSFilter;
 import org.polarsys.eplmp.server.configuration.filter.WIPPSFilter;
@@ -62,7 +62,7 @@ public class PSFilterManagerBean implements IPSFilterManagerLocal {
         ProductInstanceMasterKey productInstanceMasterKey = new ProductInstanceMasterKey(serialNumber, ciKey);
         ProductInstanceMaster productIM = productInstanceMasterDAO.loadProductInstanceMaster(productInstanceMasterKey);
         ProductInstanceIteration productII = productIM.getLastIteration();
-        return new ProductInstanceConfigSpec(productII, user);
+        return new ProductInstanceConfigSpec(productII);
     }
 
     @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
@@ -84,13 +84,13 @@ public class PSFilterManagerBean implements IPSFilterManagerLocal {
                 filter = new WIPPSFilter(user, diverge);
                 break;
             case "latest":
-                filter = new LatestPSFilter(user, diverge);
+                filter = new LatestCheckedInPSFilter(diverge);
                 break;
             case "released":
-                filter = new ReleasedPSFilter(user, diverge);
+                filter = new ReleasedPSFilter(diverge);
                 break;
             case "latest-released":
-                filter = new LatestReleasedPSFilter(user, diverge);
+                filter = new LatestReleasedPSFilter(diverge);
                 break;
             default:
                 if (filterType.startsWith("pi-")) {

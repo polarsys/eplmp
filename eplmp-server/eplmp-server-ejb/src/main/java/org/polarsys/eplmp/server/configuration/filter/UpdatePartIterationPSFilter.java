@@ -12,7 +12,6 @@
 
 package org.polarsys.eplmp.server.configuration.filter;
 
-import org.polarsys.eplmp.core.common.User;
 import org.polarsys.eplmp.core.configuration.ProductStructureFilter;
 import org.polarsys.eplmp.core.product.*;
 
@@ -31,22 +30,12 @@ import java.util.List;
  */
 public class UpdatePartIterationPSFilter implements ProductStructureFilter, Serializable {
 
-    private User user;
     private PartMasterKey rootKey;
     private PartIteration partIteration;
 
-    public UpdatePartIterationPSFilter(User user, PartIteration partIteration) {
-        this.user = user;
+    public UpdatePartIterationPSFilter(PartIteration partIteration) {
         this.partIteration = partIteration;
         rootKey = partIteration.getKey().getPartRevision().getPartMaster();
-    }
-
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
     }
 
     @Override

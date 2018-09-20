@@ -17,9 +17,7 @@ import org.polarsys.eplmp.core.product.PartLink;
 import org.polarsys.eplmp.core.product.PartMaster;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 /**
  * A ConfigSpec is used to select for each {@link PartMaster}s
@@ -36,31 +34,38 @@ import java.util.List;
  */
 public abstract class ProductConfigSpec implements ProductStructureFilter, Serializable{
 
+    protected Set<PartIteration> retainedPartIterations = new HashSet<>();
+    protected Set<String> retainedSubstituteLinks = new HashSet<>();
+    protected Set<String> retainedOptionalUsageLinks = new HashSet<>();
+
     public ProductConfigSpec() {
     }
 
     // Config specs are strict and returns a single value
     // Do not override them
-    @Override
     public final List<PartLink> filter(List<PartLink> path) {
         PartLink partLink = filterPartLink(path);
-        if(partLink != null){
-            return Arrays.asList(partLink);
-        }
-        return new ArrayList<>();
+        return partLink != null ? Collections.singletonList(partLink) : new ArrayList<>();
     }
 
-    @Override
     public final List<PartIteration> filter(PartMaster partMaster) {
         PartIteration partIteration = filterPartIteration(partMaster);
-        if(partIteration != null){
-            return Arrays.asList(partIteration);
-        }
-        return new ArrayList<>();
+        return partIteration != null ? Collections.singletonList(partIteration) : new ArrayList<>();
     }
 
     // All config specs must implement a strict filter
     public abstract PartIteration filterPartIteration(PartMaster partMaster);
     public abstract PartLink filterPartLink(List<PartLink> path);
 
+    public Set<PartIteration> getRetainedPartIterations() {
+        return retainedPartIterations;
+    }
+
+    public Set<String> getRetainedSubstituteLinks() {
+        return retainedSubstituteLinks;
+    }
+
+    public Set<String> getRetainedOptionalUsageLinks() {
+        return retainedOptionalUsageLinks;
+    }
 }

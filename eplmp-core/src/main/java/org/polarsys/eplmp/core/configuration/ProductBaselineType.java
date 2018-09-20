@@ -21,5 +21,5 @@ import org.polarsys.eplmp.core.product.PartIteration;
  * @author Morgan Guimard
  */
 public enum ProductBaselineType {
-    LATEST, RELEASED
+    LATEST, RELEASED, EFFECTIVE_DATE, EFFECTIVE_SERIAL_NUMBER, EFFECTIVE_LOT_ID
 }

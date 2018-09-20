@@ -10,16 +10,13 @@
   *******************************************************************************/
 package org.polarsys.eplmp.server.configuration.spec;
 
-import org.polarsys.eplmp.core.common.User;
 import org.polarsys.eplmp.core.configuration.ProductBaselineType;
 import org.polarsys.eplmp.core.configuration.ProductConfigSpec;
 import org.polarsys.eplmp.core.product.*;
 import org.polarsys.eplmp.core.util.Tools;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 /**
  * @author Morgan Guimard
@@ -29,32 +26,14 @@ public class ProductBaselineCreationConfigSpec extends ProductConfigSpec {
     private List<PartIteration> partIterations;
     private List<String> substituteLinks;
     private List<String> optionalUsageLinks;
-
-    private Set<PartIteration> retainedPartIterations = new HashSet<>();
-    private Set<String> retainedSubstituteLinks = new HashSet<>();
-    private Set<String> retainedOptionalUsageLinks = new HashSet<>();
-
     private ProductBaselineType type;
 
-    private User user;
 
-    public ProductBaselineCreationConfigSpec() {
-    }
-
-    public ProductBaselineCreationConfigSpec(User user, ProductBaselineType type, List<PartIteration> partIterations, List<String> substituteLinks, List<String> optionalUsageLinks) {
-        this.user = user;
+    public ProductBaselineCreationConfigSpec(ProductBaselineType type, List<PartIteration> partIterations, List<String> substituteLinks, List<String> optionalUsageLinks) {
         this.partIterations = partIterations;
         this.substituteLinks = substituteLinks;
         this.optionalUsageLinks = optionalUsageLinks;
         this.type = type;
-    }
-
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
     }
 
     @Override
@@ -97,8 +76,10 @@ public class ProductBaselineCreationConfigSpec extends ProductConfigSpec {
 
         PartLink nominalLink = path.get(path.size() - 1);
 
-        if (nominalLink.isOptional() && optionalUsageLinks.contains(Tools.getPathAsString(path))) {
-            retainedOptionalUsageLinks.add(Tools.getPathAsString(path));
+        String pathAsString = Tools.getPathAsString(path);
+
+        if (nominalLink.isOptional() && optionalUsageLinks.contains(pathAsString)) {
+            retainedOptionalUsageLinks.add(pathAsString);
         }
 
         for (PartSubstituteLink substituteLink : nominalLink.getSubstitutes()) {
@@ -106,8 +87,9 @@ public class ProductBaselineCreationConfigSpec extends ProductConfigSpec {
             List<PartLink> substitutePath = new ArrayList<>(path);
             substitutePath.set(substitutePath.size() - 1, substituteLink);
 
-            if (substituteLinks.contains(Tools.getPathAsString(substitutePath))) {
-                retainedSubstituteLinks.add(Tools.getPathAsString(substitutePath));
+            String substitutePathAsString = Tools.getPathAsString(substitutePath);
+            if (substituteLinks.contains(substitutePathAsString)) {
+                retainedSubstituteLinks.add(substitutePathAsString);
                 return substituteLink;
             }
 
@@ -116,16 +98,4 @@ public class ProductBaselineCreationConfigSpec extends ProductConfigSpec {
         return nominalLink;
     }
 
-
-    public Set<PartIteration> getRetainedPartIterations() {
-        return retainedPartIterations;
-    }
-
-    public Set<String> getRetainedSubstituteLinks() {
-        return retainedSubstituteLinks;
-    }
-
-    public Set<String> getRetainedOptionalUsageLinks() {
-        return retainedOptionalUsageLinks;
-    }
 }

@@ -32,7 +32,6 @@ public abstract class EffectivityConfigSpec extends ProductConfigSpec {
     protected ConfigurationItem configurationItem;
     protected ProductConfiguration configuration;
 
-
     public EffectivityConfigSpec(ConfigurationItem configurationItem) {
         this.configurationItem=configurationItem;
     }
@@ -42,7 +41,6 @@ public abstract class EffectivityConfigSpec extends ProductConfigSpec {
         this.configuration=configuration;
     }
 
-
     public ConfigurationItem getConfigurationItem() {
         return configurationItem;
     }
@@ -51,29 +49,45 @@ public abstract class EffectivityConfigSpec extends ProductConfigSpec {
     public PartIteration filterPartIteration(PartMaster partMaster) {
         List<PartRevision> revisions = partMaster.getPartRevisions();
         PartRevision pr=null;
+
         for(int i=revisions.size()-1;i>=0;i--){
             pr=revisions.get(i);
-            if(isEffective(pr))
+            if(isEffective(pr)) {
                 break;
-            else
-                pr=null;
+            } else {
+                pr = null;
+            }
         }
-        return pr==null?null:pr.getLastIteration();
+
+        if(pr != null){
+            PartIteration lastIteration = pr.getLastIteration();
+            retainedPartIterations.add(pr.getLastIteration());
+            return lastIteration;
+        }
+
+        return null;
     }
 
     @Override
     public PartLink filterPartLink(List<PartLink> path) {
         if(configuration !=null){
             PartLink nominalLink = path.get(path.size()-1);
-            if(nominalLink.isOptional() && !configuration.isOptionalLinkRetained(Tools.getPathAsString(path))){
-                return null;
-            }
-            for(PartSubstituteLink substituteLink:nominalLink.getSubstitutes()){
 
+            if(nominalLink.isOptional()){
+                String pathAsString = Tools.getPathAsString(path);
+                if(!configuration.isOptionalLinkRetained(pathAsString)) {
+                    return null;
+                }
+                retainedOptionalUsageLinks.add(pathAsString);
+            }
+
+            for(PartSubstituteLink substituteLink:nominalLink.getSubstitutes()){
                 List<PartLink> substitutePath = new ArrayList<>(path);
                 substitutePath.set(substitutePath.size()-1,substituteLink);
 
-                if(configuration.hasSubstituteLink(Tools.getPathAsString(substitutePath))){
+                String substitutePathAsString = Tools.getPathAsString(substitutePath);
+                if(configuration.hasSubstituteLink(substitutePathAsString)){
+                    retainedSubstituteLinks.add(substitutePathAsString);
                     return substituteLink;
                 }
             }

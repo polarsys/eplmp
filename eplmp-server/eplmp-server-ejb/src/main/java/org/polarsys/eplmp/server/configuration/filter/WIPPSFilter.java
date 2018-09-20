@@ -17,11 +17,11 @@ import org.polarsys.eplmp.core.configuration.ProductStructureFilter;
 import org.polarsys.eplmp.core.product.PartIteration;
 import org.polarsys.eplmp.core.product.PartLink;
 import org.polarsys.eplmp.core.product.PartMaster;
-import org.polarsys.eplmp.core.product.PartSubstituteLink;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * A {@link org.polarsys.eplmp.core.configuration.ProductStructureFilter} implementation
@@ -34,23 +34,13 @@ public class WIPPSFilter implements ProductStructureFilter, Serializable {
     private User user;
     private boolean diverge = false;
 
-    public WIPPSFilter() {
-    }
-
     public WIPPSFilter(User user) {
         this.user = user;
     }
+
     public WIPPSFilter(User user, boolean diverge) {
         this.user = user;
         this.diverge = diverge;
-    }
-
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
     }
 
     @Override
@@ -72,9 +62,7 @@ public class WIPPSFilter implements ProductStructureFilter, Serializable {
         links.add(link);
 
         if(diverge){
-            for(PartSubstituteLink substituteLink: link.getSubstitutes()){
-                links.add(substituteLink);
-            }
+            links.addAll(link.getSubstitutes().stream().collect(Collectors.toList()));
         }
 
         return links;

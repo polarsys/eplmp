@@ -30,6 +30,7 @@ import org.polarsys.eplmp.server.rest.dto.LightPartLinkListDTO;
 import org.polarsys.eplmp.server.rest.dto.LightPathToPathLinkDTO;
 import org.polarsys.eplmp.server.rest.dto.PathToPathLinkDTO;
 import org.polarsys.eplmp.server.rest.dto.baseline.BaselinedPartDTO;
+import org.polarsys.eplmp.server.rest.dto.baseline.ProductBaselineCreationDTO;
 import org.polarsys.eplmp.server.rest.dto.baseline.ProductBaselineDTO;
 
 import javax.annotation.PostConstruct;
@@ -42,7 +43,9 @@ import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author Taylor LABEJOF
@@ -125,7 +128,8 @@ public class ProductBaselinesResource {
     @Produces(MediaType.APPLICATION_JSON)
     public ProductBaselineDTO createProductBaseline(
             @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
-            @ApiParam(required = true, value = "Product baseline to create") ProductBaselineDTO productBaselineDTO)
+            @ApiParam(required = true, value = "Product baseline to create") ProductBaselineCreationDTO productBaselineDTO,
+            @ApiParam(required = false, value = "Dry run flag") @QueryParam("dryRun") boolean dryRun)
             throws UserNotActiveException, EntityNotFoundException, NotAllowedException, AccessRightException,
             PartRevisionNotReleasedException, EntityConstraintException, CreationException,
             EntityAlreadyExistsException, WorkspaceNotEnabledException {
@@ -137,18 +141,24 @@ public class ProductBaselinesResource {
         ProductBaselineType type = productBaselineDTO.getType();
 
         List<BaselinedPartDTO> baselinedPartsDTO = productBaselineDTO.getBaselinedParts();
-        List<PartIterationKey> partIterationKeys = new ArrayList<>();
-        for (BaselinedPartDTO part : baselinedPartsDTO) {
-            partIterationKeys.add(new PartIterationKey(workspaceId, part.getNumber(), part.getVersion(), part.getIteration()));
-        }
+        List<PartIterationKey> partIterationKeys = baselinedPartsDTO.stream()
+                .map(part -> new PartIterationKey(workspaceId, part.getNumber(), part.getVersion(), part.getIteration())).collect(Collectors.toList());
 
-        ProductBaseline baseline = productBaselineService.createBaseline(ciKey, name, type, description, partIterationKeys, productBaselineDTO.getSubstituteLinks(), productBaselineDTO.getOptionalUsageLinks());
+        ProductBaseline baseline = productBaselineService.createBaseline(ciKey, name, type, description, partIterationKeys,
+                productBaselineDTO.getSubstituteLinks(), productBaselineDTO.getOptionalUsageLinks(),
+                productBaselineDTO.getEffectiveDate(), productBaselineDTO.getEffectiveSerialNumber(), productBaselineDTO.getEffectiveLotId(), dryRun);
+
         ProductBaselineDTO dto = mapper.map(baseline, ProductBaselineDTO.class);
+
         dto.setConfigurationItemLatestRevision(baseline.getConfigurationItem().getDesignItem().getLastRevision().getVersion());
-        dto.setHasObsoletePartRevisions(!productBaselineService.getObsoletePartRevisionsInBaseline(workspaceId, baseline.getId()).isEmpty());
+
+        if(!dryRun) {
+            dto.setHasObsoletePartRevisions(!productBaselineService.getObsoletePartRevisionsInBaseline(workspaceId, baseline.getId()).isEmpty());
+        }
 
         return dto;
     }
+
 
     @DELETE
     @ApiOperation(value = "Delete product-baseline",

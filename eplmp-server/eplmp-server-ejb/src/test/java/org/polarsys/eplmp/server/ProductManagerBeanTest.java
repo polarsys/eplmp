@@ -270,7 +270,7 @@ public class ProductManagerBeanTest {
     public void checkCyclicDetection() throws EntityConstraintException, PartMasterNotFoundException, UserNotFoundException, WorkspaceNotFoundException, UserNotActiveException, NotAllowedException, WorkspaceNotEnabledException {
         cyclicAssemblyRule = new CyclicAssemblyRule("user1");
         Mockito.when(userManager.checkWorkspaceReadAccess(Matchers.anyString())).thenReturn(cyclicAssemblyRule.getUser());
-        Mockito.doThrow(EntityConstraintException.class).when(psFilterVisitor).visit(any(User.class), any(ProductStructureFilter.class), any(PartMaster.class), Mockito.eq(-1), any(PSFilterVisitorCallbacks.class));
+        Mockito.doThrow(EntityConstraintException.class).when(psFilterVisitor).visit(any(String.class), any(ProductStructureFilter.class), any(PartMaster.class), Mockito.eq(-1), any(PSFilterVisitorCallbacks.class));
 
         thrown.expect(EntityConstraintException.class);
 

@@ -51,6 +51,7 @@ public class DateBasedEffectivityConfigSpec extends EffectivityConfigSpec {
         }else
             return false;
     }
+
     private boolean isEffective(DateBasedEffectivity dateEff){
         ConfigurationItem ci = dateEff.getConfigurationItem();
         if(ci != null && !ci.equals(configurationItem))
@@ -64,7 +65,6 @@ public class DateBasedEffectivityConfigSpec extends EffectivityConfigSpec {
 
         return true;
     }
-
 
     public Date getDate() {
         return date;
