@@ -45,10 +45,11 @@ public class BinaryResourceDownloadResponseBuilder {
      * @param binaryResourceDownloadMeta The header parameters for the binary content download.
      * @param range                      The string of the queried range. Null if no range are specified
      * @param isToBeCached               Boolean to set whether we should define maxage of cache control
+     * @param originsAllowed             The allowed origins for Content-Security-Policy
      * @return A response builder with the header & the content.
      * @throws RequestedRangeNotSatisfiableException If the range is not satisfiable.
      */
-    public static Response prepareResponse(InputStream binaryContentInputStream, BinaryResourceDownloadMeta binaryResourceDownloadMeta, String range, boolean isToBeCached)
+    public static Response prepareResponse(InputStream binaryContentInputStream, BinaryResourceDownloadMeta binaryResourceDownloadMeta, String range, boolean isToBeCached, String originsAllowed)
             throws RequestedRangeNotSatisfiableException {
 
         Response.ResponseBuilder responseBuilder;
@@ -66,6 +67,13 @@ public class BinaryResourceDownloadResponseBuilder {
             }
         } else {
             responseBuilder = prepareStreamingDownloadResponse(binaryResourceDownloadMeta, binaryContentInputStream, range);
+        }
+
+        if(originsAllowed != null && !originsAllowed.isEmpty()){
+
+            String scriptPolicy =  "script-src 'self' "+originsAllowed+";";
+            String framePolicy = "frame-src 'self' "+originsAllowed+";";
+            responseBuilder.header("Content-Security-Policy",scriptPolicy+framePolicy);
         }
 
         responseBuilder = applyCachePolicyToResponse(responseBuilder, binaryResourceDownloadMeta.getETag(), binaryResourceDownloadMeta.getLastModified(), isToBeCached);
