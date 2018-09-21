@@ -145,7 +145,7 @@ public class ProductBaselineManagerBean implements IProductBaselineManagerLocal 
 
             @Override
             public void onUnresolvedVersion(PartMaster partMaster) throws NotAllowedException {
-                throw new NotAllowedException("NotAllowedException49");
+                throw new NotAllowedException("NotAllowedException49", partMaster.getNumber());
             }
 
             @Override
