@@ -43,7 +43,6 @@ import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -253,10 +252,11 @@ public class ProductBaselinesResource {
         int maxResults = 8;
         List<BaselinedPart> baselinedPartList = productBaselineService.getBaselinedPartWithReference(baselineId, q, maxResults);
 
-        List<BaselinedPartDTO> baselinedPartDTOList = new ArrayList<>();
-        for (BaselinedPart baselinedPart : baselinedPartList) {
-            baselinedPartDTOList.add(Tools.mapBaselinedPartToBaselinedPartDTO(baselinedPart));
-        }
+        List<BaselinedPartDTO> baselinedPartDTOList = baselinedPartList.stream()
+                .map(BaselinedPart::getTargetPart)
+                .map(Tools::mapPartIterationToBaselinedPart)
+                .collect(Collectors.toList());
+
         return Response.ok(new GenericEntity<List<BaselinedPartDTO>>((List<BaselinedPartDTO>) baselinedPartDTOList) {
         }).build();
     }

@@ -221,10 +221,6 @@ public class Tools {
         return partIterationDTO;
     }
 
-    public static BaselinedPartDTO mapBaselinedPartToBaselinedPartDTO(BaselinedPart baselinedPart) {
-        return mapPartIterationToBaselinedPart(baselinedPart.getTargetPart());
-    }
-
     public static List<BaselinedDocumentDTO> mapBaselinedDocumentsToBaselinedDocumentDTOs(DocumentCollection documentCollection) {
         List<BaselinedDocumentDTO> baselinedDocumentDTOs = new ArrayList<>();
         Map<BaselinedDocumentKey, BaselinedDocument> baselinedDocuments = documentCollection.getBaselinedDocuments();
