@@ -175,10 +175,9 @@ public class PSFilterVisitorTest {
         when(partMaster.getWorkspaceId()).thenReturn(ProductUtil.WORKSPACE_ID);
         when(partMasterDAO.loadPartM(anyObject())).thenReturn(partMaster);
         //## END CONFIGURATION
-        result = null;
         try {
 
-            result = psFilterVisitor.visit(ProductUtil.WORKSPACE_ID, filter, partMaster, -1, callbacks);
+            psFilterVisitor.visit(ProductUtil.WORKSPACE_ID, filter, partMaster, -1, callbacks);
             Assert.fail();
         }catch (EntityConstraintException e) {
 
@@ -187,7 +186,6 @@ public class PSFilterVisitorTest {
             verify(callbacks,times(0)).onOptionalPath(anyListOf(PartLink.class), anyListOf(PartIteration.class));
             //As we've child we must not call onBranchDiscovered
             verify(callbacks, times(0)).onBranchDiscovered(anyListOf(PartLink.class), anyListOf(PartIteration.class));
-            Assert.assertNull(result);
         }
 
         //Ensure mock are clean since theirs last use
