@@ -19,12 +19,11 @@ import org.polarsys.eplmp.core.product.*;
 import org.polarsys.eplmp.server.dao.PartMasterDAO;
 
 import javax.ejb.Stateless;
-import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
 
-@RequestScoped
+@Stateless(name = "PSFilterVisitor")
 public class PSFilterVisitor {
 
     @Inject
@@ -40,48 +39,43 @@ public class PSFilterVisitor {
     /**
      * Start the visitor with given part master
      * */
-
     public Component visit(String workspaceId, ProductStructureFilter pFilter, PartMaster pNodeFrom, Integer pStopAtDepth, PSFilterVisitorCallbacks callbacks) throws PartMasterNotFoundException, EntityConstraintException, NotAllowedException {
+        this.workspaceId = workspaceId;
+        this.filter = pFilter;
+        this.callbacks = callbacks;
 
-        init(workspaceId, pStopAtDepth, pFilter, callbacks);
-        return visit(pNodeFrom,
-                new ArrayList<PartLink>() {{
+        setDepth(pStopAtDepth);
+        List<PartLink> currentPath = new ArrayList<>();
+        List<PartMaster> currentPathParts = new ArrayList<>();
+        List<PartIteration> currentPathPartIterations = new ArrayList<>();
 
-                    add(createVirtualRootLink(pNodeFrom));
-                }},
-                new ArrayList<PartMaster>() {{
+        PartLink virtualLink = createVirtualRootLink(pNodeFrom);
+        currentPathParts.add(pNodeFrom);
+        currentPath.add(virtualLink);
 
-                    add(pNodeFrom);
-                }}
-        );
+        Component component = new Component(pNodeFrom.getAuthor(), pNodeFrom, currentPath, null);
+        List<Component> result = getComponentsRecursively(component, currentPathPartIterations, currentPathParts, currentPath);
+        component.setComponents(result);
+        return component;
     }
 
     /**
      * Start the visitor with given path
      * */
-
     public Component visit(String workspaceId, ProductStructureFilter pFilter, List<PartLink> pStartingPath, Integer pStopAtDepth, PSFilterVisitorCallbacks callbacks) throws PartMasterNotFoundException, EntityConstraintException, NotAllowedException {
-
-        init(workspaceId, pStopAtDepth, pFilter, callbacks);
-        PartMaster rootNode = pStartingPath.get(pStartingPath.size() - 1).getComponent();
-        return visit(rootNode, pStartingPath, new ArrayList<PartMaster>() {{
-
-            add(rootNode);
-        }});
-    }
-
-    private void init(String workspaceId, int stopAtDepth, ProductStructureFilter filter, PSFilterVisitorCallbacks callbacks) {
-
         this.workspaceId = workspaceId;
-        this.filter = filter;
+        this.filter = pFilter;
         this.callbacks = callbacks;
-        setDepth(stopAtDepth);
-    }
 
-    private Component visit(PartMaster pNodeFrom, List<PartLink> pStartingPath, List<PartMaster> currentPathParts) throws NotAllowedException, EntityConstraintException, PartMasterNotFoundException {
+        setDepth(pStopAtDepth);
+        List<PartMaster> currentPathParts = new ArrayList<>();
+        List<PartIteration> currentPathPartIterations = new ArrayList<>();
 
-        Component component = new Component(pNodeFrom.getAuthor(), pNodeFrom, pStartingPath, null);
-        List<Component> result = getComponentsRecursively(component, new ArrayList<>(), currentPathParts, pStartingPath);
+        PartMaster rootNode = pStartingPath.get(pStartingPath.size() - 1).getComponent();
+        currentPathParts.add(rootNode);
+
+        Component component = new Component(rootNode.getAuthor(), rootNode, pStartingPath, null);
+        List<Component> result = getComponentsRecursively(component, currentPathPartIterations, currentPathParts, pStartingPath);
         component.setComponents(result);
         return component;
     }
