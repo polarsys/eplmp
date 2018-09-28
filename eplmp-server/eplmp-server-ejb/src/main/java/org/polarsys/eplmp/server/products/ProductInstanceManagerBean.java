@@ -29,7 +29,7 @@ import org.polarsys.eplmp.core.util.Tools;
 import org.polarsys.eplmp.server.LogDocument;
 import org.polarsys.eplmp.server.configuration.PSFilterVisitor;
 import org.polarsys.eplmp.server.configuration.PSFilterVisitorCallbacks;
-import org.polarsys.eplmp.server.configuration.spec.ProductBaselineConfigSpec;
+import org.polarsys.eplmp.server.configuration.spec.ResolvedCollectionConfigSpec;
 import org.polarsys.eplmp.server.dao.*;
 import org.polarsys.eplmp.server.factory.ACLFactory;
 import org.polarsys.eplmp.server.validation.AttributesConsistencyUtils;
@@ -381,7 +381,7 @@ public class ProductInstanceManagerBean implements IProductInstanceManagerLocal 
         PartMaster partMaster = productBaseline.getConfigurationItem().getDesignItem();
         String serialNumber = lastIteration.getSerialNumber();
 
-        ProductStructureFilter filter = new ProductBaselineConfigSpec(productBaseline);
+        ProductStructureFilter filter = new ResolvedCollectionConfigSpec(productBaseline);
 
         PSFilterVisitorCallbacks callbacks = new PSFilterVisitorCallbacks() {
             @Override

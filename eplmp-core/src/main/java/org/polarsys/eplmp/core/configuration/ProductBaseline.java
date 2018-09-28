@@ -42,7 +42,7 @@ import java.util.*;
         @NamedQuery(name = "ProductBaseline.findObsoletePartRevisions", query = "SELECT pr FROM PartRevision pr JOIN ProductBaseline pb JOIN BaselinedPart bp WHERE pb = :productBaseline AND pb.partCollection.id = bp.partCollection.id AND bp.targetPart.partRevision.status = org.polarsys.eplmp.core.meta.RevisionStatus.OBSOLETE AND bp.targetPart.partRevision.partMasterWorkspaceId = :workspaceId ORDER BY pr.partMaster.number")
 
 })
-public class ProductBaseline implements Serializable {
+public class ProductBaseline implements Serializable,ResolvedCollection {
 
 
     @GeneratedValue(strategy = GenerationType.IDENTITY)

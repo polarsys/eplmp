@@ -11,10 +11,7 @@
 
 package org.polarsys.eplmp.server.configuration.spec;
 
-import org.polarsys.eplmp.core.configuration.BaselinedPart;
-import org.polarsys.eplmp.core.configuration.BaselinedPartKey;
-import org.polarsys.eplmp.core.configuration.PartCollection;
-import org.polarsys.eplmp.core.configuration.ProductConfigSpec;
+import org.polarsys.eplmp.core.configuration.*;
 import org.polarsys.eplmp.core.product.PartIteration;
 import org.polarsys.eplmp.core.product.PartLink;
 import org.polarsys.eplmp.core.product.PartMaster;
@@ -36,10 +33,10 @@ public class ResolvedCollectionConfigSpec extends ProductConfigSpec {
     private Set<String> optionalUsageLinks;
     private Set<String> substitutesUsageLinks;
 
-    public ResolvedCollectionConfigSpec(@NotNull PartCollection partCollection, @NotNull Set<String> optionalUsageLinks, @NotNull Set<String> substitutesUsageLinks) {
-        this.partCollection = partCollection;
-        this.optionalUsageLinks= optionalUsageLinks;
-        this.substitutesUsageLinks = substitutesUsageLinks;
+    public ResolvedCollectionConfigSpec(@NotNull ResolvedCollection resolvedCollection) {
+        this.partCollection = resolvedCollection.getPartCollection();
+        this.optionalUsageLinks= resolvedCollection.getOptionalUsageLinks();
+        this.substitutesUsageLinks = resolvedCollection.getSubstituteLinks();
     }
 
     @Override
