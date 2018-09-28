@@ -22,8 +22,7 @@ import org.polarsys.eplmp.server.configuration.filter.LatestCheckedInPSFilter;
 import org.polarsys.eplmp.server.configuration.filter.LatestReleasedPSFilter;
 import org.polarsys.eplmp.server.configuration.filter.ReleasedPSFilter;
 import org.polarsys.eplmp.server.configuration.filter.WIPPSFilter;
-import org.polarsys.eplmp.server.configuration.spec.ProductBaselineConfigSpec;
-import org.polarsys.eplmp.server.configuration.spec.ProductInstanceConfigSpec;
+import org.polarsys.eplmp.server.configuration.spec.ResolvedCollectionConfigSpec;
 import org.polarsys.eplmp.server.dao.ProductBaselineDAO;
 import org.polarsys.eplmp.server.dao.ProductInstanceMasterDAO;
 
@@ -52,17 +51,17 @@ public class PSFilterManagerBean implements IPSFilterManagerLocal {
     public ProductStructureFilter getBaselinePSFilter(int baselineId) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, BaselineNotFoundException, WorkspaceNotEnabledException {
         ProductBaseline productBaseline = productBaselineDAO.loadBaseline(baselineId);
         userManager.checkWorkspaceReadAccess(productBaseline.getConfigurationItem().getWorkspaceId());
-        return new ProductBaselineConfigSpec(productBaseline);
+        return new ResolvedCollectionConfigSpec(productBaseline);
     }
 
     @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
     @Override
     public ProductStructureFilter getProductInstanceConfigSpec(ConfigurationItemKey ciKey, String serialNumber) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, ProductInstanceMasterNotFoundException, WorkspaceNotEnabledException {
-        User user = userManager.checkWorkspaceReadAccess(ciKey.getWorkspace());
+        userManager.checkWorkspaceReadAccess(ciKey.getWorkspace());
         ProductInstanceMasterKey productInstanceMasterKey = new ProductInstanceMasterKey(serialNumber, ciKey);
         ProductInstanceMaster productIM = productInstanceMasterDAO.loadProductInstanceMaster(productInstanceMasterKey);
         ProductInstanceIteration productII = productIM.getLastIteration();
-        return new ProductInstanceConfigSpec(productII);
+        return new ResolvedCollectionConfigSpec(productII);
     }
 
     @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)

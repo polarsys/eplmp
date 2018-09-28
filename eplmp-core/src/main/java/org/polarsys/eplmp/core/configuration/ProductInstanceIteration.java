@@ -40,7 +40,7 @@ import java.util.*;
 @NamedQueries({
         @NamedQuery(name = "ProductInstanceIteration.findByProductBaseline", query = "SELECT p FROM ProductInstanceIteration p WHERE p.basedOn = :productBaseline")
 })
-public class ProductInstanceIteration implements Serializable, FileHolder {
+public class ProductInstanceIteration implements Serializable, FileHolder,ResolvedCollection {
 
     @Id
     @ManyToOne(optional = false, fetch = FetchType.EAGER)
