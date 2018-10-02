@@ -65,6 +65,9 @@ public class ConverterBean implements IConverterManagerLocal {
     @Inject
     private BeanLocator beanLocator;
 
+    @Inject
+    private GeometryParser geometryParser;
+
     private static final String CONF_PROPERTIES = "/org/polarsys/eplmp/server/converters/utils/conf.properties";
     private static final Properties CONF = new Properties();
     private static final float[] RATIO = new float[]{1f, 0.6f, 0.2f};
@@ -198,7 +201,7 @@ public class ConverterBean implements IConverterManagerLocal {
 
         // manage converted file
         Path convertedFile = conversionResult.getConvertedFile();
-        double[] box = new GeometryParser(convertedFile).calculateBox();
+        double[] box = geometryParser.calculateBox(convertedFile);
 
         if (decimate(convertedFile, tempDir, RATIO)) {
             String fileName = convertedFile.getFileName().toString();
