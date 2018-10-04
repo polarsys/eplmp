@@ -11,110 +11,131 @@
 
 package org.polarsys.eplmp.server.configuration.filter;
 
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Spy;
-
-import org.mockito.internal.util.reflection.Whitebox;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.polarsys.eplmp.core.product.*;
+import org.polarsys.eplmp.core.product.PartIteration;
+import org.polarsys.eplmp.core.product.PartMaster;
 
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
-import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
+import static org.junit.Assert.*;
+import static org.polarsys.eplmp.server.util.ProductUtil.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class LatestReleasedPSFilterTest {
 
-    @InjectMocks
-    private LatestReleasedPSFilter latestReleasedPSFilter = new LatestReleasedPSFilter(false);
-
-    @Mock
-    private PartRevision partRevision;
-    @Mock
-    private PartIteration partIteration;
-    @Mock
-    private PartLink partLink;
-    @Mock
-    private PartLink partLink_2;
-    @Mock
-    PartSubstituteLink partSubstituteLink;
-
-    @Spy
-    private PartMaster partMaster = new PartMaster();
+    private LatestReleasedPSFilter latestReleasedPSFilter;
 
     @Before
-    public void setUp() {
+    public void setup() throws Exception {
 
-        initMocks(this);
+        createTestableParts();
+        latestReleasedPSFilter = new LatestReleasedPSFilter(false);
     }
 
     @Test
-    public void filter(){
+    public void filterTest_with_partMaster_as_parameter(){
 
-        //******* I - Check filter with a PartMaster as parameter
+        /**
+         *
+         * Test level : 1.1.0 Many parts revision last of list is released
+         *
+         * Structure for test :
+         *
+         *          PART-001
+         *              |-> DEFAULT  A ( not released )
+         *              |-> REVISION B ( not released )
+         *              |-> REVISION C ( not released )
+         *              |-> REVISION D ( released )
+         *
+         */
+        PartMaster partMaster = get_partMaster_with("PART-001");
+        String[] members = {};
+        add_revision_with_partLink_to(partMaster,members,false);
+        add_revision_with_partLink_to(partMaster,members,false);
+        add_revision_with_partLink_to(partMaster,members, true);
 
-        //------------------------ Test : Check if iteration was added ------------------------
-        //## BEGIN CONFIGURATION
-        when(partMaster.getLastReleasedRevision()).thenReturn(partRevision);
-        when(partRevision.getLastIteration()).thenReturn(partIteration);
-        //## END CONFIGURATION
+        List<PartIteration> result =  latestReleasedPSFilter.filter(partMaster);
 
-        List<PartIteration> result = latestReleasedPSFilter.filter(partMaster);
+        assertFalse(result.isEmpty());
+        assertEquals(1,result.size());
+        are_those_of_revision("D",result,partMaster.getNumber());
 
-        //## BEGIN VERIFICATION
-        Assert.assertNotNull(result);
-        Assert.assertFalse(result.isEmpty());
-        Assert.assertTrue(result.size() == 1);
-        //## END VERIFICATION
+        //--------------------------
+        /**
+         *
+         * Test level : 1.1.1 Only first of list released
+         *
+         * Structure for test :
+         *
+         *          PART-002
+         *              |-> DEFAULT  A ( released )
+         *              |-> REVISION B ( not released )
+         *              |-> REVISION C ( not released )
+         *              |-> REVISION D ( not released )
+         *
+         */
+        partMaster = get_partMaster_with("PART-002");
+        partMaster.getLastRevision().release(user);
+        add_revision_with_partLink_to(partMaster,members,false);
+        add_revision_with_partLink_to(partMaster,members,false);
+        add_revision_with_partLink_to(partMaster,members, false);
 
-        //------------------------ Test : Empty list when no iteration founded ------------------------
-        //## BEGIN CONFIGURATION
-        when(partMaster.getLastReleasedRevision()).thenReturn(null);
-        //## END CONFIGURATION
+        result =  latestReleasedPSFilter.filter(partMaster);
 
-        result = latestReleasedPSFilter.filter(partMaster);
+        assertFalse(result.isEmpty());
+        assertEquals(1,result.size());
+        are_those_of_revision("A",result,"PART-002");
 
-        //## BEGIN VERIFICATION
-        Assert.assertNotNull(result);
-        Assert.assertTrue(result.isEmpty());
-        //## END VERIFICATION
+        //--------------------------
+        /**
+         *
+         * Test level : 1.1.2 Any released
+         *
+         * Structure for test :
+         *
+         *          PART-003
+         *              |-> DEFAULT  A ( not released )
+         *              |-> REVISION B ( not released )
+         *              |-> REVISION C ( not released )
+         *              |-> REVISION D ( not released )
+         *
+         */
+        partMaster = get_partMaster_with("PART-003");
+        add_revision_with_partLink_to(partMaster,members,false);
+        add_revision_with_partLink_to(partMaster,members,false);
+        add_revision_with_partLink_to(partMaster,members, false);
 
-        //******* II - Check filter with a List<PartLink> as parameter
+        result =  latestReleasedPSFilter.filter(partMaster);
 
-        //------------------------ Test : Diverge false ( at least last PartLink of list parameter must be added ) ------------------------
+        assertTrue(result.isEmpty());
 
-        List<PartLink> partLinks = latestReleasedPSFilter.filter(Arrays.asList(partLink,partLink_2));
+        //--------------------------
+        /**
+         *
+         * Test level : 1.1.3 All released except last of list
+         *
+         * Structure for test :
+         *
+         *          PART-004
+         *              |-> DEFAULT  A ( released )
+         *              |-> REVISION B ( released )
+         *              |-> REVISION C ( released )
+         *              |-> REVISION D ( not released )
+         *
+         */
+        partMaster = get_partMaster_with("PART-004");
+        partMaster.getLastRevision().release(user);
+        add_revision_with_partLink_to(partMaster,members,true);
+        add_revision_with_partLink_to(partMaster,members,true);
+        add_revision_with_partLink_to(partMaster,members, false);
 
-        //## BEGIN VERIFICATION
-        Assert.assertFalse((boolean) Whitebox.getInternalState(latestReleasedPSFilter, "diverge"));
-        Assert.assertNotNull(partLinks);
-        Assert.assertFalse(partLinks.isEmpty());
-        Assert.assertTrue(partLinks.size() ==1 );
-        Assert.assertTrue(partLink_2.equals(partLinks.get(0)));
-        //## END VERIFICATION
+        result =  latestReleasedPSFilter.filter(partMaster);
 
-        //------------------------ Test : Diverge true ( last PartLink of list parameter and all his substitutes must be added ) ------------------------
-        //## BEGIN CONFIGURATION
-        Whitebox.setInternalState(latestReleasedPSFilter,"diverge",true);
-        when(partLink_2.getSubstitutes()).thenReturn(Collections.singletonList(partSubstituteLink));
-        //## BEGIN CONFIGURATION
-
-        partLinks = latestReleasedPSFilter.filter(Arrays.asList(partLink,partLink_2));
-
-        //## BEGIN VERIFICATION
-        Assert.assertNotNull(partLinks);
-        Assert.assertFalse(partLinks.isEmpty());
-        Assert.assertTrue(partLinks.size() == 2 );
-        Assert.assertTrue(partLink_2.equals(partLinks.get(0)));
-        Assert.assertTrue(partSubstituteLink.equals(partLinks.get(1)));
-        //## END VERIFICATION
+        assertFalse(result.isEmpty());
+        assertEquals(1,result.size());
+        are_those_of_revision("C",result,"PART-004");
     }
 }

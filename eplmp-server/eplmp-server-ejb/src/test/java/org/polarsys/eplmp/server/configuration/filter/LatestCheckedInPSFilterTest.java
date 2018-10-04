@@ -9,114 +9,196 @@
  * DocDoku - initial API and implementation
  *******************************************************************************/
 
+
+/**
+ *
+ * @author Ludovic BAREL on 10/18.
+ *
+ * */
 package org.polarsys.eplmp.server.configuration.filter;
 
-import static org.mockito.MockitoAnnotations.initMocks;
-import static org.mockito.Mockito.when;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Spy;
-import org.mockito.internal.util.reflection.Whitebox;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.polarsys.eplmp.core.product.*;
+
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
+
+import static org.junit.Assert.*;
+import static org.polarsys.eplmp.server.util.ProductUtil.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class LatestCheckedInPSFilterTest {
 
-    @InjectMocks
-    private LatestCheckedInPSFilter latestCheckedInPSFilter = new LatestCheckedInPSFilter(false);
-
-    @Mock
-    private PartRevision partRevision;
-    @Mock
-    private PartIteration partIteration;
-    @Mock
-    private PartLink partLink;
-    @Mock
-    private PartLink partLink_2;
-    @Mock
-    PartSubstituteLink partSubstituteLink;
-
-    @Spy
-    private PartMaster partMaster = new PartMaster();
+    private LatestCheckedInPSFilter latestCheckedInPSFilter ;
 
     @Before
-    public void setUp() {
+    public void setup() throws Exception {
 
-        initMocks(this);
+        createTestableParts();
+        latestCheckedInPSFilter = new LatestCheckedInPSFilter(false);
     }
 
     @Test
-    public void filter(){
+    public void filterTest_with_partMaster_as_parameter(){
 
-        //******* I - Check filter with a PartMaster as parameter
+        /**
+         *
+         * Test level : 1.1.0 Many parts revision
+         * Purpose : Check if we have right partIteration.
+         *
+         */
+        setPartForLatestCheckInTest();
+        PartMaster partMaster = get_partMaster_with("PART-001");
+        List<PartIteration> result =  latestCheckedInPSFilter.filter(partMaster);
 
-        //------------------------ Test : Check if iteration was added ------------------------
-        //## BEGIN CONFIGURATION
-        when(partMaster.getLastRevision()).thenReturn(partRevision);
-        when(partRevision.getLastCheckedInIteration()).thenReturn(partIteration);
-        //## END CONFIGURATION
+        assertFalse(result.isEmpty());
+        are_those_of_revision("D",result,partMaster.getNumber());
 
-        List<PartIteration> partIterations = latestCheckedInPSFilter.filter(partMaster);
+        //---------------------------
+        /**
+         * Test level : 1.1.1 Lastest is check out
+         *
+         * Purpose : Check behavior when first revision is check in and other
+         * are check out in list of revision
+         *
+         */
+        partMaster.getLastRevision().setCheckOutUser(user);
+        result =  latestCheckedInPSFilter.filter(partMaster);
 
-        //## BEGIN VERIFICATION
-        Assert.assertNotNull(partIterations);
-        Assert.assertFalse(partIterations.isEmpty());
-        Assert.assertTrue(partIterations.contains(partIteration));
-        //## END VERIFICATION
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+    }
 
-        //******* II - Check filter with a List<PartLink> as parameter
+    @Test
+    public void filterTest_with_list_partLink_as_parameter(){
 
-        //------------------------ Test : Check behavior when diverge false ------------------------
+        /**
+         *
+         * Test level : 1.1.0 Diverge link with boolean false
+         *
+         * Structure for test
+         *
+         *      |-> PART-001
+         *              |-> REV-A
+         *                    |-> iteration 1
+         *                               |-> PART-007
+         *                               |       |-> REV-A
+         *                               |             |-> iteration 1
+         *                               |-> PART-008
+         *                                       |-> REV-A
+         *                                             |-> iteration 1
+         *
+         */
+        PartMaster partMaster = get_partMaster_with("PART-001");
 
-        Assert.assertFalse((boolean)Whitebox.getInternalState(latestCheckedInPSFilter,"diverge"));
-        List<PartLink> partLinks = latestCheckedInPSFilter.filter(Arrays.asList(partLink,partLink_2));
+        List<PartLink> links =  new ArrayList<>((partMaster.getLastRevision().getLastIteration().getComponents()));
+        List<PartLink> result  = latestCheckedInPSFilter.filter(links);
 
-        //## BEGIN VERIFICATION
-        Assert.assertNotNull(partLinks);
-        Assert.assertFalse(partLinks.isEmpty());
-        Assert.assertTrue(partLinks.size() == 1);
-        Assert.assertTrue(partLinks.contains(partLink_2));
-        //## END VERIFICATION
+        assertFalse(result.isEmpty());
+        assertEquals(1,result.size());
+        assertEquals("PART-008-UsageLink",result.get(0).getReferenceDescription());
 
-        //------------------------ Test : Check behavior when diverge true ------------------------
+        //----------------------
+        /**
+         *
+         * Test level : 1.2.0 Diverge link with boolean true no substitutes
+         *
+         * Structure for test
+         *
+         *      |-> PART-001
+         *              |-> REVISION-B
+         *                    |-> iteration 1
+         *                               |-> PART-007
+         *                               |       |-> REVISION-A
+         *                               |              |-> iteration 1
+         *                               |-> PART-008
+         *                                       |-> REVISION-A
+         *                                       |     |-> iteration 1
+         *                                       |-> REVISION-B
+         *                                             |-> iteration 1
+         *                                                      |-> PART-004
+         *                                                      |       |-> REVISION-A
+         *                                                      |              |-> iteration 1
+         *                                                      |-> PART-015
+         *                                                              |-> REVISION-A
+         *                                                                   |-> iteration 1
+         *                                                                             |-> PART-017
+         *                                                                                     |-> REVISION-A
+         *                                                                                             |-> iteration 1
+         */
+        latestCheckedInPSFilter = new LatestCheckedInPSFilter(true);
 
-        //## BEGIN CONFIGURATION
-        Whitebox.setInternalState(latestCheckedInPSFilter,"diverge",true);
-        when(partLink.getSubstitutes()).thenReturn(Collections.singletonList(partSubstituteLink));
-        //## END CONFIGURATION
+        String[] members_008 = {"PART-004","PART-015"};
+        add_revision_with_partLink_to(get_partMaster_with("PART-008"),members_008,false);
 
-        partLinks = latestCheckedInPSFilter.filter(Collections.singletonList(partLink));
+        String[] members =  {"PART-007","PART-008"};
+        add_revision_with_partLink_to(partMaster,members,false);
 
-        //## BEGIN VERIFICATION
-        Assert.assertTrue((boolean)Whitebox.getInternalState(latestCheckedInPSFilter,"diverge"));
-        Assert.assertNotNull(partLinks);
-        Assert.assertFalse(partLinks.isEmpty());
-        Assert.assertTrue(partLinks.size() == 2);
-        Assert.assertTrue(partLinks.contains(partLink));
-        Assert.assertTrue(partLinks.contains(partSubstituteLink));
-        //## END VERIFICATION
+        links =  new ArrayList<>((partMaster.getLastRevision().getLastIteration().getComponents()));
+        result  = latestCheckedInPSFilter.filter(links);
 
-        //------------------------ Test : partSubstitutes is empty ------------------------
-        //## BEGIN CONFIGURATION
-        when(partLink.getSubstitutes()).thenReturn(new ArrayList<PartSubstituteLink>());
-        //## END CONFIGURATION
+        assertFalse(result.isEmpty());
+        assertEquals(1,result.size());
+        assertEquals("PART-008-UsageLink",result.get(0).getReferenceDescription());
 
-        partLinks = latestCheckedInPSFilter.filter(Collections.singletonList(partLink));
+        //----------------------
+        /**
+         *
+         * Test level : 1.2.1 Diverge link with boolean true with substitutes
+         *
+         * Structure for test : same as before
+         *
+         */
+        String[] substitutes_008 = {"PART-005", "PART-002","PART-004"};// check structure in ProductUtil.java
+        add_Substitute_in_last_iteration_of_last_revision_to(partMaster,substitutes_008,"PART-008");
 
-        //## BEGIN VERIFICATION
-        Assert.assertNotNull(partLinks);
-        Assert.assertFalse(partLinks.isEmpty());
-        Assert.assertTrue(partLinks.size() == 1);
-        Assert.assertTrue(partLinks.contains(partLink));
-        //## END VERIFICATION RULE
+        links =  new ArrayList<>((partMaster.getLastRevision().getLastIteration().getComponents()));
+        result  = latestCheckedInPSFilter.filter(links);
+
+        assertFalse(result.isEmpty());
+        assertEquals(4,result.size());
+        assertEquals("PART-008-UsageLink",result.get(0).getReferenceDescription());
+        assertEquals("PART-005-Substitute",result.get(1).getReferenceDescription());
+        assertEquals("PART-002-Substitute",result.get(2).getReferenceDescription());
+        assertEquals("PART-004-Substitute",result.get(3).getReferenceDescription());
+    }
+
+    //############################################ HELPERS METHODS ############################################
+
+    /**
+     *
+     *  We'll add some revision parts to an existing which we'll transform
+     *  according to following description :
+     *
+     *      PART-OO1
+     *          |-> Default ( version A ) : check In with 1 PartIterations
+     *          |-> REV-001 ( version B ) : check out with 3 PartIterations
+     *          |-> REV-002 ( version C ) : check out with 2 PartIterations
+     *          |-> REV-003 ( version D ) : check In with 2 PartIterations
+     *
+     */
+    private void setPartForLatestCheckInTest(){
+
+        // Notice : each parts created by ProductUtil class have a least one revision with one iteration
+        PartMaster part = get_partMaster_with("PART-001");
+
+        //Create REV-001
+        PartRevision revision = part.createNextRevision(user);
+        add_revision_to_part_with("PART-001",revision,true);
+        add_iteration_to_revision(revision.getVersion(), "PART-001",revision.createNextIteration(user));
+        add_iteration_to_revision(revision.getVersion(), "PART-001",revision.createNextIteration(user));
+
+        //Create REV-002
+        revision = part.createNextRevision(user);
+        add_revision_to_part_with("PART-001",revision,true);
+        add_iteration_to_revision(revision.getVersion(), "PART-001",revision.createNextIteration(user));
+
+        //Create REV-003
+        revision = part.createNextRevision(user);
+        add_revision_to_part_with("PART-001",revision,false);
+        add_iteration_to_revision(revision.getVersion(), "PART-001",revision.createNextIteration(user));
     }
 }
