@@ -52,12 +52,12 @@ public class PSFilterVisitorTest {
     }
 
     @Test
-    public void visit_latestCheckedIn_filter() throws Exception {
+    public void visitLatestCheckedInFilterTest() throws Exception {
 
         //#### TEST VISIT METHOD WITH PART MASTER AS PARAMETER
 
         //~ TESTED STRUCTURE : one release, one iteration and one Part with one child by nodes except last
-        Component result = psFilterVisitor.visit(WORKSPACE_ID, new LatestCheckedInPSFilter(false), get_partMaster_with(defaultPartsNumber_list[5]), -1, callbacks);
+        Component result = psFilterVisitor.visit(WORKSPACE_ID, new LatestCheckedInPSFilter(false), getPartMasterWith(defaultPartsNumber_list[5]), -1, callbacks);
         Assert.assertNotNull(result);
         Assert.assertEquals(1, result.getComponents().size());
         Assert.assertEquals(1, result.getComponents().get(0).getComponents().size());
@@ -69,13 +69,13 @@ public class PSFilterVisitorTest {
     }
 
     @Test
-    public void visit_latestReleased_filter() throws Exception {
+    public void visitLatestReleasedFilterTest() throws Exception {
 
         //#### TEST VISIT METHOD WITH PART MASTER AS PARAMETER
         //~ TESTED STRUCTURE : Any Released
         try{
 
-            psFilterVisitor.visit(WORKSPACE_ID, new LatestReleasedPSFilter(false),get_partMaster_with(defaultPartsNumber_list[5]), -1, callbacks);
+            psFilterVisitor.visit(WORKSPACE_ID, new LatestReleasedPSFilter(false), getPartMasterWith(defaultPartsNumber_list[5]), -1, callbacks);
             Assert.fail();
         }catch (NotAllowedException e){
 
@@ -117,7 +117,7 @@ public class PSFilterVisitorTest {
 
         for(String partNumber :  defaultPartsNumber_list){
 
-            when(partMasterDAO.loadPartM(new PartMasterKey(WORKSPACE_ID,partNumber))).thenReturn(get_partMaster_with(partNumber));
+            when(partMasterDAO.loadPartM(new PartMasterKey(WORKSPACE_ID,partNumber))).thenReturn(getPartMasterWith(partNumber));
         }
     }
 }

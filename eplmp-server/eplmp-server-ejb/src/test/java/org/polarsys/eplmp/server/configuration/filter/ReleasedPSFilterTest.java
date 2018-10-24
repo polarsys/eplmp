@@ -11,134 +11,108 @@
 
 package org.polarsys.eplmp.server.configuration.filter;
 
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Spy;
-import org.mockito.internal.util.reflection.Whitebox;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.polarsys.eplmp.core.product.*;
-import java.util.Arrays;
-import java.util.Collections;
+import org.polarsys.eplmp.core.product.PartIteration;
+import org.polarsys.eplmp.core.product.PartLink;
+import org.polarsys.eplmp.core.product.PartMaster;
+
+import java.util.ArrayList;
 import java.util.List;
-import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.polarsys.eplmp.server.util.ProductUtil.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ReleasedPSFilterTest {
 
-    @InjectMocks
-    private ReleasedPSFilter releasedPSFilter = new ReleasedPSFilter(false);
-
-    @Mock
-    private PartRevision partRevision;
-    @Mock
-    private PartRevision partRevision_1;
-    @Mock
-    private PartRevision partRevision_2;
-    @Mock
-    private PartRevision partRevision_3;
-    @Mock
-    private PartRevision partRevision_4;
-    @Mock
-    private PartIteration partIteration;
-    @Mock
-    private PartIteration partIteration_1;
-    @Mock
-    private PartIteration partIteration_2;
-    @Mock
-    private PartIteration partIteration_3;
-    @Mock
-    private PartIteration partIteration_4;
-    @Mock
-    private PartLink partLink;
-    @Mock
-    private PartLink partLink_2;
-    @Mock
-    PartSubstituteLink partSubstituteLink;
-
-    @Spy
-    private PartMaster partMaster = new PartMaster();
+    private ReleasedPSFilter releasedPSFilter;
 
     @Before
-    public void setUp() {
+    public void setup() throws Exception {
 
-        initMocks(this);
+        createTestableParts();
+        releasedPSFilter = new ReleasedPSFilter(false);
+        createReleasedRevisionsForTestWith("PART-001");
     }
 
     @Test
-    public void filter(){
+    public void filterTestWithPartMasterAsParameter(){
 
-        //******* I - Check filter with a PartMaster as parameter
-        //------------------------ Test : Check if return all released parts------------------------
-        //## BEGIN CONFIGURATION
-        when(partRevision.isReleased()).thenReturn(true);
-        when(partRevision_1.isReleased()).thenReturn(true);
-        when(partRevision_2.isReleased()).thenReturn(true);
-        when(partRevision_3.isReleased()).thenReturn(false);
-        when(partRevision_4.isReleased()).thenReturn(false);
+        List<PartIteration> result = releasedPSFilter.filter(getPartMasterWith("PART-001"));
+        assertFalse(result.isEmpty());
+        assertEquals(6,result.size());
 
-        Whitebox.setInternalState(partRevision,"partIterations",Collections.singletonList(partIteration));
-        Whitebox.setInternalState(partRevision_1,"partIterations",Collections.singletonList(partIteration_1));
-        Whitebox.setInternalState(partRevision_2,"partIterations",Collections.singletonList(partIteration_2));
-        Whitebox.setInternalState(partRevision_3,"partIterations",Collections.singletonList(partIteration_3));
-        Whitebox.setInternalState(partRevision_4,"partIterations",Collections.singletonList(partIteration_4));
+        assertEquals("K",result.get(0).getPartVersion());
+        assertEquals("J",result.get(1).getPartVersion());
+        assertEquals("H",result.get(2).getPartVersion());
+        assertEquals("G",result.get(3).getPartVersion());
+        assertEquals("D",result.get(4).getPartVersion());
+        assertEquals("B", result.get(5).getPartVersion());
+    }
 
-        Whitebox.setInternalState(partMaster,"partRevisions",
-                Arrays.asList(partRevision, partRevision_1, partRevision_2, partRevision_3, partRevision_4));
-        //## END CONFIGURATION
+    @Test
+    public void filterTestWithListPartLinkAsParameterTest(){
 
-        List<PartIteration> partIterations = releasedPSFilter.filter(partMaster);
+        //diverge not enable
+        PartMaster partMaster = getPartMasterWith("PART-001");
 
-        //## BEGIN VERIFICATION
-        Assert.assertNotNull(partIterations);
-        Assert.assertFalse(partIterations.isEmpty());
-        Assert.assertTrue(partIterations.size() == 3);
-        //## END VERIFICATION
+        List<PartLink> links =  new ArrayList<>((partMaster.getLastRevision().getLastIteration().getComponents()));
+        List<PartLink> result  = releasedPSFilter.filter(links);
 
-        //------------------------ Test : Check if return empty list if no released part------------------------
-        //## BEGIN CONFIGURATION
-        Whitebox.setInternalState(partMaster,"partRevisions", Arrays.asList(partRevision_3, partRevision_4));
-        //## END CONFIGURATION
+        assertFalse(result.isEmpty());
+        assertEquals(1,result.size());
 
-        partIterations = releasedPSFilter.filter(partMaster);
+        //enable diverge
+        releasedPSFilter = new ReleasedPSFilter(true);
+        result  = releasedPSFilter.filter(links);
 
-        //## BEGIN VERIFICATION
-        Assert.assertNotNull(partIterations);
-        Assert.assertTrue(partIterations.isEmpty());
-        //## END VERIFICATION
+        assertFalse(result.isEmpty());
+        assertEquals(5,result.size());
+        assertEquals("PART-016-UsageLink",result.get(0).getReferenceDescription());
+        assertEquals("PART-018-Substitute",result.get(1).getReferenceDescription());
+        assertEquals("PART-015-Substitute",result.get(2).getReferenceDescription());
+        assertEquals("PART-009-Substitute",result.get(3).getReferenceDescription());
+        assertEquals("PART-012-Substitute",result.get(4).getReferenceDescription());
+    }
 
-        //******* I - Check filter with a List<PartLink> as parameter
+    //############################################ HELPERS METHODS ############################################
 
-        //------------------------ Test : Diverge false ( at least last PartLink of list parameter must be added ) ------------------------
+    private void createReleasedRevisionsForTestWith(String partNumber){
 
-        List<PartLink> partLinks = releasedPSFilter.filter(Arrays.asList(partLink,partLink_2));
+        PartMaster partMaster = getPartMasterWith(partNumber);
 
-        //## BEGIN VERIFICATION
-        Assert.assertFalse((boolean) Whitebox.getInternalState(releasedPSFilter, "diverge"));
-        Assert.assertNotNull(partLinks);
-        Assert.assertFalse(partLinks.isEmpty());
-        Assert.assertTrue(partLinks.size() ==1 );
-        Assert.assertTrue(partLink_2.equals(partLinks.get(0)));
-        //## END VERIFICATION
+        //Configure members of partMaster
+        String[] membersPartMaster = {"PART-006","PART-003","PART-005","PART-008","PART-007"};
+        String[] membersPartMasterRevisionK = {"PART-011","PART-012","PART-008","PART-007","PART-016"};
 
-        //------------------------ Test : Diverge true ( last PartLink of list parameter and all his substitutes must be added ) ------------------------
-        //## BEGIN CONFIGURATION
-        Whitebox.setInternalState(releasedPSFilter,"diverge",true);
-        when(partLink_2.getSubstitutes()).thenReturn(Collections.singletonList(partSubstituteLink));
-        //## END CONFIGURATION
+        //configure substitutes of members
+        String[] subtitutesForPart011 = {"PART-014"};
+        String[] subtitutesForPart012 = {"PART-015"};
+        String[] subtitutesForPart016 = {"PART-018","PART-015","PART-009","PART-012"};
+        String[] subtitutesForPart007 = {"PART-002","PART-005"};
+        String[] subtitutesForPart008 = {"PART-004"};
 
-        partLinks = releasedPSFilter.filter(Arrays.asList(partLink,partLink_2));
+        // true <=> released
+        addRevisionWithPartLinkTo(partMaster, membersPartMaster, true);//  revision B
+        addRevisionWithPartLinkTo(partMaster, membersPartMaster, false);// revision C
+        addRevisionWithPartLinkTo(partMaster, membersPartMaster, true);//  revision D
+        addRevisionWithPartLinkTo(partMaster, membersPartMaster, false);// revision E
+        addRevisionWithPartLinkTo(partMaster, membersPartMaster, false);// revision F
+        addRevisionWithPartLinkTo(partMaster, membersPartMaster, true);//  revision G
+        addRevisionWithPartLinkTo(partMaster, membersPartMaster, true);//  revision H
+        addRevisionWithPartLinkTo(partMaster, membersPartMaster, false);// revision I
+        addRevisionWithPartLinkTo(partMaster, membersPartMaster, true);//  revision J
+        addRevisionWithPartLinkTo(partMaster, membersPartMasterRevisionK, true);//  revision K
 
-        //## BEGIN VERIFICATION
-        Assert.assertNotNull(partLinks);
-        Assert.assertFalse(partLinks.isEmpty());
-        Assert.assertTrue(partLinks.size() == 2 );
-        Assert.assertTrue(partLink_2.equals(partLinks.get(0)));
-        Assert.assertTrue(partSubstituteLink.equals(partLinks.get(1)));
-        //## BEGIN VERIFICATION
+        //Add substitutes to members in revision K
+        addSubstituteInLastIterationOfLastRevisionTo(partMaster,subtitutesForPart011,"PART-011");
+        addSubstituteInLastIterationOfLastRevisionTo(partMaster,subtitutesForPart012,"PART-012");
+        addSubstituteInLastIterationOfLastRevisionTo(partMaster,subtitutesForPart016,"PART-016");
+        addSubstituteInLastIterationOfLastRevisionTo(partMaster,subtitutesForPart007,"PART-007");
+        addSubstituteInLastIterationOfLastRevisionTo(partMaster,subtitutesForPart008,"PART-008");
     }
 }

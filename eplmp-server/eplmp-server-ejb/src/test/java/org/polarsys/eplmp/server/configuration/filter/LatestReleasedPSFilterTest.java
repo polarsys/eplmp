@@ -36,106 +36,59 @@ public class LatestReleasedPSFilterTest {
     }
 
     @Test
-    public void filterTest_with_partMaster_as_parameter(){
+    public void filterTestWithPartMasterAsParameterTest(){
 
-        /**
-         *
-         * Test level : 1.1.0 Many parts revision last of list is released
-         *
-         * Structure for test :
-         *
-         *          PART-001
-         *              |-> DEFAULT  A ( not released )
-         *              |-> REVISION B ( not released )
-         *              |-> REVISION C ( not released )
-         *              |-> REVISION D ( released )
-         *
-         */
-        PartMaster partMaster = get_partMaster_with("PART-001");
+        PartMaster partMaster = getPartMasterWith("PART-001");
         String[] members = {};
-        add_revision_with_partLink_to(partMaster,members,false);
-        add_revision_with_partLink_to(partMaster,members,false);
-        add_revision_with_partLink_to(partMaster,members, true);
+
+        // released <=> true
+        addRevisionWithPartLinkTo(partMaster, members, false); // revision B
+        addRevisionWithPartLinkTo(partMaster, members, false); // revision C
+        addRevisionWithPartLinkTo(partMaster, members, true);  // revision D
 
         List<PartIteration> result =  latestReleasedPSFilter.filter(partMaster);
 
         assertFalse(result.isEmpty());
         assertEquals(1,result.size());
-        are_those_of_revision("D",result,partMaster.getNumber());
+        areThoseOfRevision("D", result, partMaster.getNumber());
 
         //--------------------------
-        /**
-         *
-         * Test level : 1.1.1 Only first of list released
-         *
-         * Structure for test :
-         *
-         *          PART-002
-         *              |-> DEFAULT  A ( released )
-         *              |-> REVISION B ( not released )
-         *              |-> REVISION C ( not released )
-         *              |-> REVISION D ( not released )
-         *
-         */
-        partMaster = get_partMaster_with("PART-002");
+
+        partMaster = getPartMasterWith("PART-002");
         partMaster.getLastRevision().release(user);
-        add_revision_with_partLink_to(partMaster,members,false);
-        add_revision_with_partLink_to(partMaster,members,false);
-        add_revision_with_partLink_to(partMaster,members, false);
+        addRevisionWithPartLinkTo(partMaster, members, false); // revision B
+        addRevisionWithPartLinkTo(partMaster, members, false); // revision C
+        addRevisionWithPartLinkTo(partMaster, members, false); // revision D
 
         result =  latestReleasedPSFilter.filter(partMaster);
 
         assertFalse(result.isEmpty());
         assertEquals(1,result.size());
-        are_those_of_revision("A",result,"PART-002");
+        areThoseOfRevision("A", result, "PART-002");
 
         //--------------------------
-        /**
-         *
-         * Test level : 1.1.2 Any released
-         *
-         * Structure for test :
-         *
-         *          PART-003
-         *              |-> DEFAULT  A ( not released )
-         *              |-> REVISION B ( not released )
-         *              |-> REVISION C ( not released )
-         *              |-> REVISION D ( not released )
-         *
-         */
-        partMaster = get_partMaster_with("PART-003");
-        add_revision_with_partLink_to(partMaster,members,false);
-        add_revision_with_partLink_to(partMaster,members,false);
-        add_revision_with_partLink_to(partMaster,members, false);
+
+        partMaster = getPartMasterWith("PART-003");
+        addRevisionWithPartLinkTo(partMaster, members, false); // revision B
+        addRevisionWithPartLinkTo(partMaster, members, false); // revision C
+        addRevisionWithPartLinkTo(partMaster, members, false); // revision D
 
         result =  latestReleasedPSFilter.filter(partMaster);
 
         assertTrue(result.isEmpty());
 
         //--------------------------
-        /**
-         *
-         * Test level : 1.1.3 All released except last of list
-         *
-         * Structure for test :
-         *
-         *          PART-004
-         *              |-> DEFAULT  A ( released )
-         *              |-> REVISION B ( released )
-         *              |-> REVISION C ( released )
-         *              |-> REVISION D ( not released )
-         *
-         */
-        partMaster = get_partMaster_with("PART-004");
+
+        partMaster = getPartMasterWith("PART-004");
         partMaster.getLastRevision().release(user);
-        add_revision_with_partLink_to(partMaster,members,true);
-        add_revision_with_partLink_to(partMaster,members,true);
-        add_revision_with_partLink_to(partMaster,members, false);
+        addRevisionWithPartLinkTo(partMaster, members, true); // revision B
+        addRevisionWithPartLinkTo(partMaster, members, true); // revision C
+        addRevisionWithPartLinkTo(partMaster, members, false);// revision D
 
         result =  latestReleasedPSFilter.filter(partMaster);
 
         assertFalse(result.isEmpty());
         assertEquals(1,result.size());
-        are_those_of_revision("C",result,"PART-004");
+        areThoseOfRevision("C", result, "PART-004");
     }
 }
