@@ -11,170 +11,104 @@
 
 package org.polarsys.eplmp.server.configuration.spec;
 
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.internal.util.reflection.Whitebox;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.polarsys.eplmp.core.configuration.BaselinedPart;
-import org.polarsys.eplmp.core.configuration.BaselinedPartKey;
-import org.polarsys.eplmp.core.configuration.PartCollection;
-import org.polarsys.eplmp.core.product.PartIteration;
-import org.polarsys.eplmp.core.product.PartLink;
-import org.polarsys.eplmp.core.product.PartMaster;
-import org.polarsys.eplmp.core.product.PartSubstituteLink;
-import org.polarsys.eplmp.server.util.ProductUtil;
+import org.polarsys.eplmp.core.common.Workspace;
+import org.polarsys.eplmp.core.configuration.ProductBaseline;
+import org.polarsys.eplmp.core.configuration.ProductBaselineType;
+import org.polarsys.eplmp.core.product.*;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
+import java.util.ArrayList;
+import java.util.List;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.CALLS_REAL_METHODS;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.polarsys.eplmp.server.util.ProductUtil.*;
+
+/**
+ *
+ * @author Ludovic Barel
+ */
 
 @RunWith(MockitoJUnitRunner.class)
 public class ResolvedCollectionConfigSpecTest {
 
     private ResolvedCollectionConfigSpec r2CS;
-
-    @Mock private PartCollection partCollection;
-    @Mock private PartMaster partMaster;
-    @Mock private BaselinedPart baselinedPart;
-    @Mock private PartIteration partIteration;
-
-    @Mock private PartLink link1,link2,link3;
-    @Mock private PartSubstituteLink pSLink1,pSLink2,pSLink3;
+    private ConfigurationItem configurationItem;
+    private ProductBaseline productBaseline;
 
     @Before
-    public void setUp(){
+    public void setup() throws Exception {
 
-        initMocks(this);
-        r2CS = mock(ResolvedCollectionConfigSpec.class,CALLS_REAL_METHODS);
-        when(partMaster.getWorkspaceId()).thenReturn(ProductUtil.WORKSPACE_ID);
-        when(partMaster.getNumber()).thenReturn("PART-0001");
-        when(partCollection.getId()).thenReturn(1);
-        when(link1.getFullId()).thenReturn("subLink1");
-        when(link2.getFullId()).thenReturn("subLink2");
-        when(link3.getFullId()).thenReturn("subLink3");
-        when(pSLink1.getFullId()).thenReturn("partSubLink1");
-        when(pSLink2.getFullId()).thenReturn("partSubLink2");
-        when(pSLink3.getFullId()).thenReturn("partSubLink3");
+        createTestableParts();
+        generateSomeReleasedRevisionWithSubstitutesFor("PART-001");
+        configurationItem = new ConfigurationItem(user,new Workspace(WORKSPACE_ID),"","");
+        configurationItem.setDesignItem(getPartMasterWith("PART-001"));
+        productBaseline = new ProductBaseline(user,configurationItem,"prodBase_1", ProductBaselineType.RELEASED,"validated-config");
+        productBaseline.addBaselinedPart(getPartMasterWith("PART-001").getLastRevision().getLastIteration());
+        r2CS = new ResolvedCollectionConfigSpec(productBaseline);
     }
 
     @Test
     public void filterPartIterationTest(){
 
-        //----------------- No PartCollection -----------------
-        //## BEGIN CONFIGURATION
-        Whitebox.setInternalState(r2CS,"partCollection",null);
-        //## END CONFIGURATION
-
+        //Test with productBaselineType set to RELEASED
+        PartMaster partMaster = getPartMasterWith("PART-001");
         PartIteration result = r2CS.filterPartIteration(partMaster);
+        assertNotNull(result);
+        assertEquals(partMaster.getLastRevision().getLastIteration(), result);
 
-        //## BEGIN VERIFICATION
-        Assert.assertNull(result);
-        //## END VERIFICATION
-
-        //----------------- BaselinedPart found -----------------
-        //## BEGIN CONFIGURATION
-        Whitebox.setInternalState(r2CS,"partCollection",partCollection);
-        when(partCollection.getBaselinedPart(any(BaselinedPartKey.class))).thenReturn(baselinedPart);
-        when(baselinedPart.getTargetPart()).thenReturn(partIteration);
-        //## END CONFIGURATION
-
-        result =  r2CS.filterPartIteration(partMaster);
-
-        //## BEGIN VERIFICATION
-        Assert.assertNotNull(result);
-        Assert.assertEquals(partIteration,result);
-        //## END VERIFICATION
-
-        //----------------- No BaselinedPart found -----------------
-        //## BEGIN CONFIGURATION
-        when(baselinedPart.getTargetPart()).thenReturn(null);
-        //## END CONFIGURATION
+        productBaseline.removeAllBaselinedParts();
 
         result = r2CS.filterPartIteration(partMaster);
+        assertNull(result);
 
-        //## BEGIN VERIFICATION
-        Assert.assertNull(result);
-        //## END VERIFICATION
+        //Test with productBaselineType set to LATEST
+        partMaster = getPartMasterWith("PART-006");
+        productBaseline.setType(ProductBaselineType.LATEST);
+
+        //Ensure we work with another part
+        assertEquals("PART-006", partMaster.getNumber());
+
+        configurationItem.setDesignItem(partMaster);
+        productBaseline.addBaselinedPart(partMaster.getLastRevision().getLastIteration());
+
+        result = r2CS.filterPartIteration(partMaster);
+        assertNotNull(result);
+        assertEquals(partMaster.getLastRevision().getLastIteration(), result);
     }
 
     @Test
-    public void filterPartLink(){
+    public void filterPartLinkTest(){
 
-        //----------------- Optional link and no optional usage links -----------------
-        //## BEGIN CONFIGURATION
-        Whitebox.setInternalState(r2CS,"optionalUsageLinks",new HashSet<>());
-        when(link3.isOptional()).thenReturn(true);
-        //## END CONFIGURATION
-        PartLink result = r2CS.filterPartLink(Arrays.asList(link1,link2,link3));
+        //PartLinks in list are optionals but not in the optionalUsageLinks list of r2CS instance
+        PartMaster partMaster = getPartMasterWith("PART-001");
+        List<PartLink> links =  new ArrayList<>((partMaster.getLastRevision().getLastIteration().getComponents()));
 
-        //## BEGIN VERIFICATION
-        Assert.assertNull(result);
-        //## END VERIFICATION
+        PartLink result =  r2CS.filterPartLink(links);
+        assertNull(result);
 
-        //----------------- Optional link with substitues and substitutesUsageLinks -----------------
-        //## BEGIN CONFIGURATION
-        Whitebox.setInternalState(r2CS,"optionalUsageLinks",
-                Collections.singleton("subLink1-subLink2-subLink3"));
-        Whitebox.setInternalState(r2CS,"substitutesUsageLinks",
-                Collections.singleton("subLink1-subLink2-partSubLink1"));
+        //Now, add those optional links to the optionalUsageLinks list of r2CS instance
+        //Expected the nominal link because we didn't set the substitutesUsageLinks list of r2CS instance
+        // nominal link <=> last partLink into given list
 
-        when(link3.getSubstitutes()).thenReturn(Arrays.asList(pSLink1,pSLink2,pSLink3));
-        //## END CONFIGURATION
+        productBaseline.addOptionalUsageLink("u0-u0-u0-u0-u0");
+        r2CS = new ResolvedCollectionConfigSpec(productBaseline);
 
-        result = r2CS.filterPartLink(Arrays.asList(link1,link2,link3));
+        result =  r2CS.filterPartLink(links);
+        assertNotNull(result);
+        assertEquals(links.get(links.size()-1), result);
 
-        //## BEGIN VERIFICATION
-        Assert.assertEquals(pSLink1,result);//pSLink1 because we stop at the first substituteLink founded
-        //## END VERIFICATION
+        //Now, add substitutes of those optional links
 
-        //----------------- Optional link with substitues and no substitutesUsageLinks -----------------
-        //## BEGIN CONFIGURATION
-        Whitebox.setInternalState(r2CS,"optionalUsageLinks",
-                Collections.singleton("subLink1-subLink2-subLink3"));
-        Whitebox.setInternalState(r2CS,"substitutesUsageLinks",new HashSet<>());
+        productBaseline.addSubstituteLink("u0-u0-u0-u0-s0");
+        r2CS = new ResolvedCollectionConfigSpec(productBaseline);
 
-        when(link3.getSubstitutes()).thenReturn(Arrays.asList(pSLink1,pSLink2,pSLink3));
-        //## END CONFIGURATION
-
-        result = r2CS.filterPartLink(Arrays.asList(link1,link2,link3));
-
-        //## BEGIN VERIFICATION
-        Assert.assertEquals(link3,result);
-        //## END VERIFICATION
-
-        //----------------- Non Optional link with substitues and substitutesUsageLinks -----------------
-        //## BEGIN CONFIGURATION
-
-        when(link3.isOptional()).thenReturn(false);
-        Whitebox.setInternalState(r2CS,"substitutesUsageLinks",
-                Collections.singleton("subLink1-subLink2-partSubLink1"));
-        when(link3.getSubstitutes()).thenReturn(Arrays.asList(pSLink1,pSLink2,pSLink3));
-        //## END CONFIGURATION
-
-        result = r2CS.filterPartLink(Arrays.asList(link1,link2,link3));
-
-        //## BEGIN VERIFICATION
-        Assert.assertEquals(pSLink1,result);//pSLink1 because we stop at the first substituteLink founded
-        //## END VERIFICATION
-
-        //----------------- No Optional link with substitues and no substitutesUsageLinks -----------------
-        //## BEGIN CONFIGURATION
-        Whitebox.setInternalState(r2CS,"substitutesUsageLinks",new HashSet<>());
-        //## END CONFIGURATION
-
-        result = r2CS.filterPartLink(Arrays.asList(link1,link2,link3));
-
-        //## BEGIN VERIFICATION
-        Assert.assertEquals(link3,result);
-        //## END VERIFICATION
+        result =  r2CS.filterPartLink(links);
+        assertNotNull(result);
+        assertEquals("PART-018-Substitute", result.getReferenceDescription());
     }
 }

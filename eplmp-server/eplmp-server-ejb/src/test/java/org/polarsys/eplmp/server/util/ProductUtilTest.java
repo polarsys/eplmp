@@ -248,12 +248,12 @@ public class ProductUtilTest {
         it.setIteration(1);
 
         //exiting iteration;
-        addIterationToRevision(revision.getVersion(), forPartNumber, it);
+        addIterationTo(forPartNumber, it);
         assertEquals(1, getPartIterationsOf(forPartNumber).size());
 
         //non existing iteration
         it.setIteration(12);
-        addIterationToRevision(revision.getVersion(), forPartNumber, it);
+        addIterationTo(forPartNumber, it);
         assertEquals(2, getPartIterationsOf(forPartNumber).size());
     }
 

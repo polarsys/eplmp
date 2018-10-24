@@ -15,6 +15,7 @@ import org.junit.*;
 import org.junit.runner.RunWith;
 import org.mockito.*;
 
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.polarsys.eplmp.server.util.ProductUtil.*;
@@ -28,6 +29,7 @@ import org.polarsys.eplmp.server.dao.PartMasterDAO;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
+import java.util.Date;
 import java.util.List;
 
 @RunWith(PowerMockRunner.class)
@@ -47,6 +49,7 @@ public class PSFilterVisitorTest {
 
         initMocks(this);
         createTestableParts();
+        buildBasicStructure();
         this.initDaoBahavior();
         callbacks = this.createCallBack();
     }
@@ -55,24 +58,62 @@ public class PSFilterVisitorTest {
     public void visitLatestCheckedInFilterTest() throws Exception {
 
         //#### TEST VISIT METHOD WITH PART MASTER AS PARAMETER
+        //Notice : refer to BASIC STRUCTURE in ProductUtil.java
 
-        //~ TESTED STRUCTURE : one release, one iteration and one Part with one child by nodes except last
-        Component result = psFilterVisitor.visit(WORKSPACE_ID, new LatestCheckedInPSFilter(false), getPartMasterWith(defaultPartsNumber_list[5]), -1, callbacks);
-        Assert.assertNotNull(result);
-        Assert.assertEquals(1, result.getComponents().size());
-        Assert.assertEquals(1, result.getComponents().get(0).getComponents().size());
-        Assert.assertEquals(1, result.getComponents().get(0).getComponents().get(0).getComponents().size());
-        Assert.assertEquals(1, result.getComponents().get(0).getComponents().get(0).getComponents().get(0).getComponents().size());
-        Assert.assertEquals(0, result.getComponents().get(0).getComponents().get(0).getComponents().get(0).getComponents().get(0).getComponents().get(0).getComponents().size());
+        //~ TEST : With simple structure ( No diverge )
+        Component result = psFilterVisitor.visit(WORKSPACE_ID, new LatestCheckedInPSFilter(false), getPartMasterWith("PART-006"), -1, callbacks);
+        assertNotNull(result);
+        assertEquals("B",result.getRetainedIteration().getVersion());
+        assertEquals("PART-006",result.getPartMaster().getNumber());
 
-        //~ TESTED STRUCTURE : different releases with some different iterations, complex structured parts ( simulate real case )
+        assertEquals(3, result.getComponents().size());
+        assertEquals(1, result.getComponents().get(0).getComponents().size());
+        assertEquals("A",result.getComponents().get(0).getRetainedIteration().getPartVersion());
+        assertEquals("PART-012",result.getComponents().get(0).getPartMaster().getNumber());
+
+        assertEquals(3, result.getComponents().get(1).getComponents().size());
+        assertEquals("B",result.getComponents().get(1).getRetainedIteration().getPartVersion());
+        assertEquals("PART-002",result.getComponents().get(1).getPartMaster().getNumber());
+
+        assertEquals(0, result.getComponents().get(2).getComponents().size());
+        assertEquals("A",result.getComponents().get(2).getRetainedIteration().getPartVersion());
+        assertEquals("PART-004",result.getComponents().get(2).getPartMaster().getNumber());
+
+        //~ TEST : Complex structured parts ( No diverge )
+
+        //Only one iteration on last checked out revision
+        assertEquals("E",getPartMasterWith("PART-001").getLastRevision().getVersion());
+        assertTrue(getPartMasterWith("PART-001").getLastRevision().isCheckedOut());
+        assertEquals(1,getPartMasterWith("PART-001").getLastRevision().getPartIterations().size());
+        try {
+
+            psFilterVisitor.visit(WORKSPACE_ID, new LatestCheckedInPSFilter(false), getPartMasterWith("PART-001"), -1, callbacks);
+            fail();
+        }catch (NotAllowedException e){
+
+            assertTrue(true);
+        }
+
+        //Add new iteration with same members than last iteration
+        addIterationTo("PART-001",
+                getPartMasterWith("PART-001").getLastRevision().createNextIteration(user));
+
+        assertEquals("E",getPartMasterWith("PART-001").getLastRevision().getVersion());
+        assertTrue(getPartMasterWith("PART-001").getLastRevision().isCheckedOut());
+        assertEquals(2,getPartMasterWith("PART-001").getLastRevision().getPartIterations().size());
+
+        result = psFilterVisitor.visit(WORKSPACE_ID, new LatestCheckedInPSFilter(false), getPartMasterWith("PART-001"), -1, callbacks);
+        assertNotNull(result);
+        assertEquals(1, result.getRetainedIteration().getIteration());
+
+        //#### TEST VISIT METHOD WITH PART LINKS AS PARAMETER
     }
 
     @Test
     public void visitLatestReleasedFilterTest() throws Exception {
 
         //#### TEST VISIT METHOD WITH PART MASTER AS PARAMETER
-        //~ TESTED STRUCTURE : Any Released
+        //~ TEST : None Released
         try{
 
             psFilterVisitor.visit(WORKSPACE_ID, new LatestReleasedPSFilter(false), getPartMasterWith(defaultPartsNumber_list[5]), -1, callbacks);
@@ -82,6 +123,8 @@ public class PSFilterVisitorTest {
             Assert.assertTrue(true);
         }
     }
+
+    //############################## HELPER METHODS ##############################
 
     private PSFilterVisitorCallbacks createCallBack(){
 

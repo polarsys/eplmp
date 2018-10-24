@@ -16,8 +16,10 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.polarsys.eplmp.core.product.PartIteration;
+import org.polarsys.eplmp.core.product.PartLink;
 import org.polarsys.eplmp.core.product.PartMaster;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.Assert.*;
@@ -42,9 +44,9 @@ public class LatestReleasedPSFilterTest {
         String[] members = {};
 
         // released <=> true
-        addRevisionWithPartLinkTo(partMaster, members, false); // revision B
-        addRevisionWithPartLinkTo(partMaster, members, false); // revision C
-        addRevisionWithPartLinkTo(partMaster, members, true);  // revision D
+        addRevisionWithPartLinkTo(partMaster, members, false, false); // revision B
+        addRevisionWithPartLinkTo(partMaster, members, false, false); // revision C
+        addRevisionWithPartLinkTo(partMaster, members, true, false);  // revision D
 
         List<PartIteration> result =  latestReleasedPSFilter.filter(partMaster);
 
@@ -56,9 +58,9 @@ public class LatestReleasedPSFilterTest {
 
         partMaster = getPartMasterWith("PART-002");
         partMaster.getLastRevision().release(user);
-        addRevisionWithPartLinkTo(partMaster, members, false); // revision B
-        addRevisionWithPartLinkTo(partMaster, members, false); // revision C
-        addRevisionWithPartLinkTo(partMaster, members, false); // revision D
+        addRevisionWithPartLinkTo(partMaster, members, false, false); // revision B
+        addRevisionWithPartLinkTo(partMaster, members, false, false); // revision C
+        addRevisionWithPartLinkTo(partMaster, members, false, false); // revision D
 
         result =  latestReleasedPSFilter.filter(partMaster);
 
@@ -69,9 +71,9 @@ public class LatestReleasedPSFilterTest {
         //--------------------------
 
         partMaster = getPartMasterWith("PART-003");
-        addRevisionWithPartLinkTo(partMaster, members, false); // revision B
-        addRevisionWithPartLinkTo(partMaster, members, false); // revision C
-        addRevisionWithPartLinkTo(partMaster, members, false); // revision D
+        addRevisionWithPartLinkTo(partMaster, members, false, false); // revision B
+        addRevisionWithPartLinkTo(partMaster, members, false, false); // revision C
+        addRevisionWithPartLinkTo(partMaster, members, false, false); // revision D
 
         result =  latestReleasedPSFilter.filter(partMaster);
 
@@ -81,14 +83,40 @@ public class LatestReleasedPSFilterTest {
 
         partMaster = getPartMasterWith("PART-004");
         partMaster.getLastRevision().release(user);
-        addRevisionWithPartLinkTo(partMaster, members, true); // revision B
-        addRevisionWithPartLinkTo(partMaster, members, true); // revision C
-        addRevisionWithPartLinkTo(partMaster, members, false);// revision D
+        addRevisionWithPartLinkTo(partMaster, members, true, false); // revision B
+        addRevisionWithPartLinkTo(partMaster, members, true, false); // revision C
+        addRevisionWithPartLinkTo(partMaster, members, false, false);// revision D
 
         result =  latestReleasedPSFilter.filter(partMaster);
 
         assertFalse(result.isEmpty());
         assertEquals(1,result.size());
         areThoseOfRevision("C", result, "PART-004");
+    }
+
+    @Test
+    public void filterTestWithListPartLinkAsParameterTest(){
+
+        generateSomeReleasedRevisionWithSubstitutesFor("PART-001");
+        //diverge not enable
+        PartMaster partMaster = getPartMasterWith("PART-001");
+
+        List<PartLink> links =  new ArrayList<>((partMaster.getLastRevision().getLastIteration().getComponents()));
+        List<PartLink> result  = latestReleasedPSFilter.filter(links);
+
+        assertFalse(result.isEmpty());
+        assertEquals(1,result.size());
+
+        //enable diverge
+        latestReleasedPSFilter = new LatestReleasedPSFilter(true);
+        result  = latestReleasedPSFilter.filter(links);
+
+        assertFalse(result.isEmpty());
+        assertEquals(5,result.size());
+        assertEquals("PART-016-UsageLink",result.get(0).getReferenceDescription());
+        assertEquals("PART-018-Substitute",result.get(1).getReferenceDescription());
+        assertEquals("PART-015-Substitute",result.get(2).getReferenceDescription());
+        assertEquals("PART-009-Substitute",result.get(3).getReferenceDescription());
+        assertEquals("PART-012-Substitute",result.get(4).getReferenceDescription());
     }
 }

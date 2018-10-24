@@ -78,11 +78,11 @@ public class LatestCheckedInPSFilterTest {
 
         String[] members_008 = {"PART-004","PART-015"};
 
-        //released <=> true
-        addRevisionWithPartLinkTo(getPartMasterWith("PART-008"), members_008, false);
+        //released <=> true, checkout <=> true
+        addRevisionWithPartLinkTo(getPartMasterWith("PART-008"), members_008, false, false);
 
         String[] members =  {"PART-007","PART-008"};
-        addRevisionWithPartLinkTo(partMaster, members, false);
+        addRevisionWithPartLinkTo(partMaster, members, false, false);
 
         links =  new ArrayList<>((partMaster.getLastRevision().getLastIteration().getComponents()));
         result  = latestCheckedInPSFilter.filter(links);
@@ -109,18 +109,6 @@ public class LatestCheckedInPSFilterTest {
 
     //############################################ HELPERS METHODS ############################################
 
-    /**
-     *
-     *  We'll add some revision parts to an existing which we'll transform
-     *  according to following description :
-     *
-     *      PART-OO1
-     *          |-> Default ( version A ) : check In with 1 PartIterations
-     *          |-> REV-001 ( version B ) : check out with 3 PartIterations
-     *          |-> REV-002 ( version C ) : check out with 2 PartIterations
-     *          |-> REV-003 ( version D ) : check In with 2 PartIterations
-     *
-     */
     private void setPartForLatestCheckInTest(){
 
         // Notice : each parts created by ProductUtil class have a least one revision with one iteration
@@ -131,17 +119,17 @@ public class LatestCheckedInPSFilterTest {
 
         // checkedout <=> true
         addRevisionToPartWith("PART-001", revision, true);
-        addIterationToRevision(revision.getVersion(), "PART-001", revision.createNextIteration(user));
-        addIterationToRevision(revision.getVersion(), "PART-001", revision.createNextIteration(user));
+        addIterationTo("PART-001", revision.createNextIteration(user));
+        addIterationTo("PART-001", revision.createNextIteration(user));
 
         //Create REV-002
         revision = part.createNextRevision(user);
         addRevisionToPartWith("PART-001", revision, true);
-        addIterationToRevision(revision.getVersion(), "PART-001", revision.createNextIteration(user));
+        addIterationTo("PART-001", revision.createNextIteration(user));
 
         //Create REV-003
         revision = part.createNextRevision(user);
         addRevisionToPartWith("PART-001", revision, false);
-        addIterationToRevision(revision.getVersion(), "PART-001", revision.createNextIteration(user));
+        addIterationTo("PART-001", revision.createNextIteration(user));
     }
 }

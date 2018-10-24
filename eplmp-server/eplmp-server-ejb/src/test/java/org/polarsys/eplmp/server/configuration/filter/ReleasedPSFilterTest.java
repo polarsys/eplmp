@@ -36,7 +36,7 @@ public class ReleasedPSFilterTest {
 
         createTestableParts();
         releasedPSFilter = new ReleasedPSFilter(false);
-        createReleasedRevisionsForTestWith("PART-001");
+        generateSomeReleasedRevisionWithSubstitutesFor("PART-001");
     }
 
     @Test
@@ -77,42 +77,5 @@ public class ReleasedPSFilterTest {
         assertEquals("PART-015-Substitute",result.get(2).getReferenceDescription());
         assertEquals("PART-009-Substitute",result.get(3).getReferenceDescription());
         assertEquals("PART-012-Substitute",result.get(4).getReferenceDescription());
-    }
-
-    //############################################ HELPERS METHODS ############################################
-
-    private void createReleasedRevisionsForTestWith(String partNumber){
-
-        PartMaster partMaster = getPartMasterWith(partNumber);
-
-        //Configure members of partMaster
-        String[] membersPartMaster = {"PART-006","PART-003","PART-005","PART-008","PART-007"};
-        String[] membersPartMasterRevisionK = {"PART-011","PART-012","PART-008","PART-007","PART-016"};
-
-        //configure substitutes of members
-        String[] subtitutesForPart011 = {"PART-014"};
-        String[] subtitutesForPart012 = {"PART-015"};
-        String[] subtitutesForPart016 = {"PART-018","PART-015","PART-009","PART-012"};
-        String[] subtitutesForPart007 = {"PART-002","PART-005"};
-        String[] subtitutesForPart008 = {"PART-004"};
-
-        // true <=> released
-        addRevisionWithPartLinkTo(partMaster, membersPartMaster, true);//  revision B
-        addRevisionWithPartLinkTo(partMaster, membersPartMaster, false);// revision C
-        addRevisionWithPartLinkTo(partMaster, membersPartMaster, true);//  revision D
-        addRevisionWithPartLinkTo(partMaster, membersPartMaster, false);// revision E
-        addRevisionWithPartLinkTo(partMaster, membersPartMaster, false);// revision F
-        addRevisionWithPartLinkTo(partMaster, membersPartMaster, true);//  revision G
-        addRevisionWithPartLinkTo(partMaster, membersPartMaster, true);//  revision H
-        addRevisionWithPartLinkTo(partMaster, membersPartMaster, false);// revision I
-        addRevisionWithPartLinkTo(partMaster, membersPartMaster, true);//  revision J
-        addRevisionWithPartLinkTo(partMaster, membersPartMasterRevisionK, true);//  revision K
-
-        //Add substitutes to members in revision K
-        addSubstituteInLastIterationOfLastRevisionTo(partMaster,subtitutesForPart011,"PART-011");
-        addSubstituteInLastIterationOfLastRevisionTo(partMaster,subtitutesForPart012,"PART-012");
-        addSubstituteInLastIterationOfLastRevisionTo(partMaster,subtitutesForPart016,"PART-016");
-        addSubstituteInLastIterationOfLastRevisionTo(partMaster,subtitutesForPart007,"PART-007");
-        addSubstituteInLastIterationOfLastRevisionTo(partMaster,subtitutesForPart008,"PART-008");
     }
 }

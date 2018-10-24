@@ -131,7 +131,7 @@ public class ProductUtil {
     };
 
     private static Workspace workspace;
-    public static User user;
+    public static User user = new User();
     private static List<String> createdNumber_list = new ArrayList<>();
     protected static List<PartMaster> existingPart_list = new ArrayList<>();
     private static Comparator<CharSequence> STRING_COMPARATOR = new AlphanumericComparator();
@@ -150,7 +150,8 @@ public class ProductUtil {
 
         workspace = new Workspace();
         Account account = new Account(USER_1_LOGIN,USER_1_LOGIN,USER_1_MAIL,"en",new Date(),"GMT");
-        user = new User(workspace,account);
+        user.setWorkspace(workspace);
+        user.setAccount(account);
 
         workspace.setEnabled(true);
         workspace.setFolderLocked(false);
@@ -201,6 +202,11 @@ public class ProductUtil {
 
     public static void addRevisionToPartWith(String partNumber, PartRevision revision, boolean checedkout){
 
+
+        if(checedkout){
+
+            revision.setCheckOutUser(new User());//for metadata
+        }
         //avoid double
         if(getRevisionWith(revision.getVersion(),partNumber,
                 ( (List<PartRevision>)getPartMetaData(partNumber).get(REVISIONS_MAP_KEY)).size()) != null){
@@ -208,18 +214,15 @@ public class ProductUtil {
             return;
         }
 
-        if(checedkout){
-
-            revision.setCheckOutUser(user);
-        }
-
         ((List<PartRevision>)getPartMetaData(partNumber).get(REVISIONS_MAP_KEY)).add(revision);
     }
 
-    public static void addRevisionWithPartLinkTo(PartMaster partMaster, String[] usageMembers, boolean released){
+    public static void addRevisionWithPartLinkTo(PartMaster partMaster, String[] usageMembers, boolean released, boolean checkout){
 
         PartRevision partRevision = partMaster.createNextRevision(user);
         PartIteration partIteration = partRevision.createNextIteration(user);
+        partIteration.setCheckInDate(new Date());
+        partIteration.setCreationDate(new Date());
         List<PartUsageLink> usage = new ArrayList<>();
         for(String member : usageMembers){
 
@@ -238,15 +241,18 @@ public class ProductUtil {
         }
 
         //update meta data
-        addIterationToRevision(partRevision.getVersion(), partMaster.getNumber(), partIteration);
-        addRevisionToPartWith(partMaster.getNumber(), partRevision, false);
+        addIterationTo(partMaster.getNumber(), partIteration);
+        addRevisionToPartWith(partMaster.getNumber(), partRevision, checkout);
     }
 
-    public static void addIterationToRevision(String version, String forPartNumber, PartIteration iteration){
+    public static void addIterationTo(String partNumber, PartIteration iteration){
 
-        if(!exist(iteration.getIteration(),forPartNumber)){
+        if(!exist(iteration.getIteration(),partNumber)){
 
-            ((List<PartIteration>)getPartMetaData(forPartNumber).get(ITERATION_MAP_KEY)).add(iteration);
+            iteration.setComponents(getPartMasterWith(partNumber)
+                    .getLastRevision().getLastIteration()
+                    .getComponents());
+            ((List<PartIteration>)getPartMetaData(partNumber).get(ITERATION_MAP_KEY)).add(iteration);
         }
     }
 
@@ -271,6 +277,7 @@ public class ProductUtil {
                     partSubstituteLink.setReferenceDescription(substituteTab[i]+"-Substitute");
                     substituteLinks.add(partSubstituteLink);
                     partUsageLink.setSubstitutes(substituteLinks);
+                    partUsageLink.setOptional(true);
                 }
 
             }
@@ -278,11 +285,6 @@ public class ProductUtil {
 
         //update meta data
         setPartIterationsOf(partMaster.getNumber(), partMaster.getLastRevision().getPartIterations());
-    }
-
-    private static HashMap<String, Object> getPartMetaData(String number){
-
-        return metaData_list.get(number);
     }
 
     public static void areThoseOfRevision(String version, List<PartIteration> inList, String forPartNumber){
@@ -293,6 +295,182 @@ public class ProductUtil {
             assertEquals(version, pI.getPartRevision().getVersion());
             assertFalse(pI.getPartRevision().isCheckedOut());
         }
+    }
+
+    // warning : you can reuse but do not change implementation may have impact on filters test
+    public static void generateSomeReleasedRevisionWithSubstitutesFor(String partNumber){
+
+        PartMaster partMaster = getPartMasterWith(partNumber);
+
+        //Configure members of partMaster
+        String[] membersPartMaster = {"PART-006","PART-003","PART-005","PART-008","PART-007"};
+        String[] membersPartMasterRevisionK = {"PART-011","PART-012","PART-008","PART-007","PART-016"};
+
+        //configure substitutes of members
+        String[] subtitutesForPart011 = {"PART-014"};
+        String[] subtitutesForPart012 = {"PART-015"};
+        String[] subtitutesForPart016 = {"PART-018","PART-015","PART-009","PART-012"};
+        String[] subtitutesForPart007 = {"PART-002","PART-005"};
+        String[] subtitutesForPart008 = {"PART-004"};
+
+        // true <=> released
+        addRevisionWithPartLinkTo(partMaster, membersPartMaster, true, false);//  revision B
+        addRevisionWithPartLinkTo(partMaster, membersPartMaster, false, false);// revision C
+        addRevisionWithPartLinkTo(partMaster, membersPartMaster, true, false);//  revision D
+        addRevisionWithPartLinkTo(partMaster, membersPartMaster, false, false);// revision E
+        addRevisionWithPartLinkTo(partMaster, membersPartMaster, false, false);// revision F
+        addRevisionWithPartLinkTo(partMaster, membersPartMaster, true, false);//  revision G
+        addRevisionWithPartLinkTo(partMaster, membersPartMaster, true, false);//  revision H
+        addRevisionWithPartLinkTo(partMaster, membersPartMaster, false, false);// revision I
+        addRevisionWithPartLinkTo(partMaster, membersPartMaster, true, false);//  revision J
+        addRevisionWithPartLinkTo(partMaster, membersPartMasterRevisionK, true, false);// revision K
+
+        //Add substitutes to members in revision K
+        addSubstituteInLastIterationOfLastRevisionTo(partMaster, subtitutesForPart011, "PART-011");
+        addSubstituteInLastIterationOfLastRevisionTo(partMaster, subtitutesForPart012, "PART-012");
+        addSubstituteInLastIterationOfLastRevisionTo(partMaster, subtitutesForPart016, "PART-016");
+        addSubstituteInLastIterationOfLastRevisionTo(partMaster, subtitutesForPart007, "PART-007");
+        addSubstituteInLastIterationOfLastRevisionTo(partMaster, subtitutesForPart008, "PART-008");
+    }
+
+    /**
+     *
+     * BASIC STRUCTURE BUILT : None released but last revision is checked out
+     *      Syntax : PART-NUMBER-REVISION-ITERATION
+     *
+     *  PART-001-A-1 ( Default )
+     *      |-> PART-007-A-1
+     *      |-> PART-008-A-1
+     *
+     *  PART-001-B-1
+     *      |-> PART-002-B-1
+     *              |-> PART-009-A-1
+     *              |-> PART-010-A-1
+     *              |-> PART-011-A-1
+     *      |-> PART-006-B-1
+     *              |-> PART-012-A-1
+     *                     |-> PART-015
+     *              |-> PART-002-B-1
+     *                     |-> PART-009-A-1
+     *                     |-> PART-010-A-1
+     *                     |-> PART-011-A-1
+     *              |-> PART-004-A-1
+     *      |-> PART-0018-B-1
+     *              |-> PART-003-A-1
+     *              |-> PART-014-A-1
+     *
+     *  PART-001-C-1 ( same for PART-001-D-1 )
+     *      |-> PART-002-B-1
+     *              |-> PART-009-A-1
+     *              |-> PART-010-A-1
+     *              |-> PART-011-A-1
+     *      |-> PART-006-B-1
+     *              |-> PART-012-A-1
+     *                     |-> PART-015
+     *              |-> PART-002-B-1
+     *                     |-> PART-009-A-1
+     *                     |-> PART-010-A-1
+     *                     |-> PART-011-A-1
+     *              |-> PART-004-A-1
+     *      |-> PART-015-B-1
+     *              |-> PART-007-B-1
+     *                     |-> PART-009-A-1
+     *              |-> PART-008-B-1
+     *                      |-> PART-013-A-1
+     *                          |--> PART-016-A-1
+     *                                  |-->PART-018-A-1
+     *                                          |--> PART-019-A-1
+     *                                                  |--> PART-020-A-1
+     *              |-> PART-004-A-1
+     *
+     *  PART-001-E-1 ( checked out )
+     *      |-> PART-002-B-1
+     *              |-> PART-009-A-1
+     *              |-> PART-010-A-1
+     *              |-> PART-011-A-1
+     *      |-> PART-006-B-1
+     *              |-> PART-012-A-1
+     *                  |-> PART-015-B-1
+     *                      |-> PART-007-B-1
+     *                          |-> PART-009-A-1
+     *                      |-> PART-014-A-1
+     *              |-> PART-002-B-1
+     *                     |-> PART-009-A-1
+     *                     |-> PART-010-A-1
+     *                     |-> PART-011-A-1
+     *              |-> PART-004-A-1
+     *      |-> PART-007-B-1
+     *              |-> PART-009-A-1
+     *      |-> PART-008-B-1
+     *              |-> PART-013-A-1
+     *                     |--> PART-016-A-1
+     *                             |-->PART-018-A-1
+     *                                     |--> PART-019-A-1
+     *                                             |--> PART-020-A-1
+     *              |-> PART-020-A-1
+     *              |-> PART-019-A-1
+     *                     |-> PART-020-A-1
+     *
+     */
+    public static void buildBasicStructure(){
+
+        //No released and only last revision checked out
+
+        //Set the root part members
+        PartMaster partMaster = getPartMasterWith("PART-001");
+
+        //addRevisionWithPartLinkTo(partMaster, membersRevisionX, released <=> true, checkout <=> true )
+        String[] membersRevisionB = {"PART-002","PART-006","PART-018"};
+        String[] membersRevisionC = {"PART-002","PART-006","PART-015"};
+        String[] membersRevisionD = {"PART-002","PART-006","PART-015"};
+        String[] membersRevisionE = {"PART-002","PART-006","PART-007","PART-008"};
+
+        //Set parts master's members
+        PartMaster part002 = getPartMasterWith("PART-002");
+        String[] membersRevisionB002 = {"PART-009","PART-010","PART-011"};
+        addRevisionWithPartLinkTo(part002, membersRevisionB002, false, false);
+
+        PartMaster part006 = getPartMasterWith("PART-006");
+        String[] membersRevisionB006 = {"PART-012","PART-002","PART-004"};
+        addRevisionWithPartLinkTo(part006, membersRevisionB006, false, false);
+
+        PartMaster part018 = getPartMasterWith("PART-018");
+        String[] membersRevisionB018 = {"PART-003","PART-014"};
+        addRevisionWithPartLinkTo(part018, membersRevisionB018, false, false);
+
+        PartMaster part015 =  getPartMasterWith("PART-015");
+        String[] membersRevisionB015 = {"PART-007","PART-008","PART-004"};
+        addRevisionWithPartLinkTo(part015, membersRevisionB015, false, false);
+
+        PartMaster part007 = getPartMasterWith("PART-007");
+        String[] membersRevisionB007 = {"PART-009"};
+        addRevisionWithPartLinkTo(part007, membersRevisionB007, false, false);
+
+        PartMaster part008 =  getPartMasterWith("PART-008");
+        String[] membersRevisionB008 = {"PART-013","PART-020","PART-019"};
+        addRevisionWithPartLinkTo(part008, membersRevisionB008, false, false);
+
+        //Add revision to part master
+        addRevisionWithPartLinkTo(partMaster, membersRevisionB, false, false);
+        addRevisionWithPartLinkTo(partMaster, membersRevisionC, false, false);
+        addRevisionWithPartLinkTo(partMaster, membersRevisionD, false, false);
+        addRevisionWithPartLinkTo(partMaster, membersRevisionE, false, true);//CheckedOut revision
+
+        //Add substitutes to some parts ( optional parts )
+        String[] substitutes013 = {"PART-007"};
+        String[] substitutes004 = {"PART-010"};
+        String[] substitutes011 = {"PART-016","PART-012","PART-008"};
+
+        addSubstituteInLastIterationOfLastRevisionTo(part008, substitutes013 , "PART-013");
+        addSubstituteInLastIterationOfLastRevisionTo(part015, substitutes004 , "PART-004");
+        addSubstituteInLastIterationOfLastRevisionTo(part002, substitutes011 , "PART-011");
+    }
+
+    //######################### PRIVATE METHODS #########################
+
+    private static HashMap<String, Object> getPartMetaData(String number){
+
+        return metaData_list.get(number);
     }
 
     /**
