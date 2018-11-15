@@ -21,12 +21,12 @@ import java.text.MessageFormat;
  * @author Florent Garin
  */
 public class WorkspaceAlreadyExistsException extends EntityAlreadyExistsException {
-    private final Workspace mWorkspace;
 
+    private final String mWorkspaceId;
     
-    public WorkspaceAlreadyExistsException(String pMessage) {
-        super(pMessage);
-        mWorkspace=null;
+    public WorkspaceAlreadyExistsException(String workspaceId) {
+        super();
+        mWorkspaceId = workspaceId;
     }
     
     public WorkspaceAlreadyExistsException(Workspace pWorkspace) {
@@ -35,12 +35,12 @@ public class WorkspaceAlreadyExistsException extends EntityAlreadyExistsExceptio
 
     public WorkspaceAlreadyExistsException(Workspace pWorkspace, Throwable pCause) {
         super( pCause);
-        mWorkspace=pWorkspace;
+        mWorkspaceId = pWorkspace.getId();
     }
 
     @Override
     public String getLocalizedMessage() {
         String message = getBundleDefaultMessage();
-        return MessageFormat.format(message,mWorkspace);     
+        return MessageFormat.format(message, mWorkspaceId);
     }
 }

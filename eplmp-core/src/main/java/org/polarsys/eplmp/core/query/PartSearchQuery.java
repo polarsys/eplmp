@@ -33,10 +33,10 @@ public class PartSearchQuery extends SearchQuery {
 
     }
 
-    public PartSearchQuery(String workspaceId, String fullText, String partNumber, String name, String version,
+    public PartSearchQuery(String workspaceId, String queryString, String partNumber, String name, String version,
                            String author, String type, Date creationDateFrom, Date creationDateTo, Date modificationDateFrom,
                            Date modificationDateTo, SearchQuery.AbstractAttributeQuery[] attributes, String[] tags, Boolean standardPart, String content, boolean fetchHeadOnly) {
-        super(workspaceId, fullText, version, author, type, creationDateFrom, creationDateTo, modificationDateFrom,
+        super(workspaceId, queryString, version, author, type, creationDateFrom, creationDateTo, modificationDateFrom,
                 modificationDateTo, attributes, tags, content, fetchHeadOnly);
         this.partNumber = partNumber;
         this.name = name;

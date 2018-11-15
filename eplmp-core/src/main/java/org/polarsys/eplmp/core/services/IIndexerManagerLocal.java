@@ -13,10 +13,7 @@ package org.polarsys.eplmp.core.services;
 
 import org.polarsys.eplmp.core.document.DocumentIteration;
 import org.polarsys.eplmp.core.document.DocumentRevision;
-import org.polarsys.eplmp.core.exceptions.AccessRightException;
-import org.polarsys.eplmp.core.exceptions.AccountNotFoundException;
-import org.polarsys.eplmp.core.exceptions.NotAllowedException;
-import org.polarsys.eplmp.core.exceptions.WorkspaceNotFoundException;
+import org.polarsys.eplmp.core.exceptions.*;
 import org.polarsys.eplmp.core.product.PartIteration;
 import org.polarsys.eplmp.core.product.PartRevision;
 import org.polarsys.eplmp.core.query.DocumentSearchQuery;
@@ -26,7 +23,7 @@ import java.util.List;
 
 public interface IIndexerManagerLocal {
 
-    void createWorkspaceIndex(String workspaceId);
+    void createWorkspaceIndex(String workspaceId) throws WorkspaceAlreadyExistsException;
 
     void deleteWorkspaceIndex(String workspaceId) throws AccountNotFoundException;
 
@@ -42,9 +39,9 @@ public interface IIndexerManagerLocal {
 
     void removePartIterationFromIndex(PartIteration partIteration);
 
-    List<DocumentRevision> searchDocumentRevisions(DocumentSearchQuery documentSearchQuery, int from, int size) throws AccountNotFoundException, NotAllowedException;
+    List<DocumentRevision> searchDocumentRevisions(DocumentSearchQuery documentSearchQuery, int from, int size) throws AccountNotFoundException, IndexerNotAvailableException, IndexerRequestException;
 
-    List<PartRevision> searchPartRevisions(PartSearchQuery partSearchQuery, int from, int size) throws AccountNotFoundException, NotAllowedException;
+    List<PartRevision> searchPartRevisions(PartSearchQuery partSearchQuery, int from, int size) throws AccountNotFoundException, IndexerNotAvailableException, IndexerRequestException;
 
     void indexAllWorkspacesData() throws AccountNotFoundException;
 

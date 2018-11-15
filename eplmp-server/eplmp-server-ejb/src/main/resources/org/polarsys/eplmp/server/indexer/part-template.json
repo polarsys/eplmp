@@ -1,0 +1,20 @@
+{
+  "index_patterns": ["eplmp-*-parts"],
+  "settings": {
+  },
+  "mappings": {
+    "_doc": {
+      "properties": {
+        "partName": {
+          "type": "text"
+        },
+        "partNumber": {
+          "type": "keyword"
+        },
+        "standardPart" : {
+          "type" : "boolean"
+        }
+      }
+    }
+  }
+}
