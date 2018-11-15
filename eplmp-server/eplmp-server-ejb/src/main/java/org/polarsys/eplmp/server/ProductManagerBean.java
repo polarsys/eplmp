@@ -1094,7 +1094,8 @@ public class ProductManagerBean implements IProductManagerLocal {
 
     @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
     @Override
-    public List<PartRevision> searchPartRevisions(PartSearchQuery pQuery, int from, int size) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, WorkspaceNotEnabledException, AccountNotFoundException, NotAllowedException {
+    public List<PartRevision> searchPartRevisions(PartSearchQuery pQuery, int from, int size)
+            throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, WorkspaceNotEnabledException, AccountNotFoundException, NotAllowedException, IndexerRequestException, IndexerNotAvailableException {
         User user = userManager.checkWorkspaceReadAccess(pQuery.getWorkspaceId());
         List<PartRevision> fetchedPartRs = indexerManager.searchPartRevisions(pQuery, from, size);
         // Get Search Results

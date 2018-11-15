@@ -11,41 +11,118 @@
 
 package org.polarsys.eplmp.server.indexer;
 
+import io.searchbox.core.Update;
 import org.apache.lucene.search.join.ScoreMode;
+import org.elasticsearch.common.Strings;
+import org.elasticsearch.common.xcontent.XContentBuilder;
+import org.elasticsearch.common.xcontent.XContentFactory;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.NestedQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
+import org.polarsys.eplmp.core.document.DocumentIteration;
+import org.polarsys.eplmp.core.product.PartIteration;
 import org.polarsys.eplmp.core.query.DocumentSearchQuery;
 import org.polarsys.eplmp.core.query.PartSearchQuery;
 import org.polarsys.eplmp.core.query.SearchQuery;
+import org.polarsys.eplmp.server.indexer.util.EntityMapper;
+import org.polarsys.eplmp.server.indexer.util.IndexerMapping;
+import org.polarsys.eplmp.server.indexer.util.IndicesUtils;
 
+import javax.ejb.Stateless;
+import javax.inject.Inject;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
+ * Builds elasticsearch requests
+ *
  * @author Morgan Guimard
  */
+@Stateless(name = "IndexerQueryBuilder")
 public class IndexerQueryBuilder {
 
-    public static QueryBuilder getSearchQueryBuilder(DocumentSearchQuery documentSearchQuery) {
-        BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
-        List<QueryBuilder> documentQueries = getDocumentQueries(documentSearchQuery);
-        documentQueries.forEach(boolQueryBuilder::must);
-        return boolQueryBuilder;
+    @Inject
+    private IndexerTextExtractor textExtractor;
+
+    private static final String FUZZINESS = "AUTO";
+
+    /**
+     * Creates an index request for given document
+     *
+     * @param documentIteration
+     * @return
+     * @throws IOException
+     */
+    public Update.Builder updateRequest(DocumentIteration documentIteration) throws IOException {
+        Map<String, String> contentInputs = textExtractor.getContentInputs(documentIteration.getAttachedFiles());
+        try (XContentBuilder xcb = XContentFactory.jsonBuilder()) {
+            xcb.startObject()
+                    .field("doc_as_upsert", true)
+                    .startObject("doc");
+            EntityMapper.documentIterationToJSON(xcb, documentIteration, contentInputs);
+            xcb.endObject().endObject();
+            return new Update.Builder(Strings.toString(xcb))
+                    .index(IndicesUtils.getIndexName(documentIteration.getWorkspaceId(), IndexerMapping.INDEX_DOCUMENTS))
+                    .type(IndexerMapping.TYPE)
+                    .id(documentIteration.getKey().toString());
+        }
+    }
+    /**
+     * Creates an index request for given part
+     *
+     * @param partIteration
+     * @return
+     * @throws IOException
+     */
+    public Update.Builder updateRequest(PartIteration partIteration) throws IOException {
+        Map<String, String> contentInputs = textExtractor.getContentInputs(partIteration.getAttachedFiles());
+        try (XContentBuilder xcb = XContentFactory.jsonBuilder()) {
+            xcb.startObject()
+                    .field("doc_as_upsert", true)
+                    .startObject("doc");
+            EntityMapper.partIterationToJSON(xcb, partIteration, contentInputs);
+            xcb.endObject().endObject();
+            return new Update.Builder(Strings.toString(xcb))
+                    .index(IndicesUtils.getIndexName(partIteration.getWorkspaceId(), IndexerMapping.INDEX_PARTS))
+                    .type(IndexerMapping.TYPE)
+                    .id(partIteration.getKey().toString());
+        }
     }
 
-    public static QueryBuilder getSearchQueryBuilder(PartSearchQuery partSearchQuery) {
-        BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
-        List<QueryBuilder> partQueries = getPartQueries(partSearchQuery);
-        partQueries.forEach(boolQueryBuilder::must);
-        return boolQueryBuilder;
+
+    /**
+     * Create the search query builder from given document search query
+     *
+     * @param documentSearchQuery
+     * @return
+     */
+    public QueryBuilder getSearchQueryBuilder(DocumentSearchQuery documentSearchQuery) {
+        BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
+        List<QueryBuilder> documentQueries = createQueries(documentSearchQuery);
+        documentQueries.forEach(boolQuery::must);
+        return boolQuery;
+    }
+
+    /**
+     * Create the search query builder from given part search query
+     *
+     * @param partSearchQuery
+     * @return
+     */
+    public QueryBuilder getSearchQueryBuilder(PartSearchQuery partSearchQuery) {
+        BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
+        List<QueryBuilder> partQueries = createQueries(partSearchQuery);
+        partQueries.forEach(boolQuery::must);
+        return boolQuery;
     }
 
 
-    private static List<QueryBuilder> getDocumentQueries(DocumentSearchQuery documentSearchQuery) {
+    private List<QueryBuilder> createQueries(DocumentSearchQuery documentSearchQuery) {
         List<QueryBuilder> queries = new ArrayList<>();
 
         String docMId = documentSearchQuery.getDocMId();
@@ -53,47 +130,47 @@ public class IndexerQueryBuilder {
         String folder = documentSearchQuery.getFolder();
 
         if (docMId != null && !docMId.isEmpty()) {
-            queries.add(QueryBuilders.multiMatchQuery(docMId, IndexerMapping.DOCUMENT_ID_KEY).fuzziness("AUTO"));
+            queries.add(QueryBuilders.multiMatchQuery(docMId, IndexerMapping.DOCUMENT_ID_KEY).fuzziness(FUZZINESS));
         }
 
         if (title != null && !title.isEmpty()) {
-            queries.add(QueryBuilders.multiMatchQuery(title, IndexerMapping.TITLE_KEY).fuzziness("AUTO"));
+            queries.add(QueryBuilders.multiMatchQuery(title, IndexerMapping.TITLE_KEY).fuzziness(FUZZINESS));
         }
 
         if (folder != null && !folder.isEmpty()) {
-            queries.add(QueryBuilders.multiMatchQuery(folder, IndexerMapping.FOLDER_KEY).fuzziness("AUTO"));
+            queries.add(QueryBuilders.multiMatchQuery(folder, IndexerMapping.FOLDER_KEY).fuzziness(FUZZINESS));
         }
 
-        queries.addAll(getCommonQueries(documentSearchQuery));
+        queries.addAll(createCommonQueries(documentSearchQuery));
 
         return queries;
     }
 
-    private static List<QueryBuilder> getPartQueries(PartSearchQuery partSearchQuery) {
+    private List<QueryBuilder> createQueries(PartSearchQuery partSearchQuery) {
         List<QueryBuilder> queries = new ArrayList<>();
 
         String partNumber = partSearchQuery.getPartNumber();
         String partName = partSearchQuery.getName();
 
         if (partNumber != null && !partNumber.isEmpty()) {
-            queries.add(QueryBuilders.multiMatchQuery(partNumber, IndexerMapping.PART_NUMBER_KEY).fuzziness("AUTO"));
+            queries.add(QueryBuilders.multiMatchQuery(partNumber, IndexerMapping.PART_NUMBER_KEY).fuzziness(FUZZINESS));
         }
 
         if (partName != null && !partName.isEmpty()) {
-            queries.add(QueryBuilders.multiMatchQuery(partName, IndexerMapping.PART_NAME_KEY).fuzziness("AUTO"));
+            queries.add(QueryBuilders.multiMatchQuery(partName, IndexerMapping.PART_NAME_KEY).fuzziness(FUZZINESS));
         }
 
-        queries.addAll(getCommonQueries(partSearchQuery));
+        queries.addAll(createCommonQueries(partSearchQuery));
 
         return queries;
     }
 
-    private static List<QueryBuilder> getCommonQueries(SearchQuery searchQuery) {
+    private List<QueryBuilder> createCommonQueries(SearchQuery searchQuery) {
 
         String[] tags = searchQuery.getTags();
         SearchQuery.AbstractAttributeQuery[] attributes = searchQuery.getAttributes();
 
-        String fullText = searchQuery.getFullText();
+        String queryString = searchQuery.getQueryString();
 
         List<QueryBuilder> queries = new ArrayList<>();
 
@@ -102,12 +179,12 @@ public class IndexerQueryBuilder {
         }
         if (searchQuery.getAuthor() != null) {
             BoolQueryBuilder authorQuery = QueryBuilders.boolQuery();
-            authorQuery.should(QueryBuilders.multiMatchQuery(searchQuery.getAuthor(), IndexerMapping.AUTHOR_NAME_KEY).fuzziness("AUTO"));
-            authorQuery.should(QueryBuilders.multiMatchQuery(searchQuery.getAuthor(), IndexerMapping.AUTHOR_LOGIN_KEY).fuzziness("AUTO"));
+            authorQuery.should(QueryBuilders.multiMatchQuery(searchQuery.getAuthor(), IndexerMapping.AUTHOR_NAME_KEY).fuzziness(FUZZINESS));
+            authorQuery.should(QueryBuilders.multiMatchQuery(searchQuery.getAuthor(), IndexerMapping.AUTHOR_LOGIN_KEY).fuzziness(FUZZINESS));
             queries.add(authorQuery);
         }
         if (searchQuery.getType() != null) {
-            queries.add(QueryBuilders.multiMatchQuery(searchQuery.getType(), IndexerMapping.TYPE_KEY).fuzziness("AUTO"));
+            queries.add(QueryBuilders.multiMatchQuery(searchQuery.getType(), IndexerMapping.TYPE_KEY).fuzziness(FUZZINESS));
         }
 
         if (searchQuery.getCreationDateFrom() != null) {
@@ -140,47 +217,48 @@ public class IndexerQueryBuilder {
                     .forEach((attributeName, attributeList) -> addAttributeToQueries(queries, attributeName, attributeList));
         }
 
-        if (fullText != null && !fullText.isEmpty()) {
-            queries.add(QueryBuilders.matchQuery(IndexerMapping.ALL_FIELDS, fullText));
+        if (queryString != null && !queryString.isEmpty()) {
+            queries.add(QueryBuilders.matchQuery(IndexerMapping.ALL_FIELDS, queryString));
         }
 
         return queries;
     }
 
-    private static void addAttributeToQueries(List<QueryBuilder> queries, String attributeName, List<SearchQuery.AbstractAttributeQuery> attributeList) {
+    private void addAttributeToQueries(List<QueryBuilder> queries, String attributeName, List<SearchQuery.AbstractAttributeQuery> attributeList) {
 
-        BoolQueryBuilder attributeQueryBuilder = QueryBuilders.boolQuery();
+        BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
 
-        attributeQueryBuilder.must(QueryBuilders.nestedQuery(IndexerMapping.ATTRIBUTES_KEY,
+        boolQuery.must(QueryBuilders.nestedQuery(IndexerMapping.ATTRIBUTES_KEY,
                 QueryBuilders.termQuery(IndexerMapping.ATTRIBUTES_KEY + "." + IndexerMapping.ATTRIBUTE_NAME, attributeName), ScoreMode.None));
 
-        List<NestedQueryBuilder> nestedQueryBuilders = new ArrayList<>();
+        List<NestedQueryBuilder> nestedQueries = new ArrayList<>();
         BoolQueryBuilder valuesQuery = QueryBuilders.boolQuery();
 
         for (SearchQuery.AbstractAttributeQuery attr : attributeList) {
             String attributeValue = attr.toString();
             if (attributeValue != null && !attributeValue.isEmpty()) {
-                nestedQueryBuilders.add(QueryBuilders.nestedQuery(IndexerMapping.ATTRIBUTES_KEY,
+                nestedQueries.add(QueryBuilders.nestedQuery(IndexerMapping.ATTRIBUTES_KEY,
                         QueryBuilders.termQuery(IndexerMapping.ATTRIBUTES_KEY + "." + IndexerMapping.ATTRIBUTE_VALUE, attributeValue), ScoreMode.None));
 
             }
         }
 
+        // Use 'should' on same attribute name, and 'must' for different attribute names
         // Only request for attribute name if no values
         // Use bool must if only one value passed
         // Compound should queries if many values (but must not be empty)
-        if (!nestedQueryBuilders.isEmpty()) {
-            if (nestedQueryBuilders.size() == 1) {
-                attributeQueryBuilder.must(nestedQueryBuilders.get(0));
+        if (!nestedQueries.isEmpty()) {
+            if (nestedQueries.size() == 1) {
+                boolQuery.must(nestedQueries.get(0));
             } else {
-                nestedQueryBuilders.forEach(valuesQuery::should);
-                attributeQueryBuilder.must(valuesQuery);
-                attributeQueryBuilder.mustNot(QueryBuilders.nestedQuery(IndexerMapping.ATTRIBUTES_KEY,
+                nestedQueries.forEach(valuesQuery::should);
+                boolQuery.must(valuesQuery);
+                boolQuery.mustNot(QueryBuilders.nestedQuery(IndexerMapping.ATTRIBUTES_KEY,
                         QueryBuilders.termQuery(IndexerMapping.ATTRIBUTES_KEY + "." + IndexerMapping.ATTRIBUTE_VALUE, ""), ScoreMode.None));
             }
         }
 
-        queries.add(attributeQueryBuilder);
+        queries.add(boolQuery);
 
     }
 

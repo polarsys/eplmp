@@ -41,7 +41,7 @@ public class SearchQueryParser {
 
     public static DocumentSearchQuery parseDocumentStringQuery(String workspaceId, MultivaluedMap<String, String> query) {
 
-        String fullText = null;
+        String stringQuery = null;
         String pDocMId = null;
         String pTitle = null;
         String pVersion = null;
@@ -64,7 +64,7 @@ public class SearchQueryParser {
                 String value = values.get(0);
                 switch (filter) {
                     case "q":
-                        fullText = value;
+                        stringQuery = value;
                         break;
                     case "id":
                         pDocMId = value;
@@ -138,14 +138,14 @@ public class SearchQueryParser {
 
         DocumentSearchQuery.AbstractAttributeQuery[] pAttributesArray = pAttributes.toArray(new DocumentSearchQuery.AbstractAttributeQuery[0]);
 
-        return new DocumentSearchQuery(workspaceId, fullText, pDocMId, pTitle, pVersion, pAuthor, pType,
+        return new DocumentSearchQuery(workspaceId, stringQuery, pDocMId, pTitle, pVersion, pAuthor, pType,
                 pCreationDateFrom, pCreationDateTo, pModificationDateFrom, pModificationDateTo,
                 pAttributesArray, pTags, pContent, folder, fetchHeadOnly);
 
     }
 
     public static PartSearchQuery parsePartStringQuery(String workspaceId, MultivaluedMap<String, String> query) {
-        String fullText = null;
+        String stringQuery = null;
         String pNumber = null;
         String pName = null;
         String pVersion = null;
@@ -167,7 +167,7 @@ public class SearchQueryParser {
                 String value = values.get(0);
                 switch (filter) {
                     case "q":
-                        fullText = value;
+                        stringQuery = value;
                         break;
                     case "number":
                         pNumber = value;
@@ -237,7 +237,7 @@ public class SearchQueryParser {
 
         PartSearchQuery.AbstractAttributeQuery[] pAttributesArray = pAttributes.toArray(new PartSearchQuery.AbstractAttributeQuery[0]);
 
-        return new PartSearchQuery(workspaceId, fullText, pNumber, pName, pVersion, pAuthor, pType,
+        return new PartSearchQuery(workspaceId, stringQuery, pNumber, pName, pVersion, pAuthor, pType,
                 pCreationDateFrom, pCreationDateTo, pModificationDateFrom, pModificationDateTo,
                 pAttributesArray, pTags, standardPart, content, fetchHeadOnly);
 

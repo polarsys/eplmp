@@ -213,7 +213,7 @@ public class PartsResource {
             @ApiParam(required = false, value = "Start offset", defaultValue = "0") @QueryParam("from") int from,
             @ApiParam(required = false, value = "Max results", defaultValue = "10") @QueryParam("size") int size,
             @ApiParam(required = false, value = "Search mode (false for history / true for head only)") @QueryParam("fetchHeadOnly") boolean fetchHeadOnly)
-            throws EntityNotFoundException, UserNotActiveException, AccessRightException, NotAllowedException, WorkspaceNotEnabledException {
+            throws EntityNotFoundException, UserNotActiveException, AccessRightException, NotAllowedException, WorkspaceNotEnabledException, IndexerRequestException, IndexerNotAvailableException {
 
         PartSearchQuery partSearchQuery = SearchQueryParser.parsePartStringQuery(workspaceId, uri.getQueryParameters());
 

@@ -157,11 +157,7 @@ public class WorkspaceManagerBean implements IWorkspaceManagerLocal {
         userDAO.createUser(userToCreate);
         userDAO.addUserMembership(workspace, userToCreate);
 
-        try {
-            indexerManager.createWorkspaceIndex(pID);
-        } catch (Exception e) { // TODO review exception thrown
-            throw new WorkspaceAlreadyExistsException(workspace);
-        }
+        indexerManager.createWorkspaceIndex(pID);
 
         return workspace;
     }

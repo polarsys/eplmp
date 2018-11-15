@@ -38,7 +38,7 @@ public interface IDocumentManagerLocal {
 
     DocumentRevision getDocumentRevision(DocumentRevisionKey pDocRPK) throws WorkspaceNotFoundException, DocumentRevisionNotFoundException, NotAllowedException, UserNotFoundException, UserNotActiveException, AccessRightException, WorkspaceNotEnabledException;
 
-    DocumentRevision[] searchDocumentRevisions(DocumentSearchQuery pQuery, int from, int size) throws WorkspaceNotFoundException, UserNotFoundException, UserNotActiveException, WorkspaceNotEnabledException, AccountNotFoundException, NotAllowedException;
+    DocumentRevision[] searchDocumentRevisions(DocumentSearchQuery pQuery, int from, int size) throws WorkspaceNotFoundException, UserNotFoundException, UserNotActiveException, WorkspaceNotEnabledException, AccountNotFoundException, NotAllowedException, IndexerRequestException, IndexerNotAvailableException;
 
     DocumentMasterTemplate getDocumentMasterTemplate(DocumentMasterTemplateKey pKey) throws WorkspaceNotFoundException, DocumentMasterTemplateNotFoundException, UserNotFoundException, UserNotActiveException, WorkspaceNotEnabledException;
 
