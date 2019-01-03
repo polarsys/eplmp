@@ -57,6 +57,11 @@ public abstract class Effectivity implements Serializable {
         name = pName;
     }
 
+    public Effectivity(String pName, ConfigurationItem configurationItem) {
+        name = pName;
+        this.configurationItem = configurationItem;
+    }
+
     public int getId() {
         return id;
     }

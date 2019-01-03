@@ -22,18 +22,24 @@ import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 import org.mockito.internal.util.reflection.Whitebox;
+import org.polarsys.eplmp.core.common.Account;
 import org.polarsys.eplmp.core.common.User;
+import org.polarsys.eplmp.core.common.Workspace;
+import org.polarsys.eplmp.core.configuration.ProductBaselineType;
+import org.polarsys.eplmp.core.configuration.ProductConfigSpec;
 import org.polarsys.eplmp.core.configuration.ProductStructureFilter;
 import org.polarsys.eplmp.core.exceptions.EntityConstraintException;
+import org.polarsys.eplmp.core.exceptions.NotAllowedException;
+import org.polarsys.eplmp.core.exceptions.PartMasterNotFoundException;
+import org.polarsys.eplmp.core.meta.RevisionStatus;
 import org.polarsys.eplmp.core.product.*;
+import org.polarsys.eplmp.server.configuration.spec.SerialNumberBasedEffectivityConfigSpec;
 import org.polarsys.eplmp.server.dao.PartMasterDAO;
 import org.polarsys.eplmp.server.util.ProductUtil;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
+import java.util.*;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(PSFilterVisitor.class)
@@ -308,5 +314,97 @@ public class PSFilterVisitorTest {
         Assert.assertNotNull(result);
         Assert.assertNotNull(result.getComponents());
         Assert.assertTrue(result.getComponents().isEmpty());
+    }
+
+
+    @Test
+    public void visitWithSNEffectivityFilter() throws EntityConstraintException, NotAllowedException, PartMasterNotFoundException {
+        //Given
+        String workspaceId = "workspace01";
+        Workspace workspace = new Workspace(workspaceId);
+        String login = "user1";
+        User user = new User(workspace, new Account(login, login, login + "@docdoku.com", "en", new Date(), null));
+        ConfigurationItem configurationItem = new ConfigurationItem(user, workspace, "product1", "description");
+        ProductConfigSpec filter = new SerialNumberBasedEffectivityConfigSpec("2", configurationItem);
+
+        // Create Mock ConfigurationItem with custom PartMaster
+        PartMaster designItem = createPartMaster(configurationItem, "1", "A", true, ProductBaselineType.EFFECTIVE_SERIAL_NUMBER);
+        //When
+        visit(workspaceId, filter, designItem);
+
+        //Then
+        Assert.assertNotNull(filter);
+        Assert.assertNotNull(filter.getRetainedPartIterations());
+        Assert.assertEquals(filter.getRetainedPartIterations().size(), 2);
+    }
+
+    private void visit(String workspaceId, ProductConfigSpec filter, PartMaster designItem) throws PartMasterNotFoundException, EntityConstraintException, NotAllowedException {
+        psFilterVisitor.visit(workspaceId, filter, designItem, -1, new PSFilterVisitorCallbacks() {
+        });
+    }
+
+    /**
+     * Create a PartMaster for effectivity tests
+     *
+     * @param configurationItem
+     * @param pNumber
+     * @param pVersion
+     * @param productBaselineType
+     * @return custom PartMaster
+     */
+    private PartMaster createPartMaster(ConfigurationItem configurationItem, String pNumber, String pVersion, boolean createPartLink, ProductBaselineType productBaselineType) throws PartMasterNotFoundException {
+        User user = configurationItem.getAuthor();
+        Workspace workspace = configurationItem.getWorkspace();
+        PartMaster partMaster = new PartMaster(workspace, pNumber, user);
+        partMaster.setPartRevisions(new ArrayList<PartRevision>() {{
+            add(createPartRevision(configurationItem, partMaster, pNumber, pVersion, createPartLink, productBaselineType));
+        }});
+        return partMaster;
+    }
+
+    private PartRevision createPartRevision(ConfigurationItem configurationItem, PartMaster partMaster, String pNumber, String pVersion, boolean createPartLink, ProductBaselineType productBaselineType) throws PartMasterNotFoundException {
+        PartRevision partRevision = new PartRevision(partMaster, pVersion, configurationItem.getAuthor());
+        partRevision.setStatus(RevisionStatus.RELEASED);
+        partRevision.setPartIterations(new ArrayList<PartIteration>() {{
+            add(createPartIteration(configurationItem, partRevision, pNumber, createPartLink));
+        }});
+
+        Set<Effectivity> effectivities = new HashSet<>();
+        switch (productBaselineType) {
+            case EFFECTIVE_DATE:
+                effectivities.add(new DateBasedEffectivity("DateEffectivity-" + pVersion, configurationItem, new Date(), new Date()));
+                break;
+            case EFFECTIVE_LOT_ID:
+                effectivities.add(new LotBasedEffectivity("LotIdEffectivity-" + pVersion, configurationItem, "54", "56"));
+                break;
+            case EFFECTIVE_SERIAL_NUMBER:
+                effectivities.add(new SerialNumberBasedEffectivity("SerialNumberEffectivity-" + pVersion, configurationItem, "1", "3"));
+                break;
+            default:
+        }
+        partRevision.setEffectivities(effectivities);
+
+        return partRevision;
+    }
+
+    private PartIteration createPartIteration(ConfigurationItem configurationItem, PartRevision partRevision, String pNumber, boolean createPartLink) throws PartMasterNotFoundException {
+        PartIteration partIteration = new PartIteration(partRevision, configurationItem.getAuthor());
+        if (createPartLink) {
+            partIteration.setComponents(new ArrayList<PartUsageLink>() {{
+                String newPNumber = String.valueOf(Integer.parseInt(pNumber) + 1);
+                add(createPartUsageLink(configurationItem, newPNumber, ProductBaselineType.EFFECTIVE_SERIAL_NUMBER));
+                newPNumber = String.valueOf(Integer.parseInt(newPNumber) + 1);
+                add(createPartUsageLink(configurationItem, newPNumber, ProductBaselineType.EFFECTIVE_LOT_ID));
+            }});
+        }
+        return partIteration;
+    }
+
+    private PartUsageLink createPartUsageLink(ConfigurationItem configurationItem, String pNumber, ProductBaselineType productBaselineType) throws PartMasterNotFoundException {
+        PartMaster partMaster = createPartMaster(configurationItem, pNumber, "B", false, productBaselineType);
+        Mockito.when(partMasterDAO.loadPartM(new PartMasterKey(configurationItem.getWorkspaceId(), pNumber))).thenReturn(partMaster);
+        PartUsageLink partUsageLink = new PartUsageLink();
+        partUsageLink.setComponent(partMaster);
+        return partUsageLink;
     }
 }
