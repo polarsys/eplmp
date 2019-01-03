@@ -44,6 +44,12 @@ public class LotBasedEffectivity extends Effectivity{
     public LotBasedEffectivity() {
     }
 
+    public LotBasedEffectivity(String pName, ConfigurationItem configurationItem, String startLotId, String endLotId) {
+        super(pName, configurationItem);
+        this.startLotId = startLotId;
+        this.endLotId = endLotId;
+    }
+
     public String getStartLotId() {
         return startLotId;
     }
