@@ -33,6 +33,8 @@ import org.polarsys.eplmp.core.exceptions.NotAllowedException;
 import org.polarsys.eplmp.core.exceptions.PartMasterNotFoundException;
 import org.polarsys.eplmp.core.meta.RevisionStatus;
 import org.polarsys.eplmp.core.product.*;
+import org.polarsys.eplmp.server.configuration.spec.DateBasedEffectivityConfigSpec;
+import org.polarsys.eplmp.server.configuration.spec.LotBasedEffectivityConfigSpec;
 import org.polarsys.eplmp.server.configuration.spec.SerialNumberBasedEffectivityConfigSpec;
 import org.polarsys.eplmp.server.dao.PartMasterDAO;
 import org.polarsys.eplmp.server.util.ProductUtil;
@@ -318,13 +320,10 @@ public class PSFilterVisitorTest {
 
 
     @Test
-    public void visitWithSNEffectivityFilter() throws EntityConstraintException, NotAllowedException, PartMasterNotFoundException {
+    public void visit_should_filter_serial_number_effectivity() throws EntityConstraintException, NotAllowedException, PartMasterNotFoundException {
         //Given
         String workspaceId = "workspace01";
-        Workspace workspace = new Workspace(workspaceId);
-        String login = "user1";
-        User user = new User(workspace, new Account(login, login, login + "@docdoku.com", "en", new Date(), null));
-        ConfigurationItem configurationItem = new ConfigurationItem(user, workspace, "product1", "description");
+        ConfigurationItem configurationItem = createConfigurationItem(workspaceId);
         ProductConfigSpec filter = new SerialNumberBasedEffectivityConfigSpec("2", configurationItem);
 
         // Create Mock ConfigurationItem with custom PartMaster
@@ -336,6 +335,136 @@ public class PSFilterVisitorTest {
         Assert.assertNotNull(filter);
         Assert.assertNotNull(filter.getRetainedPartIterations());
         Assert.assertEquals(filter.getRetainedPartIterations().size(), 2);
+    }
+
+    @Test
+    public void visit_should_filter_lot_effectivity() throws EntityConstraintException, NotAllowedException, PartMasterNotFoundException {
+        //Given
+        String workspaceId = "workspace01";
+        ConfigurationItem configurationItem = createConfigurationItem(workspaceId);
+        ProductConfigSpec filter = new LotBasedEffectivityConfigSpec("50", configurationItem);
+
+        // Create Mock ConfigurationItem with custom PartMaster
+        PartMaster designItem = createPartMaster(configurationItem, "1", "A", true, ProductBaselineType.EFFECTIVE_LOT_ID);
+        //When
+        visit(workspaceId, filter, designItem);
+
+        //Then
+        Assert.assertNotNull(filter);
+        Assert.assertNotNull(filter.getRetainedPartIterations());
+        Assert.assertEquals(filter.getRetainedPartIterations().size(), 1);
+    }
+
+    @Test
+    public void visit_should_filter_date_effectivity() throws EntityConstraintException, NotAllowedException, PartMasterNotFoundException {
+        //Given
+        String workspaceId = "workspace01";
+        ConfigurationItem configurationItem = createConfigurationItem(workspaceId);
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.DATE, -2);
+        ProductConfigSpec filter = new DateBasedEffectivityConfigSpec(calendar.getTime(), configurationItem);
+
+        // Create Mock ConfigurationItem with custom PartMaster
+        PartMaster designItem = createPartMaster(configurationItem, "1", "A", true, ProductBaselineType.EFFECTIVE_DATE);
+        //When
+        visit(workspaceId, filter, designItem);
+
+        //Then
+        Assert.assertNotNull(filter);
+        Assert.assertNotNull(filter.getRetainedPartIterations());
+        Assert.assertEquals(filter.getRetainedPartIterations().size(), 1);
+    }
+
+    @Test
+    public void visit_should_work_without_partrevision() throws EntityConstraintException, NotAllowedException, PartMasterNotFoundException {
+        //Given
+        String workspaceId = "workspace01";
+        ConfigurationItem configurationItem = createConfigurationItem(workspaceId);
+        ProductConfigSpec filter = new SerialNumberBasedEffectivityConfigSpec("2", configurationItem);
+
+        // Create Mock ConfigurationItem with custom PartMaster
+        User user = configurationItem.getAuthor();
+        Workspace workspace = configurationItem.getWorkspace();
+        PartMaster designItem = new PartMaster(workspace, "1", user);
+        //When
+        visit(workspaceId, filter, designItem);
+
+        //Then
+        Assert.assertNotNull(filter);
+        Assert.assertNotNull(filter.getRetainedPartIterations());
+        Assert.assertEquals(filter.getRetainedPartIterations().size(), 0);
+    }
+
+    @Test
+    public void visit_should_work_without_effectivity() throws EntityConstraintException, NotAllowedException, PartMasterNotFoundException {
+        //Given
+        String workspaceId = "workspace01";
+        ConfigurationItem configurationItem = createConfigurationItem(workspaceId);
+        ProductConfigSpec filter = new SerialNumberBasedEffectivityConfigSpec("2", configurationItem);
+
+        // Create Mock ConfigurationItem with custom PartMaster
+        User user = configurationItem.getAuthor();
+        Workspace workspace = configurationItem.getWorkspace();
+        PartMaster designItem = new PartMaster(workspace, "1", user);
+        PartRevision partRevision = new PartRevision(designItem, "A", configurationItem.getAuthor());
+        partRevision.setStatus(RevisionStatus.RELEASED);
+        designItem.setPartRevisions(new ArrayList<PartRevision>() {{
+            add(partRevision);
+        }});
+        //When
+        visit(workspaceId, filter, designItem);
+
+        //Then
+        Assert.assertNotNull(filter);
+        Assert.assertNotNull(filter.getRetainedPartIterations());
+        Assert.assertEquals(filter.getRetainedPartIterations().size(), 0);
+    }
+
+    @Test
+    public void visit_should_return_last_effective_part_revision() throws EntityConstraintException, NotAllowedException, PartMasterNotFoundException {
+        //Given
+        String workspaceId = "workspace01";
+        ConfigurationItem configurationItem = createConfigurationItem(workspaceId);
+        ProductConfigSpec filter = new LotBasedEffectivityConfigSpec("50", configurationItem);
+        User user = configurationItem.getAuthor();
+        Workspace workspace = configurationItem.getWorkspace();
+        PartMaster designItem = new PartMaster(workspace, "1", user);
+        designItem.setPartRevisions(new ArrayList<PartRevision>() {{
+            add(createPartRevision(configurationItem, designItem, "1", "A", false, ProductBaselineType.EFFECTIVE_LOT_ID));
+            add(createPartRevision(configurationItem, designItem, "99", "D", false, ProductBaselineType.EFFECTIVE_LOT_ID));
+        }});
+
+        //When
+        visit(workspaceId, filter, designItem);
+
+        //Then
+        Assert.assertNotNull(filter);
+        Assert.assertNotNull(filter.getRetainedPartIterations());
+        Assert.assertEquals(filter.getRetainedPartIterations().size(), 1);
+        Assert.assertEquals(filter.getRetainedPartIterations()
+                .stream()
+                .filter(partIteration -> partIteration.getPartVersion().equals("D"))
+                .count(), 1);
+
+        //Given
+        ProductConfigSpec filter2 = new LotBasedEffectivityConfigSpec("50", configurationItem);
+        PartMaster designItem2 = new PartMaster(workspace, "1", user);
+        designItem2.setPartRevisions(new ArrayList<PartRevision>() {{
+            add(createPartRevision(configurationItem, designItem, "99", "D", false, ProductBaselineType.EFFECTIVE_LOT_ID));
+            add(createPartRevision(configurationItem, designItem, "1", "A", false, ProductBaselineType.EFFECTIVE_LOT_ID));
+        }});
+
+        //When
+        visit(workspaceId, filter2, designItem2);
+
+        //Then
+        Assert.assertNotNull(filter2);
+        Assert.assertNotNull(filter2.getRetainedPartIterations());
+        Assert.assertEquals(filter2.getRetainedPartIterations().size(), 1);
+        Assert.assertEquals(filter2.getRetainedPartIterations()
+                .stream()
+                .filter(partIteration -> partIteration.getPartVersion().equals("A"))
+                .count(), 1);
     }
 
     private void visit(String workspaceId, ProductConfigSpec filter, PartMaster designItem) throws PartMasterNotFoundException, EntityConstraintException, NotAllowedException {
@@ -372,10 +501,15 @@ public class PSFilterVisitorTest {
         Set<Effectivity> effectivities = new HashSet<>();
         switch (productBaselineType) {
             case EFFECTIVE_DATE:
-                effectivities.add(new DateBasedEffectivity("DateEffectivity-" + pVersion, configurationItem, new Date(), new Date()));
+                Calendar calendar = Calendar.getInstance();
+                calendar.add(Calendar.DATE, -4);
+                Date date1 = calendar.getTime();
+                calendar.add(Calendar.DATE, 6);
+                Date date2 = calendar.getTime();
+                effectivities.add(new DateBasedEffectivity("DateEffectivity-" + pVersion, configurationItem, date1, date2));
                 break;
             case EFFECTIVE_LOT_ID:
-                effectivities.add(new LotBasedEffectivity("LotIdEffectivity-" + pVersion, configurationItem, "54", "56"));
+                effectivities.add(new LotBasedEffectivity("LotIdEffectivity-" + pVersion, configurationItem, "45", "56"));
                 break;
             case EFFECTIVE_SERIAL_NUMBER:
                 effectivities.add(new SerialNumberBasedEffectivity("SerialNumberEffectivity-" + pVersion, configurationItem, "1", "3"));
@@ -393,8 +527,6 @@ public class PSFilterVisitorTest {
             partIteration.setComponents(new ArrayList<PartUsageLink>() {{
                 String newPNumber = String.valueOf(Integer.parseInt(pNumber) + 1);
                 add(createPartUsageLink(configurationItem, newPNumber, ProductBaselineType.EFFECTIVE_SERIAL_NUMBER));
-                newPNumber = String.valueOf(Integer.parseInt(newPNumber) + 1);
-                add(createPartUsageLink(configurationItem, newPNumber, ProductBaselineType.EFFECTIVE_LOT_ID));
             }});
         }
         return partIteration;
@@ -406,5 +538,12 @@ public class PSFilterVisitorTest {
         PartUsageLink partUsageLink = new PartUsageLink();
         partUsageLink.setComponent(partMaster);
         return partUsageLink;
+    }
+
+    private ConfigurationItem createConfigurationItem(String workspaceId) {
+        Workspace workspace = new Workspace(workspaceId);
+        String login = "user1";
+        User user = new User(workspace, new Account(login, login, login + "@docdoku.com", "en", new Date(), null));
+        return new ConfigurationItem(user, workspace, "product1", "description");
     }
 }
