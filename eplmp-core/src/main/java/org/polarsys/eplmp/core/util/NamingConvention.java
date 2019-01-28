@@ -91,7 +91,7 @@ public class NamingConvention {
         return correct(documentId, DOCUMENTS_FORBIDDEN_CHARS);
     }
 
-    public static boolean correctPartNumber(String documentId) {
-        return correct(documentId, PARTS_FORBIDDEN_CHARS);
+    public static boolean correctPartNumber(String partNumber) {
+        return correct(partNumber, PARTS_FORBIDDEN_CHARS);
     }
 }
