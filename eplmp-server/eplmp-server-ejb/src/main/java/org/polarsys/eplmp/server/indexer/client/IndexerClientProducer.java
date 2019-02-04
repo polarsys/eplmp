@@ -1,5 +1,5 @@
 /*******************************************************************************
-  * Copyright (c) 2017 DocDoku.
+  * Copyright (c) 2017-2019 DocDoku.
   * All rights reserved. This program and the accompanying materials
   * are made available under the terms of the Eclipse Public License v1.0
   * which accompanies this distribution, and is available at
@@ -9,7 +9,7 @@
   *    DocDoku - initial API and implementation
   *******************************************************************************/
 
-package org.polarsys.eplmp.server.indexer;
+package org.polarsys.eplmp.server.indexer.client;
 
 import com.amazonaws.auth.AWSCredentialsProviderChain;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
@@ -20,6 +20,7 @@ import io.searchbox.client.JestClientFactory;
 import io.searchbox.client.config.HttpClientConfig;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.nio.client.HttpAsyncClientBuilder;
+import org.polarsys.eplmp.server.indexer.config.IndexerConfig;
 import vc.inreach.aws.request.AWSSigner;
 import vc.inreach.aws.request.AWSSigningRequestInterceptor;
 
@@ -36,15 +37,20 @@ import java.time.ZoneOffset;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+/**
+ * Produces a Jest client with elasticsearch config
+ *
+ * @author Morgan Guimard
+ */
 @Singleton(name = "IndexerClientProducer")
 public class IndexerClientProducer {
 
     private static final Logger LOGGER = Logger.getLogger(IndexerClientProducer.class.getName());
 
-    private JestClient client;
-
     @Inject
-    private IndexerConfigManager config;
+    private IndexerConfig config;
+
+    private JestClient client;
 
     @PostConstruct
     public void open() {
@@ -107,7 +113,8 @@ public class IndexerClientProducer {
 
     @PreDestroy
     public void close() {
-        client.shutdownClient();
+        // todo => deprecated fallback ?
+        //client.shutdownClient();
     }
 
     @Lock(LockType.READ)

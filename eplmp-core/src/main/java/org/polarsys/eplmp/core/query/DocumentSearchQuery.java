@@ -1,5 +1,5 @@
 /*******************************************************************************
-  * Copyright (c) 2017 DocDoku.
+  * Copyright (c) 2017-2019 DocDoku.
   * All rights reserved. This program and the accompanying materials
   * are made available under the terms of the Eclipse Public License v1.0
   * which accompanies this distribution, and is available at
@@ -30,8 +30,8 @@ public class DocumentSearchQuery extends SearchQuery {
 
     }
 
-    public DocumentSearchQuery(String workspaceId, String fullText, String docMId, String title, String version, String author, String type, Date creationDateFrom, Date creationDateTo, Date modificationDateFrom, Date modificationDateTo, SearchQuery.AbstractAttributeQuery[] attributes, String[] tags, String content, String folder, boolean fetchHeadOnly) {
-        super(workspaceId, fullText, version, author, type, creationDateFrom, creationDateTo, modificationDateFrom, modificationDateTo, attributes, tags, content, fetchHeadOnly);
+    public DocumentSearchQuery(String workspaceId, String queryString, String docMId, String title, String version, String author, String type, Date creationDateFrom, Date creationDateTo, Date modificationDateFrom, Date modificationDateTo, SearchQuery.AbstractAttributeQuery[] attributes, String[] tags, String content, String folder, boolean fetchHeadOnly) {
+        super(workspaceId, queryString, version, author, type, creationDateFrom, creationDateTo, modificationDateFrom, modificationDateTo, attributes, tags, content, fetchHeadOnly);
         this.docMId = docMId;
         this.title = title;
         this.content = content;

@@ -1,5 +1,5 @@
 /*******************************************************************************
-  * Copyright (c) 2017 DocDoku.
+  * Copyright (c) 2017-2019 DocDoku.
   * All rights reserved. This program and the accompanying materials
   * are made available under the terms of the Eclipse Public License v1.0
   * which accompanies this distribution, and is available at
@@ -64,6 +64,9 @@ public class ConverterBean implements IConverterManagerLocal {
 
     @Inject
     private BeanLocator beanLocator;
+
+    @Inject
+    private GeometryParser geometryParser;
 
     private static final String CONF_PROPERTIES = "/org/polarsys/eplmp/server/converters/utils/conf.properties";
     private static final Properties CONF = new Properties();
@@ -198,7 +201,7 @@ public class ConverterBean implements IConverterManagerLocal {
 
         // manage converted file
         Path convertedFile = conversionResult.getConvertedFile();
-        double[] box = new GeometryParser(convertedFile).calculateBox();
+        double[] box = geometryParser.calculateBox(convertedFile);
 
         if (decimate(convertedFile, tempDir, RATIO)) {
             String fileName = convertedFile.getFileName().toString();

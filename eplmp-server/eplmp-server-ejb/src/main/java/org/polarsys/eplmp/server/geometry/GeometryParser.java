@@ -1,5 +1,5 @@
 /*******************************************************************************
-  * Copyright (c) 2017 DocDoku.
+  * Copyright (c) 2017-2019 DocDoku.
   * All rights reserved. This program and the accompanying materials
   * are made available under the terms of the Eclipse Public License v1.0
   * which accompanies this distribution, and is available at
@@ -11,14 +11,10 @@
 
 package org.polarsys.eplmp.server.geometry;
 
-import de.javagl.obj.Obj;
-import de.javagl.obj.ObjData;
-import de.javagl.obj.ObjReader;
-import de.javagl.obj.ObjUtils;
-
-import java.io.FileInputStream;
-import java.io.InputStream;
-import java.nio.FloatBuffer;
+import javax.ejb.Singleton;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 import java.nio.file.Path;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -28,62 +24,63 @@ import java.util.logging.Logger;
  *
  * @author Morgan Guimard
  */
+@Singleton
 public class GeometryParser {
 
-
-    private Path path;
     private static final Logger LOGGER = Logger.getLogger(GeometryParser.class.getName());
 
-    public GeometryParser(Path convertedFile) {
-        path = convertedFile;
+    public GeometryParser() {
     }
-
 
     /**
      * Computes the bounding box of given 3D OBJ file
      *
+     * v 2.712726 -2.398764 -2.492640
+     *
+     * @param path path to resource
      * @return an array of double representing the bounding box min and max values
      */
-    public double[] calculateBox() {
+    public double[] calculateBox(Path path) {
 
-        double[] result = new double[6];
-        int i = 0;
-        double xMin = 0.0, xMax = 0.0, yMin = 0.0, yMax = 0.0, zMin = 0.0, zMax = 0.0;
+        boolean init = false;
+        Double xMin = 0.0, xMax = 0.0, yMin = 0.0, yMax = 0.0, zMin = 0.0, zMax = 0.0;
 
-        try (InputStream inputStream = new FileInputStream(path.toFile())) {
+        try (BufferedReader br = new BufferedReader(new FileReader(path.toFile()))) {
+            String line;
+            while ((line = br.readLine()) != null) {
 
-            Obj obj = ObjUtils.convertToRenderable(ObjReader.read(inputStream));
-            FloatBuffer vertices = ObjData.getVertices(obj);
-
-            while (vertices.hasRemaining()) {
-                float v = vertices.get();
-                if (i == 0) {
-                    if (v < xMin) {
-                        xMin = v;
-                    } else if (v > xMax) {
-                        xMax = v;
+                if(line.startsWith("v  ")){
+                    String[] v = line.replace("v  ", "").split(" ");
+                    double x = Double.valueOf(v[0]);
+                    double y = Double.valueOf(v[1]);
+                    double z = Double.valueOf(v[2]);
+                    if(!init){
+                        xMin = x ;
+                        xMax = x ;
+                        yMin = y ;
+                        yMax = y ;
+                        zMin = z ;
+                        zMax = z ;
+                        init = true;
+                    } else{
+                        xMin = Math.min(x, xMin);
+                        xMax = Math.max(x, xMax);
+                        yMin = Math.min(y, yMin);
+                        yMax = Math.max(y, yMax);
+                        zMin = Math.min(z, zMin);
+                        zMax = Math.max(z, zMax);
                     }
-                    i++;
-                } else if (i == 1) {
-                    if (v < yMin) {
-                        yMin = v;
-                    } else if (v > yMax) {
-                        yMax = v;
-                    }
-                    i++;
-                } else if (i == 2) {
-                    if (v < zMin) {
-                        zMin = v;
-                    } else if (v > zMax) {
-                        zMax = v;
-                    }
-                    i = 0;
+
                 }
             }
-
-        } catch (Exception e) {
+        } catch (IOException e) {
             LOGGER.log(Level.SEVERE, "Cannot parse vertices from obj", e);
+        } catch (NumberFormatException e) {
+            LOGGER.log(Level.SEVERE, "Cannot parse double value", e);
         }
+
+
+        double[] result = new double[6];
 
         result[0] = xMin;
         result[1] = yMin;

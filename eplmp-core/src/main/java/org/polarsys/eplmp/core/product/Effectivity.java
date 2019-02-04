@@ -1,5 +1,5 @@
 /*******************************************************************************
-  * Copyright (c) 2017 DocDoku.
+  * Copyright (c) 2017-2019 DocDoku.
   * All rights reserved. This program and the accompanying materials
   * are made available under the terms of the Eclipse Public License v1.0
   * which accompanies this distribution, and is available at
@@ -55,6 +55,11 @@ public abstract class Effectivity implements Serializable {
 
     public Effectivity(String pName) {
         name = pName;
+    }
+
+    public Effectivity(String pName, ConfigurationItem configurationItem) {
+        name = pName;
+        this.configurationItem = configurationItem;
     }
 
     public int getId() {

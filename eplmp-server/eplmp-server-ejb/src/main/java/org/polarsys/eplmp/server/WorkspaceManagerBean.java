@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2017 DocDoku.
+ * Copyright (c) 2017-2019 DocDoku.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -157,11 +157,7 @@ public class WorkspaceManagerBean implements IWorkspaceManagerLocal {
         userDAO.createUser(userToCreate);
         userDAO.addUserMembership(workspace, userToCreate);
 
-        try {
-            indexerManager.createWorkspaceIndex(pID);
-        } catch (Exception e) { // TODO review exception thrown
-            throw new WorkspaceAlreadyExistsException(workspace);
-        }
+        indexerManager.createWorkspaceIndex(pID);
 
         return workspace;
     }

@@ -1,5 +1,5 @@
 /*******************************************************************************
-  * Copyright (c) 2017 DocDoku.
+  * Copyright (c) 2017-2019 DocDoku.
   * All rights reserved. This program and the accompanying materials
   * are made available under the terms of the Eclipse Public License v1.0
   * which accompanies this distribution, and is available at
@@ -28,7 +28,7 @@ import java.util.Date;
 public abstract class SearchQuery implements Serializable {
 
     protected String workspaceId;
-    protected String fullText;
+    protected String queryString;
     protected String version;
     protected String author;
     protected String type;
@@ -44,11 +44,11 @@ public abstract class SearchQuery implements Serializable {
     public SearchQuery(){
 
     }
-    public SearchQuery(String workspaceId, String fullText, String version, String author, String type,
+    public SearchQuery(String workspaceId, String queryString, String version, String author, String type,
                        Date creationDateFrom, Date creationDateTo, Date modificationDateFrom, Date modificationDateTo,
                        AbstractAttributeQuery[] attributes, String[] tags, String content, boolean fetchHeadOnly) {
         this.workspaceId = workspaceId;
-        this.fullText =fullText;
+        this.queryString = queryString;
         this.version = version;
         this.author = author;
         this.type = type;
@@ -66,8 +66,8 @@ public abstract class SearchQuery implements Serializable {
     public String getWorkspaceId() {
         return workspaceId;
     }
-    public String getFullText() {
-        return fullText;
+    public String getQueryString() {
+        return queryString;
     }
     public String getVersion() {
         return version;
@@ -104,8 +104,8 @@ public abstract class SearchQuery implements Serializable {
     public void setWorkspaceId(String workspaceId) {
         this.workspaceId = workspaceId;
     }
-    public void setFullText(String fullText){
-        this.fullText = fullText;
+    public void setQueryString(String queryString){
+        this.queryString = queryString;
     }
     public void setVersion(String version) {
         this.version = version;

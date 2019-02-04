@@ -1,5 +1,5 @@
 /*******************************************************************************
-  * Copyright (c) 2017 DocDoku.
+  * Copyright (c) 2017-2019 DocDoku.
   * All rights reserved. This program and the accompanying materials
   * are made available under the terms of the Eclipse Public License v1.0
   * which accompanies this distribution, and is available at
@@ -123,7 +123,7 @@ public class DocumentsResource {
             @ApiParam(required = false, value = "Start offset", defaultValue = "0") @QueryParam("from") int from,
             @ApiParam(required = false, value = "Max results", defaultValue = "10") @QueryParam("size") int size,
             @ApiParam(required = false, value = "Search mode (false for history/ true for head only)") @QueryParam("fetchHeadOnly") boolean fetchHeadOnly
-    ) throws EntityNotFoundException, UserNotActiveException, NotAllowedException, WorkspaceNotEnabledException {
+    ) throws EntityNotFoundException, UserNotActiveException, NotAllowedException, WorkspaceNotEnabledException, IndexerRequestException, IndexerNotAvailableException {
         // Set default search size
         size = size == 0 ? 10 : size;
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
-  * Copyright (c) 2017 DocDoku.
+  * Copyright (c) 2017-2019 DocDoku.
   * All rights reserved. This program and the accompanying materials
   * are made available under the terms of the Eclipse Public License v1.0
   * which accompanies this distribution, and is available at
@@ -13,6 +13,7 @@ package org.polarsys.eplmp.server.geometry;
 
 
 import org.junit.Test;
+import org.mockito.Mock;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -39,16 +40,15 @@ public class GeometryParserTest {
         */
 
         Path path = Paths.get("src/test/resources/fake.obj");
-        GeometryParser geometryParser = new GeometryParser(path);
-        double[] doubles = geometryParser.calculateBox();
+        GeometryParser geometryParser = new GeometryParser();
+        double[] doubles = geometryParser.calculateBox(path);
 
-        assert doubles[0] == -7.60359001159668;
-        assert doubles[1] == 0.0;
-        assert doubles[2] == -4.584129810333252;
-        assert doubles[3] == 7.60359001159668;
-        assert doubles[4] == 1.9977799654006958;
-        assert doubles[5] == 3.896850109100342;
-
+        assert doubles[0] == -7.60359;
+        assert doubles[1] == 0.178962;
+        assert doubles[2] == -4.58413;
+        assert doubles[3] == 7.60359;
+        assert doubles[4] == 1.99778;
+        assert doubles[5] == 3.89685;
 
     }
 

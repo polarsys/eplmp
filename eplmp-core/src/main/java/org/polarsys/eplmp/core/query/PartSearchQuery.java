@@ -1,5 +1,5 @@
 /*******************************************************************************
-  * Copyright (c) 2017 DocDoku.
+  * Copyright (c) 2017-2019 DocDoku.
   * All rights reserved. This program and the accompanying materials
   * are made available under the terms of the Eclipse Public License v1.0
   * which accompanies this distribution, and is available at
@@ -33,10 +33,10 @@ public class PartSearchQuery extends SearchQuery {
 
     }
 
-    public PartSearchQuery(String workspaceId, String fullText, String partNumber, String name, String version,
+    public PartSearchQuery(String workspaceId, String queryString, String partNumber, String name, String version,
                            String author, String type, Date creationDateFrom, Date creationDateTo, Date modificationDateFrom,
                            Date modificationDateTo, SearchQuery.AbstractAttributeQuery[] attributes, String[] tags, Boolean standardPart, String content, boolean fetchHeadOnly) {
-        super(workspaceId, fullText, version, author, type, creationDateFrom, creationDateTo, modificationDateFrom,
+        super(workspaceId, queryString, version, author, type, creationDateFrom, creationDateTo, modificationDateFrom,
                 modificationDateTo, attributes, tags, content, fetchHeadOnly);
         this.partNumber = partNumber;
         this.name = name;

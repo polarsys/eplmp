@@ -1,5 +1,5 @@
 /*******************************************************************************
-  * Copyright (c) 2017 DocDoku.
+  * Copyright (c) 2017-2019 DocDoku.
   * All rights reserved. This program and the accompanying materials
   * are made available under the terms of the Eclipse Public License v1.0
   * which accompanies this distribution, and is available at
@@ -42,6 +42,12 @@ public class LotBasedEffectivity extends Effectivity{
     private String endLotId;
 
     public LotBasedEffectivity() {
+    }
+
+    public LotBasedEffectivity(String pName, ConfigurationItem configurationItem, String startLotId, String endLotId) {
+        super(pName, configurationItem);
+        this.startLotId = startLotId;
+        this.endLotId = endLotId;
     }
 
     public String getStartLotId() {

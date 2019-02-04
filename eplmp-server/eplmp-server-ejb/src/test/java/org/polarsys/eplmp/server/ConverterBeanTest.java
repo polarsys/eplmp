@@ -1,5 +1,5 @@
 /*******************************************************************************
-  * Copyright (c) 2017 DocDoku.
+  * Copyright (c) 2017-2019 DocDoku.
   * All rights reserved. This program and the accompanying materials
   * are made available under the terms of the Eclipse Public License v1.0
   * which accompanies this distribution, and is available at
@@ -24,10 +24,12 @@ import org.polarsys.eplmp.core.services.IBinaryStorageManagerLocal;
 import org.polarsys.eplmp.core.services.IProductManagerLocal;
 import org.polarsys.eplmp.server.converters.CADConverter;
 import org.polarsys.eplmp.server.converters.ConversionResult;
+import org.polarsys.eplmp.server.geometry.GeometryParser;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.net.URI;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 
@@ -69,8 +71,12 @@ public class ConverterBeanTest {
     @Mock
     private BinaryResource attachedFile;
 
+    @Mock
+    private GeometryParser geometryParser;
+
     @Before
     public void setup() throws Exception {
+        when(geometryParser.calculateBox(any(Path.class))).thenReturn(new double[6]);
         when(cadBinRes.getName()).thenReturn("foo.dae");
         when(storage.getBinaryResourceInputStream(cadBinRes))
                 .thenReturn(new ByteArrayInputStream("fake content".getBytes()));
