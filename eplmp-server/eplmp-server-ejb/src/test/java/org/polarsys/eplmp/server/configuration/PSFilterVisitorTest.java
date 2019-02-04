@@ -11,15 +11,21 @@
 
 package org.polarsys.eplmp.server.configuration;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.*;
 import org.junit.runner.RunWith;
 import org.mockito.*;
 
-import static org.mockito.Matchers.*;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
+import static org.polarsys.eplmp.server.util.ProductUtil.*;
+
+
+import org.polarsys.eplmp.core.exceptions.NotAllowedException;
+import org.polarsys.eplmp.core.exceptions.PartMasterNotFoundException;
+import org.polarsys.eplmp.core.product.*;
+import org.polarsys.eplmp.server.configuration.filter.LatestCheckedInPSFilter;
+import org.polarsys.eplmp.server.configuration.filter.LatestReleasedPSFilter;
 
 import org.mockito.internal.util.reflection.Whitebox;
 import org.polarsys.eplmp.core.common.Account;
@@ -36,12 +42,15 @@ import org.polarsys.eplmp.core.product.*;
 import org.polarsys.eplmp.server.configuration.spec.DateBasedEffectivityConfigSpec;
 import org.polarsys.eplmp.server.configuration.spec.LotBasedEffectivityConfigSpec;
 import org.polarsys.eplmp.server.configuration.spec.SerialNumberBasedEffectivityConfigSpec;
+
 import org.polarsys.eplmp.server.dao.PartMasterDAO;
-import org.polarsys.eplmp.server.util.ProductUtil;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
-import java.util.*;
+
+import java.util.Date;
+import java.util.List;
+
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(PSFilterVisitor.class)
@@ -52,270 +61,127 @@ public class PSFilterVisitorTest {
 
     @Mock
     private PartMasterDAO partMasterDAO;
-    @Mock
-    private ProductStructureFilter filter;
-    @Mock
-    private PartMaster partMaster;
-    @Mock
-    User user;
-    @Mock
+
     private PSFilterVisitorCallbacks callbacks;
-    @Mock
-    PartIteration partIteration;
-    @Mock
-    PartIteration partIteration_1;
-    @Mock
-    PartIteration partIteration_2;
-    @Mock
-    PartRevision partRevision;
-    @Mock
-    PartLink partLink;
-    @Mock
-    PartLink partLink_1;
-    @Mock
-    PartLink partLink_2;
-    @Mock
-    PartMaster component;
-    @Mock
-    PartMaster component_1;
-    @Mock
-    PartMaster component_2;
-    @Mock
-    PartUsageLink partUsageLink;
 
     @Before
-    public void setUp(){
+    public void setUp() throws Exception {
 
         initMocks(this);
-
-        //Basic mocked methods
-        when(partMaster.getAuthor()).thenReturn(user);
+        createTestableParts();
+        buildBasicStructure();
+        this.initDaoBahavior();
+        callbacks = this.createCallBack();
     }
 
+    @Test
+    public void visitLatestCheckedInFilterTest() throws Exception {
+
+        //#### TEST VISIT METHOD WITH PART MASTER AS PARAMETER
+        //Notice : refer to BASIC STRUCTURE in ProductUtil.java
+
+        //~ TEST : With simple structure ( No diverge )
+        Component result = psFilterVisitor.visit(WORKSPACE_ID, new LatestCheckedInPSFilter(false), getPartMasterWith("PART-006"), -1, callbacks);
+        assertNotNull(result);
+        assertEquals("B",result.getRetainedIteration().getVersion());
+        assertEquals("PART-006",result.getPartMaster().getNumber());
+
+        assertEquals(3, result.getComponents().size());
+        assertEquals(1, result.getComponents().get(0).getComponents().size());
+        assertEquals("A",result.getComponents().get(0).getRetainedIteration().getPartVersion());
+        assertEquals("PART-012",result.getComponents().get(0).getPartMaster().getNumber());
+
+        assertEquals(3, result.getComponents().get(1).getComponents().size());
+        assertEquals("B",result.getComponents().get(1).getRetainedIteration().getPartVersion());
+        assertEquals("PART-002",result.getComponents().get(1).getPartMaster().getNumber());
+
+        assertEquals(0, result.getComponents().get(2).getComponents().size());
+        assertEquals("A",result.getComponents().get(2).getRetainedIteration().getPartVersion());
+        assertEquals("PART-004",result.getComponents().get(2).getPartMaster().getNumber());
+
+        //~ TEST : Complex structured parts ( No diverge )
+
+        //Only one iteration on last checked out revision
+        assertEquals("E",getPartMasterWith("PART-001").getLastRevision().getVersion());
+        assertTrue(getPartMasterWith("PART-001").getLastRevision().isCheckedOut());
+        assertEquals(1,getPartMasterWith("PART-001").getLastRevision().getPartIterations().size());
+        try {
+
+            psFilterVisitor.visit(WORKSPACE_ID, new LatestCheckedInPSFilter(false), getPartMasterWith("PART-001"), -1, callbacks);
+            fail();
+        }catch (NotAllowedException e){
+
+            assertTrue(true);
+        }
+
+        //Add new iteration with same members than last iteration
+        addIterationTo("PART-001",
+                getPartMasterWith("PART-001").getLastRevision().createNextIteration(user));
+
+        assertEquals("E",getPartMasterWith("PART-001").getLastRevision().getVersion());
+        assertTrue(getPartMasterWith("PART-001").getLastRevision().isCheckedOut());
+        assertEquals(2,getPartMasterWith("PART-001").getLastRevision().getPartIterations().size());
+
+        result = psFilterVisitor.visit(WORKSPACE_ID, new LatestCheckedInPSFilter(false), getPartMasterWith("PART-001"), -1, callbacks);
+        assertNotNull(result);
+        assertEquals(1, result.getRetainedIteration().getIteration());
+
+        //#### TEST VISIT METHOD WITH PART LINKS AS PARAMETER
+    }
 
     @Test
-    public void visitTest() throws Exception {
+    public void visitLatestReleasedFilterTest() throws Exception {
 
-        /**
-         * Start the visitor with given part master
-         * */
+        //#### TEST VISIT METHOD WITH PART MASTER AS PARAMETER
+        //~ TEST : None Released
+        try{
 
-        //******* I - Check if PSFilterVisitorCallbacks's methods are called when call getComponentsRecursively's method.
-
-        //-------------------------- TEST CALL TO : ON_UNRESOLVED_VERSION CALLBACK --------------------------
-
-        //## BEGIN CONFIGURATION
-        when(callbacks.onPathWalk(anyListOf(PartLink.class),anyListOf(PartMaster.class))).thenReturn(true);
-        when(filter.filter(partMaster)).thenReturn(new ArrayList<>());//need an empty array
-        //## END CONFIGURATION
-
-        psFilterVisitor.visit(ProductUtil.WORKSPACE_ID, filter, partMaster, -1, callbacks);
-        verify(callbacks,times(1)).onUnresolvedVersion(anyObject());
-
-        //-------------------------- TEST CALL TO : ON_INDETERMINATE_VERSION CALLBACK --------------------------
-
-        //## BEGIN CONFIGURATION
-        when(filter.filter(partMaster)).thenReturn(Arrays.asList(new PartIteration(), new PartIteration()));
-        //## END CONFIGURATION
-
-        psFilterVisitor.visit(ProductUtil.WORKSPACE_ID, filter, partMaster, -1, callbacks);
-        verify(callbacks,times(1)).onIndeterminateVersion(anyObject(), anyListOf(PartIteration.class));
-
-        //-------------------------- TEST CALL TO : ON_BRANCH_DISCOVERED CALLBACK --------------------------
-
-        //At this level in runtime we simulated a structure with 3 nodes without no child nodes.
-        //just test if those nodes was really discovered.
-        //## BEGIN CONFIGURATION
-        when(filter.filter(partMaster)).thenReturn(Collections.singletonList(new PartIteration()));
-        //## END CONFIGURATION
-
-        psFilterVisitor.visit(ProductUtil.WORKSPACE_ID, filter, partMaster, -1, callbacks);
-        verify(callbacks,times(3)).onBranchDiscovered(anyListOf(PartLink.class), anyListOf(PartIteration.class));// 3 nodes must have been discovered
-
-        //******* II - Check navigation between links.
-        //We now add child to our nodes.
-
-        reset(callbacks);//necessary for reset the number call 'callbacks' generate by the verify method
-
-        //-------------------------- TEST : Recursive call -------------------------
-        //## BEGIN CONFIGURATION
-        when(callbacks.onPathWalk(anyListOf(PartLink.class),anyListOf(PartMaster.class))).thenReturn(true);
-        when(filter.filter(partMaster)).thenReturn(Collections.singletonList(partIteration));
-        when(partIteration.getComponents()).thenReturn(Collections.singletonList(partUsageLink));
-        when(filter.filter(anyListOf(PartLink.class))).thenReturn(Arrays.asList(partLink,partLink_1,partLink_2));
-        when(partLink.getComponent()).thenReturn(component);
-        when(partLink_1.getComponent()).thenReturn(component_1);
-        when(partLink_2.getComponent()).thenReturn(component_2);
-        when(component.getNumber()).thenReturn("PART-000");
-        when(component_1.getNumber()).thenReturn("PART-001");
-        when(component_2.getNumber()).thenReturn("PART-002");
-        when(partMasterDAO.loadPartM(new PartMasterKey(ProductUtil.WORKSPACE_ID, "PART-000")))
-                        .thenReturn(component);
-        when(partMasterDAO.loadPartM(new PartMasterKey(ProductUtil.WORKSPACE_ID,"PART-001")))
-                .thenReturn(component_1);
-        when(partMasterDAO.loadPartM(new PartMasterKey(ProductUtil.WORKSPACE_ID,"PART-002")))
-                .thenReturn(component_2);
-        //## END CONFIGURATION
-
-        Component result = psFilterVisitor.visit(ProductUtil.WORKSPACE_ID, filter, partMaster, -1, callbacks);
-
-        verify(callbacks, times(0)).onUnresolvedPath(anyListOf(PartLink.class), anyListOf(PartIteration.class));
-        verify(callbacks,times(1)).onIndeterminatePath(anyListOf(PartLink.class), anyListOf(PartIteration.class));
-        verify(callbacks,times(0)).onOptionalPath(anyListOf(PartLink.class), anyListOf(PartIteration.class));
-        //As we've child we must not call onBranchDiscovered again
-        verify(callbacks, times(0)).onBranchDiscovered(anyListOf(PartLink.class), anyListOf(PartIteration.class));
-
-        Assert.assertNotNull(result);
-        Assert.assertNotNull(result.getComponents());
-        Assert.assertFalse(result.getComponents().isEmpty());
-        Assert.assertTrue(result.getComponents().size() == 3);
-
-        reset(callbacks);//necessary for reset the number call 'callbacks' generate by the verify method
-
-        //-------------------------- TEST : FAIL BECAUSE OF CYCLIC INTEGRITY -------------------------
-        //## BEGIN CONFIGURATION
-        when(callbacks.onPathWalk(anyListOf(PartLink.class),anyListOf(PartMaster.class))).thenReturn(true);
-        when(filter.filter(partMaster)).thenReturn(Collections.singletonList(partIteration));
-        when(filter.filter(anyListOf(PartLink.class))).thenReturn(Collections.singletonList(partLink));
-        when(partIteration.getComponents()).thenReturn(Collections.singletonList(partUsageLink));
-        when(partLink.getComponent()).thenReturn(partMaster);
-        when(partMaster.getNumber()).thenReturn("A");
-        when(partMaster.getWorkspaceId()).thenReturn(ProductUtil.WORKSPACE_ID);
-        when(partMasterDAO.loadPartM(anyObject())).thenReturn(partMaster);
-        //## END CONFIGURATION
-        try {
-
-            psFilterVisitor.visit(ProductUtil.WORKSPACE_ID, filter, partMaster, -1, callbacks);
+            psFilterVisitor.visit(WORKSPACE_ID, new LatestReleasedPSFilter(false), getPartMasterWith(defaultPartsNumber_list[5]), -1, callbacks);
             Assert.fail();
-        }catch (EntityConstraintException e) {
+        }catch (NotAllowedException e){
 
-            verify(callbacks, times(0)).onUnresolvedPath(anyListOf(PartLink.class), anyListOf(PartIteration.class));
-            verify(callbacks,times(0)).onIndeterminatePath(anyListOf(PartLink.class), anyListOf(PartIteration.class));
-            verify(callbacks,times(0)).onOptionalPath(anyListOf(PartLink.class), anyListOf(PartIteration.class));
-            //As we've child we must not call onBranchDiscovered
-            verify(callbacks, times(0)).onBranchDiscovered(anyListOf(PartLink.class), anyListOf(PartIteration.class));
+            Assert.assertTrue(true);
         }
+    }
 
-        //Ensure mock are clean since theirs last use
-        reset(callbacks);//necessary for reset the number call 'callbacks' generate by the verify method
-        reset(partMaster);
-        reset(partLink);
-        reset(filter);
-        reset(partIteration);
-        reset(partMasterDAO);
+    //############################## HELPER METHODS ##############################
 
-        /**
-         * Start the visitor with given path
-         * */
+    private PSFilterVisitorCallbacks createCallBack(){
 
-        //Notice : We already tested 'callback' methods and cyclic integrity we just ensure than recursion is done
-        //correctly with a given path ( List<PartLink> ).
-        //-------------------------- TEST : RECURSIVE CALL WHEN A PATH GIVEN -------------------------
+        return new PSFilterVisitorCallbacks() {
+            @Override
+            public void onIndeterminateVersion(PartMaster partMaster, List<PartIteration> partIterations) throws NotAllowedException {
+                throw new NotAllowedException("NotAllowedException48");
+            }
 
-        //## STRUCTURE USED :
+            @Override
+            public void onUnresolvedVersion(PartMaster partMaster) throws NotAllowedException {
+                throw new NotAllowedException("NotAllowedException49", partMaster.getNumber());
+            }
 
-        //partMaster ( iteration )
-        //  |
-        //  |-> component_1 ( iteration_1 )
-        //          |
-        //          |->component_2 ( iteration_2 )
+            @Override
+            public void onIndeterminatePath(List<PartLink> pCurrentPath, List<PartIteration> pCurrentPathPartIterations) throws NotAllowedException {
+                throw new NotAllowedException("NotAllowedException50");
+            }
 
-        //## END STRUCTURE
+            @Override
+            public void onUnresolvedPath(List<PartLink> pCurrentPath, List<PartIteration> partIterations) throws NotAllowedException {
+                throw new NotAllowedException("NotAllowedException51");
+            }
 
-        //ADDITIONAL MOCKS
-        PartUsageLink partUsageLink_1 = mock(PartUsageLink.class);
-        //END ADDITIONAL MOCKS
+            @Override
+            public boolean onPathWalk(List<PartLink> path, List<PartMaster> parts) {
+                return true;
+            }
+        };
+    }
 
-        //## BEGIN CONFIGURATION
-        when(callbacks.onPathWalk(anyListOf(PartLink.class),anyListOf(PartMaster.class))).thenReturn(true);
-        when(partLink.getComponent()).thenReturn(partMaster);
-        when(filter.filter(partMaster)).thenReturn(Collections.singletonList(partIteration));
-        when(partIteration.getComponents()).thenReturn(Collections.singletonList(partUsageLink));
-        when(filter.filter(Arrays.asList(partLink,partUsageLink))).thenReturn(Collections.singletonList(partLink_1));
-        when(partLink_1.getComponent()).thenReturn(component_1);
-        when(component_1.getNumber()).thenReturn("COMP-001");
-        when(partMasterDAO.loadPartM(new PartMasterKey(ProductUtil.WORKSPACE_ID, "COMP-001")))
-                .thenReturn(component_1);
+    private void initDaoBahavior() throws PartMasterNotFoundException {
 
-        when(partLink_1.getComponent()).thenReturn(component_1);
-        when(filter.filter(component_1)).thenReturn(Collections.singletonList(partIteration_1));
-        when(partIteration_1.getComponents()).thenReturn(Collections.singletonList(partUsageLink_1));
-        when(filter.filter(Arrays.asList(partLink, partLink_1, partUsageLink_1))).thenReturn(Collections.singletonList(partLink_2));
-        when(partLink_2.getComponent()).thenReturn(component_2);
-        when(component_2.getNumber()).thenReturn("COMP-002");
-        when(partMasterDAO.loadPartM(new PartMasterKey(ProductUtil.WORKSPACE_ID, "COMP-002")))
-                .thenReturn(component_2);
+        for(String partNumber :  defaultPartsNumber_list){
 
-        when(partLink_2.getComponent()).thenReturn(component_2);
-        when(filter.filter(component_2)).thenReturn(Collections.singletonList(partIteration_2));
-        when(partIteration_2.getComponents()).thenReturn(new ArrayList<PartUsageLink>());
-        //## END CONFIGURATION
-
-        result = psFilterVisitor.visit(ProductUtil.WORKSPACE_ID,filter,Collections.singletonList(partLink),-1,callbacks);
-
-        verify(callbacks, times(0)).onUnresolvedPath(anyListOf(PartLink.class), anyListOf(PartIteration.class));
-        verify(callbacks,times(0)).onIndeterminatePath(anyListOf(PartLink.class), anyListOf(PartIteration.class));
-        verify(callbacks,times(0)).onOptionalPath(anyListOf(PartLink.class), anyListOf(PartIteration.class));
-        //As we've child we must not call onBranchDiscovered again
-        verify(callbacks, times(1)).onBranchDiscovered(anyListOf(PartLink.class), anyListOf(PartIteration.class));
-
-        Assert.assertNotNull(result);
-        Assert.assertNotNull(result.getComponents());
-        Assert.assertFalse(result.getComponents().isEmpty());
-        Assert.assertTrue(result.getComponents().size() == 1);
-        Assert.assertTrue(component_1.getNumber().equals(result.getComponents().get(0).getPartMaster().getNumber()));
-        Assert.assertTrue(result.getComponents().get(0).getComponents().size() == 1);
-        Assert.assertTrue(component_2.getNumber().equals(result.getComponents().get(0).getComponents().get(0).getPartMaster().getNumber()));
-
-        //-------------------------- TEST : MISSING IF CASES  -------------------------
-
-        //**** ELIGIBLEPATH EMPTY AND NON OPTIONAL USAGELINK
-        //## BEGIN CONFIGURATION
-        reset(callbacks);//necessary for reset the number call 'callbacks' generate by the verify method
-        when(callbacks.onPathWalk(anyListOf(PartLink.class),anyListOf(PartMaster.class))).thenReturn(true);
-        when(filter.filter(Arrays.asList(partLink,partUsageLink))).thenReturn(new ArrayList<PartLink>());
-        when(partUsageLink.isOptional()).thenReturn(false);
-        //## END CONFIGURATION
-
-        psFilterVisitor.visit(ProductUtil.WORKSPACE_ID, filter, Collections.singletonList(partLink), -1, callbacks);
-
-        verify(callbacks, times(1)).onUnresolvedPath(anyListOf(PartLink.class), anyListOf(PartIteration.class));
-
-        //**** ELIGIBLEPATH==1 AND OPTIONAL OPTIONAL LINK
-        //## BEGIN CONFIGURATION
-        reset(callbacks);//necessary for reset the number call 'callbacks' generate by the verify method
-        when(callbacks.onPathWalk(anyListOf(PartLink.class),anyListOf(PartMaster.class))).thenReturn(true);
-        when(filter.filter(Arrays.asList(partLink,partUsageLink))).thenReturn(Collections.singletonList(partLink));
-        when(partLink.isOptional()).thenReturn(true);
-        //## END CONFIGURATION
-
-        try {
-
-            //Cause a null pointer because we not provide a component with number ( no interest for this case )
-            psFilterVisitor.visit(ProductUtil.WORKSPACE_ID, filter, Collections.singletonList(partLink), -1, callbacks);
-        }catch (NullPointerException e) {
-
-            verify(callbacks, times(0)).onUnresolvedPath(anyListOf(PartLink.class), anyListOf(PartIteration.class));
-            verify(callbacks, times(1)).onOptionalPath(anyListOf(PartLink.class), anyListOf(PartIteration.class));
+            when(partMasterDAO.loadPartM(new PartMasterKey(WORKSPACE_ID,partNumber))).thenReturn(getPartMasterWith(partNumber));
         }
-
-        //**** STOP CASES
-        Whitebox.setInternalState(psFilterVisitor,"stopped",true);
-
-        result =  psFilterVisitor.visit(ProductUtil.WORKSPACE_ID, filter, Collections.singletonList(partLink), -1, callbacks);
-
-        Assert.assertNotNull(result);
-        Assert.assertNotNull(result.getComponents());
-        Assert.assertTrue(result.getComponents().isEmpty());
-
-        Whitebox.setInternalState(psFilterVisitor,"stopped",false);
-        when(callbacks.onPathWalk(anyListOf(PartLink.class),anyListOf(PartMaster.class))).thenReturn(false);
-
-        result =  psFilterVisitor.visit(ProductUtil.WORKSPACE_ID, filter, Collections.singletonList(partLink), -1, callbacks);
-
-        Assert.assertNotNull(result);
-        Assert.assertNotNull(result.getComponents());
-        Assert.assertTrue(result.getComponents().isEmpty());
     }
 
 
