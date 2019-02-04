@@ -11,45 +11,38 @@
 
 package org.polarsys.eplmp.server.configuration;
 
-import org.junit.*;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.*;
-
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
-import static org.polarsys.eplmp.server.util.ProductUtil.*;
-
-
-import org.polarsys.eplmp.core.exceptions.NotAllowedException;
-import org.polarsys.eplmp.core.exceptions.PartMasterNotFoundException;
-import org.polarsys.eplmp.core.product.*;
-import org.polarsys.eplmp.server.configuration.filter.LatestCheckedInPSFilter;
-import org.polarsys.eplmp.server.configuration.filter.LatestReleasedPSFilter;
-
-import org.mockito.internal.util.reflection.Whitebox;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.polarsys.eplmp.core.common.Account;
 import org.polarsys.eplmp.core.common.User;
 import org.polarsys.eplmp.core.common.Workspace;
 import org.polarsys.eplmp.core.configuration.ProductBaselineType;
 import org.polarsys.eplmp.core.configuration.ProductConfigSpec;
-import org.polarsys.eplmp.core.configuration.ProductStructureFilter;
 import org.polarsys.eplmp.core.exceptions.EntityConstraintException;
 import org.polarsys.eplmp.core.exceptions.NotAllowedException;
 import org.polarsys.eplmp.core.exceptions.PartMasterNotFoundException;
 import org.polarsys.eplmp.core.meta.RevisionStatus;
 import org.polarsys.eplmp.core.product.*;
+import org.polarsys.eplmp.server.configuration.filter.LatestCheckedInPSFilter;
+import org.polarsys.eplmp.server.configuration.filter.LatestReleasedPSFilter;
 import org.polarsys.eplmp.server.configuration.spec.DateBasedEffectivityConfigSpec;
 import org.polarsys.eplmp.server.configuration.spec.LotBasedEffectivityConfigSpec;
 import org.polarsys.eplmp.server.configuration.spec.SerialNumberBasedEffectivityConfigSpec;
-
 import org.polarsys.eplmp.server.dao.PartMasterDAO;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
+import java.util.*;
 
-import java.util.Date;
-import java.util.List;
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.when;
+import static org.mockito.MockitoAnnotations.initMocks;
+import static org.polarsys.eplmp.server.util.ProductUtil.*;
 
 
 @RunWith(PowerMockRunner.class)
