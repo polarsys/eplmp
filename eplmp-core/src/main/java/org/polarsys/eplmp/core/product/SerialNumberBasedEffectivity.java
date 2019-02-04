@@ -18,7 +18,7 @@ import javax.persistence.Table;
 /**
  * SerialNumberBasedEffectivity indicates that an item is effective while a
  * configuration item is being produced in a range of serial numbered units.
- * 
+ *
  * @author Florent Garin
  * @version 1.1, 18/10/11
  * @since   V1.1
@@ -31,7 +31,7 @@ public class SerialNumberBasedEffectivity extends Effectivity{
      * The serial number of the first item that the effectivity applies to.
      */
     private String startNumber;
-    
+
     /**
      * The serial number of the last item that the effectivity applies to.
      * This value is optional.
@@ -39,6 +39,12 @@ public class SerialNumberBasedEffectivity extends Effectivity{
     private String endNumber;
 
     public SerialNumberBasedEffectivity() {
+    }
+
+    public SerialNumberBasedEffectivity(String pName, ConfigurationItem configurationItem, String startNumber, String endNumber) {
+        super(pName, configurationItem);
+        this.startNumber = startNumber;
+        this.endNumber = endNumber;
     }
 
     public String getStartNumber() {
@@ -49,7 +55,7 @@ public class SerialNumberBasedEffectivity extends Effectivity{
         this.startNumber = startNumber;
     }
 
-    
+
     public String getEndNumber() {
         return endNumber;
     }
@@ -57,7 +63,7 @@ public class SerialNumberBasedEffectivity extends Effectivity{
     public void setEndNumber(String endNumber) {
         this.endNumber = endNumber;
     }
-    
-    
-    
+
+
+
 }

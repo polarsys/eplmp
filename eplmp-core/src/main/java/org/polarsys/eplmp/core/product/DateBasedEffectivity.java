@@ -21,7 +21,7 @@ import java.util.Date;
 /**
  * DateBasedEffectivity indicates that an item is effective while a
  * configuration item is being produced during a date range.
- * 
+ *
  * @author Florent Garin
  * @version 1.1, 18/10/11
  * @since   V1.1
@@ -35,16 +35,22 @@ public class DateBasedEffectivity extends Effectivity{
      */
     @Temporal(TemporalType.TIMESTAMP)
     private Date startDate;
-    
+
     /**
      * The date and/or time when the effectivity ends.
-     * If a value for this attribute is not set, 
+     * If a value for this attribute is not set,
      * then the effectivity has no defined end.
      */
     @Temporal(TemporalType.TIMESTAMP)
     private Date endDate;
 
     public DateBasedEffectivity() {
+    }
+
+    public DateBasedEffectivity(String pName, ConfigurationItem configurationItem, Date startDate, Date endDate) {
+        super(pName, configurationItem);
+        this.startDate = startDate;
+        this.endDate = endDate;
     }
 
     public Date getStartDate() {
@@ -62,5 +68,5 @@ public class DateBasedEffectivity extends Effectivity{
     public void setEndDate(Date endDate) {
         this.endDate = endDate;
     }
-    
+
 }
