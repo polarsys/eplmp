@@ -33,20 +33,15 @@ public class ProductUtil {
     public static final String VERSION = "A";
     public static final int ITERATION = 1;
     public static final String PART_ID = "TestPart";
-    public static final String PART_MASTER_TEMPLATE_ID = "template";
-    public static final String PART_TYPE = "PartType";
     public static final String USER_2_NAME = "user2";
     public static final String USER_2_LOGIN = "user2";
-    public static final String USER_1_NAME = "user1";
     public static final String USER_1_LOGIN = "user1";
 
     public static final String USER_1_MAIL = "user1@docdoku.com";
     public static final String USER_1_LANGUAGE = "fr";
     public static final String USER_2_MAIL = "user2@docdoku.com";
     public static final String USER_2_LANGUAGE = "en";
-    public static final String USER_GRP1 = "grp1";
 
-    public static String WORKSPACE_DESCRIPTION = "description of the workspace";
 
     //BEGIN : DEFAULT PARTS
     /**  createTestableParts method will generate a default structure for each part set as follow :
@@ -122,7 +117,7 @@ public class ProductUtil {
      *
      *     When PART-XYZ have no related the array will be empty
      */
-    protected final static int [][] defaultMappingUsageLink_tab = {
+    private final static int [][] defaultMappingUsageLink_tab = {
 
             {6,7}, {8,9}, {10}, {}, {11},//related to : part1, part2, part3, part4, part5
             {12}, {}, {}, {}, {},     //related to    : part6, part7, part8, part9, part10
@@ -133,14 +128,16 @@ public class ProductUtil {
     private static Workspace workspace;
     public static User user = new User();
     private static List<String> createdNumber_list = new ArrayList<>();
-    protected static List<PartMaster> existingPart_list = new ArrayList<>();
+    static List<PartMaster> existingPart_list = new ArrayList<>();
     private static Comparator<CharSequence> STRING_COMPARATOR = new AlphanumericComparator();
-    private static HashMap<String,HashMap<String,Object>> metaData_list = new HashMap<>();
+    private static HashMap<String,HashMap<String,List<PartRevision>>> metaData_list_revision= new HashMap<>();
+    private static HashMap<String,HashMap<String,List<PartIteration>>> metaData_list_iteration = new HashMap<>();
+    private static HashMap<String,HashMap<String,PartMaster>> metaData_list_master = new HashMap<>();
     private static List<String> rootsPartNumberInBuild = new ArrayList<>();
 
-    public  static final String PARTMASTER_MAP_KEY = "PartMaster";
-    public  static final String REVISIONS_MAP_KEY = "Revisions";
-    public  static final String ITERATION_MAP_KEY = "Iterations";
+    private  static final String PARTMASTER_MAP_KEY = "PartMaster";
+    private  static final String REVISIONS_MAP_KEY = "Revisions";
+    private  static final String ITERATION_MAP_KEY = "Iterations";
 
     public static void createTestableParts() throws Exception {
 
@@ -172,32 +169,32 @@ public class ProductUtil {
 
     public static PartMaster getPartMasterWith(String partNumber){
 
-        return (PartMaster) metaData_list.get(partNumber).get(PARTMASTER_MAP_KEY);
+        return metaData_list_master.get(partNumber).get(PARTMASTER_MAP_KEY);
     }
 
-    public static  List<PartRevision> getPartRevisionsOf(String partNumber){
+    static  List<PartRevision> getPartRevisionsOf(String partNumber){
 
-        return ((List<PartRevision>)getPartMetaData(partNumber).get(REVISIONS_MAP_KEY));
+        return metaData_list_revision.get(partNumber).get(REVISIONS_MAP_KEY);
     }
 
-    public static  void setPartIterationsOf(String partNumber, List<PartIteration> newList){
-
-        metaData_list.get(partNumber).put(ITERATION_MAP_KEY,newList);
+    private static  void setPartIterationsOf(String partNumber, List<PartIteration> newList){
+        metaData_list_iteration.computeIfAbsent(partNumber, k -> new HashMap<>());
+        metaData_list_iteration.get(partNumber).put(ITERATION_MAP_KEY,newList);
     }
 
-    public static  void setPartRevisionsOf(String partNumber, List<PartRevision> newList){
-
-        metaData_list.get(partNumber).put(REVISIONS_MAP_KEY,newList);
+    private static void setPartRevisionsOf(String partNumber, List<PartRevision> newList){
+        metaData_list_revision.computeIfAbsent(partNumber, k -> new HashMap<>());
+        metaData_list_revision.get(partNumber).put(REVISIONS_MAP_KEY,newList);
     }
 
-    public static  List<PartIteration> getPartIterationsOf(String partNumber){
+    static  List<PartIteration> getPartIterationsOf(String partNumber){
 
-        return ((List<PartIteration>)getPartMetaData(partNumber).get(ITERATION_MAP_KEY));
+        return metaData_list_iteration.get(partNumber).get(ITERATION_MAP_KEY);
     }
 
-    public static PartRevision getPartRevisionWith(String version, String partNumber){
+    static PartRevision getPartRevisionWith(String version, String partNumber){
 
-        return getRevisionWith(version, partNumber,((List<PartRevision>)getPartMetaData(partNumber).get(REVISIONS_MAP_KEY)).size());
+        return getRevisionWith(version, partNumber,metaData_list_revision.get(partNumber).get(REVISIONS_MAP_KEY).size());
     }
 
     public static void addRevisionToPartWith(String partNumber, PartRevision revision, boolean checedkout){
@@ -209,12 +206,12 @@ public class ProductUtil {
         }
         //avoid double
         if(getRevisionWith(revision.getVersion(),partNumber,
-                ( (List<PartRevision>)getPartMetaData(partNumber).get(REVISIONS_MAP_KEY)).size()) != null){
+                metaData_list_revision.get(partNumber).get(REVISIONS_MAP_KEY).size()) != null){
 
             return;
         }
 
-        ((List<PartRevision>)getPartMetaData(partNumber).get(REVISIONS_MAP_KEY)).add(revision);
+        (metaData_list_revision.get(partNumber).get(REVISIONS_MAP_KEY)).add(revision);
     }
 
     public static void addRevisionWithPartLinkTo(PartMaster partMaster, String[] usageMembers, boolean released, boolean checkout){
@@ -252,29 +249,25 @@ public class ProductUtil {
             iteration.setComponents(getPartMasterWith(partNumber)
                     .getLastRevision().getLastIteration()
                     .getComponents());
-            ((List<PartIteration>)getPartMetaData(partNumber).get(ITERATION_MAP_KEY)).add(iteration);
+            metaData_list_iteration.get(partNumber).get(ITERATION_MAP_KEY).add(iteration);
         }
     }
 
     public static void addSubstituteInLastIterationOfLastRevisionTo(PartMaster partMaster, String[] substituteTab, String toPartNumber){
 
         List<PartSubstituteLink> substituteLinks = new ArrayList<>();
-        List<PartUsageLink> usages = new ArrayList<>();
         for(PartUsageLink partUsageLink : partMaster.getLastRevision().getLastIteration().getComponents()){
 
             if( partUsageLink.getComponent() == null){
-
-                usages.add(partUsageLink);
                 continue;
             }
             if(partUsageLink.getComponent().getNumber().equals(toPartNumber)){
 
-                for(int i = 0; i < substituteTab.length;i++){
-
+                for (String aSubstituteTab : substituteTab) {
                     PartSubstituteLink partSubstituteLink = new PartSubstituteLink();
-                    partSubstituteLink.setSubstitute(getPartMasterWith(substituteTab[i]));
+                    partSubstituteLink.setSubstitute(getPartMasterWith(aSubstituteTab));
                     partSubstituteLink.setAmount(1);
-                    partSubstituteLink.setReferenceDescription(substituteTab[i]+"-Substitute");
+                    partSubstituteLink.setReferenceDescription(aSubstituteTab + "-Substitute");
                     substituteLinks.add(partSubstituteLink);
                     partUsageLink.setSubstitutes(substituteLinks);
                     partUsageLink.setOptional(true);
@@ -466,13 +459,6 @@ public class ProductUtil {
         addSubstituteInLastIterationOfLastRevisionTo(part002, substitutes011 , "PART-011");
     }
 
-    //######################### PRIVATE METHODS #########################
-
-    private static HashMap<String, Object> getPartMetaData(String number){
-
-        return metaData_list.get(number);
-    }
-
     /**
      *
      * Map structure
@@ -488,16 +474,16 @@ public class ProductUtil {
             return;
         }
         PartMaster tmpPart = existingPart_list.get(partCountNumber - 1);
-        HashMap<String,Object> tmpDateMap = new HashMap<>();
+        HashMap<String,PartMaster> tmpDateMap = new HashMap<>();
         tmpDateMap.put(PARTMASTER_MAP_KEY,tmpPart);
         List<PartIteration> iteration_list = new ArrayList<>();
         for(PartRevision revision : tmpPart.getPartRevisions()) {
 
             iteration_list.addAll(revision.getPartIterations());
         }
-        tmpDateMap.put(REVISIONS_MAP_KEY,tmpPart.getPartRevisions());
-        tmpDateMap.put(ITERATION_MAP_KEY,iteration_list);
-        metaData_list.put(tmpPart.getNumber(),tmpDateMap);
+        setPartRevisionsOf(tmpPart.getNumber(), tmpPart.getPartRevisions());
+        setPartIterationsOf(tmpPart.getNumber(), iteration_list);
+        metaData_list_master.put(tmpPart.getNumber(),tmpDateMap);
         createMetaData(partCountNumber-1);
     }
 
@@ -519,7 +505,7 @@ public class ProductUtil {
 
             return null;
         }
-        PartRevision result = ( (List<PartRevision>)metaData_list.get(partNumber).get(REVISIONS_MAP_KEY)).get(lastIndex - 1);
+        PartRevision result = metaData_list_revision.get(partNumber).get(REVISIONS_MAP_KEY).get(lastIndex - 1);
         if(version.equals(result.getVersion())){
 
             return  result;
