@@ -333,12 +333,6 @@ public class PSFilterVisitorTest {
 
     /**
      * Create a PartMaster for effectivity tests
-     *
-     * @param configurationItem
-     * @param pNumber
-     * @param pVersion
-     * @param productBaselineType
-     * @return custom PartMaster
      */
     private PartMaster createPartMaster(ConfigurationItem configurationItem, String pNumber, String pVersion, boolean createPartLink, ProductBaselineType productBaselineType) throws PartMasterNotFoundException {
         User user = configurationItem.getAuthor();

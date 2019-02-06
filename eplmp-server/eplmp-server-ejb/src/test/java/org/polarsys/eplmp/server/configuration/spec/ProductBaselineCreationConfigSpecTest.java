@@ -23,9 +23,9 @@ import org.polarsys.eplmp.core.product.PartMaster;
 import org.polarsys.eplmp.core.product.PartRevision;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
-import static java.util.Arrays.asList;
 import static org.junit.Assert.*;
 import static org.polarsys.eplmp.server.util.ProductUtil.*;
 
@@ -50,7 +50,7 @@ public class ProductBaselineCreationConfigSpecTest {
 
         pB2CS = new ProductBaselineCreationConfigSpec(ProductBaselineType.RELEASED,
                 iterations,
-                asList(""),asList(""));
+                Collections.singletonList(""), Collections.singletonList(""));
     }
 
     @Test
@@ -59,7 +59,7 @@ public class ProductBaselineCreationConfigSpecTest {
         //Test with RELEASED TYPE
         PartIteration result = pB2CS.filterPartIteration(partMaster);
         assertNotNull(result);
-        areThoseOfRevision("K",asList(result),partMaster.getNumber());
+        areThoseOfRevision("K", Collections.singletonList(result),partMaster.getNumber());
         assertFalse(pB2CS.getRetainedPartIterations().isEmpty());
         assertEquals(1,pB2CS.getRetainedPartIterations().size());
         assertTrue(pB2CS.getRetainedPartIterations().contains(result));
@@ -83,7 +83,7 @@ public class ProductBaselineCreationConfigSpecTest {
         //Test with LATEST TYPE
         pB2CS = new ProductBaselineCreationConfigSpec(ProductBaselineType.LATEST,
                 new ArrayList<>(),
-                asList(""),asList(""));
+                Collections.singletonList(""), Collections.singletonList(""));
         partMaster = getPartMasterWith("PART-005");
         result = pB2CS.filterPartIteration(partMaster);
         assertNotNull(result);
@@ -109,8 +109,8 @@ public class ProductBaselineCreationConfigSpecTest {
 
         pB2CS = new ProductBaselineCreationConfigSpec(ProductBaselineType.LATEST,
                 new ArrayList<>(),
-                asList(""),
-                asList("u0-u0-u0-u0-u0"));
+                Collections.singletonList(""),
+                Collections.singletonList("u0-u0-u0-u0-u0"));
 
         result =  pB2CS.filterPartLink(links);
         assertNotNull(result);
@@ -121,8 +121,8 @@ public class ProductBaselineCreationConfigSpecTest {
         //Now, add substitutes of those optional links
         pB2CS = new ProductBaselineCreationConfigSpec(ProductBaselineType.LATEST,
                 new ArrayList<>(),
-                asList("u0-u0-u0-u0-s0"),
-                asList("u0-u0-u0-u0-u0"));
+                Collections.singletonList("u0-u0-u0-u0-s0"),
+                Collections.singletonList("u0-u0-u0-u0-u0"));
 
         result =  pB2CS.filterPartLink(links);
         assertNotNull(result);
