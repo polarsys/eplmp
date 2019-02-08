@@ -211,7 +211,7 @@ public class PSFilterVisitorTest {
         //Then
         Assert.assertNotNull(filter);
         Assert.assertNotNull(filter.getRetainedPartIterations());
-        Assert.assertEquals(filter.getRetainedPartIterations().size(), 1);
+        Assert.assertEquals(filter.getRetainedPartIterations().size(), 2);
     }
 
     @Test
@@ -231,11 +231,11 @@ public class PSFilterVisitorTest {
         //Then
         Assert.assertNotNull(filter);
         Assert.assertNotNull(filter.getRetainedPartIterations());
-        Assert.assertEquals(filter.getRetainedPartIterations().size(), 1);
+        Assert.assertEquals(filter.getRetainedPartIterations().size(), 2);
     }
 
-    @Test
-    public void visit_should_work_without_partrevision() throws EntityConstraintException, NotAllowedException, PartMasterNotFoundException {
+    @Test(expected = NotAllowedException.class)
+    public void visit_should_not_work_without_partrevision() throws EntityConstraintException, NotAllowedException, PartMasterNotFoundException {
         //Given
         String workspaceId = "workspace01";
         ConfigurationItem configurationItem = createConfigurationItem(workspaceId);
@@ -246,16 +246,28 @@ public class PSFilterVisitorTest {
         Workspace workspace = configurationItem.getWorkspace();
         PartMaster designItem = new PartMaster(workspace, "1", user);
         //When
-        visit(workspaceId, filter, designItem);
-
-        //Then
-        Assert.assertNotNull(filter);
-        Assert.assertNotNull(filter.getRetainedPartIterations());
-        Assert.assertEquals(filter.getRetainedPartIterations().size(), 0);
+        visit(workspaceId, filter, designItem); //should throw NotAllowedException
     }
 
-    @Test
-    public void visit_should_work_without_effectivity() throws EntityConstraintException, NotAllowedException, PartMasterNotFoundException {
+    @Test(expected = NotAllowedException.class)
+    public void visit_should_not_work_without_effective_partlink() throws EntityConstraintException, NotAllowedException, PartMasterNotFoundException {
+        //Given
+        String workspaceId = "workspace01";
+        ConfigurationItem configurationItem = createConfigurationItem(workspaceId);
+        ProductConfigSpec filter = new LotBasedEffectivityConfigSpec("50", configurationItem);
+
+        // Create Mock ConfigurationItem with custom PartMaster
+        PartMaster designItem = createPartMaster(configurationItem, "1", "A", false, ProductBaselineType.EFFECTIVE_LOT_ID);
+        designItem.getPartRevisions().get(0).getPartIterations().get(0).setComponents(new ArrayList<PartUsageLink>() {{
+            PartUsageLink partUsageLink = createPartUsageLinkWithoutEffectivity(configurationItem);
+            add(partUsageLink);
+        }});
+        //When
+        visit(workspaceId, filter, designItem); //should throw NotAllowedException
+    }
+
+    @Test(expected = NotAllowedException.class)
+    public void visit_should_not_work_without_effectivity() throws EntityConstraintException, NotAllowedException, PartMasterNotFoundException {
         //Given
         String workspaceId = "workspace01";
         ConfigurationItem configurationItem = createConfigurationItem(workspaceId);
@@ -271,12 +283,7 @@ public class PSFilterVisitorTest {
             add(partRevision);
         }});
         //When
-        visit(workspaceId, filter, designItem);
-
-        //Then
-        Assert.assertNotNull(filter);
-        Assert.assertNotNull(filter.getRetainedPartIterations());
-        Assert.assertEquals(filter.getRetainedPartIterations().size(), 0);
+        visit(workspaceId, filter, designItem); //should throw NotAllowedException
     }
 
     @Test
@@ -327,8 +334,7 @@ public class PSFilterVisitorTest {
     }
 
     private void visit(String workspaceId, ProductConfigSpec filter, PartMaster designItem) throws PartMasterNotFoundException, EntityConstraintException, NotAllowedException {
-        psFilterVisitor.visit(workspaceId, filter, designItem, -1, new PSFilterVisitorCallbacks() {
-        });
+        psFilterVisitor.visit(workspaceId, filter, designItem, -1, createCallBack());
     }
 
     /**
@@ -354,7 +360,7 @@ public class PSFilterVisitorTest {
         PartRevision partRevision = new PartRevision(partMaster, pVersion, configurationItem.getAuthor());
         partRevision.setStatus(RevisionStatus.RELEASED);
         partRevision.setPartIterations(new ArrayList<PartIteration>() {{
-            add(createPartIteration(configurationItem, partRevision, pNumber, createPartLink));
+            add(createPartIteration(configurationItem, partRevision, pNumber, createPartLink, productBaselineType));
         }});
 
         Set<Effectivity> effectivities = new HashSet<>();
@@ -380,12 +386,12 @@ public class PSFilterVisitorTest {
         return partRevision;
     }
 
-    private PartIteration createPartIteration(ConfigurationItem configurationItem, PartRevision partRevision, String pNumber, boolean createPartLink) throws PartMasterNotFoundException {
+    private PartIteration createPartIteration(ConfigurationItem configurationItem, PartRevision partRevision, String pNumber, boolean createPartLink, ProductBaselineType productBaselineType) throws PartMasterNotFoundException {
         PartIteration partIteration = new PartIteration(partRevision, configurationItem.getAuthor());
         if (createPartLink) {
             partIteration.setComponents(new ArrayList<PartUsageLink>() {{
                 String newPNumber = String.valueOf(Integer.parseInt(pNumber) + 1);
-                add(createPartUsageLink(configurationItem, newPNumber, ProductBaselineType.EFFECTIVE_SERIAL_NUMBER));
+                add(createPartUsageLink(configurationItem, newPNumber, productBaselineType));
             }});
         }
         return partIteration;
@@ -396,6 +402,21 @@ public class PSFilterVisitorTest {
         Mockito.when(partMasterDAO.loadPartM(new PartMasterKey(configurationItem.getWorkspaceId(), pNumber))).thenReturn(partMaster);
         PartUsageLink partUsageLink = new PartUsageLink();
         partUsageLink.setComponent(partMaster);
+        return partUsageLink;
+    }
+
+    private PartUsageLink createPartUsageLinkWithoutEffectivity(ConfigurationItem configurationItem) throws PartMasterNotFoundException {
+        PartUsageLink partUsageLink = new PartUsageLink();
+        User user = configurationItem.getAuthor();
+        Workspace workspace = configurationItem.getWorkspace();
+        PartMaster partMaster = new PartMaster(workspace, "2", user);
+        PartRevision partRevision = new PartRevision(partMaster, "A", configurationItem.getAuthor());
+        partRevision.setStatus(RevisionStatus.RELEASED);
+        partMaster.setPartRevisions(new ArrayList<PartRevision>() {{
+            add(partRevision);
+        }});
+        partUsageLink.setComponent(partMaster);
+        Mockito.when(partMasterDAO.loadPartM(new PartMasterKey(configurationItem.getWorkspaceId(), "2"))).thenReturn(partMaster);
         return partUsageLink;
     }
 
