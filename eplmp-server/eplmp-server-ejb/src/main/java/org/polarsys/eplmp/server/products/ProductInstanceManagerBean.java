@@ -14,6 +14,7 @@ package org.polarsys.eplmp.server.products;
 import org.polarsys.eplmp.core.common.BinaryResource;
 import org.polarsys.eplmp.core.common.User;
 import org.polarsys.eplmp.core.configuration.*;
+import org.polarsys.eplmp.core.document.DocumentIteration;
 import org.polarsys.eplmp.core.document.DocumentLink;
 import org.polarsys.eplmp.core.document.DocumentRevisionKey;
 import org.polarsys.eplmp.core.exceptions.*;
@@ -29,7 +30,7 @@ import org.polarsys.eplmp.core.util.Tools;
 import org.polarsys.eplmp.server.LogDocument;
 import org.polarsys.eplmp.server.configuration.PSFilterVisitor;
 import org.polarsys.eplmp.server.configuration.PSFilterVisitorCallbacks;
-import org.polarsys.eplmp.server.configuration.spec.ResolvedCollectionConfigSpec;
+import org.polarsys.eplmp.server.configuration.spec.*;
 import org.polarsys.eplmp.server.dao.*;
 import org.polarsys.eplmp.server.factory.ACLFactory;
 import org.polarsys.eplmp.server.validation.AttributesConsistencyUtils;
@@ -170,7 +171,7 @@ public class ProductInstanceManagerBean implements IProductInstanceManagerLocal 
 
     @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
     @Override
-    public ProductInstanceMaster createProductInstance(String workspaceId, ConfigurationItemKey configurationItemKey, String serialNumber, int baselineId, Map<String, String> aclUserEntries, Map<String, String> aclUserGroupEntries, List<InstanceAttribute> attributes, DocumentRevisionKey[] links, String[] documentLinkComments) throws UserNotFoundException, AccessRightException, WorkspaceNotFoundException, ConfigurationItemNotFoundException, BaselineNotFoundException, CreationException, ProductInstanceAlreadyExistsException, NotAllowedException, EntityConstraintException, UserNotActiveException, PathToPathLinkAlreadyExistsException, PartMasterNotFoundException, ProductInstanceMasterNotFoundException, DocumentRevisionNotFoundException, WorkspaceNotEnabledException {
+    public ProductInstanceMaster createProductInstance(String workspaceId, ConfigurationItemKey configurationItemKey, String serialNumber, Integer baselineId, ProductBaselineType pType, Map<String, String> aclUserEntries, Map<String, String> aclUserGroupEntries, List<InstanceAttribute> attributes, DocumentRevisionKey[] links, String[] documentLinkComments, Date effectiveDate, String effectiveSerialNumber, String effectiveLotId) throws UserNotFoundException, AccessRightException, WorkspaceNotFoundException, ConfigurationItemNotFoundException, BaselineNotFoundException, CreationException, ProductInstanceAlreadyExistsException, NotAllowedException, EntityConstraintException, UserNotActiveException, PathToPathLinkAlreadyExistsException, PartMasterNotFoundException, ProductInstanceMasterNotFoundException, DocumentRevisionNotFoundException, WorkspaceNotEnabledException {
         User user = userManager.checkWorkspaceWriteAccess(configurationItemKey.getWorkspace());
 
         checkNameValidity(serialNumber);
@@ -204,20 +205,91 @@ public class ProductInstanceManagerBean implements IProductInstanceManagerLocal 
         documentCollection.setAuthor(user);
         documentCollection.setCreationDate(now);
 
-        ProductBaseline productBaseline = productBaselineDAO.loadBaseline(baselineId);
-        productInstanceIteration.setBasedOn(productBaseline);
-        productInstanceIteration.setSubstituteLinks(new HashSet<>(productBaseline.getSubstituteLinks()));
-        productInstanceIteration.setOptionalUsageLinks(new HashSet<>(productBaseline.getOptionalUsageLinks()));
+        //Product Instance creation from effectivity filter
+        if (pType != null && baselineId == null) {
+
+            List<String> visitedPaths = new ArrayList<>();
+            ProductConfigSpec filter;
+            switch(pType){
+                case EFFECTIVE_DATE:
+                    filter = new DateBasedEffectivityConfigSpec(effectiveDate, configurationItem);
+                    break;
+
+                case EFFECTIVE_SERIAL_NUMBER:
+                    filter = new SerialNumberBasedEffectivityConfigSpec(effectiveSerialNumber, configurationItem);
+                    break;
+
+                case EFFECTIVE_LOT_ID:
+                    filter = new LotBasedEffectivityConfigSpec(effectiveLotId, configurationItem);
+                    break;
+                default:
+                    throw new CreationException();
+            }
+
+            psFilterVisitor.visit(workspaceId, filter, configurationItem.getDesignItem(), -1, new PSFilterVisitorCallbacks() {
+                @Override
+                public void onIndeterminateVersion(PartMaster partMaster, List<PartIteration> partIterations) throws NotAllowedException {
+                    throw new NotAllowedException("NotAllowedException48");
+                }
+
+                @Override
+                public void onUnresolvedVersion(PartMaster partMaster) throws NotAllowedException {
+                    throw new NotAllowedException("NotAllowedException49", partMaster.getNumber());
+                }
+
+                @Override
+                public void onIndeterminatePath(List<PartLink> pCurrentPath, List<PartIteration> pCurrentPathPartIterations) throws NotAllowedException {
+                    throw new NotAllowedException("NotAllowedException50");
+                }
+
+                @Override
+                public void onUnresolvedPath(List<PartLink> pCurrentPath, List<PartIteration> partIterations) throws NotAllowedException {
+                    throw new NotAllowedException("NotAllowedException51");
+                }
+
+                @Override
+                public boolean onPathWalk(List<PartLink> path, List<PartMaster> parts) {
+                    String encodedPath = Tools.getPathAsString(path);
+                    visitedPaths.add(encodedPath);
+                    return true;
+                }
+            });
+
+            productInstanceIteration.setSubstituteLinks(new HashSet<>(filter.getRetainedSubstituteLinks()));
+            productInstanceIteration.setOptionalUsageLinks(new HashSet<>(filter.getRetainedOptionalUsageLinks()));
+            for (PartIteration partIteration : filter.getRetainedPartIterations()) {
+                partCollection.addBaselinedPart(partIteration);
+                for (DocumentLink docLink : partIteration.getLinkedDocuments()) {
+                    DocumentIteration docI = docLink.getTargetDocument().getLastCheckedInIteration();
+                    if (docI != null)
+                        documentCollection.addBaselinedDocument(docI);
+                }
+            }
+
+            List<PathToPathLink> linksPath = pathToPathLinkDAO.getPathToPathLinkFromPathList(configurationItem, visitedPaths);
+            for (PathToPathLink link : linksPath) {
+                PathToPathLink clone = link.clone();
+                pathToPathLinkDAO.createPathToPathLink(clone);
+                productInstanceIteration.addPathToPathLink(clone);
+            }
+        }
+
+        //Product instance creation from baseline
+        if (baselineId != null) {
+            ProductBaseline productBaseline = productBaselineDAO.loadBaseline(baselineId);
+            productInstanceIteration.setBasedOn(productBaseline);
+            productInstanceIteration.setSubstituteLinks(new HashSet<>(productBaseline.getSubstituteLinks()));
+            productInstanceIteration.setOptionalUsageLinks(new HashSet<>(productBaseline.getOptionalUsageLinks()));
+            for (BaselinedPart baselinedPart : productBaseline.getBaselinedParts().values()) {
+                partCollection.addBaselinedPart(baselinedPart.getTargetPart());
+            }
+
+            for (BaselinedDocument baselinedDocument : productBaseline.getBaselinedDocuments().values()) {
+                documentCollection.addBaselinedDocument(baselinedDocument.getTargetDocument());
+            }
+        }
 
         productInstanceMasterDAO.createProductInstanceMaster(productInstanceMaster);
-
-        for (BaselinedPart baselinedPart : productBaseline.getBaselinedParts().values()) {
-            partCollection.addBaselinedPart(baselinedPart.getTargetPart());
-        }
-
-        for (BaselinedDocument baselinedDocument : productBaseline.getBaselinedDocuments().values()) {
-            documentCollection.addBaselinedDocument(baselinedDocument.getTargetDocument());
-        }
 
         productInstanceIteration.setPartCollection(partCollection);
         productInstanceIteration.setDocumentCollection(documentCollection);
@@ -241,7 +313,9 @@ public class ProductInstanceManagerBean implements IProductInstanceManagerLocal 
             }
         }
 
-        copyPathToPathLinks(productInstanceIteration);
+        if (baselineId != null) {
+            copyPathToPathLinks(productInstanceIteration);
+        }
 
         return productInstanceMaster;
     }

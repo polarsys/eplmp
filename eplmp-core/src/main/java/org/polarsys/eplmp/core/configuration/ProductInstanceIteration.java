@@ -102,7 +102,7 @@ public class ProductInstanceIteration implements Serializable, FileHolder,Resolv
             })
     private List<InstanceAttribute> instanceAttributes = new ArrayList<>();
 
-    @ManyToOne(optional = false, fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "PRODUCTBASELINE_ID", referencedColumnName = "ID")
     private ProductBaseline basedOn;
 

@@ -13,6 +13,7 @@ package org.polarsys.eplmp.server.rest.dto.product;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import org.polarsys.eplmp.core.configuration.ProductBaselineType;
 import org.polarsys.eplmp.server.rest.dto.ACLDTO;
 import org.polarsys.eplmp.server.rest.dto.BinaryResourceDTO;
 import org.polarsys.eplmp.server.rest.dto.DocumentRevisionDTO;
@@ -20,10 +21,7 @@ import org.polarsys.eplmp.server.rest.dto.InstanceAttributeDTO;
 
 import javax.xml.bind.annotation.XmlRootElement;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @XmlRootElement
 @ApiModel(value = "ProductInstanceCreationDTO", description = "Use this class to create a new {@link org.polarsys.eplmp.core.configuration.ProductInstanceMaster} entity")
@@ -36,7 +34,7 @@ public class ProductInstanceCreationDTO implements Serializable {
     private String configurationItemId;
 
     @ApiModelProperty(value = "Baseline in use")
-    private int baselineId;
+    private Integer baselineId;
 
     @ApiModelProperty(value = "Product instance ACL")
     private ACLDTO acl;
@@ -49,6 +47,18 @@ public class ProductInstanceCreationDTO implements Serializable {
 
     @ApiModelProperty(value = "Product instance attached files")
     private List<BinaryResourceDTO> attachedFiles;
+
+    @ApiModelProperty(value = "Effectivity filter in use")
+    private ProductBaselineType type;
+
+    @ApiModelProperty(value = "Date for date effectivity filter")
+    private Date effectiveDate;
+
+    @ApiModelProperty(value = "Serial number for serial number effectivity filter")
+    private String effectiveSerialNumber;
+
+    @ApiModelProperty(value = "Lot id for lot id effectivity filter")
+    private String effectiveLotId;
 
     public ProductInstanceCreationDTO() {
     }
@@ -69,11 +79,11 @@ public class ProductInstanceCreationDTO implements Serializable {
         this.configurationItemId = configurationItemId;
     }
 
-    public int getBaselineId() {
+    public Integer getBaselineId() {
         return baselineId;
     }
 
-    public void setBaselineId(int baselineId) {
+    public void setBaselineId(Integer baselineId) {
         this.baselineId = baselineId;
     }
 
@@ -107,5 +117,39 @@ public class ProductInstanceCreationDTO implements Serializable {
 
     public void setAttachedFiles(List<BinaryResourceDTO> attachedFiles) {
         this.attachedFiles = attachedFiles;
+    }
+
+
+
+    public ProductBaselineType getType() {
+        return type;
+    }
+
+    public void setType(ProductBaselineType type) {
+        this.type = type;
+    }
+
+    public Date getEffectiveDate() {
+        return effectiveDate;
+    }
+
+    public void setEffectiveDate(Date effectiveDate) {
+        this.effectiveDate = effectiveDate;
+    }
+
+    public String getEffectiveSerialNumber() {
+        return effectiveSerialNumber;
+    }
+
+    public void setEffectiveSerialNumber(String effectiveSerialNumber) {
+        this.effectiveSerialNumber = effectiveSerialNumber;
+    }
+
+    public String getEffectiveLotId() {
+        return effectiveLotId;
+    }
+
+    public void setEffectiveLotId(String effectiveLotId) {
+        this.effectiveLotId = effectiveLotId;
     }
 }

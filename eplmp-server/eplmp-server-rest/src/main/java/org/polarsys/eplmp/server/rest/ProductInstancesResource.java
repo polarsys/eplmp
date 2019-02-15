@@ -171,7 +171,7 @@ public class ProductInstancesResource {
                 documentLinkComments[i++] = comment;
             }
         }
-        ProductInstanceMaster productInstanceMaster = productInstanceService.createProductInstance(workspaceId, new ConfigurationItemKey(workspaceId, productInstanceCreationDTO.getConfigurationItemId()), productInstanceCreationDTO.getSerialNumber(), productInstanceCreationDTO.getBaselineId(), userEntries, userGroupEntries, attributes, links, documentLinkComments);
+        ProductInstanceMaster productInstanceMaster = productInstanceService.createProductInstance(workspaceId, new ConfigurationItemKey(workspaceId, productInstanceCreationDTO.getConfigurationItemId()), productInstanceCreationDTO.getSerialNumber(), productInstanceCreationDTO.getBaselineId(), productInstanceCreationDTO.getType(), userEntries, userGroupEntries, attributes, links, documentLinkComments, productInstanceCreationDTO.getEffectiveDate(), productInstanceCreationDTO.getEffectiveSerialNumber(), productInstanceCreationDTO.getEffectiveLotId());
 
         return mapper.map(productInstanceMaster, ProductInstanceMasterDTO.class);
     }
