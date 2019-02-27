@@ -451,107 +451,113 @@ public class ProductInstanceManagerBean implements IProductInstanceManagerLocal 
     private void copyPathDataMasterList(String workspaceId, ProductInstanceIteration lastIteration, ProductInstanceIteration nextIteration) throws NotAllowedException, EntityConstraintException, PartMasterNotFoundException {
 
         List<PathDataMaster> pathDataMasterList = new ArrayList<>();
-        ProductBaseline productBaseline = nextIteration.getBasedOn();
-        PartMaster partMaster = productBaseline.getConfigurationItem().getDesignItem();
-        String serialNumber = lastIteration.getSerialNumber();
+        ProductBaseline basedOn = nextIteration.getBasedOn();
 
-        ProductStructureFilter filter = new ResolvedCollectionConfigSpec(productBaseline);
+        if(null != basedOn) {
 
-        PSFilterVisitorCallbacks callbacks = new PSFilterVisitorCallbacks() {
-            @Override
-            public boolean onPathWalk(List<PartLink> path, List<PartMaster> parts) {
-                // Find pathData in previous iteration which is on this path. Copy it.
-                String pathAsString = Tools.getPathAsString(path);
-                pathDataMasterList.addAll(
-                        lastIteration.getPathDataMasterList()
-                                .stream().filter(pathDataMaster -> pathAsString.equals(pathDataMaster.getPath()))
-                                .map(this::clonePathDataMaster)
-                                .collect(Collectors.toList()));
-                return true;
-            }
+            PartMaster partMaster = basedOn.getConfigurationItem().getDesignItem();
+            String serialNumber = lastIteration.getSerialNumber();
 
-            private PathDataMaster clonePathDataMaster(PathDataMaster pathDataMaster) {
-                PathDataMaster clone = new PathDataMaster();
+            ProductStructureFilter filter = new ResolvedCollectionConfigSpec(basedOn);
 
-                // Need to persist and flush to get an id
-                em.persist(clone);
-                em.flush();
-
-                clone.setPath(pathDataMaster.getPath());
-
-                List<PathDataIteration> pathDataIterations = new ArrayList<>();
-                for (PathDataIteration pathDataIteration : pathDataMaster.getPathDataIterations()) {
-                    PathDataIteration clonedIteration = clonePathDataIteration(workspaceId, clone, pathDataIteration);
-                    pathDataIterations.add(clonedIteration);
+            PSFilterVisitorCallbacks callbacks = new PSFilterVisitorCallbacks() {
+                @Override
+                public boolean onPathWalk(List<PartLink> path, List<PartMaster> parts) {
+                    // Find pathData in previous iteration which is on this path. Copy it.
+                    String pathAsString = Tools.getPathAsString(path);
+                    pathDataMasterList.addAll(
+                            lastIteration.getPathDataMasterList()
+                                    .stream().filter(pathDataMaster -> pathAsString.equals(pathDataMaster.getPath()))
+                                    .map(this::clonePathDataMaster)
+                                    .collect(Collectors.toList()));
+                    return true;
                 }
-                clone.setPathDataIterations(pathDataIterations);
 
-                return clone;
-            }
+                private PathDataMaster clonePathDataMaster(PathDataMaster pathDataMaster) {
+                    PathDataMaster clone = new PathDataMaster();
 
-            private PathDataIteration clonePathDataIteration(String workspaceId, PathDataMaster newPathDataMaster, PathDataIteration pathDataIteration) {
-                PathDataIteration clone = new PathDataIteration();
+                    // Need to persist and flush to get an id
+                    em.persist(clone);
+                    em.flush();
 
-                clone.setPathDataMaster(newPathDataMaster);
-                clone.setDateIteration(pathDataIteration.getDateIteration());
-                clone.setIteration(pathDataIteration.getIteration());
-                clone.setIterationNote(pathDataIteration.getIterationNote());
+                    clone.setPath(pathDataMaster.getPath());
 
-                // Attributes
-                List<InstanceAttribute> clonedAttributes = new ArrayList<>();
-                for (InstanceAttribute attribute : pathDataIteration.getInstanceAttributes()) {
-                    InstanceAttribute clonedAttribute = attribute.clone();
-                    clonedAttributes.add(clonedAttribute);
+                    List<PathDataIteration> pathDataIterations = new ArrayList<>();
+                    for (PathDataIteration pathDataIteration : pathDataMaster.getPathDataIterations()) {
+                        PathDataIteration clonedIteration = clonePathDataIteration(workspaceId, clone, pathDataIteration);
+                        pathDataIterations.add(clonedIteration);
+                    }
+                    clone.setPathDataIterations(pathDataIterations);
+
+                    return clone;
                 }
-                clone.setInstanceAttributes(clonedAttributes);
 
-                // Attached files
-                for (BinaryResource sourceFile : pathDataIteration.getAttachedFiles()) {
-                    String fileName = sourceFile.getName();
-                    long length = sourceFile.getContentLength();
-                    Date lastModified = sourceFile.getLastModified();
-                    String fullName = workspaceId + "/product-instances/" + serialNumber + "/pathdata/" + newPathDataMaster.getId() + "/iterations/" + pathDataIteration.getIteration() + '/' + fileName;
-                    BinaryResource targetFile = new BinaryResource(fullName, length, lastModified);
+                private PathDataIteration clonePathDataIteration(String workspaceId, PathDataMaster newPathDataMaster, PathDataIteration pathDataIteration) {
+                    PathDataIteration clone = new PathDataIteration();
+
+                    clone.setPathDataMaster(newPathDataMaster);
+                    clone.setDateIteration(pathDataIteration.getDateIteration());
+                    clone.setIteration(pathDataIteration.getIteration());
+                    clone.setIterationNote(pathDataIteration.getIterationNote());
+
+                    // Attributes
+                    List<InstanceAttribute> clonedAttributes = new ArrayList<>();
+                    for (InstanceAttribute attribute : pathDataIteration.getInstanceAttributes()) {
+                        InstanceAttribute clonedAttribute = attribute.clone();
+                        clonedAttributes.add(clonedAttribute);
+                    }
+                    clone.setInstanceAttributes(clonedAttributes);
+
+                    // Attached files
+                    for (BinaryResource sourceFile : pathDataIteration.getAttachedFiles()) {
+                        String fileName = sourceFile.getName();
+                        long length = sourceFile.getContentLength();
+                        Date lastModified = sourceFile.getLastModified();
+                        String fullName = workspaceId + "/product-instances/" + serialNumber + "/pathdata/" + newPathDataMaster.getId() + "/iterations/" + pathDataIteration.getIteration() + '/' + fileName;
+                        BinaryResource targetFile = new BinaryResource(fullName, length, lastModified);
+                        try {
+                            copyBinary(sourceFile, targetFile);
+                            clone.getAttachedFiles().add(targetFile);
+                        } catch (FileAlreadyExistsException | CreationException e) {
+                            LOGGER.log(Level.FINEST, null, e);
+                        }
+                    }
+
+                    // Linked documents
+                    Set<DocumentLink> newLinks = pathDataIteration.getLinkedDocuments()
+                            .stream().map(DocumentLink::clone)
+                            .collect(Collectors.toSet());
+                    clone.setLinkedDocuments(newLinks);
+
+                    return clone;
+                }
+
+                private void copyBinary(BinaryResource sourceFile, BinaryResource targetFile) throws FileAlreadyExistsException, CreationException {
+                    binaryResourceDAO.createBinaryResource(targetFile);
                     try {
-                        copyBinary(sourceFile, targetFile);
-                        clone.getAttachedFiles().add(targetFile);
-                    } catch (FileAlreadyExistsException | CreationException e) {
-                        LOGGER.log(Level.FINEST, null, e);
+                        storageManager.copyData(sourceFile, targetFile);
+                    } catch (StorageException e) {
+                        LOGGER.log(Level.INFO, null, e);
                     }
                 }
 
-                // Linked documents
-                Set<DocumentLink> newLinks = pathDataIteration.getLinkedDocuments()
-                        .stream().map(DocumentLink::clone)
-                        .collect(Collectors.toSet());
-                clone.setLinkedDocuments(newLinks);
+            };
 
-                return clone;
-            }
+            psFilterVisitor.visit(workspaceId, filter, partMaster, -1, callbacks);
 
-            private void copyBinary(BinaryResource sourceFile, BinaryResource targetFile) throws FileAlreadyExistsException, CreationException {
-                binaryResourceDAO.createBinaryResource(targetFile);
-                try {
-                    storageManager.copyData(sourceFile, targetFile);
-                } catch (StorageException e) {
-                    LOGGER.log(Level.INFO, null, e);
-                }
-            }
-
-        };
-
-        psFilterVisitor.visit(workspaceId, filter, partMaster, -1, callbacks);
-
-        nextIteration.setPathDataMasterList(pathDataMasterList);
-
+            nextIteration.setPathDataMasterList(pathDataMasterList);
+        }
     }
 
     private void copyPathToPathLinks(ProductInstanceIteration productInstanceIteration) throws PathToPathLinkAlreadyExistsException, CreationException, UserNotFoundException, WorkspaceNotFoundException, UserNotActiveException, ConfigurationItemNotFoundException, BaselineNotFoundException, ProductInstanceMasterNotFoundException, NotAllowedException, EntityConstraintException, PartMasterNotFoundException {
-        List<PathToPathLink> links = productInstanceIteration.getBasedOn().getPathToPathLinks();
-        for (PathToPathLink link : links) {
-            PathToPathLink clone = link.clone();
-            pathToPathLinkDAO.createPathToPathLink(clone);
-            productInstanceIteration.addPathToPathLink(clone);
+        ProductBaseline basedOn = productInstanceIteration.getBasedOn();
+        if(null != basedOn) {
+            List<PathToPathLink> links = basedOn.getPathToPathLinks();
+            for (PathToPathLink link : links) {
+                PathToPathLink clone = link.clone();
+                pathToPathLinkDAO.createPathToPathLink(clone);
+                productInstanceIteration.addPathToPathLink(clone);
+            }
         }
     }
 

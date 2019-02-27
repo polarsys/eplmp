@@ -1033,26 +1033,30 @@ public class ProductInstancesResource {
         List<PathToPathLink> pathToPathLinkTypes = productInstanceIteration.getPathToPathLinks();
         List<PathToPathLinkDTO> pathToPathLinkDTOs = new ArrayList<>();
 
-        for (PathToPathLink pathToPathLink : pathToPathLinkTypes) {
-            PathToPathLinkDTO pathToPathLinkDTO = mapper.map(pathToPathLink, PathToPathLinkDTO.class);
-            List<PartLink> sourcePath = productService.decodePath(productInstanceIteration.getBasedOn().getConfigurationItem().getKey(), pathToPathLink.getSourcePath());
-            List<PartLink> targetPath = productService.decodePath(productInstanceIteration.getBasedOn().getConfigurationItem().getKey(), pathToPathLink.getTargetPath());
+        ProductBaseline basedOn = productInstanceIteration.getBasedOn();
 
-            List<LightPartLinkDTO> sourceLightPartLinkDTOs = new ArrayList<>();
-            for (PartLink partLink : sourcePath) {
-                LightPartLinkDTO lightPartLinkDTO = new LightPartLinkDTO(partLink.getComponent().getNumber(), partLink.getComponent().getName(), partLink.getReferenceDescription(), partLink.getFullId());
-                sourceLightPartLinkDTOs.add(lightPartLinkDTO);
+        if( null != basedOn){
+            for (PathToPathLink pathToPathLink : pathToPathLinkTypes) {
+                PathToPathLinkDTO pathToPathLinkDTO = mapper.map(pathToPathLink, PathToPathLinkDTO.class);
+                List<PartLink> sourcePath = productService.decodePath(basedOn.getConfigurationItem().getKey(), pathToPathLink.getSourcePath());
+                List<PartLink> targetPath = productService.decodePath(basedOn.getConfigurationItem().getKey(), pathToPathLink.getTargetPath());
+
+                List<LightPartLinkDTO> sourceLightPartLinkDTOs = new ArrayList<>();
+                for (PartLink partLink : sourcePath) {
+                    LightPartLinkDTO lightPartLinkDTO = new LightPartLinkDTO(partLink.getComponent().getNumber(), partLink.getComponent().getName(), partLink.getReferenceDescription(), partLink.getFullId());
+                    sourceLightPartLinkDTOs.add(lightPartLinkDTO);
+                }
+
+                List<LightPartLinkDTO> targetLightPartLinkDTOs = new ArrayList<>();
+                for (PartLink partLink : targetPath) {
+                    LightPartLinkDTO lightPartLinkDTO = new LightPartLinkDTO(partLink.getComponent().getNumber(), partLink.getComponent().getName(), partLink.getReferenceDescription(), partLink.getFullId());
+                    targetLightPartLinkDTOs.add(lightPartLinkDTO);
+                }
+
+                pathToPathLinkDTO.setSourceComponents(sourceLightPartLinkDTOs);
+                pathToPathLinkDTO.setTargetComponents(targetLightPartLinkDTOs);
+                pathToPathLinkDTOs.add(pathToPathLinkDTO);
             }
-
-            List<LightPartLinkDTO> targetLightPartLinkDTOs = new ArrayList<>();
-            for (PartLink partLink : targetPath) {
-                LightPartLinkDTO lightPartLinkDTO = new LightPartLinkDTO(partLink.getComponent().getNumber(), partLink.getComponent().getName(), partLink.getReferenceDescription(), partLink.getFullId());
-                targetLightPartLinkDTOs.add(lightPartLinkDTO);
-            }
-
-            pathToPathLinkDTO.setSourceComponents(sourceLightPartLinkDTOs);
-            pathToPathLinkDTO.setTargetComponents(targetLightPartLinkDTOs);
-            pathToPathLinkDTOs.add(pathToPathLinkDTO);
         }
         return pathToPathLinkDTOs;
     }

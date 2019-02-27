@@ -3334,18 +3334,21 @@ public class ProductManagerBean implements IProductManagerLocal {
             baseline = productBaselineDAO.loadBaseline(baselineId);
         }
 
-        DocumentCollection documentCollection = baseline.getDocumentCollection();
-        Map<BaselinedDocumentKey, BaselinedDocument> baselinedDocuments = documentCollection.getBaselinedDocuments();
         List<ResolvedDocumentLink> resolvedDocumentLinks = new ArrayList<>();
 
-        for (Map.Entry<BaselinedDocumentKey, BaselinedDocument> map : baselinedDocuments.entrySet()) {
-            BaselinedDocument baselinedDocument = map.getValue();
-            DocumentIteration targetDocument = baselinedDocument.getTargetDocument();
-            resolvedDocumentLinks.addAll(partIteration.getLinkedDocuments()
-                    .stream()
-                    .filter(documentLink -> documentLink.getTargetDocument().getKey().equals(targetDocument.getDocumentRevisionKey()))
-                    .map(documentLink -> new ResolvedDocumentLink(documentLink, targetDocument))
-                    .collect(Collectors.toList()));
+        if(baseline != null) {
+            DocumentCollection documentCollection = baseline.getDocumentCollection();
+            Map<BaselinedDocumentKey, BaselinedDocument> baselinedDocuments = documentCollection.getBaselinedDocuments();
+
+            for (Map.Entry<BaselinedDocumentKey, BaselinedDocument> map : baselinedDocuments.entrySet()) {
+                BaselinedDocument baselinedDocument = map.getValue();
+                DocumentIteration targetDocument = baselinedDocument.getTargetDocument();
+                resolvedDocumentLinks.addAll(partIteration.getLinkedDocuments()
+                        .stream()
+                        .filter(documentLink -> documentLink.getTargetDocument().getKey().equals(targetDocument.getDocumentRevisionKey()))
+                        .map(documentLink -> new ResolvedDocumentLink(documentLink, targetDocument))
+                        .collect(Collectors.toList()));
+            }
         }
 
         return resolvedDocumentLinks;

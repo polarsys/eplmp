@@ -122,11 +122,13 @@ public class ProductBaselineDAO {
         ProductInstanceMaster productIM = productInstanceMasterDAO.loadProductInstanceMaster(productInstanceMasterKey);
         ProductInstanceIteration productII = productIM.getLastIteration();
 
-        if (productII != null) {
-            return productII.getBasedOn();
+        ProductBaseline basedOn = null;
+
+        if (productII != null ) {
+            basedOn = productII.getBasedOn();
         }
 
-        return null;
+        return basedOn;
     }
 
 }
