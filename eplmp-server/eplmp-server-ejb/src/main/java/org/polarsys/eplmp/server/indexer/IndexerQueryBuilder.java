@@ -14,6 +14,7 @@ package org.polarsys.eplmp.server.indexer;
 import io.searchbox.core.Update;
 import org.apache.lucene.search.join.ScoreMode;
 import org.elasticsearch.common.Strings;
+import org.elasticsearch.common.unit.Fuzziness;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
 import org.elasticsearch.index.query.BoolQueryBuilder;
@@ -204,7 +205,7 @@ public class IndexerQueryBuilder {
         }
 
         if (searchQuery.getContent() != null) {
-            queries.add(QueryBuilders.matchQuery(IndexerMapping.CONTENT_KEY, searchQuery.getContent()));
+            queries.add(QueryBuilders.nestedQuery(IndexerMapping.FILES_KEY, QueryBuilders.matchQuery(IndexerMapping.FILES_KEY + '.' + IndexerMapping.CONTENT_KEY, searchQuery.getContent()), ScoreMode.Avg));
         }
 
         if (tags != null && tags.length > 0) {
@@ -218,7 +219,7 @@ public class IndexerQueryBuilder {
         }
 
         if (queryString != null && !queryString.isEmpty()) {
-            queries.add(QueryBuilders.matchQuery(IndexerMapping.ALL_FIELDS, queryString));
+            queries.add(QueryBuilders.queryStringQuery(queryString));
         }
 
         return queries;

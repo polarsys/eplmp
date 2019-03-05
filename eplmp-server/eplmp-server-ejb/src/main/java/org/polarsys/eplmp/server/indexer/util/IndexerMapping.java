@@ -54,6 +54,5 @@ public class IndexerMapping {
     public static final String FILES_KEY = "files";
     public static final String CONTENT_KEY = "content";
     public static final String STANDARD_PART_KEY = "standardPart";
-    public static final String ALL_FIELDS = "_all";
 
 }
