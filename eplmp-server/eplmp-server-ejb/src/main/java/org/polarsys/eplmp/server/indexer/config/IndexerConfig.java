@@ -45,4 +45,10 @@ public class IndexerConfig {
 
     public String getAWSSecretKey() { return properties.getProperty("awsSecretKey"); }
 
+    public String getPrefixIndex(){
+
+        String property = properties.getProperty("indexPrefix");
+        return ( property != null ) ? property : "localhost" ;
+    }
+
 }

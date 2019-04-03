@@ -12,7 +12,9 @@
 package org.polarsys.eplmp.server.indexer.util;
 
 import org.polarsys.eplmp.core.util.Tools;
-
+import org.polarsys.eplmp.server.indexer.config.IndexerConfig;
+import javax.ejb.Stateless;
+import javax.inject.Inject;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.logging.Level;
@@ -23,16 +25,19 @@ import java.util.logging.Logger;
  *
  * @author Taylor Labejof
  */
-public class IndicesUtils {
+
+@Stateless(name = "IndicesUtils")
+public class IndicesUtils{
+
+    @Inject
+    IndexerConfig config;
 
     private static final Logger LOGGER = Logger.getLogger(IndicesUtils.class.getName());
 
-    private IndicesUtils() {
-    }
-
-    public static String getIndexName(String workspaceId, String type){
-        return IndexerMapping.INDEX_PREFIX + IndexerMapping.INDEX_SEPARATOR +
-                formatIndexName(workspaceId) + IndexerMapping. INDEX_SEPARATOR + type;
+    public String getIndexName(String indexName, String type){
+        return config.getPrefixIndex() + IndexerMapping.INDEX_SEPARATOR +
+               IndexerMapping.INDEX_PREFIX + IndexerMapping.INDEX_SEPARATOR +
+                formatIndexName(indexName) + IndexerMapping. INDEX_SEPARATOR + type;
     }
 
     /**
@@ -41,7 +46,7 @@ public class IndicesUtils {
      * @param workspaceId Id to convert
      * @return The workspaceId without uppercase and space
      */
-    private static String formatIndexName(String workspaceId) {
+    private String formatIndexName(String workspaceId) {
         try {
             return URLEncoder.encode(Tools.unAccent(workspaceId), "UTF-8").toLowerCase();
         } catch (UnsupportedEncodingException e) {
