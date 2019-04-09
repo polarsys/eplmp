@@ -38,10 +38,9 @@ import org.polarsys.eplmp.server.indexer.util.IndicesUtils;
 
 import javax.annotation.security.DeclareRoles;
 import javax.annotation.security.RolesAllowed;
-import javax.ejb.Asynchronous;
-import javax.ejb.Local;
-import javax.ejb.Stateless;
+import javax.ejb.*;
 import javax.inject.Inject;
+import javax.transaction.Transactional;
 import java.io.IOException;
 import java.util.*;
 import java.util.logging.Level;
@@ -249,10 +248,11 @@ public class IndexerManagerBean implements IIndexerManagerLocal {
      */
     @Override
     @RolesAllowed({UserGroupMapping.REGULAR_USER_ROLE_ID})
+    @TransactionAttribute(value = TransactionAttributeType.REQUIRES_NEW)
     public void removeDocumentIterationFromIndex(DocumentIteration documentIteration) {
         try {
             String indexName = indicesUtils.getIndexName(documentIteration.getWorkspaceId(), IndexerMapping.INDEX_DOCUMENTS);
-            indexManager.executeRemove(indexName, documentIteration.getKey().toString());
+            indexManager.executeRemove(indexName, indicesUtils.formatDocId(documentIteration.getKey().toString()));
         } catch (IndexerNotAvailableException | IndexerRequestException e) {
             LOGGER.log(Level.WARNING, "Cannot delete document " + documentIteration + ": The Elasticsearch cluster does not seem to respond");
         }
@@ -265,10 +265,11 @@ public class IndexerManagerBean implements IIndexerManagerLocal {
      */
     @Override
     @RolesAllowed({UserGroupMapping.REGULAR_USER_ROLE_ID})
+    @TransactionAttribute(value = TransactionAttributeType.REQUIRES_NEW)
     public void removePartIterationFromIndex(PartIteration partIteration) {
         try {
             String indexName = indicesUtils.getIndexName(partIteration.getWorkspaceId(), IndexerMapping.INDEX_PARTS);
-            indexManager.executeRemove(indexName, partIteration.getKey().toString());
+            indexManager.executeRemove(indexName, indicesUtils.formatDocId(partIteration.getKey().toString()));
         } catch (IndexerNotAvailableException | IndexerRequestException e) {
             LOGGER.log(Level.WARNING, "Cannot delete part iteration " + partIteration + ": The Elasticsearch cluster does not seem to respond");
         }

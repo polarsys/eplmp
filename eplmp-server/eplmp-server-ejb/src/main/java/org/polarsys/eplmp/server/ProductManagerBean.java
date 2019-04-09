@@ -1585,8 +1585,6 @@ public class ProductManagerBean implements IProductManagerLocal {
             } catch (StorageException e) {
                 LOGGER.log(Level.INFO, null, e);
             }
-
-            indexerManager.removePartIterationFromIndex(partIteration);
         }
     }
 
@@ -2050,9 +2048,6 @@ public class ProductManagerBean implements IProductManagerLocal {
             throw new EntityConstraintException("EntityConstraintException21");
         }
 
-        // delete Elasticsearch Index for this revision iteration
-        partR.getPartIterations().forEach(indexerManager::removePartIterationFromIndex);
-
         partRevisionEvent.select(new AnnotationLiteral<Removed>() {
         }).fire(new PartRevisionEvent(partR));
 
@@ -2063,13 +2058,17 @@ public class ProductManagerBean implements IProductManagerLocal {
             partRevisionDAO.removeRevision(partR);
         }
 
-        // delete CAD and other files attached with this partMaster
         for (PartIteration partIteration : partR.getPartIterations()) {
+            try {
+                indexerManager.removePartIterationFromIndex(partIteration);
+            } catch (Exception e ) {
+                LOGGER.log(Level.WARNING, null, e);
+            }
             try {
                 removeCADFile(partIteration);
                 removeAttachedFiles(partIteration);
             } catch (PartIterationNotFoundException e) {
-                LOGGER.log(Level.INFO, null, e);
+                LOGGER.log(Level.WARNING, null, e);
             }
         }
     }

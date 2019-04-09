@@ -1231,14 +1231,19 @@ public class DocumentManagerBean implements IDocumentManagerLocal {
         }
 
         for (DocumentIteration doc : docR.getDocumentIterations()) {
+            try {
+                indexerManager.removeDocumentIterationFromIndex(doc);
+            } catch(Exception e){
+                LOGGER.log(Level.WARNING, null, e);
+            }
             for (BinaryResource file : doc.getAttachedFiles()) {
                 try {
                     storageManager.deleteData(file);
                 } catch (StorageException e) {
-                    LOGGER.log(Level.INFO, null, e);
+                    LOGGER.log(Level.WARNING, null, e);
                 }
-                indexerManager.removeDocumentIterationFromIndex(doc);
             }
+
         }
     }
 

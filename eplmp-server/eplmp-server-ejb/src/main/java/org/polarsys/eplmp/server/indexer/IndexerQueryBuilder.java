@@ -73,7 +73,7 @@ public class IndexerQueryBuilder {
             return new Update.Builder(Strings.toString(xcb))
                     .index(indicesUtils.getIndexName(documentIteration.getWorkspaceId(), IndexerMapping.INDEX_DOCUMENTS))
                     .type(IndexerMapping.TYPE)
-                    .id(documentIteration.getKey().toString());
+                    .id(indicesUtils.formatDocId(documentIteration.getKey().toString()));
         }
     }
     /**
@@ -94,7 +94,7 @@ public class IndexerQueryBuilder {
             return new Update.Builder(Strings.toString(xcb))
                     .index(indicesUtils.getIndexName(partIteration.getWorkspaceId(), IndexerMapping.INDEX_PARTS))
                     .type(IndexerMapping.TYPE)
-                    .id(partIteration.getKey().toString());
+                    .id(indicesUtils.formatDocId(partIteration.getKey().toString()));
         }
     }
 

@@ -54,4 +54,19 @@ public class IndicesUtils{
             return null;
         }
     }
+
+    /**
+     * Convert the workspaceId to a Elastic Search index name
+     *
+     * @param id document Id to convert
+     * @return The document id without uppercase and space
+     */
+    public String formatDocId(String id){
+        try {
+            return URLEncoder.encode(Tools.unAccent(id), "UTF-8").toLowerCase();
+        } catch (UnsupportedEncodingException e) {
+            LOGGER.log(Level.FINEST, null, e);
+            return null;
+        }
+    }
 }
