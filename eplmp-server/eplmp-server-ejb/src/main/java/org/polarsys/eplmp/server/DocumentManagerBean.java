@@ -24,7 +24,6 @@ import org.polarsys.eplmp.core.security.UserGroupMapping;
 import org.polarsys.eplmp.core.services.*;
 import org.polarsys.eplmp.core.sharing.SharedDocument;
 import org.polarsys.eplmp.core.sharing.SharedEntityKey;
-import org.polarsys.eplmp.core.util.FileIO;
 import org.polarsys.eplmp.core.util.NamingConvention;
 import org.polarsys.eplmp.core.util.Tools;
 import org.polarsys.eplmp.core.workflow.*;
@@ -196,7 +195,7 @@ public class DocumentManagerBean implements IDocumentManagerLocal {
         if (isCheckoutByUser(user, docR) && docR.getLastIteration().equals(document)) {
             BinaryResource binaryResource = null;
 
-            String fullName = docR.getWorkspaceId() + "/documents/" + FileIO.encode(docR.getId()) + "/" + docR.getVersion() + "/" + document.getIteration() + "/" + pName;
+            String fullName = docR.getWorkspaceId() + "/documents/" + docR.getId() + "/" + docR.getVersion() + "/" + document.getIteration() + "/" + pName;
 
             for (BinaryResource bin : document.getAttachedFiles()) {
                 if (bin.getFullName().equals(fullName)) {
@@ -719,12 +718,12 @@ public class DocumentManagerBean implements IDocumentManagerLocal {
             }
             newDoc.setInstanceAttributes(attrs);
 
-            String encodedDocMId = FileIO.encode(docM.getId());
+            String docMId = docM.getId();
             for (BinaryResource sourceFile : template.getAttachedFiles()) {
                 String fileName = sourceFile.getName();
                 long length = sourceFile.getContentLength();
                 Date lastModified = sourceFile.getLastModified();
-                String fullName = docM.getWorkspaceId() + "/documents/" + encodedDocMId + "/A/1/" + fileName;
+                String fullName = docM.getWorkspaceId() + "/documents/" + docMId + "/A/1/" + fileName;
                 BinaryResource targetFile = new BinaryResource(fullName, length, lastModified);
                 binaryResourceDAO.createBinaryResource(targetFile);
 
@@ -932,12 +931,12 @@ public class DocumentManagerBean implements IDocumentManagerLocal {
         docR.setCheckOutDate(now);
 
         if (beforeLastDocument != null) {
-            String encodedDocRId = FileIO.encode(docR.getId());
+            String docRId = docR.getId();
             for (BinaryResource sourceFile : beforeLastDocument.getAttachedFiles()) {
                 String fileName = sourceFile.getName();
                 long length = sourceFile.getContentLength();
                 Date lastModified = sourceFile.getLastModified();
-                String fullName = docR.getWorkspaceId() + "/documents/" + encodedDocRId + "/" + docR.getVersion() + "/" + newDoc.getIteration() + "/" + fileName;
+                String fullName = docR.getWorkspaceId() + "/documents/" + docRId + "/" + docR.getVersion() + "/" + newDoc.getIteration() + "/" + fileName;
                 BinaryResource targetFile = new BinaryResource(fullName, length, lastModified);
                 binaryResourceDAO.createBinaryResource(targetFile);
                 newDoc.addFile(targetFile);
@@ -1231,19 +1230,14 @@ public class DocumentManagerBean implements IDocumentManagerLocal {
         }
 
         for (DocumentIteration doc : docR.getDocumentIterations()) {
-            try {
-                indexerManager.removeDocumentIterationFromIndex(doc);
-            } catch(Exception e){
-                LOGGER.log(Level.WARNING, null, e);
-            }
             for (BinaryResource file : doc.getAttachedFiles()) {
                 try {
                     storageManager.deleteData(file);
                 } catch (StorageException e) {
-                    LOGGER.log(Level.WARNING, null, e);
+                    LOGGER.log(Level.INFO, null, e);
                 }
+                indexerManager.removeDocumentIterationFromIndex(doc);
             }
-
         }
     }
 
@@ -1454,12 +1448,12 @@ public class DocumentManagerBean implements IDocumentManagerLocal {
         DocumentIteration lastDoc = originalDocR.getLastIteration();
         DocumentIteration firstIte = docR.createNextIteration(user);
         if (lastDoc != null) {
-            String encodedDocRId = FileIO.encode(docR.getId());
+            String docRId = docR.getId();
             for (BinaryResource sourceFile : lastDoc.getAttachedFiles()) {
                 String fileName = sourceFile.getName();
                 long length = sourceFile.getContentLength();
                 Date lastModified = sourceFile.getLastModified();
-                String fullName = docR.getWorkspaceId() + "/documents/" + encodedDocRId + "/" + docR.getVersion() + "/1/" + fileName;
+                String fullName = docR.getWorkspaceId() + "/documents/" + docRId + "/" + docR.getVersion() + "/1/" + fileName;
                 BinaryResource targetFile = new BinaryResource(fullName, length, lastModified);
                 binaryResourceDAO.createBinaryResource(targetFile);
                 firstIte.addFile(targetFile);

@@ -22,7 +22,6 @@ import org.polarsys.eplmp.core.security.UserGroupMapping;
 import org.polarsys.eplmp.core.services.*;
 import org.polarsys.eplmp.core.sharing.SharedEntity;
 import org.polarsys.eplmp.core.sharing.SharedPart;
-import org.polarsys.eplmp.core.util.FileIO;
 import org.polarsys.eplmp.core.util.HashUtils;
 import org.polarsys.eplmp.server.auth.AuthConfig;
 import org.polarsys.eplmp.server.auth.jwt.JWTokenFactory;
@@ -252,7 +251,7 @@ public class PartBinaryResource {
             LOGGER.log(Level.SEVERE, "Cannot decode filename", e);
         }
 
-        String fullName = workspaceId + "/parts/" + FileIO.encode(partNumber) + "/" + version + "/" + iteration + "/";
+        String fullName = workspaceId + "/parts/" + partNumber + "/" + version + "/" + iteration + "/";
 
         if (subType != null && !subType.isEmpty()) {
             fullName = fullName + subType + "/";
