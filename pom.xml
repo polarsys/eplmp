@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.polarsys.eplmp</groupId>
     <artifactId>eclipse-eplmp</artifactId>
-    <version>2.5.4</version>
+    <version>2.5.4-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Eclipse Product Lifecycle Management Platform</name>
     <description>high end open source PLM platform.</description>
