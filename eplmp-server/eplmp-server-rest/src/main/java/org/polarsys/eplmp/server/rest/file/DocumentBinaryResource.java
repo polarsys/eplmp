@@ -23,7 +23,6 @@ import org.polarsys.eplmp.core.security.UserGroupMapping;
 import org.polarsys.eplmp.core.services.*;
 import org.polarsys.eplmp.core.sharing.SharedDocument;
 import org.polarsys.eplmp.core.sharing.SharedEntity;
-import org.polarsys.eplmp.core.util.FileIO;
 import org.polarsys.eplmp.core.util.HashUtils;
 import org.polarsys.eplmp.server.auth.AuthConfig;
 import org.polarsys.eplmp.server.auth.jwt.JWTokenFactory;
@@ -172,7 +171,7 @@ public class DocumentBinaryResource {
             LOGGER.log(Level.SEVERE, "Cannot decode filename", e);
         }
 
-        String fullName = workspaceId + "/documents/" + FileIO.encode(documentId) + "/" + version + "/" + iteration + "/" + decodedFileName;
+        String fullName = workspaceId + "/documents/" + documentId + "/" + version + "/" + iteration + "/" + decodedFileName;
 
         boolean isWorkingCopy = false;
 

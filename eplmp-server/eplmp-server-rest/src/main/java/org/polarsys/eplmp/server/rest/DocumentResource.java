@@ -31,7 +31,6 @@ import org.polarsys.eplmp.core.services.IDocumentManagerLocal;
 import org.polarsys.eplmp.core.services.IDocumentWorkflowManagerLocal;
 import org.polarsys.eplmp.core.services.IProductManagerLocal;
 import org.polarsys.eplmp.core.sharing.SharedDocument;
-import org.polarsys.eplmp.core.util.FileIO;
 import org.polarsys.eplmp.core.workflow.Workflow;
 import org.polarsys.eplmp.server.rest.dto.*;
 import org.polarsys.eplmp.server.rest.dto.product.ProductInstanceMasterDTO;
@@ -578,7 +577,7 @@ public class DocumentResource {
             throws EntityNotFoundException, NotAllowedException, AccessRightException, UserNotActiveException,
             EntityAlreadyExistsException, CreationException, StorageException, WorkspaceNotEnabledException {
 
-        String fileFullName = workspaceId + "/documents/" + FileIO.encode(documentId) + "/" + documentVersion + "/" + docIteration + "/" + fileName;
+        String fileFullName = workspaceId + "/documents/" + documentId + "/" + documentVersion + "/" + docIteration + "/" + fileName;
         BinaryResource binaryResource = documentService.renameFileInDocument(fileFullName, fileDTO.getShortName());
         return new FileDTO(true, binaryResource.getFullName(), binaryResource.getName());
     }
@@ -600,7 +599,7 @@ public class DocumentResource {
             @ApiParam(required = true, value = "Document iteration") @PathParam("docIteration") int docIteration,
             @ApiParam(required = true, value = "File name") @PathParam("fileName") String fileName)
             throws EntityNotFoundException, NotAllowedException, AccessRightException, UserNotActiveException, WorkspaceNotEnabledException {
-        String fileFullName = workspaceId + "/documents/" + FileIO.encode(documentId) + "/" + documentVersion + "/" + docIteration + "/" + fileName;
+        String fileFullName = workspaceId + "/documents/" + documentId + "/" + documentVersion + "/" + docIteration + "/" + fileName;
         documentService.removeFileFromDocument(fileFullName);
         return Response.noContent().build();
     }
