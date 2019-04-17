@@ -1448,7 +1448,7 @@ public class DocumentManagerBean implements IDocumentManagerLocal {
         DocumentIteration lastDoc = originalDocR.getLastIteration();
         DocumentIteration firstIte = docR.createNextIteration(user);
         if (lastDoc != null) {
-            String docRId = docR.getId());
+            String docRId = docR.getId();
             for (BinaryResource sourceFile : lastDoc.getAttachedFiles()) {
                 String fileName = sourceFile.getName();
                 long length = sourceFile.getContentLength();
