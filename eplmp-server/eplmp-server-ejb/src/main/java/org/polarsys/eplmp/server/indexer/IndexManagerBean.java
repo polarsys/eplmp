@@ -50,6 +50,9 @@ public class IndexManagerBean {
     private IndexerConfig config;
 
     @Inject
+    private IndicesUtils indicesUtils;
+
+    @Inject
     private JestClient esClient;
 
     private static final Logger LOGGER = Logger.getLogger(IndexManagerBean.class.getName());
@@ -76,8 +79,8 @@ public class IndexManagerBean {
      * @throws IndexerNotAvailableException
      */
     public void createIndices(String workspaceId) throws IndexerRequestException, IndexerNotAvailableException {
-        createIndex(IndicesUtils.getIndexName(workspaceId, IndexerMapping.INDEX_DOCUMENTS));
-        createIndex(IndicesUtils.getIndexName(workspaceId, IndexerMapping.INDEX_PARTS));
+        createIndex(indicesUtils.getIndexName(workspaceId, IndexerMapping.INDEX_DOCUMENTS));
+        createIndex(indicesUtils.getIndexName(workspaceId, IndexerMapping.INDEX_PARTS));
     }
 
     /**
@@ -88,8 +91,8 @@ public class IndexManagerBean {
      * @throws IndexerRequestException
      */
     public void deleteIndices(String workspaceId) throws IndexerNotAvailableException, IndexerRequestException {
-        deleteIndex(IndicesUtils.getIndexName(workspaceId, IndexerMapping.INDEX_DOCUMENTS));
-        deleteIndex(IndicesUtils.getIndexName(workspaceId, IndexerMapping.INDEX_PARTS));
+        deleteIndex(indicesUtils.getIndexName(workspaceId, IndexerMapping.INDEX_DOCUMENTS));
+        deleteIndex(indicesUtils.getIndexName(workspaceId, IndexerMapping.INDEX_PARTS));
     }
 
     /**
@@ -205,8 +208,8 @@ public class IndexManagerBean {
      * @throws IndexerNotAvailableException
      */
     public boolean indicesExist(String workspaceId) throws IndexerNotAvailableException {
-        return indexExists(IndicesUtils.getIndexName(workspaceId, IndexerMapping.INDEX_DOCUMENTS)) ||
-                indexExists(IndicesUtils.getIndexName(workspaceId, IndexerMapping.INDEX_PARTS));
+        return indexExists(indicesUtils.getIndexName(workspaceId, IndexerMapping.INDEX_DOCUMENTS)) ||
+                indexExists(indicesUtils.getIndexName(workspaceId, IndexerMapping.INDEX_PARTS));
     }
 
 

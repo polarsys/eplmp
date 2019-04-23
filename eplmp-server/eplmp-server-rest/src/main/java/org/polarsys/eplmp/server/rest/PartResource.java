@@ -31,7 +31,6 @@ import org.polarsys.eplmp.core.services.IProductInstanceManagerLocal;
 import org.polarsys.eplmp.core.services.IProductManagerLocal;
 import org.polarsys.eplmp.core.services.IWorkspaceManagerLocal;
 import org.polarsys.eplmp.core.sharing.SharedPart;
-import org.polarsys.eplmp.core.util.FileIO;
 import org.polarsys.eplmp.core.workflow.Workflow;
 import org.polarsys.eplmp.server.rest.collections.VirtualInstanceCollection;
 import org.polarsys.eplmp.server.rest.dto.*;
@@ -567,7 +566,7 @@ public class PartResource {
             @ApiParam(required = true, value = "File name") @PathParam("fileName") String fileName)
             throws EntityNotFoundException, UserNotActiveException, WorkspaceNotEnabledException {
         PartIterationKey partIKey = new PartIterationKey(workspaceId, partNumber, partVersion, partIteration);
-        String fileFullName = workspaceId + "/parts/" + FileIO.encode(partNumber) + "/" + partVersion + "/" + partIteration + "/" + subType + "/" + fileName;
+        String fileFullName = workspaceId + "/parts/" + partNumber + "/" + partVersion + "/" + partIteration + "/" + subType + "/" + fileName;
         productService.removeFileInPartIteration(partIKey, subType, fileFullName);
         return Response.noContent().build();
     }
@@ -595,7 +594,7 @@ public class PartResource {
             throws UserNotActiveException, CreationException, NotAllowedException, EntityAlreadyExistsException,
             StorageException, WorkspaceNotEnabledException, EntityNotFoundException {
 
-        String fileFullName = workspaceId + "/parts/" + FileIO.encode(partNumber) + "/" + partVersion + "/" + partIteration + "/" + subType + "/" + fileName;
+        String fileFullName = workspaceId + "/parts/" + partNumber + "/" + partVersion + "/" + partIteration + "/" + subType + "/" + fileName;
         BinaryResource binaryResource = productService.renameFileInPartIteration(subType, fileFullName, fileDTO.getShortName());
         return new FileDTO(true, binaryResource.getFullName(), binaryResource.getName());
     }

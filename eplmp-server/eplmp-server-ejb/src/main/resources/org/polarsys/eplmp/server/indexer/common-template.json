@@ -1,5 +1,5 @@
 {
-  "index_patterns": ["eplmp-*"],
+  "index_patterns": ["*-eplmp-*"],
   "settings": {
   },
   "mappings": {

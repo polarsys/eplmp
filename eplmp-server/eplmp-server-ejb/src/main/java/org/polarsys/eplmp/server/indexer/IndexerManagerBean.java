@@ -38,10 +38,9 @@ import org.polarsys.eplmp.server.indexer.util.IndicesUtils;
 
 import javax.annotation.security.DeclareRoles;
 import javax.annotation.security.RolesAllowed;
-import javax.ejb.Asynchronous;
-import javax.ejb.Local;
-import javax.ejb.Stateless;
+import javax.ejb.*;
 import javax.inject.Inject;
+import javax.transaction.Transactional;
 import java.io.IOException;
 import java.util.*;
 import java.util.logging.Level;
@@ -88,6 +87,9 @@ public class IndexerManagerBean implements IIndexerManagerLocal {
 
     @Inject
     private IndexManagerBean indexManager;
+
+    @Inject
+    private IndicesUtils indicesUtils;
 
     private static final String I18N_CONF = "/org/polarsys/eplmp/core/i18n/LocalStrings";
     private static final Logger LOGGER = Logger.getLogger(IndexerManagerBean.class.getName());
@@ -246,10 +248,11 @@ public class IndexerManagerBean implements IIndexerManagerLocal {
      */
     @Override
     @RolesAllowed({UserGroupMapping.REGULAR_USER_ROLE_ID})
+    @TransactionAttribute(value = TransactionAttributeType.REQUIRES_NEW)
     public void removeDocumentIterationFromIndex(DocumentIteration documentIteration) {
         try {
-            String indexName = IndicesUtils.getIndexName(documentIteration.getWorkspaceId(), IndexerMapping.INDEX_DOCUMENTS);
-            indexManager.executeRemove(indexName, documentIteration.getKey().toString());
+            String indexName = indicesUtils.getIndexName(documentIteration.getWorkspaceId(), IndexerMapping.INDEX_DOCUMENTS);
+            indexManager.executeRemove(indexName, indicesUtils.formatDocId(documentIteration.getKey().toString()));
         } catch (IndexerNotAvailableException | IndexerRequestException e) {
             LOGGER.log(Level.WARNING, "Cannot delete document " + documentIteration + ": The Elasticsearch cluster does not seem to respond");
         }
@@ -262,10 +265,11 @@ public class IndexerManagerBean implements IIndexerManagerLocal {
      */
     @Override
     @RolesAllowed({UserGroupMapping.REGULAR_USER_ROLE_ID})
+    @TransactionAttribute(value = TransactionAttributeType.REQUIRES_NEW)
     public void removePartIterationFromIndex(PartIteration partIteration) {
         try {
-            String indexName = IndicesUtils.getIndexName(partIteration.getWorkspaceId(), IndexerMapping.INDEX_PARTS);
-            indexManager.executeRemove(indexName, partIteration.getKey().toString());
+            String indexName = indicesUtils.getIndexName(partIteration.getWorkspaceId(), IndexerMapping.INDEX_PARTS);
+            indexManager.executeRemove(indexName, indicesUtils.formatDocId(partIteration.getKey().toString()));
         } catch (IndexerNotAvailableException | IndexerRequestException e) {
             LOGGER.log(Level.WARNING, "Cannot delete part iteration " + partIteration + ": The Elasticsearch cluster does not seem to respond");
         }
@@ -286,7 +290,7 @@ public class IndexerManagerBean implements IIndexerManagerLocal {
     @RolesAllowed({UserGroupMapping.REGULAR_USER_ROLE_ID})
     public List<DocumentRevision> searchDocumentRevisions(DocumentSearchQuery documentSearchQuery, int from, int size)
             throws AccountNotFoundException, IndexerRequestException, IndexerNotAvailableException {
-        String indexName = IndicesUtils.getIndexName(documentSearchQuery.getWorkspaceId(), IndexerMapping.INDEX_DOCUMENTS);
+        String indexName = indicesUtils.getIndexName(documentSearchQuery.getWorkspaceId(), IndexerMapping.INDEX_DOCUMENTS);
         QueryBuilder query = indexerQueryBuilder.getSearchQueryBuilder(documentSearchQuery);
         SearchResult searchResult = indexManager.executeSearch(indexName, query, from, size);
         return indexerResultsMapper.processSearchResult(searchResult, documentSearchQuery);
@@ -308,7 +312,7 @@ public class IndexerManagerBean implements IIndexerManagerLocal {
     @RolesAllowed({UserGroupMapping.REGULAR_USER_ROLE_ID})
     public List<PartRevision> searchPartRevisions(PartSearchQuery partSearchQuery, int from, int size)
             throws AccountNotFoundException, IndexerRequestException, IndexerNotAvailableException {
-        String indexName = IndicesUtils.getIndexName(partSearchQuery.getWorkspaceId(), IndexerMapping.INDEX_PARTS);
+        String indexName = indicesUtils.getIndexName(partSearchQuery.getWorkspaceId(), IndexerMapping.INDEX_PARTS);
         QueryBuilder query = indexerQueryBuilder.getSearchQueryBuilder(partSearchQuery);
         SearchResult searchResult = indexManager.executeSearch(indexName, query, from, size);
         return indexerResultsMapper.processSearchResult(searchResult, partSearchQuery);

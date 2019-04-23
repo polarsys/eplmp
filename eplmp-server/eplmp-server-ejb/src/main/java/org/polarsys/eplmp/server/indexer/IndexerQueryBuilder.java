@@ -50,6 +50,9 @@ public class IndexerQueryBuilder {
     @Inject
     private IndexerTextExtractor textExtractor;
 
+    @Inject
+    private IndicesUtils indicesUtils;
+
     private static final String FUZZINESS = "AUTO";
 
     /**
@@ -68,9 +71,9 @@ public class IndexerQueryBuilder {
             EntityMapper.documentIterationToJSON(xcb, documentIteration, contentInputs);
             xcb.endObject().endObject();
             return new Update.Builder(Strings.toString(xcb))
-                    .index(IndicesUtils.getIndexName(documentIteration.getWorkspaceId(), IndexerMapping.INDEX_DOCUMENTS))
+                    .index(indicesUtils.getIndexName(documentIteration.getWorkspaceId(), IndexerMapping.INDEX_DOCUMENTS))
                     .type(IndexerMapping.TYPE)
-                    .id(documentIteration.getKey().toString());
+                    .id(indicesUtils.formatDocId(documentIteration.getKey().toString()));
         }
     }
     /**
@@ -89,9 +92,9 @@ public class IndexerQueryBuilder {
             EntityMapper.partIterationToJSON(xcb, partIteration, contentInputs);
             xcb.endObject().endObject();
             return new Update.Builder(Strings.toString(xcb))
-                    .index(IndicesUtils.getIndexName(partIteration.getWorkspaceId(), IndexerMapping.INDEX_PARTS))
+                    .index(indicesUtils.getIndexName(partIteration.getWorkspaceId(), IndexerMapping.INDEX_PARTS))
                     .type(IndexerMapping.TYPE)
-                    .id(partIteration.getKey().toString());
+                    .id(indicesUtils.formatDocId(partIteration.getKey().toString()));
         }
     }
 
