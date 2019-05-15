@@ -54,8 +54,8 @@ public class PlatformHealthManagerBean implements IPlatformHealthManagerLocal {
 
         // Database check
         try {
-            Long one = (Long) em.createNativeQuery("select 1 from dual").getSingleResult();
-            if (one != 1) {
+            Long two = (Long) em.createNativeQuery("select 1+1").getSingleResult();
+            if (two != 2) {
                 LOGGER.log(Level.SEVERE, "Database doesn't seem to be reachable");
                 check = false;
             }
