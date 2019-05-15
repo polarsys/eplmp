@@ -117,6 +117,7 @@ public class IndexerManagerBean implements IIndexerManagerLocal {
      */
     @Override
     @RolesAllowed({UserGroupMapping.ADMIN_ROLE_ID, UserGroupMapping.REGULAR_USER_ROLE_ID})
+    @TransactionAttribute(value = TransactionAttributeType.REQUIRES_NEW)
     public void createWorkspaceIndex(String workspaceId) throws WorkspaceAlreadyExistsException {
         try {
             if(indexManager.indicesExist(workspaceId)){
