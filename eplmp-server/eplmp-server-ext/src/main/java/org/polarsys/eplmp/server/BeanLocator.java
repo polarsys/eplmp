@@ -63,7 +63,7 @@ public class BeanLocator {
      */
     @SuppressWarnings("unchecked")
     // Cause : Generic Type Erasure
-    <T> List<T> search(Class<T> type, Context ctx) {
+    synchronized <T> List<T> search(Class<T> type, Context ctx) {
         List<T> result = new ArrayList<T>();
         try {
             NamingEnumeration<NameClassPair> ncps = ctx.list("");
