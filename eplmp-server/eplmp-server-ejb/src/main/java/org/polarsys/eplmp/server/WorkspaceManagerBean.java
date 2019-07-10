@@ -257,7 +257,7 @@ public class WorkspaceManagerBean implements IWorkspaceManagerLocal {
         
         WorkspaceBackOptions workspaceBackOptions = workspaceDAO.loadWorkspaceBackOptions(workspaceId);
         if (contextManager.isCallerInRole(UserGroupMapping.ADMIN_ROLE_ID)) {
-            return workspaceBackOptions;
+     
         } else {
             userManager.checkWorkspaceReadAccess(workspaceId);
         }
