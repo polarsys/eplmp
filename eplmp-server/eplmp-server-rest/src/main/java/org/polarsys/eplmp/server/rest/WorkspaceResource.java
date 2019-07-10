@@ -835,7 +835,7 @@ public class WorkspaceResource {
     @Produces(MediaType.APPLICATION_JSON)
     public WorkspaceBackOptionsDTO getWorkspaceBackOptions(
             @ApiParam(value = "Workspace id", required = true) @PathParam("workspaceId") String workspaceId)
-            throws EntityNotFoundException, AccessRightException {
+            throws EntityNotFoundException, AccessRightException, UserNotActiveException, WorkspaceNotEnabledException {
         WorkspaceBackOptions workspaceBackOptions = workspaceManager.getWorkspaceBackOptions(workspaceId);
         return mapper.map(workspaceBackOptions, WorkspaceBackOptionsDTO.class);
     }
