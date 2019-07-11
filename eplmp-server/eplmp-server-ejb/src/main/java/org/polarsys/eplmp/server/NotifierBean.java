@@ -667,7 +667,7 @@ public class NotifierBean implements INotifierLocal {
         WorkspaceBackOptions workspaceBackOptions;
         try {
             workspaceBackOptions = workspaceManager.getWorkspaceBackOptions(workspaceId);
-        } catch (WorkspaceNotFoundException | AccountNotFoundException | AccessRightException e) {
+        } catch (AccountNotFoundException | WorkspaceNotFoundException | UserNotFoundException | UserNotActiveException | WorkspaceNotEnabledException e) {
             LOGGER.log(Level.SEVERE, null, e);
             return;
         }
