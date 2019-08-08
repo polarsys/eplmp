@@ -245,6 +245,7 @@ public class WorkspaceManagerBean implements IWorkspaceManagerLocal {
     @RolesAllowed({UserGroupMapping.REGULAR_USER_ROLE_ID, UserGroupMapping.ADMIN_ROLE_ID})
     public void updateWorkspaceBackOptions(WorkspaceBackOptions pWorkspaceBackOptions) throws WorkspaceNotFoundException, AccountNotFoundException, AccessRightException {
         String workspaceId = pWorkspaceBackOptions.getWorkspace().getId();
+        userManager.checkAdmin(workspaceId);
         Workspace workspace = workspaceDAO.loadWorkspace(workspaceId);
         pWorkspaceBackOptions.setWorkspace(workspace);
         workspaceDAO.updateWorkspaceBackOptions(pWorkspaceBackOptions);
@@ -252,15 +253,17 @@ public class WorkspaceManagerBean implements IWorkspaceManagerLocal {
 
     @Override
     @RolesAllowed({UserGroupMapping.REGULAR_USER_ROLE_ID, UserGroupMapping.ADMIN_ROLE_ID})
-    public WorkspaceBackOptions getWorkspaceBackOptions(String workspaceId) throws WorkspaceNotFoundException, AccountNotFoundException, AccessRightException {
-        userManager.checkAdmin(workspaceId);
+    public WorkspaceBackOptions getWorkspaceBackOptions(String workspaceId) throws AccountNotFoundException, WorkspaceNotFoundException, UserNotFoundException, UserNotActiveException, WorkspaceNotEnabledException {
+        
+        if (!contextManager.isCallerInRole(UserGroupMapping.ADMIN_ROLE_ID)) {
+        	userManager.checkWorkspaceReadAccess(workspaceId);
+        }
         WorkspaceBackOptions workspaceBackOptions = workspaceDAO.loadWorkspaceBackOptions(workspaceId);
-
-        Workspace workspace = em.find(Workspace.class, workspaceId);
         if (workspaceBackOptions == null) {
+        	Workspace workspace = em.find(Workspace.class, workspaceId);
             workspaceBackOptions = new WorkspaceBackOptions(workspace);
         }
-
+        
         return workspaceBackOptions;
     }
 
