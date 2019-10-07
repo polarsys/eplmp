@@ -99,6 +99,7 @@ public class DocumentManagerBean implements IDocumentManagerLocal {
     @Inject
     private LOVDAO lovDAO;
 
+
     @Inject
     private PartRevisionDAO partRevisionDAO;
 
@@ -465,21 +466,8 @@ public class DocumentManagerBean implements IDocumentManagerLocal {
     @RolesAllowed({UserGroupMapping.REGULAR_USER_ROLE_ID, UserGroupMapping.ADMIN_ROLE_ID})
     @Override
     public int getDocumentsInWorkspaceCount(String workspaceId) throws UserNotFoundException, UserNotActiveException, WorkspaceNotFoundException, WorkspaceNotEnabledException, AccountNotFoundException {
+        return documentRevisionDAO.getTotalNumberOfDocuments(workspaceId);
 
-        int count;
-
-        if (contextManager.isCallerInRole(UserGroupMapping.ADMIN_ROLE_ID)) {
-            count = documentRevisionDAO.getTotalNumberOfDocuments(workspaceId);
-        } else {
-            User user = userManager.checkWorkspaceReadAccess(workspaceId);
-            if (user.isAdministrator()) {
-                count = documentRevisionDAO.getTotalNumberOfDocuments(workspaceId);
-            } else {
-                count = documentRevisionDAO.getDocumentRevisionsCountFiltered(user, workspaceId);
-            }
-        }
-
-        return count;
     }
 
     @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
@@ -1154,7 +1142,7 @@ public class DocumentManagerBean implements IDocumentManagerLocal {
         //TODO security check if both parameter belong to the same workspace
         String workspace = Folder.parseWorkspaceId(pCompletePath);
         User user = userManager.checkWorkspaceWriteAccess(workspace);
-        
+
         Folder folder = folderDAO.loadFolder(pCompletePath);
         checkFoldersStructureChangeRight(user);
         if (isAnotherUserHomeFolder(user, folder) || folder.isRoot() || folder.isHome()) {
@@ -1232,7 +1220,7 @@ public class DocumentManagerBean implements IDocumentManagerLocal {
         for (DocumentIteration doc : docR.getDocumentIterations()) {
             try {
                 indexerManager.removeDocumentIterationFromIndex(doc);
-            } catch(Exception e){
+            } catch (Exception e) {
                 LOGGER.log(Level.WARNING, null, e);
             }
             for (BinaryResource file : doc.getAttachedFiles()) {

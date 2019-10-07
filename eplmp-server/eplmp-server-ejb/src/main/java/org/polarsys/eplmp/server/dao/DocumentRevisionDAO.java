@@ -246,17 +246,6 @@ public class DocumentRevisionDAO {
         return query.getResultList();
     }
 
-    public int getDocumentRevisionsCountFiltered(User user, String workspaceId) {
-
-        String excludedFolders = workspaceId + "/~%";
-
-        return ((Number) em.createNamedQuery("DocumentRevision.countByWorkspace.filterACLEntry")
-                .setParameter(WORKSPACE_ID, workspaceId)
-                .setParameter("user", user)
-                .setParameter(EXCLUDED_FOLDERS, excludedFolders)
-                .getSingleResult()).intValue();
-    }
-
     public DocumentRevision getWorkflowHolder(Workflow workflow) {
         try {
             return em.createNamedQuery("DocumentRevision.findByWorkflow", DocumentRevision.class).
