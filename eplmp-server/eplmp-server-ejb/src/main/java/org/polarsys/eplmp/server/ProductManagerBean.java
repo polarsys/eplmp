@@ -202,7 +202,7 @@ public class ProductManagerBean implements IProductManagerLocal {
 
     @Inject
     private PSFilterVisitor psFilterVisitor;
-    
+
     private static final Logger LOGGER = Logger.getLogger(ProductManagerBean.class.getName());
 
     @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
@@ -1753,7 +1753,7 @@ public class ProductManagerBean implements IProductManagerLocal {
 
         List<InstanceAttributeTemplate> attrs = new ArrayList<>();
         for (int i = 0; i < pAttributeTemplates.size(); i++) {
-            if(attributesLocked) {
+            if (attributesLocked) {
                 pAttributeTemplates.get(i).setLocked(true);
             }
             attrs.add(pAttributeTemplates.get(i));
@@ -1990,22 +1990,7 @@ public class ProductManagerBean implements IProductManagerLocal {
     @RolesAllowed({UserGroupMapping.REGULAR_USER_ROLE_ID, UserGroupMapping.ADMIN_ROLE_ID})
     @Override
     public int getPartsInWorkspaceCount(String pWorkspaceId) throws WorkspaceNotFoundException, UserNotFoundException, UserNotActiveException, WorkspaceNotEnabledException, AccountNotFoundException {
-
-        int count;
-
-        if (contextManager.isCallerInRole(UserGroupMapping.ADMIN_ROLE_ID)) {
-            accountDAO.loadAccount(contextManager.getCallerPrincipalLogin());
-            count = partRevisionDAO.getTotalNumberOfParts(pWorkspaceId);
-        } else {
-            User user = userManager.checkWorkspaceReadAccess(pWorkspaceId);
-            if (user.isAdministrator()) {
-                count = partRevisionDAO.getTotalNumberOfParts(pWorkspaceId);
-            } else {
-                count = partRevisionDAO.getPartRevisionCountFiltered(user, pWorkspaceId);
-            }
-        }
-
-        return count;
+        return partRevisionDAO.getTotalNumberOfParts(pWorkspaceId);
     }
 
     @RolesAllowed(UserGroupMapping.REGULAR_USER_ROLE_ID)
@@ -2060,7 +2045,7 @@ public class ProductManagerBean implements IProductManagerLocal {
         for (PartIteration partIteration : partR.getPartIterations()) {
             try {
                 indexerManager.removePartIterationFromIndex(partIteration);
-            } catch (Exception e ) {
+            } catch (Exception e) {
                 LOGGER.log(Level.WARNING, null, e);
             }
             try {
@@ -2403,7 +2388,8 @@ public class ProductManagerBean implements IProductManagerLocal {
         String workspaceId = ciKey.getWorkspace();
         userManager.checkWorkspaceReadAccess(workspaceId);
 
-        PSFilterVisitorCallbacks callbacks = new PSFilterVisitorCallbacks(){};
+        PSFilterVisitorCallbacks callbacks = new PSFilterVisitorCallbacks() {
+        };
 
         if (path == null) {
             ConfigurationItem ci = configurationItemDAO.loadConfigurationItem(ciKey);
@@ -2869,7 +2855,8 @@ public class ProductManagerBean implements IProductManagerLocal {
         String workspaceId = workspace.getId();
         User user = userManager.checkWorkspaceReadAccess(workspaceId);
 
-        PSFilterVisitorCallbacks callbacks = new PSFilterVisitorCallbacks() {};
+        PSFilterVisitorCallbacks callbacks = new PSFilterVisitorCallbacks() {
+        };
         psFilterVisitor.visit(workspaceId, new UpdatePartIterationPSFilter(partIteration), partMaster, -1, callbacks);
 
     }
@@ -3334,7 +3321,7 @@ public class ProductManagerBean implements IProductManagerLocal {
 
         List<ResolvedDocumentLink> resolvedDocumentLinks = new ArrayList<>();
 
-        if(baseline != null) {
+        if (baseline != null) {
             DocumentCollection documentCollection = baseline.getDocumentCollection();
             Map<BaselinedDocumentKey, BaselinedDocument> baselinedDocuments = documentCollection.getBaselinedDocuments();
 
