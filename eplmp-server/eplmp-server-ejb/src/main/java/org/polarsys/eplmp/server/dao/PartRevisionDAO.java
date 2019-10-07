@@ -101,13 +101,6 @@ public class PartRevisionDAO {
                 .getSingleResult()).intValue();
     }
 
-    public int getPartRevisionCountFiltered(User caller, String workspaceId) {
-        return ((Number) em.createNamedQuery("PartRevision.countByWorkspace.filterACLEntry")
-                .setParameter(WORKSPACE_ID, workspaceId)
-                .setParameter("user", caller)
-                .getSingleResult()).intValue();
-    }
-
     public void createPartR(PartRevision partR) throws PartRevisionAlreadyExistsException, CreationException {
 
         try {

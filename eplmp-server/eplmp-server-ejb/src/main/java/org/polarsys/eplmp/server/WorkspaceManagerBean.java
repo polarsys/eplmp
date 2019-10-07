@@ -166,29 +166,10 @@ public class WorkspaceManagerBean implements IWorkspaceManagerLocal {
     @Override
     public Workspace getWorkspace(String workspaceId)
             throws WorkspaceNotFoundException, AccountNotFoundException, UserNotFoundException, UserNotActiveException, WorkspaceNotEnabledException {
-
-        if (contextManager.isCallerInRole(UserGroupMapping.ADMIN_ROLE_ID)) {
-            return workspaceDAO.loadWorkspace(workspaceId);
-        } else {
+        if(!contextManager.isCallerInRole(UserGroupMapping.ADMIN_ROLE_ID)){
             userManager.checkWorkspaceReadAccess(workspaceId);
         }
-
-        String login = contextManager.getCallerPrincipalLogin();
-        User[] users = userDAO.getUsers(login);
-
-        Workspace workspace = null;
-        for (User user : users) {
-            if (user.getWorkspace().getId().equals(workspaceId)) {
-                workspace = user.getWorkspace();
-                break;
-            }
-        }
-
-        if (workspace == null) {
-            throw new WorkspaceNotFoundException(workspaceId);
-        }
-
-        return workspace;
+        return workspaceDAO.loadWorkspace(workspaceId);
     }
 
 
@@ -196,30 +177,10 @@ public class WorkspaceManagerBean implements IWorkspaceManagerLocal {
     @Override
     public WorkspaceFrontOptions getWorkspaceFrontOptions(String workspaceId)
             throws AccountNotFoundException, WorkspaceNotFoundException, UserNotFoundException, UserNotActiveException, WorkspaceNotEnabledException {
-
-        WorkspaceFrontOptions settings = workspaceDAO.loadWorkspaceFrontOptions(workspaceId);
-        if (contextManager.isCallerInRole(UserGroupMapping.ADMIN_ROLE_ID)) {
-            return settings;
-        } else {
+        if(!contextManager.isCallerInRole(UserGroupMapping.ADMIN_ROLE_ID)){
             userManager.checkWorkspaceReadAccess(workspaceId);
         }
-
-        String login = contextManager.getCallerPrincipalLogin();
-
-        User[] users = userDAO.getUsers(login);
-
-        Workspace workspace = null;
-        for (User user : users) {
-            if (user.getWorkspace().getId().equals(workspaceId)) {
-                workspace = user.getWorkspace();
-                break;
-            }
-        }
-
-        if (workspace == null) {
-            throw new WorkspaceNotFoundException(workspaceId);
-        }
-        return settings;
+        return workspaceDAO.loadWorkspaceFrontOptions(workspaceId);
     }
 
     @RolesAllowed({UserGroupMapping.REGULAR_USER_ROLE_ID, UserGroupMapping.ADMIN_ROLE_ID})
@@ -254,16 +215,15 @@ public class WorkspaceManagerBean implements IWorkspaceManagerLocal {
     @Override
     @RolesAllowed({UserGroupMapping.REGULAR_USER_ROLE_ID, UserGroupMapping.ADMIN_ROLE_ID})
     public WorkspaceBackOptions getWorkspaceBackOptions(String workspaceId) throws AccountNotFoundException, WorkspaceNotFoundException, UserNotFoundException, UserNotActiveException, WorkspaceNotEnabledException {
-        
+
         if (!contextManager.isCallerInRole(UserGroupMapping.ADMIN_ROLE_ID)) {
-        	userManager.checkWorkspaceReadAccess(workspaceId);
+            userManager.checkWorkspaceReadAccess(workspaceId);
         }
         WorkspaceBackOptions workspaceBackOptions = workspaceDAO.loadWorkspaceBackOptions(workspaceId);
         if (workspaceBackOptions == null) {
-        	Workspace workspace = em.find(Workspace.class, workspaceId);
+            Workspace workspace = em.find(Workspace.class, workspaceId);
             workspaceBackOptions = new WorkspaceBackOptions(workspace);
         }
-        
         return workspaceBackOptions;
     }
 
