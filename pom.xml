@@ -48,7 +48,7 @@
     <dependencyManagement>
         <dependencies>
 
-            <!-- JEE -->
+            <!-- JEE 8 -->
             <dependency>
                 <groupId>javax</groupId>
                 <artifactId>javaee-api</artifactId>

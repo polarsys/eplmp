@@ -9,7 +9,8 @@
     </parent>
     <artifactId>eplmp-server-rest</artifactId>
     <packaging>war</packaging>
-    <name>eplmp-server-rest Java EE Restful web services</name>
+    <name>eplmp-server-rest Java EE 8 Restful web services</name>
+
     <dependencies>
         <dependency>
             <groupId>org.polarsys.eplmp</groupId>

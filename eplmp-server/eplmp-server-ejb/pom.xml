@@ -9,7 +9,7 @@
     </parent>
     <artifactId>eplmp-server-ejb</artifactId>
     <packaging>ejb</packaging>
-    <name>eplmp-server-ejb Java EE Core</name>
+    <name>eplmp-server-ejb Java EE 8 Core</name>
     <dependencies>
         <dependency>
             <groupId>javax</groupId>
