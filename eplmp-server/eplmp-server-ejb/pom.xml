@@ -9,7 +9,7 @@
     </parent>
     <artifactId>eplmp-server-ejb</artifactId>
     <packaging>ejb</packaging>
-    <name>eplmp-server-ejb Java EE 7 Core</name>
+    <name>eplmp-server-ejb Java EE Core</name>
     <dependencies>
         <dependency>
             <groupId>javax</groupId>
@@ -96,7 +96,7 @@
         </dependency>
         <dependency>
             <groupId>org.mockito</groupId>
-            <artifactId>mockito-all</artifactId>
+            <artifactId>mockito-core</artifactId>
         </dependency>
         <dependency>
             <groupId>simple-jndi</groupId>
@@ -116,7 +116,7 @@
         </dependency>
         <dependency>
             <groupId>org.powermock</groupId>
-            <artifactId>powermock-api-mockito</artifactId>
+            <artifactId>powermock-api-mockito2</artifactId>
         </dependency>
         <dependency>
             <groupId>org.powermock</groupId>

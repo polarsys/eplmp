@@ -16,12 +16,11 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.polarsys.eplmp.core.configuration.ProductConfiguration;
 import org.polarsys.eplmp.core.product.ConfigurationItem;
 import org.polarsys.eplmp.core.product.DateBasedEffectivity;
 import org.polarsys.eplmp.core.product.LotBasedEffectivity;
-import org.polarsys.eplmp.server.util.ProductUtil;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -46,11 +45,11 @@ public class DateBasedEffectivityConfigSpecTest {
     public void setUp() throws ParseException {
 
         initMocks(this);
-        when(configurationItem.getId()).thenReturn("ITEM-001");
-        when(configurationItem.getWorkspaceId()).thenReturn(ProductUtil.WORKSPACE_ID);
+        //when(configurationItem.getId()).thenReturn("ITEM-001");
+        //when(configurationItem.getWorkspaceId()).thenReturn(ProductUtil.WORKSPACE_ID);
 
-        when(configurationItem_tmp.getId()).thenReturn("ITEM-002");
-        when(configurationItem_tmp.getWorkspaceId()).thenReturn(ProductUtil.WORKSPACE_ID+"_tmp");
+        //when(configurationItem_tmp.getId()).thenReturn("ITEM-002");
+        //when(configurationItem_tmp.getWorkspaceId()).thenReturn(ProductUtil.WORKSPACE_ID+"_tmp");
 
         when(productConfiguration.getConfigurationItem()).thenReturn(configurationItem);
 

@@ -15,7 +15,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
-import org.mockito.Matchers;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.polarsys.eplmp.core.exceptions.ApplicationException;
@@ -52,7 +52,7 @@ public class WorkflowResourceTest {
 
         Workflow workflow = new Workflow();
         workflow.setId(workflowId);
-        Mockito.when(workflowService.getWorkflow(Matchers.anyString(), Matchers.anyInt())).thenReturn(workflow);
+        Mockito.when(workflowService.getWorkflow(ArgumentMatchers.anyString(), ArgumentMatchers.anyInt())).thenReturn(workflow);
 
         WorkflowDTO workflowDTO = workflowResource.getWorkflowInstance("wks", workflowId);
         Assert.assertNotNull(workflowDTO);
@@ -65,7 +65,7 @@ public class WorkflowResourceTest {
         Workflow workflow = new Workflow();
         workflow.setId(workflowId);
         Workflow[] list = new Workflow[]{workflow};
-        Mockito.when(workflowService.getWorkflowAbortedWorkflowList(Matchers.anyString(), Matchers.anyInt())).thenReturn(list);
+        Mockito.when(workflowService.getWorkflowAbortedWorkflowList(ArgumentMatchers.anyString(), ArgumentMatchers.anyInt())).thenReturn(list);
 
         Response res = workflowResource.getWorkflowAbortedWorkflowList("wks", workflowId);
         Object entity = res.getEntity();

@@ -19,7 +19,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.*;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.polarsys.eplmp.core.exceptions.FileNotFoundException;
 import org.polarsys.eplmp.core.exceptions.StorageException;
 
@@ -58,7 +58,7 @@ public class FileConverterTest {
 
             }catch (IOException e ){
 
-                Mockito.verify(officeManager, Mockito.times(1)).execute(Matchers.any());
+                Mockito.verify(officeManager, Mockito.times(1)).execute(ArgumentMatchers.any());
             }
 
         }catch (IOException e ){

@@ -16,15 +16,12 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.internal.util.reflection.Whitebox;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.polarsys.eplmp.core.configuration.ProductConfiguration;
 import org.polarsys.eplmp.core.product.*;
+import org.powermock.reflect.Whitebox;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
+import java.util.*;
 
 import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
@@ -115,7 +112,7 @@ public class EffectivityConfigSpecTest {
         //## END VERIFICATION
 
         //## BEGIN VERIFICATION : RETAINED LINK COUNT NUMBER
-        HashSet<PartIteration> retained = (HashSet) Whitebox.getInternalState(effectivityConfigSpec, "retainedPartIterations");
+        Set<PartIteration> retained = Whitebox.getInternalState(effectivityConfigSpec, "retainedPartIterations");
         Assert.assertTrue(retained.size() == 2);// both iteration must has been retained
         //## END VERIFICATION :  RETAINED LINK COUNT NUMBER
 
@@ -204,8 +201,8 @@ public class EffectivityConfigSpecTest {
         //## END VERIFICATION
 
         //## BEGIN VERIFICATION :  RETAINED LINK COUNT NUMBER
-        HashSet<String> retainedUsageLinks = (HashSet) Whitebox.getInternalState(effectivityConfigSpec, "retainedOptionalUsageLinks");
-        HashSet<String> retainedSubstituteLinks = (HashSet) Whitebox.getInternalState(effectivityConfigSpec, "retainedSubstituteLinks");
+        Set<String> retainedUsageLinks = Whitebox.getInternalState(effectivityConfigSpec, "retainedOptionalUsageLinks");
+        Set<String> retainedSubstituteLinks = Whitebox.getInternalState(effectivityConfigSpec, "retainedSubstituteLinks");
 
         Assert.assertFalse(retainedUsageLinks.isEmpty());
         Assert.assertEquals(2,retainedUsageLinks.size());
@@ -216,7 +213,8 @@ public class EffectivityConfigSpecTest {
 
         //~~ No product configuration with no optional link
         //## BEGIN CONFIGURATION
-        Whitebox.setInternalState(effectivityConfigSpec,"configuration",null);
+        Object inState = null;
+        Whitebox.setInternalState(effectivityConfigSpec,"configuration",inState);
         //## END CONFIGURATION
 
         result = effectivityConfigSpec.filterPartLink(Arrays.asList(link1));

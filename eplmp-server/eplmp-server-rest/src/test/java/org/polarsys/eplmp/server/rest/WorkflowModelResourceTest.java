@@ -15,7 +15,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
-import org.mockito.Matchers;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.polarsys.eplmp.core.common.Account;
@@ -88,7 +88,7 @@ public class WorkflowModelResourceTest {
     public void updateWorkflowModelTest() throws ApplicationException {
         String workflowModelId = "whatever";
         WorkflowModel workflowModel = new WorkflowModel(workspace, workflowModelId, user, "state");
-        Mockito.when(workflowService.updateWorkflowModel(Matchers.any(),Matchers.any(),Matchers.any()))
+        Mockito.when(workflowService.updateWorkflowModel(ArgumentMatchers.any(),ArgumentMatchers.any(),ArgumentMatchers.any()))
                 .thenReturn(workflowModel);
         WorkflowModelDTO workflowModelDTO = new WorkflowModelDTO();
         ActivityModelDTO activityModel1 = new ActivityModelDTO();
@@ -123,7 +123,7 @@ public class WorkflowModelResourceTest {
     public void createWorkflowModelTest() throws ApplicationException {
         String workflowModelId = "whatever";
         WorkflowModel workflowModel = new WorkflowModel(workspace, workflowModelId, user, "state");
-        Mockito.when(workflowService.createWorkflowModel(Matchers.any(),Matchers.any(),Matchers.any(),Matchers.any()))
+        Mockito.when(workflowService.createWorkflowModel(ArgumentMatchers.any(),ArgumentMatchers.any(),ArgumentMatchers.any(),ArgumentMatchers.any()))
                 .thenReturn(workflowModel);
         WorkflowModelDTO workflowModelDTO = new WorkflowModelDTO();
         ActivityModelDTO activityModel1 = new ActivityModelDTO();

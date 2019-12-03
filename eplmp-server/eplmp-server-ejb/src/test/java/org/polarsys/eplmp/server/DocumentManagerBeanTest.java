@@ -15,7 +15,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
-import org.mockito.Matchers;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.polarsys.eplmp.core.common.Account;
@@ -348,7 +348,7 @@ public class DocumentManagerBeanTest {
         DocumentRevisionKey documentRevisionKey = new DocumentRevisionKey(workspace.getId(), documentMaster.getId(), documentRevision.getVersion());
 
         Mockito.when(userManager.checkWorkspaceReadAccess(workspace.getId())).thenReturn(user);
-        Mockito.when(aclTypedQuery.setParameter(Matchers.anyString(), Matchers.any())).thenReturn(aclTypedQuery);
+        Mockito.when(aclTypedQuery.setParameter(ArgumentMatchers.anyString(), ArgumentMatchers.any())).thenReturn(aclTypedQuery);
         Mockito.when(documentRevisionDAO.getDocRRef(documentRevisionKey)).thenReturn(documentRevision);
 
         documentManagerBean.removeACLFromDocumentRevision(documentRevision.getKey());

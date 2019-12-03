@@ -9,7 +9,7 @@
     </parent>
     <artifactId>eplmp-server-ear</artifactId>
     <packaging>ear</packaging>
-    <name>eplmp-server-ear Java EE 7 Assembly</name>
+    <name>eplmp-server-ear Java EE Assembly</name>
     <properties>
         <context-root></context-root>
     </properties>

@@ -17,7 +17,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.mockito.InjectMocks;
-import org.mockito.Matchers;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.polarsys.eplmp.core.common.Account;
@@ -41,7 +41,7 @@ import org.polarsys.eplmp.server.util.ProductUtil;
 import javax.enterprise.event.Event;
 import java.util.*;
 
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 public class ProductManagerBeanTest {
@@ -269,7 +269,7 @@ public class ProductManagerBeanTest {
     @Test
     public void checkCyclicDetection() throws EntityConstraintException, PartMasterNotFoundException, UserNotFoundException, WorkspaceNotFoundException, UserNotActiveException, NotAllowedException, WorkspaceNotEnabledException {
         cyclicAssemblyRule = new CyclicAssemblyRule("user1");
-        Mockito.when(userManager.checkWorkspaceReadAccess(Matchers.anyString())).thenReturn(cyclicAssemblyRule.getUser());
+        Mockito.when(userManager.checkWorkspaceReadAccess(ArgumentMatchers.anyString())).thenReturn(cyclicAssemblyRule.getUser());
         Mockito.doThrow(EntityConstraintException.class).when(psFilterVisitor).visit(any(String.class), any(ProductStructureFilter.class), any(PartMaster.class), Mockito.eq(-1), any(PSFilterVisitorCallbacks.class));
 
         thrown.expect(EntityConstraintException.class);

@@ -15,7 +15,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
-import org.mockito.Matchers;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.polarsys.eplmp.core.common.Account;
@@ -156,7 +156,7 @@ public class WorkflowManagerBeanTest {
 
         Mockito.when(userManager.checkWorkspaceReadAccess(workspace.getId())).thenReturn(user);
         Mockito.when(workflowModelDAO.loadWorkflowModel(workflowModelKey)).thenReturn(workflowModel);
-        Mockito.when(aclTypedQuery.setParameter(Matchers.anyString(),Matchers.any())).thenReturn(aclTypedQuery);
+        Mockito.when(aclTypedQuery.setParameter(ArgumentMatchers.anyString(),ArgumentMatchers.any())).thenReturn(aclTypedQuery);
         Mockito.when(aclFactory.updateACL(workspace.getId(), acl, userEntries, grpEntries)).thenReturn(expectedAcl);
 
         //When

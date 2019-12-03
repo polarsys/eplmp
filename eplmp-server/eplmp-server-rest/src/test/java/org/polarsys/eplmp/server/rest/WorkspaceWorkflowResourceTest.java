@@ -15,7 +15,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
-import org.mockito.Matchers;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.polarsys.eplmp.core.exceptions.ApplicationException;
@@ -95,8 +95,8 @@ public class WorkspaceWorkflowResourceTest {
         WorkspaceWorkflow workspaceWorkflow = new WorkspaceWorkflow();
         workspaceWorkflow.setId("id");
 
-        Mockito.when(workflowService.instantiateWorkflow(Matchers.any(), Matchers.any(), Matchers.any(), Matchers.any(),
-                Matchers.any())).thenReturn(workspaceWorkflow);
+        Mockito.when(workflowService.instantiateWorkflow(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any(),
+                ArgumentMatchers.any())).thenReturn(workspaceWorkflow);
 
         WorkspaceWorkflowDTO result = workspaceWorkflowResource.createWorkspaceWorkflow(workspaceId,
                 workflowCreationDTO);

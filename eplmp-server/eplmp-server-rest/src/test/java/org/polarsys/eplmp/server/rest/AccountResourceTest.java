@@ -16,7 +16,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
-import org.mockito.Matchers;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.polarsys.eplmp.core.common.Account;
@@ -108,8 +108,8 @@ public class AccountResourceTest {
         Account account = new Account("FooBar");
         Mockito.when(authConfig.getJWTKey()).thenReturn(key);
 
-        Mockito.when(accountManager.updateAccount(Matchers.anyString(), Matchers.anyString(), Matchers.anyString(),
-                Matchers.anyString(), Matchers.anyString())).thenReturn(account);
+        Mockito.when(accountManager.updateAccount(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any(),
+                ArgumentMatchers.any(), ArgumentMatchers.any())).thenReturn(account);
 
         AccountDTO accountDTO = new AccountDTO();
         accountDTO.setLogin(account.getLogin());
@@ -127,7 +127,7 @@ public class AccountResourceTest {
         Assert.assertEquals(Response.Status.OK.getStatusCode(), res.getStatus());
 
         accountDTO.setPassword("SomePass");
-        Mockito.when(accountManager.authenticateAccount(Matchers.anyString(), Matchers.anyString()))
+        Mockito.when(accountManager.authenticateAccount(ArgumentMatchers.anyString(), ArgumentMatchers.anyString()))
                 .thenReturn(null);
         try {
             accountResource.updateAccount(null, accountDTO);
@@ -136,7 +136,7 @@ public class AccountResourceTest {
             Assert.assertNotNull(e.getMessage());
         }
 
-        Mockito.when(accountManager.authenticateAccount(Matchers.anyString(), Matchers.anyString()))
+        Mockito.when(accountManager.authenticateAccount(ArgumentMatchers.any(), ArgumentMatchers.any()))
                 .thenReturn(account);
         res = accountResource.updateAccount(null, accountDTO);
 
@@ -161,8 +161,8 @@ public class AccountResourceTest {
         AccountDTO accountDTO = new AccountDTO();
         Account account = new Account();
 
-        Mockito.when(accountManager.createAccount(Matchers.anyString(), Matchers.anyString(), Matchers.anyString(),
-                Matchers.anyString(), Matchers.anyString(), Matchers.anyString()))
+        Mockito.when(accountManager.createAccount(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any(),
+                ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
                 .thenReturn(account);
 
         Response res = accountResource.createAccount(mockedRequest, mockedResponse, accountDTO);

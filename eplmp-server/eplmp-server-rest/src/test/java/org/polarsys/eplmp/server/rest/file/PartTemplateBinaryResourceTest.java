@@ -70,7 +70,7 @@ public class PartTemplateBinaryResourceTest {
         binaryResource = new BinaryResource(ResourceUtil.FILENAME1, ResourceUtil.DOCUMENT_SIZE, new Date());
 
         OutputStream outputStream = new FileOutputStream(uploadedFile);
-        Mockito.when(productService.saveFileInTemplate(Matchers.any(PartMasterTemplateKey.class), Matchers.anyString(), Matchers.anyInt())).thenReturn(binaryResource);
+        Mockito.when(productService.saveFileInTemplate(ArgumentMatchers.any(PartMasterTemplateKey.class), ArgumentMatchers.anyString(), ArgumentMatchers.anyInt())).thenReturn(binaryResource);
         Mockito.when(storageManager.getBinaryResourceOutputStream(binaryResource)).thenReturn(outputStream);
         Mockito.when(request.getRequestURI()).thenReturn(ResourceUtil.WORKSPACE_ID + "/parts-templates/" + ResourceUtil.PART_TEMPLATE_ID + "/" + ResourceUtil.FILENAME_TARGET_PART);
         //When
@@ -103,7 +103,7 @@ public class PartTemplateBinaryResourceTest {
         binaryResource = new BinaryResource(ResourceUtil.FILENAME1, ResourceUtil.DOCUMENT_SIZE, new Date());
 
         OutputStream outputStream = new FileOutputStream(uploadedFile);
-        Mockito.when(productService.saveFileInTemplate(Matchers.any(PartMasterTemplateKey.class), Matchers.anyString(), Matchers.anyInt())).thenReturn(binaryResource);
+        Mockito.when(productService.saveFileInTemplate(ArgumentMatchers.any(PartMasterTemplateKey.class), ArgumentMatchers.anyString(), ArgumentMatchers.anyInt())).thenReturn(binaryResource);
         Mockito.when(storageManager.getBinaryResourceOutputStream(binaryResource)).thenReturn(outputStream);
         Mockito.when(request.getRequestURI()).thenReturn(ResourceUtil.WORKSPACE_ID + "/parts-templates/" + ResourceUtil.PART_TEMPLATE_ID + "/" + ResourceUtil.FILENAME_TARGET_PART);
         //When
@@ -135,7 +135,7 @@ public class PartTemplateBinaryResourceTest {
         binaryResource = new BinaryResource(ResourceUtil.FILENAME1, ResourceUtil.DOCUMENT_SIZE, new Date());
 
         OutputStream outputStream = new FileOutputStream(uploadedFile);
-        Mockito.when(productService.saveFileInTemplate(Matchers.any(PartMasterTemplateKey.class), Matchers.anyString(), Matchers.anyInt())).thenReturn(binaryResource);
+        Mockito.when(productService.saveFileInTemplate(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.anyLong())).thenReturn(binaryResource);
         Mockito.when(storageManager.getBinaryResourceOutputStream(binaryResource)).thenReturn(outputStream);
         Mockito.when(request.getRequestURI()).thenReturn(ResourceUtil.WORKSPACE_ID + "/parts-templates/" + ResourceUtil.PART_TEMPLATE_ID + "/" + ResourceUtil.FILENAME_TARGET_PART);
 
@@ -179,9 +179,9 @@ public class PartTemplateBinaryResourceTest {
         OutputStream outputStream1 = new FileOutputStream(uploadedFile1);
         OutputStream outputStream2 = new FileOutputStream(uploadedFile2);
         OutputStream outputStream3 = new FileOutputStream(uploadedFile3);
-        Mockito.when(productService.saveFileInTemplate(Matchers.any(PartMasterTemplateKey.class), Matchers.anyString(), Matchers.anyInt())).thenReturn(binaryResource1, binaryResource1, binaryResource2, binaryResource2, binaryResource3, binaryResource3);
+        Mockito.when(productService.saveFileInTemplate(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.anyLong())).thenReturn(binaryResource1, binaryResource1, binaryResource2, binaryResource2, binaryResource3, binaryResource3);
 
-        Mockito.when(storageManager.getBinaryResourceOutputStream(Matchers.any(BinaryResource.class))).thenReturn(outputStream1, outputStream2, outputStream3);
+        Mockito.when(storageManager.getBinaryResourceOutputStream(ArgumentMatchers.any(BinaryResource.class))).thenReturn(outputStream1, outputStream2, outputStream3);
         Mockito.when(request.getRequestURI()).thenReturn(ResourceUtil.WORKSPACE_ID + "/parts-templates/" + ResourceUtil.PART_TEMPLATE_ID + "/" + ResourceUtil.FILENAME_TARGET_PART);
 
         //When

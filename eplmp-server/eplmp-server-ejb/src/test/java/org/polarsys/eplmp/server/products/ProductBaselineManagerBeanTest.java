@@ -18,10 +18,9 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
-import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.polarsys.eplmp.core.common.User;
 import org.polarsys.eplmp.core.configuration.ProductBaseline;
 import org.polarsys.eplmp.core.configuration.ProductBaselineType;
@@ -40,8 +39,7 @@ import javax.persistence.TypedQuery;
 import java.security.Principal;
 import java.util.ArrayList;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyInt;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.MockitoAnnotations.initMocks;
 
@@ -89,8 +87,8 @@ public class ProductBaselineManagerBeanTest {
     @Before
     public void setup() {
         initMocks(this);
-        Mockito.when(ctx.getCallerPrincipal()).thenReturn(principal);
-        Mockito.when(principal.getName()).thenReturn("user1");
+        //Mockito.when(ctx.getCallerPrincipal()).thenReturn(principal);
+        //Mockito.when(principal.getName()).thenReturn("user1");
     }
 
     @Test
@@ -98,11 +96,11 @@ public class ProductBaselineManagerBeanTest {
 
         //Given
         baselineRuleReleased = new BaselineRule("myBaseline", ProductBaselineType.RELEASED, "description", "workspace01", "user1", "part01", "product01", true);
-        doReturn(new User()).when(userManager).checkWorkspaceWriteAccess(Matchers.anyString());
-        Mockito.when(userManager.checkWorkspaceWriteAccess(Matchers.anyString())).thenReturn(baselineRuleReleased.getUser());
+        doReturn(new User()).when(userManager).checkWorkspaceWriteAccess(anyString());
+        Mockito.when(userManager.checkWorkspaceWriteAccess(anyString())).thenReturn(baselineRuleReleased.getUser());
 
-        Mockito.when(productService.getRootPartUsageLink(Matchers.any())).thenReturn(baselineRuleReleased.getRootPartUsageLink());
-        Mockito.when(mockedQuery.setParameter(Matchers.anyString(), Matchers.any())).thenReturn(mockedQuery);
+        //Mockito.when(productService.getRootPartUsageLink(Matchers.any())).thenReturn(baselineRuleReleased.getRootPartUsageLink());
+        //Mockito.when(mockedQuery.setParameter(Matchers.anyString(), Matchers.any())).thenReturn(mockedQuery);
 
         // Create Mock ConfigurationItem
         ConfigurationItem configurationItem = new ConfigurationItem(baselineRuleReleased.getUser(), baselineRuleReleased.getWorkspace(), baselineRuleReleased.getConfigurationItemKey().getId(), "description");
@@ -126,8 +124,8 @@ public class ProductBaselineManagerBeanTest {
         //Given
         baselineRuleNotReleased = new BaselineRule("myBaseline", ProductBaselineType.RELEASED, "description", "workspace01", "user1", "part01", "product01", false);
 
-        doReturn(new User()).when(userManager).checkWorkspaceWriteAccess(Matchers.anyString());
-        Mockito.when(userManager.checkWorkspaceWriteAccess(Matchers.anyString())).thenReturn(baselineRuleNotReleased.getUser());
+        doReturn(new User()).when(userManager).checkWorkspaceWriteAccess(anyString());
+        Mockito.when(userManager.checkWorkspaceWriteAccess(anyString())).thenReturn(baselineRuleNotReleased.getUser());
 
         // Create Mock ConfigurationItem
         ConfigurationItem configurationItem = new ConfigurationItem(baselineRuleNotReleased.getUser(), baselineRuleNotReleased.getWorkspace(), baselineRuleNotReleased.getConfigurationItemKey().getId(), "description");
@@ -145,11 +143,11 @@ public class ProductBaselineManagerBeanTest {
 
         //Given
         baselineRuleLatest = new BaselineRule("myBaseline", ProductBaselineType.LATEST, "description", "workspace01", "user1", "part01", "product01", true);
-        doReturn(new User()).when(userManager).checkWorkspaceWriteAccess(Matchers.anyString());
-        Mockito.when(userManager.checkWorkspaceWriteAccess(Matchers.anyString())).thenReturn(baselineRuleLatest.getUser());
+        doReturn(new User()).when(userManager).checkWorkspaceWriteAccess(anyString());
+        Mockito.when(userManager.checkWorkspaceWriteAccess(anyString())).thenReturn(baselineRuleLatest.getUser());
 
-        Mockito.when(productService.getRootPartUsageLink(Matchers.any())).thenReturn(baselineRuleLatest.getRootPartUsageLink());
-        Mockito.when(mockedQuery.setParameter(Matchers.anyString(), Matchers.any())).thenReturn(mockedQuery);
+        //Mockito.when(productService.getRootPartUsageLink(Matchers.any())).thenReturn(baselineRuleLatest.getRootPartUsageLink());
+        //Mockito.when(mockedQuery.setParameter(Matchers.anyString(), Matchers.any())).thenReturn(mockedQuery);
 
         // Create Mock ConfigurationItem
         ConfigurationItem configurationItem = new ConfigurationItem(baselineRuleLatest.getUser(), baselineRuleLatest.getWorkspace(), baselineRuleLatest.getConfigurationItemKey().getId(), "description");
@@ -172,11 +170,11 @@ public class ProductBaselineManagerBeanTest {
 
         //Given
         baselineRuleReleased = new BaselineRule("myBaseline", ProductBaselineType.LATEST , "description", "workspace01", "user1", "part01", "product01", true, false);
-        doReturn(new User()).when(userManager).checkWorkspaceWriteAccess(Matchers.anyString());
-        Mockito.when(userManager.checkWorkspaceWriteAccess(Matchers.anyString())).thenReturn(baselineRuleReleased.getUser());
-        Mockito.when(partIterationDAO.loadPartI(baselineRuleReleased.getPartMaster().getLastReleasedRevision().getIteration(1).getKey())).thenReturn(baselineRuleReleased.getPartMaster().getLastReleasedRevision().getIteration(1));
-        Mockito.when(productService.getRootPartUsageLink(Matchers.any())).thenReturn(baselineRuleReleased.getRootPartUsageLink());
-        Mockito.when(mockedQuery.setParameter(Matchers.anyString(), Matchers.any())).thenReturn(mockedQuery);
+        doReturn(new User()).when(userManager).checkWorkspaceWriteAccess(anyString());
+        Mockito.when(userManager.checkWorkspaceWriteAccess(anyString())).thenReturn(baselineRuleReleased.getUser());
+        //Mockito.when(partIterationDAO.loadPartI(baselineRuleReleased.getPartMaster().getLastReleasedRevision().getIteration(1).getKey())).thenReturn(baselineRuleReleased.getPartMaster().getLastReleasedRevision().getIteration(1));
+        //Mockito.when(productService.getRootPartUsageLink(Matchers.any())).thenReturn(baselineRuleReleased.getRootPartUsageLink());
+        //Mockito.when(mockedQuery.setParameter(Matchers.anyString(), Matchers.any())).thenReturn(mockedQuery);
 
         // Create Mock ConfigurationItem
         ConfigurationItem configurationItem = new ConfigurationItem(baselineRuleReleased.getUser(), baselineRuleReleased.getWorkspace(), baselineRuleReleased.getConfigurationItemKey().getId(), "description");

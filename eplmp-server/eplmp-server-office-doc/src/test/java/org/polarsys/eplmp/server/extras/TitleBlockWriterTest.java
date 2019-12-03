@@ -19,7 +19,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.polarsys.eplmp.core.common.User;
 import org.polarsys.eplmp.core.document.DocumentIteration;
 import org.polarsys.eplmp.core.document.DocumentRevision;
@@ -66,7 +66,7 @@ public class TitleBlockWriterTest {
         date = new Date();
         documentIteration.setCreationDate(date);
         Mockito.doReturn("TestIdOrNumber").when(documentIteration).getId();
-        Mockito.doReturn("TestIdOrNumber-A-154").when(documentIteration).toString();
+        //Mockito.doReturn("TestIdOrNumber-A-154").when(documentIteration).toString();
         Mockito.doReturn("A").when(documentIteration).getVersion();
         Mockito.when(documentIteration.getInstanceAttributes()).thenReturn(new ArrayList<>());
         documentIteration.setAuthor(user);

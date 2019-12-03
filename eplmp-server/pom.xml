@@ -9,7 +9,7 @@
     </parent>
     <artifactId>eplmp-server</artifactId>
     <packaging>pom</packaging>
-    <name>eplmp-server Java EE 7</name>
+    <name>eplmp-server Java EE</name>
     <modules>
         <module>eplmp-server-ext</module>
         <module>eplmp-server-office-doc</module>

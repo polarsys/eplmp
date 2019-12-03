@@ -15,7 +15,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
-import org.mockito.Matchers;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.polarsys.eplmp.core.exceptions.AccessRightException;
@@ -47,7 +47,7 @@ public class ModificationNotificationResourceTest {
     @Test
     public void acknowledgeNotificationTest() throws EntityNotFoundException, WorkspaceNotEnabledException, AccessRightException {
         ModificationNotificationDTO notificationDTO = new ModificationNotificationDTO();
-        Mockito.doNothing().when(productService).updateModificationNotification(Matchers.anyString(), Matchers.anyInt(), Matchers.anyString());
+        Mockito.doNothing().when(productService).updateModificationNotification(ArgumentMatchers.anyString(), ArgumentMatchers.anyInt(), ArgumentMatchers.anyString());
         Response res = modificationNotificationResource.acknowledgeNotification("wks", 0, notificationDTO);
         Assert.assertEquals(Response.Status.NO_CONTENT.getStatusCode(), res.getStatus());
     }

@@ -17,7 +17,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.polarsys.eplmp.core.common.Account;
 import org.polarsys.eplmp.core.common.User;
 import org.polarsys.eplmp.core.common.Workspace;
@@ -80,12 +80,12 @@ public class DocumentBaselineManagerBeanTest {
     public void shouldNotBaselineAnEmptyCollection() throws Exception {
         //Given
         Mockito.when(userManager.checkWorkspaceWriteAccess(workspace.getId())).thenReturn(user);
-        Mockito.when(em.find(Workspace.class, workspace.getId())).thenReturn(workspace);
-        Mockito.when(em.createQuery("SELECT DISTINCT f FROM Folder f WHERE f.parentFolder.completePath = :completePath", Folder.class)).thenReturn(folderTypedQuery);
-        Mockito.when(folderTypedQuery.getResultList()).thenReturn(new ArrayList<>(0));
-        Mockito.when(workspaceDAO.loadWorkspace(workspace.getId())).thenReturn(workspace);
-        Mockito.when(em.find(Folder.class, workspace.getId())).thenReturn(folder);
-        Mockito.when(documentService.getAllDocumentsInWorkspace(workspace.getId())).thenReturn(new DocumentRevision[0]);
+        //Mockito.when(em.find(Workspace.class, workspace.getId())).thenReturn(workspace);
+        //Mockito.when(em.createQuery("SELECT DISTINCT f FROM Folder f WHERE f.parentFolder.completePath = :completePath", Folder.class)).thenReturn(folderTypedQuery);
+        //Mockito.when(folderTypedQuery.getResultList()).thenReturn(new ArrayList<>(0));
+        //Mockito.when(workspaceDAO.loadWorkspace(workspace.getId())).thenReturn(workspace);
+        //Mockito.when(em.find(Folder.class, workspace.getId())).thenReturn(folder);
+        //Mockito.when(documentService.getAllDocumentsInWorkspace(workspace.getId())).thenReturn(new DocumentRevision[0]);
 
         //when
         try {
@@ -107,11 +107,11 @@ public class DocumentBaselineManagerBeanTest {
     public void baselineDocuments() throws Exception {
         //Given
         Mockito.when(userManager.checkWorkspaceWriteAccess(workspace.getId())).thenReturn(user);
-        Mockito.when(em.find(Workspace.class, workspace.getId())).thenReturn(workspace);
-        Mockito.when(em.createQuery("SELECT DISTINCT f FROM Folder f WHERE f.parentFolder.completePath = :completePath", Folder.class)).thenReturn(folderTypedQuery);
-        Mockito.when(folderTypedQuery.getResultList()).thenReturn(new ArrayList<>(0));
-        Mockito.when(workspaceDAO.loadWorkspace(workspace.getId())).thenReturn(workspace);
-        Mockito.when(em.find(Folder.class, workspace.getId())).thenReturn(folder);
+        //Mockito.when(em.find(Workspace.class, workspace.getId())).thenReturn(workspace);
+        //Mockito.when(em.createQuery("SELECT DISTINCT f FROM Folder f WHERE f.parentFolder.completePath = :completePath", Folder.class)).thenReturn(folderTypedQuery);
+        //Mockito.when(folderTypedQuery.getResultList()).thenReturn(new ArrayList<>(0));
+        //Mockito.when(workspaceDAO.loadWorkspace(workspace.getId())).thenReturn(workspace);
+        //Mockito.when(em.find(Folder.class, workspace.getId())).thenReturn(folder);
         DocumentRevision[] revisions = new DocumentRevision[2];
 
         DocumentMaster documentMaster1 = new DocumentMaster(workspace, "doc1", user);
@@ -128,11 +128,11 @@ public class DocumentBaselineManagerBeanTest {
         documentRevision2.createNextIteration(user);
         documentRevision1.setLocation(folder);
         documentRevision2.setLocation(folder);
-        Mockito.when(em.find(DocumentRevision.class, documentRevision1.getKey())).thenReturn(documentRevision1);
-        Mockito.when(em.find(DocumentRevision.class, documentRevision2.getKey())).thenReturn(documentRevision2);
+        //Mockito.when(em.find(DocumentRevision.class, documentRevision1.getKey())).thenReturn(documentRevision1);
+        //Mockito.when(em.find(DocumentRevision.class, documentRevision2.getKey())).thenReturn(documentRevision2);
 
-        Mockito.when(documentService.getAllDocumentsInWorkspace(workspace.getId())).thenReturn(revisions);
-        Mockito.when(userManager.checkWorkspaceReadAccess(workspace.getId())).thenReturn(user);
+        //Mockito.when(documentService.getAllDocumentsInWorkspace(workspace.getId())).thenReturn(revisions);
+        //Mockito.when(userManager.checkWorkspaceReadAccess(workspace.getId())).thenReturn(user);
         Mockito.when(documentRevisionDAO.loadDocR(documentRevision1.getKey())).thenReturn(documentRevision1);
         Mockito.when(documentRevisionDAO.loadDocR(documentRevision2.getKey())).thenReturn(documentRevision2);
 

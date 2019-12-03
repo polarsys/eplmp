@@ -9,7 +9,7 @@
     </parent>
     <artifactId>eplmp-server-ext</artifactId>
     <packaging>jar</packaging>
-    <name>eplmp-server-ext Java EE 7 Extensions API</name>
+    <name>eplmp-server-ext Java EE Extensions API</name>
     <dependencies>
         <dependency>
             <groupId>org.polarsys.eplmp</groupId>

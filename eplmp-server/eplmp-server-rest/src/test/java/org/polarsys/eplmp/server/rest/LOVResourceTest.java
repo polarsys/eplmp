@@ -17,7 +17,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
-import org.mockito.Matchers;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.polarsys.eplmp.core.common.Workspace;
@@ -112,7 +112,7 @@ public class LOVResourceTest {
         Mapper mapper = DozerBeanMapperSingletonWrapper.getInstance();
         ListOfValues lov = mapper.map(lovDTO, ListOfValues.class);
 
-        Mockito.when(lovManager.updateLov(Matchers.any(), Matchers.any(), Matchers.any(), Matchers.any()))
+        Mockito.when(lovManager.updateLov(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
                 .thenReturn(lov);
 
         ListOfValuesDTO result = lovResource.updateLOV(workspaceId, name, lovDTO);

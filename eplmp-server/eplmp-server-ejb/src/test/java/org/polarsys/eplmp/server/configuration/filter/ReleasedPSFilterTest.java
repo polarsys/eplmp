@@ -14,7 +14,7 @@ package org.polarsys.eplmp.server.configuration.filter;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.polarsys.eplmp.core.product.PartIteration;
 import org.polarsys.eplmp.core.product.PartLink;
 import org.polarsys.eplmp.core.product.PartMaster;

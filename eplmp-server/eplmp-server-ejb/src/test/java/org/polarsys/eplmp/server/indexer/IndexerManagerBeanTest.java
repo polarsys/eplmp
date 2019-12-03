@@ -16,12 +16,14 @@ import io.searchbox.client.JestResult;
 import io.searchbox.cluster.Health;
 import io.searchbox.core.Bulk;
 import io.searchbox.core.DocumentResult;
-import io.searchbox.core.Update;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
-import org.mockito.*;
+import org.junit.runner.RunWith;
+import org.mockito.ArgumentMatchers;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.polarsys.eplmp.core.common.Account;
 import org.polarsys.eplmp.core.document.DocumentIteration;
 import org.polarsys.eplmp.core.exceptions.AccountNotFoundException;
@@ -31,18 +33,15 @@ import org.polarsys.eplmp.core.exceptions.WorkspaceAlreadyExistsException;
 import org.polarsys.eplmp.core.product.PartIteration;
 import org.polarsys.eplmp.core.services.IAccountManagerLocal;
 import org.polarsys.eplmp.core.services.INotifierLocal;
-import org.powermock.core.classloader.annotations.*;
 
-import javax.inject.Inject;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.logging.Logger;
-import java.util.regex.Matcher;
 
 import static org.mockito.Mockito.times;
 
+@RunWith(MockitoJUnitRunner.class)
 public class IndexerManagerBeanTest {
 
     @InjectMocks
@@ -65,10 +64,6 @@ public class IndexerManagerBeanTest {
 
     private String workspaceId = "wks";
 
-    @Before
-    public void setup() throws Exception {
-        MockitoAnnotations.initMocks(this);
-    }
 
     @Test
     public void pingTest() throws IOException {
@@ -124,17 +119,17 @@ public class IndexerManagerBeanTest {
         Mockito.doThrow(new IndexerNotAvailableException()).when(indexManager).deleteIndices(workspaceId);
 
         indexerManagerBean.deleteWorkspaceIndex(workspaceId);
-        Mockito.verify(mailer, times(1)).sendWorkspaceIndexationFailure(Matchers.any(Account.class), Matchers.anyString(), Matchers.anyString());
+        Mockito.verify(mailer, times(1)).sendWorkspaceIndexationFailure(ArgumentMatchers.any(Account.class), ArgumentMatchers.anyString(), ArgumentMatchers.anyString());
     }
 
     @Test
     public void indexDocumentIterationTest() throws IndexerNotAvailableException, AccountNotFoundException, IndexerRequestException {
         DocumentResult documentResult = new DocumentResult(new Gson());
         DocumentIteration documentIteration = new DocumentIteration();
-        Mockito.when(indexManager.executeUpdate(Matchers.any(Update.Builder.class)))
+        Mockito.when(indexManager.executeUpdate(ArgumentMatchers.isNull()))
             .thenReturn(documentResult);
         indexerManagerBean.indexDocumentIteration(documentIteration);
-        Mockito.verify(indexManager,times(1)).executeUpdate(Matchers.any(Update.Builder.class));
+        Mockito.verify(indexManager,times(1)).executeUpdate(ArgumentMatchers.isNull());
 
     }
 
@@ -142,10 +137,10 @@ public class IndexerManagerBeanTest {
     public void indexPartIterationTest() throws IndexerNotAvailableException, AccountNotFoundException, IndexerRequestException {
         DocumentResult documentResult = new DocumentResult(new Gson());
         PartIteration partIteration = new PartIteration();
-        Mockito.when(indexManager.executeUpdate(Matchers.any(Update.Builder.class)))
+        Mockito.when(indexManager.executeUpdate(ArgumentMatchers.isNull()))
                 .thenReturn(documentResult);
         indexerManagerBean.indexPartIteration(partIteration);
-        Mockito.verify(indexManager,times(1)).executeUpdate(Matchers.any(Update.Builder.class));
+        Mockito.verify(indexManager,times(1)).executeUpdate(ArgumentMatchers.isNull());
 
     }
 
@@ -158,7 +153,7 @@ public class IndexerManagerBeanTest {
         indexerManagerBean.indexDocumentIterations(documentIterations);
 
         Mockito.verify(indexManager,times(1))
-                .sendBulk(Matchers.any(Bulk.Builder.class));
+                .sendBulk(ArgumentMatchers.any(Bulk.Builder.class));
 
     }
 
@@ -171,7 +166,7 @@ public class IndexerManagerBeanTest {
         indexerManagerBean.indexPartIterations(partIterations);
 
         Mockito.verify(indexManager,times(1))
-                .sendBulk(Matchers.any(Bulk.Builder.class));
+                .sendBulk(ArgumentMatchers.any(Bulk.Builder.class));
 
     }
 }

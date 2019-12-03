@@ -15,7 +15,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.polarsys.eplmp.core.common.BinaryResource;
 import org.polarsys.eplmp.core.product.Geometry;
 import org.polarsys.eplmp.core.product.PartIteration;

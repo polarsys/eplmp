@@ -102,7 +102,7 @@ public class PartResourceTest {
 
         //when
         try {
-            Mockito.when(productService.partMasterExists(Matchers.any(PartMasterKey.class))).thenReturn(false);
+            Mockito.when(productService.partMasterExists(ArgumentMatchers.any(PartMasterKey.class))).thenReturn(false);
             Mockito.when(userManager.checkWorkspaceWriteAccess(ResourceUtil.WORKSPACE_ID)).thenReturn(user);
             Mockito.when(partResource.findOrCreatePartMaster(ResourceUtil.WORKSPACE_ID, componentDTO)).thenReturn(partMaster);
             Mockito.when(partResource.findOrCreatePartMaster(ResourceUtil.WORKSPACE_ID, subComponentDTO)).thenReturn(subPartMaster);

@@ -11,14 +11,14 @@
 
 package org.polarsys.eplmp.core.product;
 
-import org.polarsys.eplmp.core.common.User;
 import junit.framework.TestCase;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
+import org.polarsys.eplmp.core.common.User;
 
 import java.util.ArrayList;
 import java.util.List;

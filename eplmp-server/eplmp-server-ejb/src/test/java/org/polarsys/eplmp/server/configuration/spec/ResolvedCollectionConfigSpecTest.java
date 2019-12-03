@@ -14,7 +14,7 @@ package org.polarsys.eplmp.server.configuration.spec;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.polarsys.eplmp.core.common.Workspace;
 import org.polarsys.eplmp.core.configuration.ProductBaseline;
 import org.polarsys.eplmp.core.configuration.ProductBaselineType;

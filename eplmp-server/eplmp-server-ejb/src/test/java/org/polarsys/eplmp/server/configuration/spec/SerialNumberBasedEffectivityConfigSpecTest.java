@@ -16,16 +16,14 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.internal.util.reflection.Whitebox;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.polarsys.eplmp.core.configuration.ProductConfiguration;
 import org.polarsys.eplmp.core.product.ConfigurationItem;
 import org.polarsys.eplmp.core.product.DateBasedEffectivity;
 import org.polarsys.eplmp.core.product.SerialNumberBasedEffectivity;
+import org.powermock.reflect.Whitebox;
 
-import static org.mockito.Mockito.CALLS_REAL_METHODS;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -41,8 +39,8 @@ public class SerialNumberBasedEffectivityConfigSpecTest {
 
         SNBECS = mock(SerialNumberBasedEffectivityConfigSpec.class,CALLS_REAL_METHODS);
         initMocks(this);
-        when(configurationItem.getId()).thenReturn("ITEM-001");
-        when(tmp_CI.getId()).thenReturn("ITEM-002");
+        //when(configurationItem.getId()).thenReturn("ITEM-001");
+        //when(tmp_CI.getId()).thenReturn("ITEM-002");
         Whitebox.setInternalState(SNBECS,"number","20");
         when(configuration.getConfigurationItem()).thenReturn(configurationItem);
     }

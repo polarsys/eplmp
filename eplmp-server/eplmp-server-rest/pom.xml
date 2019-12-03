@@ -9,10 +9,9 @@
     </parent>
     <artifactId>eplmp-server-rest</artifactId>
     <packaging>war</packaging>
-    <name>eplmp-server-rest Java EE 7 Restful web services</name>
+    <name>eplmp-server-rest Java EE Restful web services</name>
 
     <dependencies>
-
         <dependency>
             <groupId>org.polarsys.eplmp</groupId>
             <artifactId>eplmp-core</artifactId>
@@ -25,10 +24,6 @@
         <dependency>
             <groupId>javax</groupId>
             <artifactId>javaee-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>javax.activation</groupId>
-            <artifactId>activation</artifactId>
         </dependency>
 
         <!-- Dependencies for sources -->
@@ -82,16 +77,6 @@
                 </exclusion>
             </exclusions>
         </dependency>
-        <dependency>
-            <groupId>com.brsanthu</groupId>
-            <artifactId>migbase64</artifactId>
-            <scope>runtime</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.glassfish.jersey.media</groupId>
-            <artifactId>jersey-media-json-jackson</artifactId>
-            <scope>runtime</scope>
-        </dependency>
 
         <!-- Test dependencies -->
         <dependency>
@@ -105,7 +90,7 @@
         </dependency>
         <dependency>
             <groupId>org.mockito</groupId>
-            <artifactId>mockito-all</artifactId>
+            <artifactId>mockito-core</artifactId>
         </dependency>
     </dependencies>
 

@@ -16,7 +16,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.*;
 import org.polarsys.eplmp.core.common.BinaryResource;
-import org.polarsys.eplmp.core.document.DocumentMasterTemplateKey;
 import org.polarsys.eplmp.core.services.IBinaryStorageManagerLocal;
 import org.polarsys.eplmp.core.services.IDocumentManagerLocal;
 import org.polarsys.eplmp.core.services.IOnDemandConverterManagerLocal;
@@ -90,7 +89,7 @@ public class DocumentTemplateBinaryResourceTest {
         File uploadedFile = File.createTempFile(ResourceUtil.TARGET_FILE_STORAGE + "new_" + ResourceUtil.FILENAME1, ResourceUtil.TEMP_SUFFIX);
 
         OutputStream outputStream = new FileOutputStream(uploadedFile);
-        Mockito.when(documentService.saveFileInTemplate(Matchers.any(DocumentMasterTemplateKey.class), Matchers.anyString(), Matchers.anyInt())).thenReturn(binaryResource);
+        Mockito.when(documentService.saveFileInTemplate(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.anyLong())).thenReturn(binaryResource);
         Mockito.when(storageManager.getBinaryResourceOutputStream(binaryResource)).thenReturn(outputStream);
         Mockito.when(request.getRequestURI()).thenReturn(ResourceUtil.WORKSPACE_ID + "/documents/" + ResourceUtil.DOCUMENT_ID + "/" + ResourceUtil.FILENAME1);
         Mockito.when(request.getParts()).thenReturn(filesParts);

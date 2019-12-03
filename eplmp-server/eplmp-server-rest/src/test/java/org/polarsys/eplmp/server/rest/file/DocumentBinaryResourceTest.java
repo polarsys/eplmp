@@ -97,8 +97,8 @@ public class DocumentBinaryResourceTest {
         OutputStream outputStream1 = new FileOutputStream(uploadedFile1);
 
         Mockito.when(request.getParts()).thenReturn(filesParts);
-        Mockito.when(documentService.saveFileInDocument(Matchers.any(DocumentIterationKey.class), Matchers.anyString(), Matchers.anyInt())).thenReturn(binaryResource);
-        Mockito.when(storageManager.getBinaryResourceOutputStream(Matchers.any(BinaryResource.class))).thenReturn(outputStream1);
+        Mockito.when(documentService.saveFileInDocument(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.anyLong())).thenReturn(binaryResource);
+        Mockito.when(storageManager.getBinaryResourceOutputStream(ArgumentMatchers.any(BinaryResource.class))).thenReturn(outputStream1);
         Mockito.when(request.getRequestURI()).thenReturn(ResourceUtil.WORKSPACE_ID + "/documents/" + ResourceUtil.DOCUMENT_ID + "/" + ResourceUtil.FILENAME1);
 
         //When
@@ -134,8 +134,8 @@ public class DocumentBinaryResourceTest {
         OutputStream outputStream1 = new FileOutputStream(uploadedFile1);
 
         Mockito.when(request.getParts()).thenReturn(filesParts);
-        Mockito.when(documentService.saveFileInDocument(Matchers.any(DocumentIterationKey.class), Matchers.anyString(), Matchers.anyInt())).thenReturn(binaryResource);
-        Mockito.when(storageManager.getBinaryResourceOutputStream(Matchers.any(BinaryResource.class))).thenReturn(outputStream1);
+        Mockito.when(documentService.saveFileInDocument(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.anyLong())).thenReturn(binaryResource);
+        Mockito.when(storageManager.getBinaryResourceOutputStream(ArgumentMatchers.any(BinaryResource.class))).thenReturn(outputStream1);
         Mockito.when(request.getRequestURI()).thenReturn(ResourceUtil.WORKSPACE_ID + "/documents/" + ResourceUtil.DOCUMENT_ID + "/" + ResourceUtil.FILENAME2);
 
 
@@ -178,8 +178,8 @@ public class DocumentBinaryResourceTest {
         OutputStream outputStream2 = new FileOutputStream(uploadedFile2);
         OutputStream outputStream3 = new FileOutputStream(uploadedFile3);
         Mockito.when(request.getParts()).thenReturn(filesParts);
-        Mockito.when(documentService.saveFileInDocument(Matchers.any(DocumentIterationKey.class), Matchers.anyString(), Matchers.anyInt())).thenReturn(binaryResource1, binaryResource1, binaryResource2, binaryResource2, binaryResource3, binaryResource3);
-        Mockito.when(storageManager.getBinaryResourceOutputStream(Matchers.any(BinaryResource.class))).thenReturn(outputStream1, outputStream2, outputStream3);
+        Mockito.when(documentService.saveFileInDocument(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.anyLong())).thenReturn(binaryResource1, binaryResource1, binaryResource2, binaryResource2, binaryResource3, binaryResource3);
+        Mockito.when(storageManager.getBinaryResourceOutputStream(ArgumentMatchers.any(BinaryResource.class))).thenReturn(outputStream1, outputStream2, outputStream3);
         //When
         Response response = documentBinaryResource.uploadDocumentFiles(request, ResourceUtil.WORKSPACE_ID, ResourceUtil.DOCUMENT_ID, ResourceUtil.VERSION, ResourceUtil.ITERATION);
 
@@ -211,12 +211,12 @@ public class DocumentBinaryResourceTest {
         BinaryResource binaryResource = new BinaryResource(ResourceUtil.FILENAME1, ResourceUtil.DOCUMENT_SIZE, new Date());
         Mockito.when(documentService.canAccess(new DocumentIterationKey(ResourceUtil.WORKSPACE_ID, ResourceUtil.DOCUMENT_ID, ResourceUtil.VERSION, ResourceUtil.ITERATION))).thenReturn(false);
         Mockito.when(documentService.getBinaryResource(fullName)).thenReturn(binaryResource);
-        Mockito.when(documentService.getDocumentRevision(Matchers.any(DocumentRevisionKey.class))).thenReturn(documentRevision);
+        Mockito.when(documentService.getDocumentRevision(ArgumentMatchers.any(DocumentRevisionKey.class))).thenReturn(documentRevision);
         Mockito.when(storageManager.getBinaryResourceInputStream(binaryResource)).thenReturn(new FileInputStream(new File(ResourceUtil.getFilePath(ResourceUtil.SOURCE_FILE_STORAGE + ResourceUtil.FILENAME1))));
-        Mockito.when(publicEntityManager.getPublicDocumentRevision(Matchers.any(DocumentRevisionKey.class))).thenReturn(documentRevision);
+        Mockito.when(publicEntityManager.getPublicDocumentRevision(ArgumentMatchers.any(DocumentRevisionKey.class))).thenReturn(documentRevision);
         Mockito.when(publicEntityManager.getPublicBinaryResourceForDocument(fullName)).thenReturn(binaryResource);
         Mockito.when(contextManager.isCallerInRole(UserGroupMapping.REGULAR_USER_ROLE_ID)).thenReturn(false);
-        Mockito.when(publicEntityManager.canAccess(Matchers.any(DocumentIterationKey.class))).thenReturn(true);
+        Mockito.when(publicEntityManager.canAccess(ArgumentMatchers.any(DocumentIterationKey.class))).thenReturn(true);
 
         //When
         Response response = documentBinaryResource.downloadDocumentFile(request, ResourceUtil.WORKSPACE_ID, ResourceUtil.DOCUMENT_ID, ResourceUtil.VERSION, ResourceUtil.ITERATION, ResourceUtil.FILENAME1, ResourceUtil.FILE_TYPE, null, ResourceUtil.RANGE, null, null, null);
@@ -327,7 +327,7 @@ public class DocumentBinaryResourceTest {
         Mockito.when(storageManager.getBinaryResourceInputStream(binaryResource)).thenReturn(new FileInputStream(new File(ResourceUtil.getFilePath(ResourceUtil.SOURCE_FILE_STORAGE + ResourceUtil.FILENAME1))));
         Mockito.when(publicEntityManager.getBinaryResourceForSharedEntity(fullName)).thenReturn(binaryResource);
         Mockito.when(contextManager.isCallerInRole(UserGroupMapping.REGULAR_USER_ROLE_ID)).thenReturn(true);
-        Mockito.when(publicEntityManager.canAccess(Matchers.any(DocumentIterationKey.class))).thenReturn(false);
+        Mockito.when(publicEntityManager.canAccess(ArgumentMatchers.any(DocumentIterationKey.class))).thenReturn(false);
 
         //When
         try {

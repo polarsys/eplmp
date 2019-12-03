@@ -14,7 +14,7 @@ package org.polarsys.eplmp.server.rest.file;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
-import org.mockito.Matchers;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.polarsys.eplmp.core.common.Account;
@@ -86,7 +86,7 @@ public class PartBinaryResourceTest {
         BinaryResource binaryResource = new BinaryResource(ResourceUtil.FILENAME1, ResourceUtil.PART_SIZE, new Date());
         OutputStream outputStream = new FileOutputStream(uploadedFile);
         Mockito.when(request.getRequestURI()).thenReturn(ResourceUtil.WORKSPACE_ID + "/parts/" + ResourceUtil.PART_TEMPLATE_ID + "/");
-        Mockito.when(productService.saveFileInPartIteration(Matchers.any(PartIterationKey.class), Matchers.anyString(), Matchers.anyString(), Matchers.anyInt())).thenReturn(binaryResource);
+        Mockito.when(productService.saveFileInPartIteration(ArgumentMatchers.any(PartIterationKey.class), ArgumentMatchers.anyString(), ArgumentMatchers.anyString(), ArgumentMatchers.anyInt())).thenReturn(binaryResource);
         Mockito.when(storageManager.getBinaryResourceOutputStream(binaryResource)).thenReturn(outputStream);
 
         //When
@@ -116,7 +116,7 @@ public class PartBinaryResourceTest {
         BinaryResource binaryResource = new BinaryResource(ResourceUtil.FILENAME1, ResourceUtil.PART_SIZE, new Date());
         OutputStream outputStream = new FileOutputStream(uploadedFile);
         Mockito.when(request.getRequestURI()).thenReturn(ResourceUtil.WORKSPACE_ID + "/parts/" + ResourceUtil.PART_TEMPLATE_ID + "/");
-        Mockito.when(productService.saveNativeCADInPartIteration(Matchers.any(PartIterationKey.class), Matchers.anyString(), Matchers.anyInt())).thenReturn(binaryResource);
+        Mockito.when(productService.saveNativeCADInPartIteration(ArgumentMatchers.any(PartIterationKey.class), ArgumentMatchers.anyString(), ArgumentMatchers.anyInt())).thenReturn(binaryResource);
         Mockito.when(storageManager.getBinaryResourceOutputStream(binaryResource)).thenReturn(outputStream);
 
         //When
@@ -149,7 +149,7 @@ public class PartBinaryResourceTest {
 
         OutputStream outputStream = new FileOutputStream(uploadedFile);
         Mockito.when(request.getRequestURI()).thenReturn(ResourceUtil.WORKSPACE_ID + "/parts/" + ResourceUtil.PART_TEMPLATE_ID + "/");
-        Mockito.when(productService.saveFileInPartIteration(Matchers.any(PartIterationKey.class), Matchers.anyString(), Matchers.anyString(), Matchers.anyInt())).thenReturn(binaryResource);
+        Mockito.when(productService.saveFileInPartIteration(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.anyLong())).thenReturn(binaryResource);
         Mockito.when(storageManager.getBinaryResourceOutputStream(binaryResource)).thenReturn(outputStream);
 
         //When
@@ -187,7 +187,7 @@ public class PartBinaryResourceTest {
 
         OutputStream outputStream1 = new FileOutputStream(uploadedFile1);
         OutputStream outputStream2 = new FileOutputStream(uploadedFile2);
-        Mockito.when(productService.saveFileInPartIteration(Matchers.any(PartIterationKey.class), Matchers.anyString(), Matchers.anyString(), Matchers.anyInt())).thenReturn(binaryResource1, binaryResource1, binaryResource2, binaryResource2);
+        Mockito.when(productService.saveFileInPartIteration(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.anyLong())).thenReturn(binaryResource1, binaryResource1, binaryResource2, binaryResource2);
         Mockito.when(storageManager.getBinaryResourceOutputStream(Mockito.any(BinaryResource.class))).thenReturn(outputStream1, outputStream2);
 
         //When
@@ -219,12 +219,12 @@ public class PartBinaryResourceTest {
         Mockito.when(storageManager.getBinaryResourceInputStream(binaryResource)).thenReturn(new FileInputStream(new File(ResourceUtil.getFilePath(ResourceUtil.SOURCE_FILE_STORAGE + ResourceUtil.FILENAME1))));
         Mockito.when(contextManager.isCallerInRole(UserGroupMapping.REGULAR_USER_ROLE_ID)).thenReturn(false);
         Mockito.when(publicEntityManager.canAccess(Mockito.any(PartIterationKey.class))).thenReturn(true);
-        Mockito.when(productService.canAccess(Matchers.any(PartIterationKey.class))).thenReturn(false);
+        Mockito.when(productService.canAccess(ArgumentMatchers.any(PartIterationKey.class))).thenReturn(false);
         Mockito.when(storageManager.getBinaryResourceInputStream(binaryResource)).thenReturn(new FileInputStream(new File(ResourceUtil.getFilePath(ResourceUtil.SOURCE_PART_STORAGE + ResourceUtil.TEST_PART_FILENAME1))));
-        Mockito.when(productService.getPartRevision(Matchers.any(PartRevisionKey.class))).thenReturn(new PartRevision());
+        Mockito.when(productService.getPartRevision(ArgumentMatchers.any(PartRevisionKey.class))).thenReturn(new PartRevision());
 
         //When
-        Mockito.when(publicEntityManager.getPublicBinaryResourceForPart(Matchers.anyString())).thenReturn(binaryResource);
+        Mockito.when(publicEntityManager.getPublicBinaryResourceForPart(ArgumentMatchers.anyString())).thenReturn(binaryResource);
         Response response = partBinaryResource.downloadPartFile(request, ResourceUtil.WORKSPACE_ID,
                 ResourceUtil.PART_NUMBER, ResourceUtil.VERSION, ResourceUtil.ITERATION, "attached-files",
                 ResourceUtil.TEST_PART_FILENAME1, ResourceUtil.FILE_TYPE, null, ResourceUtil.RANGE, null, null, null);
@@ -263,10 +263,10 @@ public class PartBinaryResourceTest {
         Mockito.when(storageManager.getBinaryResourceInputStream(binaryResource)).thenReturn(new FileInputStream(new File(ResourceUtil.getFilePath(ResourceUtil.SOURCE_FILE_STORAGE + ResourceUtil.FILENAME1))));
         Mockito.when(contextManager.isCallerInRole(UserGroupMapping.REGULAR_USER_ROLE_ID)).thenReturn(false);
         Mockito.when(publicEntityManager.canAccess(Mockito.any(PartIterationKey.class))).thenReturn(true);
-        Mockito.when(productService.canAccess(Matchers.any(PartIterationKey.class))).thenReturn(false);
+        Mockito.when(productService.canAccess(ArgumentMatchers.any(PartIterationKey.class))).thenReturn(false);
         File file = File.createTempFile(ResourceUtil.getFilePath(ResourceUtil.SOURCE_PART_STORAGE + ResourceUtil.TEST_PART_FILENAME1), ResourceUtil.TEMP_SUFFIX);
         Mockito.when(storageManager.getBinaryResourceInputStream(binaryResource)).thenReturn(new FileInputStream(file));
-        Mockito.when(publicEntityManager.getBinaryResourceForSharedEntity(Matchers.anyString())).thenReturn(binaryResource);
+        Mockito.when(publicEntityManager.getBinaryResourceForSharedEntity(ArgumentMatchers.anyString())).thenReturn(binaryResource);
         Mockito.when(shareService.findSharedEntityForGivenUUID(ResourceUtil.SHARED_PART_ENTITY_UUID)).thenReturn(sharedPart);
         //When
         Response response = partBinaryResource.downloadPartFile(request, ResourceUtil.WORKSPACE_ID,
@@ -295,11 +295,11 @@ public class PartBinaryResourceTest {
         BinaryResource binaryResource = Mockito.spy(new BinaryResource(ResourceUtil.FILENAME1, ResourceUtil.PART_SIZE, new Date()));
         Mockito.when(storageManager.getBinaryResourceInputStream(binaryResource)).thenReturn(new FileInputStream(new File(ResourceUtil.getFilePath(ResourceUtil.SOURCE_FILE_STORAGE + ResourceUtil.FILENAME1))));
         Mockito.when(contextManager.isCallerInRole(UserGroupMapping.REGULAR_USER_ROLE_ID)).thenReturn(true);
-        Mockito.when(productService.getBinaryResource(Matchers.anyString())).thenReturn(binaryResource);
-        Mockito.when(productService.canAccess(Matchers.any(PartIterationKey.class))).thenReturn(true);
-        Mockito.when(productService.getPartRevision(Matchers.any(PartRevisionKey.class))).thenReturn(new PartRevision());
+        Mockito.when(productService.getBinaryResource(ArgumentMatchers.anyString())).thenReturn(binaryResource);
+        Mockito.when(productService.canAccess(ArgumentMatchers.any(PartIterationKey.class))).thenReturn(true);
+        Mockito.when(productService.getPartRevision(ArgumentMatchers.any(PartRevisionKey.class))).thenReturn(new PartRevision());
         Mockito.when(storageManager.getBinaryResourceInputStream(binaryResource)).thenReturn(new FileInputStream(new File(ResourceUtil.getFilePath(ResourceUtil.SOURCE_PART_STORAGE + ResourceUtil.TEST_PART_FILENAME1))));
-        Mockito.when(publicEntityManager.getPublicBinaryResourceForPart(Matchers.anyString())).thenReturn(binaryResource);
+        Mockito.when(publicEntityManager.getPublicBinaryResourceForPart(ArgumentMatchers.anyString())).thenReturn(binaryResource);
         //When
         Response response = partBinaryResource.downloadPartFile(request, ResourceUtil.WORKSPACE_ID,
                 ResourceUtil.PART_NUMBER, ResourceUtil.VERSION, ResourceUtil.ITERATION, "attached-files",
@@ -326,11 +326,11 @@ public class PartBinaryResourceTest {
         File file = File.createTempFile(ResourceUtil.getFilePath(ResourceUtil.SOURCE_FILE_STORAGE + ResourceUtil.FILENAME1), ResourceUtil.TEMP_SUFFIX);
         Mockito.when(storageManager.getBinaryResourceInputStream(binaryResource)).thenReturn(new FileInputStream(file));
         Mockito.when(contextManager.isCallerInRole(UserGroupMapping.REGULAR_USER_ROLE_ID)).thenReturn(true);
-        Mockito.when(productService.getBinaryResource(Matchers.anyString())).thenReturn(binaryResource);
-        Mockito.when(productService.canAccess(Matchers.any(PartIterationKey.class))).thenReturn(false);
+        Mockito.when(productService.getBinaryResource(ArgumentMatchers.anyString())).thenReturn(binaryResource);
+        Mockito.when(productService.canAccess(ArgumentMatchers.any(PartIterationKey.class))).thenReturn(false);
         File file1 = File.createTempFile(ResourceUtil.getFilePath(ResourceUtil.SOURCE_PART_STORAGE + ResourceUtil.TEST_PART_FILENAME1), ResourceUtil.TEMP_SUFFIX);
         Mockito.when(storageManager.getBinaryResourceInputStream(binaryResource)).thenReturn(new FileInputStream(file1));
-        Mockito.when(publicEntityManager.getPublicBinaryResourceForPart(Matchers.anyString())).thenReturn(binaryResource);
+        Mockito.when(publicEntityManager.getPublicBinaryResourceForPart(ArgumentMatchers.anyString())).thenReturn(binaryResource);
         //When
         try {
             partBinaryResource.downloadPartFile(request, ResourceUtil.WORKSPACE_ID,

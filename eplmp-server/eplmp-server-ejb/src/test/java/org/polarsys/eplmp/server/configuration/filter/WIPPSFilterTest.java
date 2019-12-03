@@ -16,7 +16,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.polarsys.eplmp.core.common.User;
 import org.polarsys.eplmp.core.product.PartIteration;
 import org.polarsys.eplmp.core.product.PartMaster;
@@ -39,7 +39,7 @@ public class WIPPSFilterTest {
     @Before
     public void setup() {
         User user = Mockito.spy(new User());
-        Mockito.when(user.getLogin()).thenReturn("test");
+        //Mockito.when(user.getLogin()).thenReturn("test");
         filter = new WIPPSFilter(user);
         partMaster = Mockito.spy(new PartMaster());
         partRevisions = new ArrayList<>();

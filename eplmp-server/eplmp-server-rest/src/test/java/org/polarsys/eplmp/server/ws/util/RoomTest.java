@@ -14,9 +14,9 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Matchers;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.polarsys.eplmp.server.ws.chat.Room;
 
 import javax.websocket.Session;
@@ -51,28 +51,16 @@ public class RoomTest {
         Mockito.when(room.addUserSession(userSession1, "user1")).thenCallRealMethod();
         Mockito.when(room.addUserSession(userSession2, "user2")).thenCallRealMethod();
         Mockito.when(room.key()).thenReturn("plm");
-
-        Mockito.when(userSession1.getUserPrincipal()).thenReturn(principal1);
-        Mockito.when(principal1.getName()).thenReturn("user1");
         Mockito.when(room.getUser1Login()).thenCallRealMethod();
-
-        Mockito.when(userSession2.getUserPrincipal()).thenReturn(principal2);
-        Mockito.when(principal2.getName()).thenReturn("user2");
         Mockito.when(room.getUser2Login()).thenCallRealMethod();
-
-        Mockito.when(principal3.getName()).thenReturn("user3");
-        Mockito.when(userSession3.getUserPrincipal()).thenReturn(principal3);
-
-        Mockito.when(room.getUserSession(Matchers.anyString())).thenCallRealMethod();
-        Mockito.when(room.getOtherUserSession(Matchers.any(Session.class))).thenCallRealMethod();
-        Mockito.when(RoomTest.DB.get(Matchers.anyString())).thenReturn(room);
-        Mockito.when(RoomTest.DB.put(Matchers.anyString(), Matchers.any(Room.class))).thenReturn(room);
-        Mockito.when(RoomTest.DB.get("plm").getSessionForUserLogin(Matchers.anyString())).thenCallRealMethod();
-        Mockito.when(RoomTest.DB.get("plm").getRoomSessionForUserLogin(Matchers.anyString())).thenCallRealMethod();
+        Mockito.when(room.getUserSession(ArgumentMatchers.anyString())).thenCallRealMethod();
+        Mockito.when(room.getOtherUserSession(ArgumentMatchers.any(Session.class))).thenCallRealMethod();
+        Mockito.when(RoomTest.DB.get(ArgumentMatchers.anyString())).thenReturn(room);
+        Mockito.when(RoomTest.DB.get("plm").getSessionForUserLogin(ArgumentMatchers.anyString())).thenCallRealMethod();
+        Mockito.when(RoomTest.DB.get("plm").getRoomSessionForUserLogin(ArgumentMatchers.anyString())).thenCallRealMethod();
         Mockito.when(room.getOccupancy()).thenCallRealMethod();
-        Mockito.doCallRealMethod().when(room).put();
 
-        Mockito.when(room.hasUser(Matchers.anyString())).thenCallRealMethod();
+        Mockito.when(room.hasUser(ArgumentMatchers.anyString())).thenCallRealMethod();
 
         room.addUserSession(userSession1, "user1");
         room.addUserSession(userSession2, "user2");
