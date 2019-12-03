@@ -26,8 +26,7 @@ import org.polarsys.eplmp.core.sharing.SharedDocument;
 import org.polarsys.eplmp.core.sharing.SharedEntity;
 import org.polarsys.eplmp.core.sharing.SharedPart;
 import org.polarsys.eplmp.core.util.HashUtils;
-import org.polarsys.eplmp.server.auth.AuthConfig;
-import org.polarsys.eplmp.server.auth.jwt.JWTokenFactory;
+import org.polarsys.eplmp.server.config.AuthConfig;
 import org.polarsys.eplmp.server.rest.dto.DocumentRevisionDTO;
 import org.polarsys.eplmp.server.rest.dto.PartRevisionDTO;
 
@@ -58,6 +57,8 @@ public class SharedResource {
     private IContextManagerLocal contextManager;
     @Inject
     private AuthConfig authConfig;
+    @Inject
+    private ITokenManagerLocal tokenManager;
 
     private Mapper mapper;
 
@@ -99,7 +100,7 @@ public class SharedResource {
         if (documentRevision != null) {
             DocumentRevisionDTO documentRevisionDTO = mapper.map(documentRevision, DocumentRevisionDTO.class);
             documentRevisionDTO.setRoutePath(documentRevision.getLocation().getRoutePath());
-            String entityToken = JWTokenFactory.createEntityToken(authConfig.getJWTKey(), documentRevision.getKey().toString());
+            String entityToken = tokenManager.createEntityToken(authConfig.getJWTKey(), documentRevision.getKey().toString());
             return Response.ok().header("entity-token", entityToken).entity(documentRevisionDTO).build();
         } else {
             return Response.status(Response.Status.FORBIDDEN).build();
@@ -134,7 +135,7 @@ public class SharedResource {
         }
 
         if (partRevision != null) {
-            String entityToken = JWTokenFactory.createEntityToken(authConfig.getJWTKey(), partRevision.getKey().toString());
+            String entityToken = tokenManager.createEntityToken(authConfig.getJWTKey(), partRevision.getKey().toString());
             return Response.ok().header("entity-token", entityToken).entity(Tools.mapPartRevisionToPartDTO(partRevision)).build();
         } else {
             return Response.status(Response.Status.FORBIDDEN).build();
@@ -169,7 +170,7 @@ public class SharedResource {
             return createPasswordProtectedResponse();
         }
 
-        String sharedEntityToken = JWTokenFactory.createSharedEntityToken(authConfig.getJWTKey(), sharedEntity);
+        String sharedEntityToken = tokenManager.createSharedEntityToken(authConfig.getJWTKey(), sharedEntity);
         DocumentRevision documentRevision = ((SharedDocument) sharedEntity).getDocumentRevision();
         return Response.ok().header("shared-entity-token", sharedEntityToken).entity(mapper.map(documentRevision, DocumentRevisionDTO.class)).build();
     }
@@ -201,7 +202,7 @@ public class SharedResource {
             return createPasswordProtectedResponse();
         }
 
-        String sharedEntityToken = JWTokenFactory.createSharedEntityToken(authConfig.getJWTKey(), sharedEntity);
+        String sharedEntityToken = tokenManager.createSharedEntityToken(authConfig.getJWTKey(), sharedEntity);
         PartRevision partRevision = ((SharedPart) sharedEntity).getPartRevision();
         return Response.ok().header("shared-entity-token", sharedEntityToken).entity(Tools.mapPartRevisionToPartDTO(partRevision)).build();
 

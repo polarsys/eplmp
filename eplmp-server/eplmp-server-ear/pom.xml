@@ -29,6 +29,11 @@
                     <modules>
                         <ejbModule>
                             <groupId>org.polarsys.eplmp</groupId>
+                            <artifactId>eplmp-server-config</artifactId>
+                            <bundleFileName>eplmp-server-config.jar</bundleFileName>
+                        </ejbModule>
+                        <ejbModule>
+                            <groupId>org.polarsys.eplmp</groupId>
                             <artifactId>eplmp-server-ejb</artifactId>
                             <bundleFileName>eplmp-server-ejb.jar</bundleFileName>
                         </ejbModule>
@@ -46,6 +51,13 @@
         <finalName>${project.artifactId}</finalName>
     </build>
     <dependencies>
+        <dependency>
+            <groupId>org.polarsys.eplmp</groupId>
+            <artifactId>eplmp-server-config</artifactId>
+            <version>${project.version}</version>
+            <type>ejb</type>
+            <scope>runtime</scope>
+        </dependency>
         <dependency>
             <groupId>org.polarsys.eplmp</groupId>
             <artifactId>eplmp-server-ejb</artifactId>

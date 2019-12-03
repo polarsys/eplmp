@@ -19,6 +19,7 @@ import org.polarsys.eplmp.server.rest.dto.LightPartLinkListDTO;
 import org.polarsys.eplmp.server.rest.dto.UserDTO;
 
 import javax.json.bind.annotation.JsonbDateFormat;
+import javax.json.bind.annotation.JsonbProperty;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
@@ -28,7 +29,7 @@ import java.util.List;
 public class ProductConfigurationDTO implements Serializable {
 
     @ApiModelProperty(value = "Product configuration id")
-
+    @JsonbProperty(nillable = true)
     private int id;
 
     @ApiModelProperty(value = "Configuration item id")

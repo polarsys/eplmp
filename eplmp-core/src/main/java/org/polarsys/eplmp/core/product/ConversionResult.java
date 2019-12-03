@@ -1,15 +1,15 @@
 /*******************************************************************************
-  * Copyright (c) 2017-2019 DocDoku.
-  * All rights reserved. This program and the accompanying materials
-  * are made available under the terms of the Eclipse Public License v1.0
-  * which accompanies this distribution, and is available at
-  * http://www.eclipse.org/legal/epl-v10.html
-  *
-  * Contributors:
-  *    DocDoku - initial API and implementation
-  *******************************************************************************/
+ * Copyright (c) 2017-2019 DocDoku.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ * <p>
+ * Contributors:
+ * DocDoku - initial API and implementation
+ *******************************************************************************/
 
-package org.polarsys.eplmp.server.converters;
+package org.polarsys.eplmp.core.product;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -74,6 +74,10 @@ public class ConversionResult implements Closeable, Serializable {
      */
     private URI convertedFile;
     /**
+     * Bounding box
+     */
+    private double[] box;
+    /**
      * The list of materials files if any
      */
     private List<URI> materials = new ArrayList<>();
@@ -130,8 +134,10 @@ public class ConversionResult implements Closeable, Serializable {
         return convertedFile != null ? Paths.get(convertedFile) : null;
     }
 
-    void setConvertedFile(Path convertedFile) {
-        this.convertedFile = convertedFile.toUri();
+    public void setConvertedFile(Path convertedFile) {
+        if (null != convertedFile) {
+            this.convertedFile = convertedFile.toUri();
+        }
     }
 
     public List<Path> getMaterials() {
@@ -140,7 +146,7 @@ public class ConversionResult implements Closeable, Serializable {
                 .collect(Collectors.toList());
     }
 
-    void setMaterials(List<Path> materials) {
+    public void setMaterials(List<Path> materials) {
         this.materials = new ArrayList<>();
         materials.forEach(path -> this.materials.add(path.toUri()));
     }
@@ -165,8 +171,16 @@ public class ConversionResult implements Closeable, Serializable {
         return this.componentPositionMap;
     }
 
-    void setComponentPositionMap(Map<String, List<Position>> componentPositionMap) {
+    public void setComponentPositionMap(Map<String, List<Position>> componentPositionMap) {
         this.componentPositionMap = componentPositionMap;
+    }
+
+    public double[] getBox() {
+        return box;
+    }
+
+    public void setBox(double[] box) {
+        this.box = box;
     }
 
     public void close() {

@@ -21,6 +21,7 @@ import org.polarsys.eplmp.core.services.IContextManagerLocal;
 import org.polarsys.eplmp.core.services.INotifierLocal;
 import org.polarsys.eplmp.core.services.IPlatformOptionsManagerLocal;
 import org.polarsys.eplmp.i18n.PropertiesLoader;
+import org.polarsys.eplmp.server.config.ServerConfig;
 import org.polarsys.eplmp.server.dao.AccountDAO;
 import org.polarsys.eplmp.server.dao.GCMAccountDAO;
 import org.polarsys.eplmp.server.dao.OrganizationDAO;
@@ -63,7 +64,7 @@ public class AccountManagerBean implements IAccountManagerLocal {
     private IPlatformOptionsManagerLocal platformOptionsManager;
 
     @Inject
-    private ConfigManager configManager;
+    private ServerConfig serverConfig;
 
     public AccountManagerBean() {
     }
@@ -72,7 +73,7 @@ public class AccountManagerBean implements IAccountManagerLocal {
     public Account authenticateAccount(String login, String password) {
         Account account = null;
 
-        if (accountDAO.authenticate(login, password, configManager.getDigestAlgorithm())) {
+        if (accountDAO.authenticate(login, password, serverConfig.getDigestAlgorithm())) {
 
             try {
                 account = getAccount(login);
@@ -95,7 +96,7 @@ public class AccountManagerBean implements IAccountManagerLocal {
         Date now = new Date();
         Account account = new Account(pLogin, pName, pEmail, pLanguage, now, pTimeZone);
         account.setEnabled(registrationStrategy.equals(OperationSecurityStrategy.NONE));
-        accountDAO.createAccount(account, pPassword, configManager.getDigestAlgorithm());
+        accountDAO.createAccount(account, pPassword, serverConfig.getDigestAlgorithm());
         mailer.sendCredential(account);
         return account;
     }
@@ -130,7 +131,7 @@ public class AccountManagerBean implements IAccountManagerLocal {
         account.setLanguage(pLanguage);
         account.setTimeZone(pTimeZone);
         if (pPassword != null) {
-            accountDAO.updateCredential(account.getLogin(), pPassword, configManager.getDigestAlgorithm());
+            accountDAO.updateCredential(account.getLogin(), pPassword, serverConfig.getDigestAlgorithm());
         }
         return account;
     }
@@ -231,7 +232,7 @@ public class AccountManagerBean implements IAccountManagerLocal {
         otherAccount.setLanguage(pLanguage);
         otherAccount.setTimeZone(pTimeZone);
         if (pPassword != null) {
-            accountDAO.updateCredential(otherAccount.getLogin(), pPassword, configManager.getDigestAlgorithm());
+            accountDAO.updateCredential(otherAccount.getLogin(), pPassword, serverConfig.getDigestAlgorithm());
         }
         return otherAccount;
     }

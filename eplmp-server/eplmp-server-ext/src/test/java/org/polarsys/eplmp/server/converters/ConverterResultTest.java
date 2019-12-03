@@ -13,6 +13,7 @@ package org.polarsys.eplmp.server.converters;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.polarsys.eplmp.core.product.ConversionResult;
 
 import java.net.URI;
 import java.nio.file.Path;

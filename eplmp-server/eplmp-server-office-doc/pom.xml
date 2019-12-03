@@ -60,6 +60,12 @@
             <artifactId>jodconverter-local</artifactId>
             <version>4.2.0</version>
         </dependency>
+        <dependency>
+            <groupId>org.polarsys.eplmp</groupId>
+            <artifactId>eplmp-server-config</artifactId>
+            <version>${parent.version}</version>
+            <scope>compile</scope>
+        </dependency>
     </dependencies>
 
     <build>

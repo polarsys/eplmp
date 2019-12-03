@@ -15,6 +15,7 @@ import org.polarsys.eplmp.core.exceptions.PlatformHealthException;
 import org.polarsys.eplmp.core.services.IBinaryStorageManagerLocal;
 import org.polarsys.eplmp.core.services.IIndexerManagerLocal;
 import org.polarsys.eplmp.core.services.IPlatformHealthManagerLocal;
+import org.polarsys.eplmp.server.config.ServerConfig;
 import org.polarsys.eplmp.server.resourcegetters.OfficeConfig;
 
 import javax.ejb.Local;
@@ -45,7 +46,7 @@ public class PlatformHealthManagerBean implements IPlatformHealthManagerLocal {
     private OfficeConfig officeConfig;
 
     @Inject
-    private ConfigManager configManager;
+    private ServerConfig serverConfig;
 
     @Override
     public void runHealthCheck() throws PlatformHealthException {
@@ -105,7 +106,7 @@ public class PlatformHealthManagerBean implements IPlatformHealthManagerLocal {
         }
 
         // Check for mandatory config
-        String vaultPath = configManager.getVaultPath();
+        String vaultPath = serverConfig.getVaultPath();
 
         if (vaultPath == null || vaultPath.isEmpty()) {
             LOGGER.log(Level.SEVERE, "Vaultpath is not set, you won't be able to upload/download files");
@@ -126,7 +127,7 @@ public class PlatformHealthManagerBean implements IPlatformHealthManagerLocal {
         }
 
         // Check for optional config
-        String codebase = configManager.getCodebase();
+        String codebase = serverConfig.getCodebase();
         if (codebase == null || codebase.isEmpty()) {
             LOGGER.log(Level.WARNING, "Codebase is not set, if you are using docdoku-web-front with this server you should configure it");
         }

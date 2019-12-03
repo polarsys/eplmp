@@ -14,6 +14,7 @@ package org.polarsys.eplmp.server.rest.dto.change;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
+import javax.json.bind.annotation.JsonbProperty;
 import java.io.Serializable;
 import java.util.List;
 
@@ -25,7 +26,7 @@ public class ChangeRequestDTO extends ChangeItemDTO implements Serializable {
     private List<ChangeIssueDTO> addressedChangeIssues;
 
     @ApiModelProperty(value = "Change request due milestone id")
-
+    @JsonbProperty(nillable = true)
     private int milestoneId;
 
     public ChangeRequestDTO() {

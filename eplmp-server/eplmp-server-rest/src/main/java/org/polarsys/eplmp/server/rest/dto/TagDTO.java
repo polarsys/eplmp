@@ -13,6 +13,7 @@ package org.polarsys.eplmp.server.rest.dto;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
+import javax.json.bind.annotation.JsonbProperty;
 import java.io.Serializable;
 
 /**
@@ -24,15 +25,15 @@ import java.io.Serializable;
 public class TagDTO implements Serializable {
 
     @ApiModelProperty(value = "Tag id")
-
+    @JsonbProperty(nillable = true)
     private String id;
 
     @ApiModelProperty(value = "Tag label")
-
+    @JsonbProperty(nillable = true)
     private String label;
 
     @ApiModelProperty(value = "Workspace id")
-
+    @JsonbProperty(nillable = true)
     private String workspaceId;
 
     public TagDTO() {

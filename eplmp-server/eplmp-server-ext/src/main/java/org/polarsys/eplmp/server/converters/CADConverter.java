@@ -54,7 +54,7 @@ public interface CADConverter {
      * @throws ConversionException
      *
      */
-    ConversionResult convert(URI cadFileName, URI tempDir)
+    ConversionResultProxy convert(URI cadFileName, URI tempDir)
             throws ConversionException;
 
     /**

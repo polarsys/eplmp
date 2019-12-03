@@ -16,6 +16,7 @@ import org.polarsys.eplmp.core.security.*;
 import org.polarsys.eplmp.core.services.IContextManagerLocal;
 import org.polarsys.eplmp.core.services.INotifierLocal;
 import org.polarsys.eplmp.core.services.IUserManagerLocal;
+import org.polarsys.eplmp.server.config.ServerConfig;
 import org.polarsys.eplmp.server.dao.*;
 import org.polarsys.eplmp.server.events.*;
 
@@ -66,7 +67,7 @@ public class UserManagerBean implements IUserManagerLocal {
     private INotifierLocal mailer;
 
     @Inject
-    private ConfigManager configManager;
+    private ServerConfig serverConfig;
 
     @Inject
     private PasswordRecoveryRequestDAO passwordRecoveryRequestDAO;
@@ -381,7 +382,7 @@ public class UserManagerBean implements IUserManagerLocal {
     @Override
     public void recoverPassword(String pPasswdRRUuid, String pPassword) throws PasswordRecoveryRequestNotFoundException {
         PasswordRecoveryRequest passwdRR = passwordRecoveryRequestDAO.loadPasswordRecoveryRequest(pPasswdRRUuid);
-        accountDAO.updateCredential(passwdRR.getLogin(), pPassword, configManager.getDigestAlgorithm());
+        accountDAO.updateCredential(passwdRR.getLogin(), pPassword, serverConfig.getDigestAlgorithm());
         passwordRecoveryRequestDAO.removePasswordRecoveryRequest(passwdRR);
     }
 

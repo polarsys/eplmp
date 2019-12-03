@@ -8,10 +8,10 @@
   * Contributors:
   *    DocDoku - initial API and implementation
   *******************************************************************************/
-package org.polarsys.eplmp.server.indexer.config;
+package org.polarsys.eplmp.server.config;
 
 import javax.annotation.Resource;
-import javax.enterprise.context.ApplicationScoped;
+import javax.ejb.Singleton;
 import java.util.Properties;
 
 /**
@@ -19,7 +19,7 @@ import java.util.Properties;
  *
  * @author Morgan Guimard
  */
-@ApplicationScoped
+@Singleton
 public class IndexerConfig {
 
     public static final String NUMBER_OF_SHARDS = "number_of_shards";

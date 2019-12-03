@@ -33,7 +33,7 @@ import org.polarsys.eplmp.core.sharing.SharedDocument;
 import org.polarsys.eplmp.core.sharing.SharedEntity;
 import org.polarsys.eplmp.core.sharing.SharedPart;
 import org.polarsys.eplmp.core.util.HashUtils;
-import org.polarsys.eplmp.server.auth.AuthConfig;
+import org.polarsys.eplmp.server.config.AuthConfig;
 
 import javax.ws.rs.core.Response;
 

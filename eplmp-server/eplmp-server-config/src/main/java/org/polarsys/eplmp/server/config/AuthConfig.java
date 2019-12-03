@@ -9,15 +9,14 @@
   *    DocDoku - initial API and implementation
   *******************************************************************************/
 
-package org.polarsys.eplmp.server.auth;
+package org.polarsys.eplmp.server.config;
 
 import org.jose4j.keys.HmacKey;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.Resource;
 import javax.crypto.KeyGenerator;
-import javax.enterprise.context.ApplicationScoped;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
+import javax.ejb.Singleton;
 import java.io.UnsupportedEncodingException;
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
@@ -30,24 +29,21 @@ import java.util.logging.Logger;
  *
  * @author Morgan Guimard
  */
-@ApplicationScoped
+@Singleton
 public class AuthConfig {
 
+    @Resource(lookup="auth.config")
     private Properties properties;
+
     private Key defaultKey;
 
     private static final Logger LOGGER = Logger.getLogger(AuthConfig.class.getName());
 
-
     @PostConstruct
     private void init() {
         try {
-            InitialContext ctx = new InitialContext();
-            properties = (Properties) ctx.lookup("auth.config");
             KeyGenerator keyGen = KeyGenerator.getInstance("HmacSHA256");
             defaultKey = keyGen.generateKey();
-        } catch (NamingException e) {
-            LOGGER.log(Level.SEVERE, "Cannot initialize auth configuration", e);
         } catch (NoSuchAlgorithmException e) {
             LOGGER.log(Level.SEVERE, "Cannot generate random JWT default key", e);
         }
@@ -66,15 +62,17 @@ public class AuthConfig {
     }
 
     public Key getJWTKey() {
-        try {
-            String secret = properties.getProperty("jwt.key");
-            if (null != secret && !secret.isEmpty()) {
+        String secret = properties.getProperty("jwt.key");
+
+        if (null != secret && !secret.isEmpty()) {
+            try {
                 return new HmacKey(secret.getBytes("UTF-8"));
             }
+            catch (UnsupportedEncodingException e) {
+                    LOGGER.log(Level.SEVERE, "Cannot create JWT key", e);
+            }
         }
-        catch (UnsupportedEncodingException e) {
-            LOGGER.log(Level.SEVERE, "Cannot create JWT key", e);
-        }
+
         return defaultKey;
     }
 }

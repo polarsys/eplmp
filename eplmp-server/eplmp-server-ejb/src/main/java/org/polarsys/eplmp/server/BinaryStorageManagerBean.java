@@ -15,6 +15,7 @@ import org.polarsys.eplmp.core.exceptions.FileNotFoundException;
 import org.polarsys.eplmp.core.exceptions.StorageException;
 import org.polarsys.eplmp.core.security.UserGroupMapping;
 import org.polarsys.eplmp.core.services.IBinaryStorageManagerLocal;
+import org.polarsys.eplmp.server.config.ServerConfig;
 import org.polarsys.eplmp.server.storage.StorageProvider;
 import org.polarsys.eplmp.server.storage.filesystem.FileStorageProvider;
 
@@ -35,13 +36,13 @@ import java.util.Date;
 public class BinaryStorageManagerBean implements IBinaryStorageManagerLocal {
 
     @Inject
-    private ConfigManager configManager;
+    private ServerConfig serverConfig;
 
     private StorageProvider defaultStorageProvider;
 
     @PostConstruct
     private void init() {
-        StorageProvider fileStorageProvider = new FileStorageProvider(configManager.getVaultPath());
+        StorageProvider fileStorageProvider = new FileStorageProvider(serverConfig.getVaultPath());
         defaultStorageProvider = fileStorageProvider;
     }
 

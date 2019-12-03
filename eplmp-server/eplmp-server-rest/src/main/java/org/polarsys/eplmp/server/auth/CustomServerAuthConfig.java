@@ -11,6 +11,7 @@
 package org.polarsys.eplmp.server.auth;
 
 import org.polarsys.eplmp.server.auth.modules.*;
+import org.polarsys.eplmp.server.config.AuthConfig;
 
 import javax.security.auth.Subject;
 import javax.security.auth.callback.CallbackHandler;

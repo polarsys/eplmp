@@ -20,6 +20,7 @@ import org.polarsys.eplmp.core.common.Account;
 import org.polarsys.eplmp.core.exceptions.AccountNotFoundException;
 import org.polarsys.eplmp.core.exceptions.NotAllowedException;
 import org.polarsys.eplmp.core.services.IContextManagerLocal;
+import org.polarsys.eplmp.server.config.ServerConfig;
 import org.polarsys.eplmp.server.dao.AccountDAO;
 import java.util.Date;
 import org.junit.Assert;
@@ -31,7 +32,7 @@ public class AccountManagerBeanTest {
     @Mock
     private AccountDAO accountDAO;
     @Mock
-    private ConfigManager configManager;
+    private ServerConfig serverConfig;
     @Spy
     private Account account = new Account("login", "user", "test@docdoku.com", "en", new Date(), null);
     @Before

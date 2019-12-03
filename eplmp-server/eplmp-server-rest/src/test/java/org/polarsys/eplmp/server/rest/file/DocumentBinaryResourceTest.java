@@ -25,7 +25,7 @@ import org.polarsys.eplmp.core.security.UserGroupMapping;
 import org.polarsys.eplmp.core.services.*;
 import org.polarsys.eplmp.core.sharing.SharedDocument;
 import org.polarsys.eplmp.core.util.Tools;
-import org.polarsys.eplmp.server.auth.AuthConfig;
+import org.polarsys.eplmp.server.config.AuthConfig;
 import org.polarsys.eplmp.server.util.PartImpl;
 import org.polarsys.eplmp.server.util.ResourceUtil;
 

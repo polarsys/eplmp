@@ -16,6 +16,7 @@ import io.swagger.annotations.ApiModelProperty;
 import org.polarsys.eplmp.core.util.DateUtils;
 
 import javax.json.bind.annotation.JsonbDateFormat;
+import javax.json.bind.annotation.JsonbProperty;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
@@ -39,10 +40,11 @@ public class QueryDTO implements Serializable {
     private Date creationDate;
 
     @ApiModelProperty(value = "Part iteration query rule")
+    @JsonbProperty(nillable = true)
     private QueryRuleDTO queryRule;
 
     @ApiModelProperty(value = "Path data query rule")
-
+    @JsonbProperty(nillable = true)
     private QueryRuleDTO pathDataQueryRule;
 
     @ApiModelProperty(value = "List of select statements")

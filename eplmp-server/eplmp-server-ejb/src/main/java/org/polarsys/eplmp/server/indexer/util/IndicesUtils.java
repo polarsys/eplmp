@@ -12,7 +12,7 @@
 package org.polarsys.eplmp.server.indexer.util;
 
 import org.polarsys.eplmp.core.util.Tools;
-import org.polarsys.eplmp.server.indexer.config.IndexerConfig;
+import org.polarsys.eplmp.server.config.IndexerConfig;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import java.io.UnsupportedEncodingException;

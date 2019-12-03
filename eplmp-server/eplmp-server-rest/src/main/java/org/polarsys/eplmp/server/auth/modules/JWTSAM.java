@@ -11,10 +11,13 @@
 
 package org.polarsys.eplmp.server.auth.modules;
 
+import org.polarsys.eplmp.core.common.JWTokenUserGroupMapping;
 import org.polarsys.eplmp.core.security.UserGroupMapping;
-import org.polarsys.eplmp.server.auth.jwt.JWTokenFactory;
-import org.polarsys.eplmp.server.auth.jwt.JWTokenUserGroupMapping;
+import org.polarsys.eplmp.core.services.ITokenManagerLocal;
 
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
 import javax.security.auth.Subject;
 import javax.security.auth.callback.Callback;
 import javax.security.auth.callback.UnsupportedCallbackException;
@@ -55,8 +58,18 @@ public class JWTSAM extends CustomSAM {
         String authorization = request.getHeader("Authorization");
         String[] splitAuthorization = authorization.split(" ");
         String jwt = splitAuthorization[1];
+        ITokenManagerLocal tokenManager;
 
-        JWTokenUserGroupMapping jwTokenUserGroupMapping = JWTokenFactory.validateAuthToken(key, jwt);
+        try {
+            final String beanName = "java:app/eplmp-server-ejb/JWTokenManager!org.polarsys.eplmp.core.services.ITokenManagerLocal";;
+            InitialContext context = new InitialContext();
+            tokenManager = (ITokenManagerLocal) context.lookup(beanName);
+        } catch (NamingException e) {
+            LOGGER.log(Level.SEVERE,null,e);
+            return AuthStatus.FAILURE;
+        }
+
+        JWTokenUserGroupMapping jwTokenUserGroupMapping = tokenManager.validateAuthToken(key, jwt);
 
         if (jwTokenUserGroupMapping != null) {
 
@@ -71,7 +84,7 @@ public class JWTSAM extends CustomSAM {
                 throw new AuthException(e.getMessage());
             }
 
-            JWTokenFactory.refreshTokenIfNeeded(key, response, jwTokenUserGroupMapping);
+            tokenManager.refreshTokenIfNeeded(key, response, jwTokenUserGroupMapping);
 
             return AuthStatus.SUCCESS;
         }

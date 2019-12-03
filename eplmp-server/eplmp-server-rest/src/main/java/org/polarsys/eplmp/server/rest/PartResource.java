@@ -19,8 +19,8 @@ import org.polarsys.eplmp.core.configuration.ProductBaseline;
 import org.polarsys.eplmp.core.configuration.ProductInstanceMaster;
 import org.polarsys.eplmp.core.configuration.ProductStructureFilter;
 import org.polarsys.eplmp.core.document.DocumentRevisionKey;
-import org.polarsys.eplmp.core.exceptions.*;
 import org.polarsys.eplmp.core.exceptions.NotAllowedException;
+import org.polarsys.eplmp.core.exceptions.*;
 import org.polarsys.eplmp.core.meta.InstanceAttribute;
 import org.polarsys.eplmp.core.meta.InstanceAttributeTemplate;
 import org.polarsys.eplmp.core.meta.Tag;
@@ -838,6 +838,31 @@ public class PartResource {
         }
         return Response.ok(new GenericEntity<List<ProductBaselineDTO>>((List<ProductBaselineDTO>) productBaselineDTOs) {
         }).build();
+    }
+
+    @PUT
+    @ApiOperation(value = "Send conversion result",
+            response = Response.class)
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "Successful conversion"),
+            @ApiResponse(code = 401, message = "Unauthorized"),
+            @ApiResponse(code = 403, message = "Forbidden"),
+            @ApiResponse(code = 500, message = "Internal server error")
+    })
+    @Path("/conversion")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response sendConversionResult(
+            @ApiParam(required = true, value = "Workspace id") @PathParam("workspaceId") String workspaceId,
+            @ApiParam(required = true, value = "Part number") @PathParam("partNumber") String partNumber,
+            @ApiParam(required = true, value = "Part version") @PathParam("partVersion") String partVersion,
+            @ApiParam(required = true, value = "Conversion result") ConversionResultDTO conversionResultDTO)
+            throws Exception {
+
+        ConversionResult result = mapper.map(conversionResultDTO, ConversionResult.class);
+        PartRevisionKey partRevisionKey = new PartRevisionKey(workspaceId,partNumber,partVersion);
+        converterService.handleConversionResultCallback(partRevisionKey, result);
+        return Response.ok().build();
     }
 
 

@@ -11,6 +11,7 @@
     <packaging>pom</packaging>
     <name>eplmp-server Java EE 8</name>
     <modules>
+        <module>eplmp-server-config</module>
         <module>eplmp-server-ext</module>
         <module>eplmp-server-office-doc</module>
         <module>eplmp-server-ejb</module>

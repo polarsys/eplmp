@@ -11,12 +11,11 @@
 
 package org.polarsys.eplmp.server.ws;
 
+import org.polarsys.eplmp.core.common.JWTokenUserGroupMapping;
 import org.polarsys.eplmp.core.security.UserGroupMapping;
+import org.polarsys.eplmp.core.services.ITokenManagerLocal;
 import org.polarsys.eplmp.core.services.IUserManagerLocal;
-import org.polarsys.eplmp.server.auth.AuthConfig;
-import org.polarsys.eplmp.server.auth.jwt.JWTokenFactory;
-import org.polarsys.eplmp.server.auth.jwt.JWTokenUserGroupMapping;
-
+import org.polarsys.eplmp.server.config.AuthConfig;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
@@ -61,6 +60,9 @@ public class WebSocketApplication {
 
     @Inject
     private AuthConfig authConfig;
+
+    @Inject
+    private ITokenManagerLocal tokenManager;
 
     public WebSocketApplication() {
     }
@@ -111,7 +113,7 @@ public class WebSocketApplication {
         if (AUTH.equals(type)) {
             String jwt = message.getString("jwt");
 
-            JWTokenUserGroupMapping jwTokenUserGroupMapping = JWTokenFactory.validateAuthToken(authConfig.getJWTKey(), jwt);
+            JWTokenUserGroupMapping jwTokenUserGroupMapping = tokenManager.validateAuthToken(authConfig.getJWTKey(), jwt);
 
             if (null != jwTokenUserGroupMapping) {
                 UserGroupMapping userGroupMapping = jwTokenUserGroupMapping.getUserGroupMapping();

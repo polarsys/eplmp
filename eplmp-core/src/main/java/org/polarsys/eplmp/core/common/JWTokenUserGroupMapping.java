@@ -9,7 +9,7 @@
   *    DocDoku - initial API and implementation
   *******************************************************************************/
 
-package org.polarsys.eplmp.server.auth.jwt;
+package org.polarsys.eplmp.core.common;
 
 import org.jose4j.jwt.JwtClaims;
 import org.polarsys.eplmp.core.security.UserGroupMapping;

@@ -21,12 +21,9 @@ import org.polarsys.eplmp.core.exceptions.EntityAlreadyExistsException;
 import org.polarsys.eplmp.core.exceptions.EntityNotFoundException;
 import org.polarsys.eplmp.core.exceptions.NotAllowedException;
 import org.polarsys.eplmp.core.security.UserGroupMapping;
-import org.polarsys.eplmp.core.services.IAccountManagerLocal;
-import org.polarsys.eplmp.core.services.IContextManagerLocal;
-import org.polarsys.eplmp.core.services.IOAuthManagerLocal;
-import org.polarsys.eplmp.core.services.IUserManagerLocal;
-import org.polarsys.eplmp.server.auth.AuthConfig;
-import org.polarsys.eplmp.server.auth.jwt.JWTokenFactory;
+import org.polarsys.eplmp.core.services.*;
+import org.polarsys.eplmp.server.config.AuthConfig;
+
 import org.polarsys.eplmp.server.rest.dto.AccountDTO;
 import org.polarsys.eplmp.server.rest.dto.GCMAccountDTO;
 import org.polarsys.eplmp.server.rest.dto.WorkspaceDTO;
@@ -64,6 +61,8 @@ public class AccountResource {
     private IOAuthManagerLocal authManager;
     @Inject
     private AuthConfig authConfig;
+    @Inject
+    private ITokenManagerLocal tokenManager;
 
     private static final Logger LOGGER = Logger.getLogger(AccountResource.class.getName());
     private Mapper mapper;
@@ -123,7 +122,7 @@ public class AccountResource {
         } else {
             if (authorizationString == null
                     || !authorizationString.startsWith("Bearer ")
-                    || !JWTokenFactory.isJWTValidBefore(authConfig.getJWTKey(), 2 * 60, authorizationString.substring("Bearer ".length()))) {
+                    || !tokenManager.isJWTValidBefore(authConfig.getJWTKey(), 2 * 60, authorizationString.substring("Bearer ".length()))) {
                 return Response.status(Response.Status.FORBIDDEN).build();
             }
         }
@@ -176,7 +175,7 @@ public class AccountResource {
                     .entity(mapper.map(account, AccountDTO.class));
 
             if (authConfig.isJwtEnabled()) {
-                responseBuilder.header("jwt", JWTokenFactory.createAuthToken(authConfig.getJWTKey(), new UserGroupMapping(login, UserGroupMapping.REGULAR_USER_ROLE_ID)));
+                responseBuilder.header("jwt", tokenManager.createAuthToken(authConfig.getJWTKey(), new UserGroupMapping(login, UserGroupMapping.REGULAR_USER_ROLE_ID)));
             }
 
             return responseBuilder

@@ -15,6 +15,7 @@ import io.swagger.annotations.ApiModelProperty;
 import org.polarsys.eplmp.core.util.DateUtils;
 
 import javax.json.bind.annotation.JsonbDateFormat;
+import javax.json.bind.annotation.JsonbProperty;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
@@ -59,8 +60,8 @@ public class DocumentIterationDTO implements Serializable {
     @ApiModelProperty(value = "Document author")
     private UserDTO author;
 
-
     @ApiModelProperty(value = "Revision note")
+    @JsonbProperty(nillable = true)
     private String revisionNote;
 
     @ApiModelProperty(value = "Document iteration attached files")

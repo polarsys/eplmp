@@ -20,6 +20,7 @@ import org.polarsys.eplmp.server.rest.dto.DocumentIterationDTO;
 import org.polarsys.eplmp.server.rest.dto.PartIterationDTO;
 
 import javax.json.bind.annotation.JsonbDateFormat;
+import javax.json.bind.annotation.JsonbProperty;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
@@ -42,11 +43,11 @@ public abstract class ChangeItemDTO implements Serializable {
     private String authorName;
 
     @ApiModelProperty(value = "Change item assignee user login")
-
+    @JsonbProperty(nillable = true)
     private String assignee;
 
     @ApiModelProperty(value = "Change item assignee user name")
-
+    @JsonbProperty(nillable = true)
     private String assigneeName;
 
     @ApiModelProperty(value = "Change item creation date")
@@ -72,7 +73,7 @@ public abstract class ChangeItemDTO implements Serializable {
     private String[] tags;
 
     @ApiModelProperty(value = "Change item ACL")
-
+    @JsonbProperty(nillable = true)
     private ACLDTO acl;
 
     @ApiModelProperty(value = "Change item writable flag")

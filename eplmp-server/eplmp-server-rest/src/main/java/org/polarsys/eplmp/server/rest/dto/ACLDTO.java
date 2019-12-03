@@ -15,6 +15,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import org.polarsys.eplmp.core.security.ACLPermission;
 
+import javax.json.bind.annotation.JsonbProperty;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -27,10 +28,11 @@ public class ACLDTO implements Serializable {
 
 
     @ApiModelProperty(value = "Users ACL entries")
+    @JsonbProperty(nillable = true)
     private List<ACLEntryDTO> userEntries = new ArrayList<>();
 
-
     @ApiModelProperty(value = "Groups ACL entries")
+    @JsonbProperty(nillable = true)
     private List<ACLEntryDTO> groupEntries = new ArrayList<>();
 
     public ACLDTO() {

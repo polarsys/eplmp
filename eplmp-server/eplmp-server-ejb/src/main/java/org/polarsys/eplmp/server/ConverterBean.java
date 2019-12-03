@@ -10,19 +10,20 @@
   *******************************************************************************/
 package org.polarsys.eplmp.server;
 
+import org.apache.kafka.clients.producer.KafkaProducer;
+import org.apache.kafka.clients.producer.ProducerRecord;
+import org.apache.kafka.common.serialization.StringSerializer;
 import org.polarsys.eplmp.core.common.BinaryResource;
 import org.polarsys.eplmp.core.exceptions.*;
 import org.polarsys.eplmp.core.product.*;
 import org.polarsys.eplmp.core.security.UserGroupMapping;
-import org.polarsys.eplmp.core.services.IBinaryStorageManagerLocal;
-import org.polarsys.eplmp.core.services.IConverterManagerLocal;
-import org.polarsys.eplmp.core.services.IProductManagerLocal;
-import org.polarsys.eplmp.core.util.FileIO;
-import org.polarsys.eplmp.server.converters.CADConverter;
-import org.polarsys.eplmp.server.converters.CADConverter.ConversionException;
-import org.polarsys.eplmp.server.converters.ConversionResult;
+import org.polarsys.eplmp.core.services.*;
+import org.polarsys.eplmp.server.config.AuthConfig;
+import org.polarsys.eplmp.server.config.ServerConfig;
+import org.polarsys.eplmp.server.converters.ConversionOrder;
 import org.polarsys.eplmp.server.converters.ConverterUtils;
-import org.polarsys.eplmp.server.geometry.GeometryParser;
+import org.polarsys.eplmp.server.converters.serialization.JsonbSerializer;
+import org.polarsys.eplmp.server.dao.PartRevisionDAO;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.security.DeclareRoles;
@@ -37,11 +38,11 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.security.Key;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.DoubleStream;
-import java.util.stream.Stream;
 
 /**
  * CAD File converter
@@ -54,25 +55,30 @@ import java.util.stream.Stream;
 @Stateless(name = "ConverterBean")
 public class ConverterBean implements IConverterManagerLocal {
 
-    private List<CADConverter> converters = new ArrayList<>();
-
     @Inject
     private IProductManagerLocal productService;
-
+    @Inject
+    private ITokenManagerLocal tokenManager;
+    @Inject
+    private AuthConfig authConfig;
+    @Inject
+    private IContextManagerLocal contextManager;
+    @Inject
+    private PartRevisionDAO partRevisionDAO;
+    @Inject
+    private IUserManagerLocal userService;
     @Inject
     private IBinaryStorageManagerLocal storageManager;
-
     @Inject
-    private BeanLocator beanLocator;
+    private ServerConfig serverConfig;
 
-    @Inject
-    private GeometryParser geometryParser;
-
-    private static final String CONF_PROPERTIES = "/org/polarsys/eplmp/server/converters/utils/conf.properties";
-    private static final Properties CONF = new Properties();
-    private static final float[] RATIO = new float[]{1f, 0.6f, 0.2f};
 
     private static final Logger LOGGER = Logger.getLogger(ConverterBean.class.getName());
+    private static final String PRODUCER_TOPIC = "CONVERT";
+    private static final String CONF_PROPERTIES = "/org/polarsys/eplmp/server/converters/utils/conf.properties";
+    private KafkaProducer<String, ConversionOrder> producer;
+    private static final float[] RATIO = new float[]{1f, 0.6f, 0.2f};
+    private static final Properties CONF = new Properties();
 
     static {
         try (InputStream inputStream = ConverterBean.class.getResourceAsStream(CONF_PROPERTIES)) {
@@ -83,9 +89,20 @@ public class ConverterBean implements IConverterManagerLocal {
     }
 
     @PostConstruct
-    void init() {
-        // add external converters
-        converters.addAll(beanLocator.search(CADConverter.class));
+    public void init (){
+        Properties producerProperties = new Properties();
+        producerProperties.put("bootstrap.servers", "kafka:9092");
+        producerProperties.put("acks", "0");
+        producerProperties.put("retries", "1");
+        producerProperties.put("batch.size", "20971520");
+        producerProperties.put("linger.ms", "33");
+        producerProperties.put("max.request.size", "2097152");
+        producerProperties.put("compression.type", "gzip");
+        producerProperties.put("key.serializer", StringSerializer.class.getName());
+        producerProperties.put("value.serializer", JsonbSerializer.class.getName());
+        producerProperties.put("kafka.topic", PRODUCER_TOPIC);
+
+        producer = new KafkaProducer<>(producerProperties);
     }
 
     @Override
@@ -118,90 +135,113 @@ public class ConverterBean implements IConverterManagerLocal {
         try {
             LOGGER.log(Level.FINE, "Creating a new conversion");
             productService.createConversion(partIterationKey);
+
         } catch (ApplicationException e) {
             // Abort if any error (this should not happen though)
             LOGGER.log(Level.SEVERE, null, e);
             return;
         }
 
-        CADConverter selectedConverter = selectConverter(cadBinaryResource);
-
-        boolean succeed = false;
-
-        if (selectedConverter != null) {
-            try {
-                succeed = doConversion(cadBinaryResource, selectedConverter, partIterationKey);
-            } catch (StorageException e) {
-                LOGGER.log(Level.WARNING, "Unable to read from storage", e);
-            } catch (IOException e) {
-                LOGGER.log(Level.WARNING, e.getMessage(), e);
-            } catch (ConversionException e) {
-                LOGGER.log(Level.WARNING, "Cannot convert " + cadBinaryResource.getName(), e);
-            }
-        } else {
-            LOGGER.log(Level.WARNING, "No CAD converter able to handle " + cadBinaryResource.getName());
-        }
-
-        try {
-            LOGGER.log(Level.FINE, "Conversion ended");
-            productService.endConversion(partIterationKey, succeed);
-        } catch (ApplicationException e) {
-            LOGGER.log(Level.SEVERE, null, e);
-        }
+        // Send message in kafka queue
+        String token = generateUserToken();
+        ConversionOrder conversionOrder = new ConversionOrder(partIterationKey, cadBinaryResource, token);
+        producer.send(new ProducerRecord<>(PRODUCER_TOPIC, partIterationKey.toString(), conversionOrder));
 
     }
 
-    private boolean doConversion(BinaryResource cadBinaryResource, CADConverter selectedConverter,
-                                 PartIterationKey pPartIPK) throws IOException, StorageException, ConversionException {
+    @Override
+    @RolesAllowed({UserGroupMapping.REGULAR_USER_ROLE_ID})
+    public void handleConversionResultCallback(PartRevisionKey partRevisionKey, ConversionResult conversionResult) throws UserNotFoundException, WorkspaceNotFoundException, WorkspaceNotEnabledException, AccessRightException, EntityConstraintException, UserNotActiveException, PartRevisionNotFoundException, NotAllowedException, DocumentRevisionNotFoundException, ListOfValuesNotFoundException, PartUsageLinkNotFoundException, PartMasterNotFoundException, PartIterationNotFoundException {
 
-        boolean result = false;
+        userService.checkWorkspaceWriteAccess(partRevisionKey.getWorkspaceId());
 
-        UUID uuid = UUID.randomUUID();
-        Path tempDir = Files.createDirectory(Paths.get("docdoku-" + uuid));
-        Path tmpCadFile = tempDir.resolve(cadBinaryResource.getName().trim());
+        PartRevision partRevision = partRevisionDAO.loadPartR(partRevisionKey);
 
-        // copy resource content to temp directory
-        try (InputStream in = storageManager.getBinaryResourceInputStream(cadBinaryResource)) {
-            Files.copy(in, tmpCadFile);
-            // convert file
-            try (ConversionResult conversionResult = selectedConverter.convert(tmpCadFile.toUri(), tempDir.toUri())) {
-                Map<String, List<ConversionResult.Position>> componentPositionMap = conversionResult.getComponentPositionMap();
-                if (componentPositionMap != null) {
-                    result = syncAssembly(componentPositionMap, productService.getPartIteration(pPartIPK));
-                }
-                if (conversionResult.getConvertedFile() != null) {
-                    result = handleConvertedFile(conversionResult, pPartIPK, tempDir);
-                }
-            } catch (Exception e) {
-                LOGGER.log(Level.WARNING, e.getMessage(), e);
-            } finally {
-                deleteTempDirectory(tempDir);
-            }
-        } finally {
-            Files.deleteIfExists(tempDir);
+        if(null == partRevision) {
+            LOGGER.severe("Cannot find part revision");
+            return;
         }
-        return result;
-    }
 
-    private void deleteTempDirectory(Path tempDir) {
-        try (Stream<Path> s = Files.list(tempDir)) {
-            s.forEach((path) -> {
-                try {
-                    Files.delete(path);
-                } catch (IOException e) {
-                    LOGGER.warning("Unable to delete " + path.getFileName());
-                }
-            });
-        } catch (IOException e) {
-            LOGGER.warning("Unable to delete " + tempDir.getFileName());
+        PartIteration partIteration = partRevision.getLastIteration();
+        PartIterationKey partIterationKey = partIteration.getKey();
+
+        if(!partRevision.isCheckedOut()) {
+            LOGGER.severe("Cannot proceed as the part is not checked out");
+            productService.endConversion(partIterationKey, false);
+            return;
         }
-    }
 
-    private boolean handleConvertedFile(ConversionResult conversionResult, PartIterationKey pPartIPK, Path tempDir) {
-
-        // manage converted file
+        Map<String, List<ConversionResult.Position>> componentPositionMap = conversionResult.getComponentPositionMap();
         Path convertedFile = conversionResult.getConvertedFile();
-        double[] box = geometryParser.calculateBox(convertedFile);
+
+        // No CAD file and no position map
+        if(convertedFile == null && componentPositionMap == null) {
+            LOGGER.severe("Converted file and component position map are null, conversion failed \nError output: " + conversionResult.getErrorOutput());
+            productService.endConversion(partIterationKey, false);
+            return;
+        }
+
+        // Handle component map
+        if (componentPositionMap != null && !syncAssembly(componentPositionMap, partIteration)) {
+            LOGGER.severe("Failed to sync assembly, conversion failed");
+            productService.endConversion(partIterationKey, false);
+            return;
+        }
+
+        // Handle converted file
+        if(convertedFile != null) {
+            // Temp dir : conversionPath/UUID
+            String uuid = convertedFile.getParent().getFileName().toString();
+            String fileName = convertedFile.getFileName().toString();
+            Path tempDir = Paths.get(serverConfig.getConversionsPath() + "/" + uuid);
+
+            Path convertedFileAbsolute = Paths.get(tempDir.toAbsolutePath() + "/" + fileName);
+
+            if (!handleConvertedFile(tempDir, convertedFileAbsolute, conversionResult, partIterationKey)) {
+                LOGGER.severe("Failed to hand converted fileconversion failed");
+                productService.endConversion(partIterationKey, false);
+                return;
+            }
+
+
+            double[] box = conversionResult.getBox();
+
+            if (decimate(convertedFileAbsolute, tempDir, RATIO)) {
+                for (int i = 0; i < RATIO.length; i++) {
+                    Path geometryFile = tempDir
+                            .resolve(convertedFileAbsolute.getFileName().toString().replaceAll("\\.obj$", Math.round((RATIO[i] * 100)) + ".obj"));
+                    saveGeometryFile(partIterationKey, i, geometryFile, box);
+                }
+            } else {
+                // Copy the converted file if decimation failed,
+                saveGeometryFile(partIterationKey, 0, convertedFileAbsolute, box);
+            }
+
+            // Save materials files as attached files
+            for (Path material : conversionResult.getMaterials()) {
+                Path absolutePath = Paths.get(tempDir + "/" + material.getFileName());
+                saveAttachedFile(partIterationKey, absolutePath);
+            }
+
+            try {
+                LOGGER.log(Level.FINE, "Conversion ended with success");
+                productService.endConversion(partIterationKey, true);
+            } catch (ApplicationException e) {
+                LOGGER.log(Level.SEVERE, null, e);
+            }
+        }
+    }
+
+    private String generateUserToken() {
+        String login = contextManager.getCallerPrincipalLogin();
+        Key key = authConfig.getJWTKey();
+        UserGroupMapping mapping = new UserGroupMapping(login, UserGroupMapping.REGULAR_USER_ROLE_ID);
+        return tokenManager.createAuthToken(key, mapping);
+    }
+
+    private boolean handleConvertedFile(Path tempDir, Path convertedFile, ConversionResult conversionResult, PartIterationKey pPartIPK) {
+
+        double[] box = conversionResult.getBox();
 
         if (decimate(convertedFile, tempDir, RATIO)) {
             String fileName = convertedFile.getFileName().toString();
@@ -224,24 +264,6 @@ public class ConverterBean implements IConverterManagerLocal {
 
     }
 
-    /**
-     * Update the current Part from the imported assembly description
-     *
-     * @param componentPositionMap Assembly description root component.
-     * @param partToConvert        Current Part ID
-     * @throws UserNotFoundException
-     * @throws UserNotActiveException
-     * @throws WorkspaceNotEnabledException
-     * @throws WorkspaceNotFoundException
-     * @throws EntityConstraintException
-     * @throws NotAllowedException
-     * @throws AccessRightException
-     * @throws DocumentRevisionNotFoundException
-     * @throws PartUsageLinkNotFoundException
-     * @throws ListOfValuesNotFoundException
-     * @throws PartMasterNotFoundException
-     * @throws PartRevisionNotFoundException
-     */
     private boolean syncAssembly(Map<String, List<ConversionResult.Position>> componentPositionMap, PartIteration partToConvert)
             throws UserNotFoundException, UserNotActiveException, WorkspaceNotEnabledException,
             WorkspaceNotFoundException, PartRevisionNotFoundException, PartMasterNotFoundException,
@@ -295,20 +317,6 @@ public class ConverterBean implements IConverterManagerLocal {
         return instances;
     }
 
-    private CADConverter selectConverter(BinaryResource cadBinaryResource) {
-        String ext = FileIO.getExtension(cadBinaryResource.getName());
-        for (CADConverter converter : converters) {
-            try {
-                if (converter.canConvertToOBJ(ext)) {
-                    return converter;
-                }
-            } catch (Exception e) {
-                // javax.ejb.CreateException can be thrown when static initialization fail inside plugin
-                LOGGER.log(Level.SEVERE, "Something gone wrong with converter instantiation " + converter, e);
-            }
-        }
-        return null;
-    }
 
     private boolean decimate(Path file, Path tempDir, float[] ratio) {
 
@@ -396,4 +404,5 @@ public class ConverterBean implements IConverterManagerLocal {
             LOGGER.log(Level.SEVERE, "Cannot save attached file to part iteration", e);
         }
     }
+
 }

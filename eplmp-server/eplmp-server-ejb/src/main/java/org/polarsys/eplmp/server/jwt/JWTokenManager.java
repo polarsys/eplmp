@@ -9,7 +9,7 @@
   *    DocDoku - initial API and implementation
   *******************************************************************************/
 
-package org.polarsys.eplmp.server.auth.jwt;
+package org.polarsys.eplmp.server.jwt;
 
 import org.jose4j.jws.AlgorithmIdentifiers;
 import org.jose4j.jws.JsonWebSignature;
@@ -20,9 +20,15 @@ import org.jose4j.jwt.consumer.InvalidJwtException;
 import org.jose4j.jwt.consumer.JwtConsumer;
 import org.jose4j.jwt.consumer.JwtConsumerBuilder;
 import org.jose4j.lang.JoseException;
+import org.polarsys.eplmp.core.common.JWTokenUserGroupMapping;
 import org.polarsys.eplmp.core.security.UserGroupMapping;
+import org.polarsys.eplmp.core.services.IAccountManagerLocal;
+import org.polarsys.eplmp.core.services.ITokenManagerLocal;
 import org.polarsys.eplmp.core.sharing.SharedEntity;
 
+import javax.annotation.security.DeclareRoles;
+import javax.ejb.Local;
+import javax.ejb.Stateless;
 import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
@@ -35,13 +41,17 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * This JWTokenFactory class is responsible for JWT tokens creation
+ * This JWTokenManager class is responsible for JWT tokens creation
  *
  * @author Morgan Guimard
  */
-public class JWTokenFactory {
 
-    private static final Logger LOGGER = Logger.getLogger(JWTokenFactory.class.getName());
+@DeclareRoles({UserGroupMapping.REGULAR_USER_ROLE_ID, UserGroupMapping.ADMIN_ROLE_ID})
+@Local(ITokenManagerLocal.class)
+@Stateless(name = "JWTokenManager")
+public class JWTokenManager implements ITokenManagerLocal {
+
+    private static final Logger LOGGER = Logger.getLogger(JWTokenManager.class.getName());
     private static final String ALG = AlgorithmIdentifiers.HMAC_SHA256;
     private static final Long JWT_TOKEN_EXPIRES_TIME = 60 * 60 *3l; // 3 hours token lifetime, to prevent timeout when uploading
     private static final Long JWT_TOKEN_REFRESH_BEFORE = 3 * 60l; // Deliver new token 3 minutes before expiration
@@ -51,10 +61,8 @@ public class JWTokenFactory {
     private static final String SHARED_ENTITY_UUID = "uuid";
     private static final String ENTITY_KEY = "key";
 
-    private JWTokenFactory() {
-    }
-
-    public static String createAuthToken(Key key, UserGroupMapping userGroupMapping) {
+    @Override
+    public String createAuthToken(Key key, UserGroupMapping userGroupMapping) {
         JsonObjectBuilder subjectBuilder = Json.createObjectBuilder();
         subjectBuilder.add(SUBJECT_LOGIN, userGroupMapping.getLogin());
         subjectBuilder.add(SUBJECT_GROUP_NAME, userGroupMapping.getGroupName());
@@ -62,14 +70,15 @@ public class JWTokenFactory {
         return createToken(key, build);
     }
 
-    public static String createSharedEntityToken(Key key, SharedEntity sharedEntity) {
+    @Override
+    public String createSharedEntityToken(Key key, SharedEntity sharedEntity) {
         JsonObjectBuilder subjectBuilder = Json.createObjectBuilder();
         subjectBuilder.add(SHARED_ENTITY_UUID, sharedEntity.getUuid());
         JsonObject build = subjectBuilder.build();
         return createToken(key, build);
     }
 
-    private static String createToken(Key key, JsonObject jsonClaims) {
+    private String createToken(Key key, JsonObject jsonClaims) {
 
         JwtClaims claims = new JwtClaims();
         claims.setSubject(jsonClaims.toString());
@@ -91,7 +100,8 @@ public class JWTokenFactory {
         return null;
     }
 
-    public static JWTokenUserGroupMapping validateAuthToken(Key key, String jwt) {
+    @Override
+    public JWTokenUserGroupMapping validateAuthToken(Key key, String jwt) {
 
         JwtConsumer jwtConsumer = new JwtConsumerBuilder()
                 .setVerificationKey(key)
@@ -121,7 +131,8 @@ public class JWTokenFactory {
 
     }
 
-    public static String validateSharedResourceToken(Key key, String jwt) {
+    @Override
+    public String validateSharedResourceToken(Key key, String jwt) {
 
         JwtConsumer jwtConsumer = new JwtConsumerBuilder()
                 .setVerificationKey(key)
@@ -143,7 +154,8 @@ public class JWTokenFactory {
 
     }
 
-    public static boolean isJWTValidBefore(Key key, int seconds, String authorizationString) {
+    @Override
+    public boolean isJWTValidBefore(Key key, int seconds, String authorizationString) {
         JWTokenUserGroupMapping jwTokenUserGroupMapping = validateAuthToken(key, authorizationString);
         if (jwTokenUserGroupMapping != null) {
             try {
@@ -157,7 +169,8 @@ public class JWTokenFactory {
         return false;
     }
 
-    public static void refreshTokenIfNeeded(Key key, HttpServletResponse response, JWTokenUserGroupMapping jwTokenUserGroupMapping) {
+    @Override
+    public void refreshTokenIfNeeded(Key key, HttpServletResponse response, JWTokenUserGroupMapping jwTokenUserGroupMapping) {
 
         try {
             NumericDate expirationTime = jwTokenUserGroupMapping.getClaims().getExpirationTime();
@@ -173,14 +186,16 @@ public class JWTokenFactory {
 
     }
 
-    public static String createEntityToken(Key key, String entityKey) {
+    @Override
+    public String createEntityToken(Key key, String entityKey) {
         JsonObjectBuilder subjectBuilder = Json.createObjectBuilder();
         subjectBuilder.add(ENTITY_KEY, entityKey);
         JsonObject build = subjectBuilder.build();
         return createToken(key, build);
     }
 
-    public static String validateEntityToken(Key key, String jwt) {
+    @Override
+    public String validateEntityToken(Key key, String jwt) {
 
         JwtConsumer jwtConsumer = new JwtConsumerBuilder()
                 .setVerificationKey(key)

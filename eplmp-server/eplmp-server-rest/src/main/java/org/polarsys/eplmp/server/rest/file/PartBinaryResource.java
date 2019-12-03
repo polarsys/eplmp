@@ -23,8 +23,7 @@ import org.polarsys.eplmp.core.services.*;
 import org.polarsys.eplmp.core.sharing.SharedEntity;
 import org.polarsys.eplmp.core.sharing.SharedPart;
 import org.polarsys.eplmp.core.util.HashUtils;
-import org.polarsys.eplmp.server.auth.AuthConfig;
-import org.polarsys.eplmp.server.auth.jwt.JWTokenFactory;
+import org.polarsys.eplmp.server.config.AuthConfig;
 import org.polarsys.eplmp.server.rest.exceptions.FileConversionException;
 import org.polarsys.eplmp.server.rest.exceptions.PreconditionFailedException;
 import org.polarsys.eplmp.server.rest.exceptions.RequestedRangeNotSatisfiableException;
@@ -81,6 +80,8 @@ public class PartBinaryResource {
     private AuthConfig authConfig;
     @Inject
     private Locale userLocale;
+    @Inject
+    private ITokenManagerLocal tokenManager;
 
     public PartBinaryResource() {
     }
@@ -264,7 +265,7 @@ public class PartBinaryResource {
             SharedEntity sharedEntity = shareService.findSharedEntityForGivenUUID(uuid);
 
             if (accessToken != null && !accessToken.isEmpty()) {
-                String decodedUUID = JWTokenFactory.validateSharedResourceToken(authConfig.getJWTKey(), accessToken);
+                String decodedUUID = tokenManager.validateSharedResourceToken(authConfig.getJWTKey(), accessToken);
                 if (null == decodedUUID || !decodedUUID.equals(sharedEntity.getUuid())) {
                     throw new NotAllowedException("NotAllowedException73");
                 }
@@ -291,7 +292,7 @@ public class PartBinaryResource {
             // Check access right
 
             if (accessToken != null && !accessToken.isEmpty()) {
-                String decodedEntityKey = JWTokenFactory.validateEntityToken(authConfig.getJWTKey(), accessToken);
+                String decodedEntityKey = tokenManager.validateEntityToken(authConfig.getJWTKey(), accessToken);
                 boolean tokenValid = new PartRevisionKey(workspaceId, partNumber, version).toString().equals(decodedEntityKey);
                 if (!tokenValid) {
                     throw new NotAllowedException("NotAllowedException73");

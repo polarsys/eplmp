@@ -16,6 +16,7 @@ import io.swagger.annotations.ApiModelProperty;
 import org.polarsys.eplmp.core.util.DateUtils;
 
 import javax.json.bind.annotation.JsonbDateFormat;
+import javax.json.bind.annotation.JsonbProperty;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
@@ -92,12 +93,15 @@ public class ComponentDTO implements Serializable {
     private boolean optional;
 
     @ApiModelProperty(value = "Last part iteration number")
+    @JsonbProperty(nillable = true)
     private int lastIterationNumber;
 
     @ApiModelProperty(value = "Denied access flag")
+    @JsonbProperty(nillable = true)
     private boolean accessDeny;
 
     @ApiModelProperty(value = "Available substitutes list")
+    @JsonbProperty(nillable = true)
     private List<String> substituteIds;
 
     @ApiModelProperty(value = "Hooked modifications notifications")

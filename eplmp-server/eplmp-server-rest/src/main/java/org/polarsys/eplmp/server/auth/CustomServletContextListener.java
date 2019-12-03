@@ -11,6 +11,8 @@
 
 package org.polarsys.eplmp.server.auth;
 
+import org.polarsys.eplmp.server.config.AuthConfig;
+
 import javax.inject.Inject;
 import javax.security.auth.message.config.AuthConfigFactory;
 import javax.servlet.ServletContext;
@@ -30,10 +32,12 @@ public class CustomServletContextListener implements ServletContextListener {
 
     private static final Logger LOGGER = Logger.getLogger(CustomServletContextListener.class.getName());
 
-    @Inject
+
     private AuthConfig authConfig;
 
-    public CustomServletContextListener() {
+    @Inject
+    public CustomServletContextListener(AuthConfig authConfig) {
+        this.authConfig = authConfig;
     }
 
     @Override

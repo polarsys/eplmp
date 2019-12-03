@@ -9,14 +9,12 @@
   *    DocDoku - initial API and implementation
   *******************************************************************************/
 
-package org.polarsys.eplmp.server;
+package org.polarsys.eplmp.server.config;
 
 import org.polarsys.eplmp.core.common.OAuthProvider;
 
-import javax.annotation.PostConstruct;
-import javax.enterprise.context.ApplicationScoped;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
+import javax.annotation.Resource;
+import javax.ejb.Singleton;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -29,22 +27,13 @@ import java.util.stream.Collectors;
  *
  * @author Morgan Guimard
  */
-@ApplicationScoped
+@Singleton
 public class OauthConfig {
 
     private static final Logger LOGGER = Logger.getLogger(OauthConfig.class.getName());
 
+    @Resource(lookup = "oauth.config")
     private Properties properties;
-
-    @PostConstruct
-    private void init() {
-        try {
-            InitialContext ctx = new InitialContext();
-            properties = (Properties) ctx.lookup("oauth.config");
-        } catch (NamingException e) {
-            LOGGER.log(Level.INFO, "Oauth providers configuration is empty");
-        }
-    }
 
     public List<OAuthProvider> getProviders() {
 

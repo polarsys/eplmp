@@ -34,13 +34,9 @@ import org.polarsys.eplmp.core.exceptions.CreationException;
 import org.polarsys.eplmp.core.exceptions.EntityNotFoundException;
 import org.polarsys.eplmp.core.exceptions.ProvidedAccountNotFoundException;
 import org.polarsys.eplmp.core.security.UserGroupMapping;
-import org.polarsys.eplmp.core.services.IAccountManagerLocal;
-import org.polarsys.eplmp.core.services.IContextManagerLocal;
-import org.polarsys.eplmp.core.services.IOAuthManagerLocal;
-import org.polarsys.eplmp.core.services.IUserManagerLocal;
-import org.polarsys.eplmp.server.auth.AuthConfig;
+import org.polarsys.eplmp.core.services.*;
+import org.polarsys.eplmp.server.config.AuthConfig;
 import org.polarsys.eplmp.server.auth.AuthServices;
-import org.polarsys.eplmp.server.auth.jwt.JWTokenFactory;
 import org.polarsys.eplmp.server.rest.dto.*;
 
 import javax.annotation.PostConstruct;
@@ -86,6 +82,8 @@ public class AuthResource {
     private IOAuthManagerLocal oAuthManager;
     @Inject
     private AuthConfig authConfig;
+    @Inject
+    private ITokenManagerLocal tokenManager;
 
     private static final Logger LOGGER = Logger.getLogger(AuthResource.class.getName());
     private Mapper mapper;
@@ -142,7 +140,7 @@ public class AuthResource {
             accountDTO.setAdmin(UserGroupMapping.ADMIN_ROLE_ID.equals(userGroupMapping.getGroupName()));
             Response.ResponseBuilder responseBuilder = Response.ok().entity(accountDTO);
             if (authConfig.isJwtEnabled()) {
-                responseBuilder.header("jwt", JWTokenFactory.createAuthToken(authConfig.getJWTKey(), userGroupMapping));
+                responseBuilder.header("jwt", tokenManager.createAuthToken(authConfig.getJWTKey(), userGroupMapping));
             }
 
             return responseBuilder.build();
@@ -341,7 +339,7 @@ public class AuthResource {
         UserGroupMapping userGroupMapping = AuthServices.getUserGroupMapping(account.getLogin());
 
         if (authConfig.isJwtEnabled()) {
-            responseBuilder.header("jwt", JWTokenFactory.createAuthToken(authConfig.getJWTKey(), userGroupMapping));
+            responseBuilder.header("jwt", tokenManager.createAuthToken(authConfig.getJWTKey(), userGroupMapping));
         }
 
         return responseBuilder.build();

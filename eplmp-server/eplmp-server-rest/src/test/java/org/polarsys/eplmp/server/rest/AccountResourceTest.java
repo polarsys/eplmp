@@ -26,12 +26,8 @@ import org.polarsys.eplmp.core.exceptions.EntityNotFoundException;
 import org.polarsys.eplmp.core.exceptions.GCMAccountNotFoundException;
 import org.polarsys.eplmp.core.exceptions.NotAllowedException;
 import org.polarsys.eplmp.core.security.UserGroupMapping;
-import org.polarsys.eplmp.core.services.IAccountManagerLocal;
-import org.polarsys.eplmp.core.services.IContextManagerLocal;
-import org.polarsys.eplmp.core.services.IOAuthManagerLocal;
-import org.polarsys.eplmp.core.services.IUserManagerLocal;
-import org.polarsys.eplmp.server.auth.AuthConfig;
-import org.polarsys.eplmp.server.auth.jwt.JWTokenFactory;
+import org.polarsys.eplmp.core.services.*;
+import org.polarsys.eplmp.server.config.AuthConfig;
 import org.polarsys.eplmp.server.rest.dto.AccountDTO;
 import org.polarsys.eplmp.server.rest.dto.GCMAccountDTO;
 import org.polarsys.eplmp.server.rest.dto.WorkspaceDTO;
@@ -72,6 +68,9 @@ public class AccountResourceTest {
     @Mock
     private IUserManagerLocal userManager;
 
+    @Mock
+    private ITokenManagerLocal tokenManager;
+
     @Before
     public void setup() throws Exception {
         initMocks(this);
@@ -104,7 +103,7 @@ public class AccountResourceTest {
 
         Key key = new HmacKey("verySecretPhrase".getBytes("UTF-8"));
         UserGroupMapping groupMapping = new UserGroupMapping("FooBar", UserGroupMapping.REGULAR_USER_ROLE_ID);
-        String authToken = JWTokenFactory.createAuthToken(key, groupMapping);
+        String authToken = tokenManager.createAuthToken(key, groupMapping);
         Account account = new Account("FooBar");
         Mockito.when(authConfig.getJWTKey()).thenReturn(key);
 

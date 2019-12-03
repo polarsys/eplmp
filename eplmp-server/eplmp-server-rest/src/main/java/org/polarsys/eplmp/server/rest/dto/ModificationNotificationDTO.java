@@ -16,6 +16,7 @@ import io.swagger.annotations.ApiModelProperty;
 import org.polarsys.eplmp.core.util.DateUtils;
 
 import javax.json.bind.annotation.JsonbDateFormat;
+import javax.json.bind.annotation.JsonbProperty;
 import java.io.Serializable;
 import java.util.Date;
 
@@ -55,7 +56,7 @@ public class ModificationNotificationDTO implements Serializable {
     private UserDTO author;
 
     @ApiModelProperty(value = "Acknowledged flag")
-
+    @JsonbProperty(nillable = true)
     private boolean acknowledged;
 
     @ApiModelProperty(value = "Acknowledged comment")

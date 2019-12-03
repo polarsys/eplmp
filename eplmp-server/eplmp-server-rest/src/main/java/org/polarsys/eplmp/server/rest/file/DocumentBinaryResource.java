@@ -12,7 +12,6 @@ package org.polarsys.eplmp.server.rest.file;
 
 import io.swagger.annotations.*;
 import org.polarsys.eplmp.core.common.BinaryResource;
-import org.polarsys.eplmp.core.common.User;
 import org.polarsys.eplmp.core.document.DocumentIteration;
 import org.polarsys.eplmp.core.document.DocumentIterationKey;
 import org.polarsys.eplmp.core.document.DocumentRevision;
@@ -24,8 +23,7 @@ import org.polarsys.eplmp.core.services.*;
 import org.polarsys.eplmp.core.sharing.SharedDocument;
 import org.polarsys.eplmp.core.sharing.SharedEntity;
 import org.polarsys.eplmp.core.util.HashUtils;
-import org.polarsys.eplmp.server.auth.AuthConfig;
-import org.polarsys.eplmp.server.auth.jwt.JWTokenFactory;
+import org.polarsys.eplmp.server.config.AuthConfig;
 import org.polarsys.eplmp.server.helpers.Streams;
 import org.polarsys.eplmp.server.rest.exceptions.FileConversionException;
 import org.polarsys.eplmp.server.rest.exceptions.PreconditionFailedException;
@@ -83,6 +81,8 @@ public class DocumentBinaryResource {
     private AuthConfig authConfig;
     @Inject
     private Locale userLocale;
+    @Inject
+    private ITokenManagerLocal tokenManager;
 
     public DocumentBinaryResource() {
     }
@@ -180,7 +180,7 @@ public class DocumentBinaryResource {
 
             if (accessToken != null && !accessToken.isEmpty()) {
 
-                String decodedUUID = JWTokenFactory.validateSharedResourceToken(authConfig.getJWTKey(), accessToken);
+                String decodedUUID = tokenManager.validateSharedResourceToken(authConfig.getJWTKey(), accessToken);
 
                 if (null == decodedUUID || !decodedUUID.equals(sharedEntity.getUuid())) {
                     throw new NotAllowedException("NotAllowedException73");
@@ -211,7 +211,7 @@ public class DocumentBinaryResource {
             // Check access right
 
             if (accessToken != null && !accessToken.isEmpty()) {
-                String decodedEntityKey = JWTokenFactory.validateEntityToken(authConfig.getJWTKey(), accessToken);
+                String decodedEntityKey = tokenManager.validateEntityToken(authConfig.getJWTKey(), accessToken);
                 boolean tokenValid = new DocumentRevisionKey(workspaceId, documentId, version).toString().equals(decodedEntityKey);
                 if (!tokenValid) {
                     throw new NotAllowedException("NotAllowedException73");

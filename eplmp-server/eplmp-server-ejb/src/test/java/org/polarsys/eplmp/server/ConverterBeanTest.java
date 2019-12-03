@@ -23,13 +23,11 @@ import org.polarsys.eplmp.core.product.PartIterationKey;
 import org.polarsys.eplmp.core.services.IBinaryStorageManagerLocal;
 import org.polarsys.eplmp.core.services.IProductManagerLocal;
 import org.polarsys.eplmp.server.converters.CADConverter;
-import org.polarsys.eplmp.server.converters.ConversionResult;
-import org.polarsys.eplmp.server.geometry.GeometryParser;
+import org.polarsys.eplmp.server.converters.ConversionResultProxy;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.net.URI;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 
@@ -63,7 +61,7 @@ public class ConverterBeanTest {
     private CADConverter conv;
 
     @Mock
-    private ConversionResult result;
+    private ConversionResultProxy result;
 
     @Mock
     private Geometry lod;
@@ -71,12 +69,9 @@ public class ConverterBeanTest {
     @Mock
     private BinaryResource attachedFile;
 
-    @Mock
-    private GeometryParser geometryParser;
 
     @Before
     public void setup() throws Exception {
-        when(geometryParser.calculateBox(any(Path.class))).thenReturn(new double[6]);
         when(cadBinRes.getName()).thenReturn("foo.dae");
         when(storage.getBinaryResourceInputStream(cadBinRes))
                 .thenReturn(new ByteArrayInputStream("fake content".getBytes()));
@@ -101,7 +96,7 @@ public class ConverterBeanTest {
 
         when(locator.search(CADConverter.class)).thenReturn(Arrays.asList(conv));
 
-        bean.init();
+        //bean.init();
     }
 
     @Test

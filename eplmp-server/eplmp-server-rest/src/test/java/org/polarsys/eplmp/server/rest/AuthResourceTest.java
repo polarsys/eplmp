@@ -20,7 +20,7 @@ import org.polarsys.eplmp.core.exceptions.EntityNotFoundException;
 import org.polarsys.eplmp.core.security.UserGroupMapping;
 import org.polarsys.eplmp.core.services.IAccountManagerLocal;
 import org.polarsys.eplmp.core.services.IOAuthManagerLocal;
-import org.polarsys.eplmp.server.auth.AuthConfig;
+import org.polarsys.eplmp.server.config.AuthConfig;
 import org.polarsys.eplmp.server.rest.dto.AccountDTO;
 import org.polarsys.eplmp.server.rest.dto.LoginRequestDTO;
 

@@ -17,6 +17,8 @@ import org.polarsys.eplmp.core.meta.RevisionStatus;
 import org.polarsys.eplmp.core.util.DateUtils;
 
 import javax.json.bind.annotation.JsonbDateFormat;
+import javax.json.bind.annotation.JsonbNillable;
+import javax.json.bind.annotation.JsonbProperty;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
@@ -26,7 +28,7 @@ import java.util.List;
 public class PartRevisionDTO implements Serializable {
 
     @ApiModelProperty(value = "Part last iteration number")
-
+    @JsonbProperty(nillable = true)
     int lastIterationNumber;
 
     @ApiModelProperty(value = "Part key")
@@ -66,15 +68,16 @@ public class PartRevisionDTO implements Serializable {
     private List<PartIterationDTO> partIterations;
 
     @ApiModelProperty(value = "Part check out user if any")
-
+    @JsonbProperty(nillable = true)
     private UserDTO checkOutUser;
 
     @ApiModelProperty(value = "Part check out date if any")
     @JsonbDateFormat(value = DateUtils.GLOBAL_DATE_FORMAT)
+    @JsonbProperty(nillable = true)
     private Date checkOutDate;
 
     @ApiModelProperty(value = "Instantiated workflow if any")
-
+    @JsonbProperty(nillable = true)
     private WorkflowDTO workflow;
 
     @ApiModelProperty(value = "Current lifecycle state")
@@ -90,14 +93,14 @@ public class PartRevisionDTO implements Serializable {
     private boolean publicShared;
 
     @ApiModelProperty(value = "Part ACL")
-
+    @JsonbProperty(nillable = true)
     private ACLDTO acl;
 
     @ApiModelProperty(value = "Attributes locked flag")
     private boolean attributesLocked;
 
     @ApiModelProperty(value = "Part status")
-
+    @JsonbProperty(nillable = true)
     private RevisionStatus status;
 
     @ApiModelProperty(value = "Part tag list")
@@ -107,11 +110,11 @@ public class PartRevisionDTO implements Serializable {
     private List<ModificationNotificationDTO> notifications;
 
     @ApiModelProperty(value = "Obsolete date")
-        @JsonbDateFormat(value = DateUtils.GLOBAL_DATE_FORMAT)
+    @JsonbDateFormat(value = DateUtils.GLOBAL_DATE_FORMAT)
     private Date obsoleteDate;
 
     @ApiModelProperty(value = "Obsolete author")
-
+    @JsonbProperty(nillable = true)
     private UserDTO obsoleteAuthor;
 
     @ApiModelProperty(value = "Released date")
@@ -119,7 +122,7 @@ public class PartRevisionDTO implements Serializable {
     private Date releaseDate;
 
     @ApiModelProperty(value = "Released author")
-
+    @JsonbProperty(nillable = true)
     private UserDTO releaseAuthor;
 
     public PartRevisionDTO() {

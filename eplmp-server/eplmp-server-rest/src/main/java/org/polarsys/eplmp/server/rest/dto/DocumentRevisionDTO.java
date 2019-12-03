@@ -17,6 +17,7 @@ import org.polarsys.eplmp.core.meta.RevisionStatus;
 import org.polarsys.eplmp.core.util.DateUtils;
 
 import javax.json.bind.annotation.JsonbDateFormat;
+import javax.json.bind.annotation.JsonbProperty;
 import javax.json.bind.annotation.JsonbTransient;
 import java.io.Serializable;
 import java.util.Date;
@@ -52,17 +53,19 @@ public class DocumentRevisionDTO implements Serializable, Comparable<DocumentRev
     private Date creationDate;
 
     @ApiModelProperty(value = "Document comment link")
-
+    @JsonbProperty(nillable = true)
     private String commentLink;
 
     @ApiModelProperty(value = "Document title")
     private String title;
 
     @ApiModelProperty(value = "Document check out user")
+    @JsonbProperty(nillable = true)
     private UserDTO checkOutUser;
 
     @ApiModelProperty(value = "Document check out date")
     @JsonbDateFormat(value = DateUtils.GLOBAL_DATE_FORMAT)
+    @JsonbProperty(nillable = true)
     private Date checkOutDate;
 
     @ApiModelProperty(value = "Document tag list")
@@ -101,8 +104,8 @@ public class DocumentRevisionDTO implements Serializable, Comparable<DocumentRev
     @ApiModelProperty(value = "Attributes locked flag")
     private boolean attributesLocked;
 
-
     @ApiModelProperty(value = "Document status")
+    @JsonbProperty(nillable = true)
     private RevisionStatus status;
 
     @ApiModelProperty(value = "Obsolete date")
@@ -114,15 +117,16 @@ public class DocumentRevisionDTO implements Serializable, Comparable<DocumentRev
     private UserDTO obsoleteAuthor;
 
     @ApiModelProperty(value = "Released date")
-        @JsonbDateFormat(value = DateUtils.GLOBAL_DATE_FORMAT)
+    @JsonbDateFormat(value = DateUtils.GLOBAL_DATE_FORMAT)
+    @JsonbProperty(nillable = true)
     private Date releaseDate;
 
     @ApiModelProperty(value = "Released author")
-
+    @JsonbProperty(nillable = true)
     private UserDTO releaseAuthor;
 
     @ApiModelProperty(value = "Document ACL")
-
+    @JsonbProperty(nillable = true)
     private ACLDTO acl;
 
     public DocumentRevisionDTO() {

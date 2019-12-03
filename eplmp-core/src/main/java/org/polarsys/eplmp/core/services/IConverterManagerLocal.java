@@ -12,7 +12,10 @@
 package org.polarsys.eplmp.core.services;
 
 import org.polarsys.eplmp.core.common.BinaryResource;
+import org.polarsys.eplmp.core.exceptions.*;
+import org.polarsys.eplmp.core.product.ConversionResult;
 import org.polarsys.eplmp.core.product.PartIterationKey;
+import org.polarsys.eplmp.core.product.PartRevisionKey;
 
 /**
  *
@@ -20,4 +23,5 @@ import org.polarsys.eplmp.core.product.PartIterationKey;
  */
 public interface IConverterManagerLocal {
     void convertCADFileToOBJ(PartIterationKey pPartIPK, BinaryResource cadFile);
+    void handleConversionResultCallback(PartRevisionKey partRevisionKey, ConversionResult result) throws UserNotFoundException, WorkspaceNotFoundException, WorkspaceNotEnabledException, AccessRightException, PartRevisionNotFoundException, NotAllowedException, UserNotActiveException, PartIterationNotFoundException, EntityConstraintException, DocumentRevisionNotFoundException, ListOfValuesNotFoundException, PartUsageLinkNotFoundException, PartMasterNotFoundException;
 }

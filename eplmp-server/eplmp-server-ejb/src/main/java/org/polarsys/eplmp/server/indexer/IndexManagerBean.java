@@ -25,7 +25,7 @@ import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.polarsys.eplmp.core.exceptions.IndexerNotAvailableException;
 import org.polarsys.eplmp.core.exceptions.IndexerRequestException;
-import org.polarsys.eplmp.server.indexer.config.IndexerConfig;
+import org.polarsys.eplmp.server.config.IndexerConfig;
 import org.polarsys.eplmp.server.indexer.util.IndexerMapping;
 import org.polarsys.eplmp.server.indexer.util.IndicesUtils;
 

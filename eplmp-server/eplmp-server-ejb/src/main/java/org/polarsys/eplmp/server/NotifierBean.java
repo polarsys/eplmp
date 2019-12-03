@@ -29,6 +29,7 @@ import org.polarsys.eplmp.core.util.FileIO;
 import org.polarsys.eplmp.core.workflow.Task;
 import org.polarsys.eplmp.core.workflow.WorkspaceWorkflow;
 import org.polarsys.eplmp.i18n.PropertiesLoader;
+import org.polarsys.eplmp.server.config.ServerConfig;
 import org.polarsys.eplmp.server.hooks.SNSWebhookRunner;
 import org.polarsys.eplmp.server.hooks.SimpleWebhookRunner;
 import org.polarsys.eplmp.server.hooks.WebhookRunner;
@@ -62,7 +63,7 @@ public class NotifierBean implements INotifierLocal {
     private static final String TEMPLATE_BASE_NAME = "/org/polarsys/eplmp/server/templates/NotificationText";
 
     @Inject
-    private ConfigManager configManager;
+    private ServerConfig serverConfig;
 
     @Inject
     private IPlatformOptionsManagerLocal platformOptionsManager;
@@ -388,7 +389,7 @@ public class NotifierBean implements INotifierLocal {
 
         Object[] args = {
                 account.getLogin(),
-                configManager.getCodebase(),
+                serverConfig.getCodebase(),
                 accountDisabledMessage
         };
 
@@ -597,19 +598,19 @@ public class NotifierBean implements INotifierLocal {
 
     // URIs
     private String getDocumentRevisionPermalinkURL(DocumentRevision pDocR) {
-        return configManager.getCodebase() + "/documents/index.html#" + pDocR.getWorkspaceId() + "/" + FileIO.encode(pDocR.getId()) + "/" + pDocR.getVersion();
+        return serverConfig.getCodebase() + "/documents/index.html#" + pDocR.getWorkspaceId() + "/" + FileIO.encode(pDocR.getId()) + "/" + pDocR.getVersion();
     }
 
     private String getPartRevisionPermalinkURL(PartRevision pPartR) {
-        return configManager.getCodebase() + "/parts/index.html#" + pPartR.getWorkspaceId() + "/" + FileIO.encode(pPartR.getPartNumber()) + "/" + pPartR.getVersion();
+        return serverConfig.getCodebase() + "/parts/index.html#" + pPartR.getWorkspaceId() + "/" + FileIO.encode(pPartR.getPartNumber()) + "/" + pPartR.getVersion();
     }
 
     private String getTaskUrl(Task pTask, String workspaceId) {
-        return configManager.getCodebase() + "/change-management/index.html#" + workspaceId + "/tasks/" + pTask.getWorkflowId() + "-" + pTask.getActivityStep() + "-" + pTask.getNum();
+        return serverConfig.getCodebase() + "/change-management/index.html#" + workspaceId + "/tasks/" + pTask.getWorkflowId() + "-" + pTask.getActivityStep() + "-" + pTask.getNum();
     }
 
     private String getRecoveryUrl(String uuid) {
-        return configManager.getCodebase() + "/index.html#recover/" + uuid;
+        return serverConfig.getCodebase() + "/index.html#recover/" + uuid;
     }
 
 

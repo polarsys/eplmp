@@ -34,6 +34,10 @@
                 <class-a>org.polarsys.eplmp.core.hooks.Webhook</class-a>
                 <class-b>org.polarsys.eplmp.server.rest.dto.WebhookDTO</class-b>
             </converter>
+            <converter type="org.polarsys.eplmp.server.rest.converters.ConversionResultDozerConverter" >
+                <class-a>org.polarsys.eplmp.core.product.ConversionResult</class-a>
+                <class-b>org.polarsys.eplmp.server.rest.dto.ConversionResultDTO</class-b>
+            </converter>
         </custom-converters>    
     </configuration>
     

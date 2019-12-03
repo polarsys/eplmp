@@ -20,6 +20,7 @@ import org.polarsys.eplmp.core.exceptions.ProvidedAccountNotFoundException;
 import org.polarsys.eplmp.core.security.UserGroupMapping;
 import org.polarsys.eplmp.core.services.IAccountManagerLocal;
 import org.polarsys.eplmp.core.services.IOAuthManagerLocal;
+import org.polarsys.eplmp.server.config.OauthConfig;
 import org.polarsys.eplmp.server.dao.OAuthProviderDAO;
 
 import javax.annotation.security.DeclareRoles;
