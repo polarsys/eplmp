@@ -10,7 +10,6 @@
     <artifactId>eplmp-server-rest</artifactId>
     <packaging>war</packaging>
     <name>eplmp-server-rest Java EE Restful web services</name>
-
     <dependencies>
         <dependency>
             <groupId>org.polarsys.eplmp</groupId>
