@@ -26,7 +26,7 @@ public class IndexerConfig {
     public static final String NUMBER_OF_REPLICAS = "number_of_replicas";
     public static final String AUTO_EXPAND_REPLICAS = "auto_expand_replicas";
 
-    @Resource(name = "elasticsearch.config")
+    @Resource(lookup = "elasticsearch.config")
     private Properties properties;
 
     public String getServerUri() {

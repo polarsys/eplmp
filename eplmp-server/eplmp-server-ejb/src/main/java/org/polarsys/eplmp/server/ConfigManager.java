@@ -24,7 +24,7 @@ import java.util.Properties;
 @ApplicationScoped
 public class ConfigManager {
 
-    @Resource(name="docdokuplm.config")
+    @Resource(lookup="docdokuplm.config")
     private Properties properties;
 
     public String getCodebase(){
