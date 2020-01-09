@@ -40,7 +40,6 @@ import javax.annotation.security.DeclareRoles;
 import javax.annotation.security.RolesAllowed;
 import javax.ejb.*;
 import javax.inject.Inject;
-import javax.transaction.Transactional;
 import java.io.IOException;
 import java.util.*;
 import java.util.logging.Level;
@@ -93,6 +92,7 @@ public class IndexerManagerBean implements IIndexerManagerLocal {
 
     private static final String I18N_CONF = "/org/polarsys/eplmp/core/i18n/LocalStrings";
     private static final Logger LOGGER = Logger.getLogger(IndexerManagerBean.class.getName());
+    private static final Integer BULK_SIZE = 50;
 
     /**
      * Check for indexer availability
@@ -326,15 +326,10 @@ public class IndexerManagerBean implements IIndexerManagerLocal {
      */
     @Override
     @RolesAllowed({UserGroupMapping.ADMIN_ROLE_ID})
-    public void indexAllWorkspacesData() throws AccountNotFoundException {
+    @Asynchronous
+    public void indexAllWorkspacesData() {
         List<Workspace> workspaces = workspaceDAO.getAll();
-        workspaces.stream().forEach(workspace -> {
-            try {
-                indexWorkspaceData(workspace.getId());
-            } catch (WorkspaceNotFoundException | AccountNotFoundException | AccessRightException e) {
-                LOGGER.log(Level.WARNING, "The workspace " + workspace.getId() + " cannot be indexed.", e);
-            }
-        });
+        workspaces.forEach(workspace -> doIndexWorkspaceData(workspace.getId()));
     }
 
     /**
@@ -347,20 +342,30 @@ public class IndexerManagerBean implements IIndexerManagerLocal {
      */
     @Override
     @RolesAllowed({UserGroupMapping.ADMIN_ROLE_ID, UserGroupMapping.REGULAR_USER_ROLE_ID})
-    public void indexWorkspaceData(String workspaceId)
-            throws WorkspaceNotFoundException, AccountNotFoundException, AccessRightException {
-        Account account = accountManager.getMyAccount();
-
-        if (contextManager.isCallerInRole(UserGroupMapping.REGULAR_USER_ROLE_ID)) {
-            userManager.checkAdmin(workspaceId);
-        }
-
-        indexWorkspace(account, workspaceId);
+    @Asynchronous
+    public void indexWorkspaceData(String workspaceId) {
+        doIndexWorkspaceData(workspaceId);
     }
 
+    private void doIndexWorkspaceData(String workspaceId){
+        Account account;
 
-    @Asynchronous
-    private void indexWorkspace(Account account, String workspaceId) {
+        try {
+            account = accountManager.getMyAccount();
+        } catch (AccountNotFoundException e) {
+            LOGGER.severe("Account not found");
+            return;
+        }
+
+        if (contextManager.isCallerInRole(UserGroupMapping.REGULAR_USER_ROLE_ID)) {
+            try {
+                userManager.checkAdmin(workspaceId);
+            } catch (AccessRightException | AccountNotFoundException | WorkspaceNotFoundException e) {
+                LOGGER.severe("Not an admin");
+                return;
+            }
+        }
+
         try {
             // force recreate
             if(indexManager.indicesExist(workspaceId)) {
@@ -369,20 +374,16 @@ public class IndexerManagerBean implements IIndexerManagerLocal {
 
             indexManager.createIndices(workspaceId);
 
-            List<BulkResult> bulkResults = new ArrayList<>();
+            List<BulkResult> bulkErrors = new ArrayList<>();
 
-            bulkResults.addAll(indexWorkspaceDocuments(workspaceId));
-            bulkResults.addAll(indexWorkspaceParts(workspaceId));
+            bulkErrors.addAll(indexWorkspaceDocuments(workspaceId));
+            bulkErrors.addAll(indexWorkspaceParts(workspaceId));
 
-            List<BulkResult.BulkResultItem> failedItems = bulkResults.stream().flatMap(bulkResult -> bulkResult.getFailedItems().stream())
+            List<String> errors = bulkErrors.stream().map(JestResult::getErrorMessage)
                     .filter(Objects::nonNull)
                     .collect(Collectors.toList());
 
-            List<String> errors = bulkResults.stream().map(JestResult::getErrorMessage)
-                    .filter(Objects::nonNull)
-                    .collect(Collectors.toList());
-
-            if(failedItems.isEmpty() && errors.isEmpty()){
+            if(errors.isEmpty()){
                 mailer.sendBulkIndexationSuccess(account);
             }else{
                 String failureMessage = String.join(", ", errors);
@@ -399,49 +400,53 @@ public class IndexerManagerBean implements IIndexerManagerLocal {
     private List<BulkResult> indexWorkspaceParts(String workspaceId) throws IndexerRequestException, IndexerNotAvailableException {
 
         Long countByWorkspace = partMasterDAO.getCountByWorkspace(workspaceId);
-        Integer limit = 1000;
-        int numberOfPage = (int) Math.ceil(countByWorkspace.doubleValue() / limit.doubleValue());
+        int numberOfPage = (int) Math.ceil(countByWorkspace.doubleValue() / BULK_SIZE.doubleValue());
 
         List<BulkResult> results = new ArrayList<>();
+
         for (int pageIndex = 0; pageIndex < numberOfPage; pageIndex++) {
-            int offset = pageIndex * limit;
-
-            Bulk.Builder bulk = new Bulk.Builder();
-            List<PartMaster> paginatedByWorkspace = partMasterDAO.getPaginatedByWorkspace(workspaceId, limit, offset);
-
-            paginatedByWorkspace.stream()
-                    .flatMap(partM -> partM.getPartRevisions().stream().map(PartRevision::getPartIterations))
-                    .flatMap(Collection::stream).forEach(partIteration -> addToBulk(partIteration, bulk));
-
-            BulkResult bulkResult = indexManager.sendBulk(bulk);
-            results.add(bulkResult);
+            int offset = pageIndex * BULK_SIZE;
+            results.add(sendPartsBulk(workspaceId, offset));
         }
 
-        return results;
+        return results.stream().filter(bulkResult -> !bulkResult.getFailedItems().isEmpty()).collect(Collectors.toList());
+
+    }
+
+    private BulkResult sendPartsBulk(String workspaceId, int offset) throws IndexerRequestException, IndexerNotAvailableException {
+        Bulk.Builder bulk = new Bulk.Builder();
+        List<PartMaster> paginatedByWorkspace = partMasterDAO.getPaginatedByWorkspace(workspaceId, BULK_SIZE, offset);
+        paginatedByWorkspace.stream()
+                .flatMap(partM -> partM.getPartRevisions().stream().map(PartRevision::getPartIterations))
+                .flatMap(Collection::stream).forEach(partIteration -> addToBulk(partIteration, bulk));
+
+        return indexManager.sendBulk(bulk);
     }
 
     private List<BulkResult> indexWorkspaceDocuments(String workspaceId) throws IndexerRequestException, IndexerNotAvailableException {
 
         Long countByWorkspace = documentMasterDAO.getCountByWorkspace(workspaceId);
-        Integer limit = 1000;
-        int numberOfPage = (int) Math.ceil(countByWorkspace.doubleValue() / limit.doubleValue());
+        int numberOfPage = (int) Math.ceil(countByWorkspace.doubleValue() / BULK_SIZE.doubleValue());
 
         List<BulkResult> results = new ArrayList<>();
         for (int pageIndex = 0; pageIndex < numberOfPage; pageIndex++) {
-            int offset = pageIndex * limit;
-
-            Bulk.Builder bulk = new Bulk.Builder();
-            List<DocumentMaster> paginatedByWorkspace = documentMasterDAO.getPaginatedByWorkspace(workspaceId, limit, offset);
-
-            paginatedByWorkspace.stream()
-                    .flatMap(docM -> docM.getDocumentRevisions().stream().map(DocumentRevision::getDocumentIterations))
-                    .flatMap(Collection::stream).forEach(documentIteration -> addToBulk(documentIteration, bulk));
-
-            BulkResult bulkResult = indexManager.sendBulk(bulk);
-            results.add(bulkResult);
+            int offset = pageIndex * BULK_SIZE;
+            results.add(sendDocumentsBulk(workspaceId, offset));
         }
+        return results.stream().filter(bulkResult -> !bulkResult.getFailedItems().isEmpty()).collect(Collectors.toList());
 
-        return results;
+    }
+
+    private BulkResult sendDocumentsBulk(String workspaceId, int offset) throws IndexerRequestException, IndexerNotAvailableException {
+
+        Bulk.Builder bulk = new Bulk.Builder();
+        List<DocumentMaster> paginatedByWorkspace = documentMasterDAO.getPaginatedByWorkspace(workspaceId, BULK_SIZE, offset);
+
+        paginatedByWorkspace.stream()
+                .flatMap(docM -> docM.getDocumentRevisions().stream().map(DocumentRevision::getDocumentIterations))
+                .flatMap(Collection::stream).forEach(documentIteration -> addToBulk(documentIteration, bulk));
+
+        return indexManager.sendBulk(bulk);
     }
 
     private void addToBulk(DocumentIteration documentIteration, Bulk.Builder bulk) {
