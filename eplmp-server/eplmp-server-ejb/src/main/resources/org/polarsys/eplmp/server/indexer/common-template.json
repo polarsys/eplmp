@@ -1,5 +1,6 @@
 {
   "index_patterns": ["*-eplmp-*"],
+  "order" : 0,
   "settings": {
   },
   "mappings": {

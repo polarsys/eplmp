@@ -17,10 +17,7 @@ import org.elasticsearch.common.Strings;
 import org.elasticsearch.common.unit.Fuzziness;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
-import org.elasticsearch.index.query.BoolQueryBuilder;
-import org.elasticsearch.index.query.NestedQueryBuilder;
-import org.elasticsearch.index.query.QueryBuilder;
-import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.index.query.*;
 import org.polarsys.eplmp.core.document.DocumentIteration;
 import org.polarsys.eplmp.core.product.PartIteration;
 import org.polarsys.eplmp.core.query.DocumentSearchQuery;
@@ -134,7 +131,7 @@ public class IndexerQueryBuilder {
         String folder = documentSearchQuery.getFolder();
 
         if (docMId != null && !docMId.isEmpty()) {
-            queries.add(QueryBuilders.multiMatchQuery(docMId, IndexerMapping.DOCUMENT_ID_KEY).fuzziness(FUZZINESS));
+            queries.add(QueryBuilders.matchQuery(docMId, IndexerMapping.DOCUMENT_ID_KEY));
         }
 
         if (title != null && !title.isEmpty()) {
@@ -157,7 +154,7 @@ public class IndexerQueryBuilder {
         String partName = partSearchQuery.getName();
 
         if (partNumber != null && !partNumber.isEmpty()) {
-            queries.add(QueryBuilders.multiMatchQuery(partNumber, IndexerMapping.PART_NUMBER_KEY).fuzziness(FUZZINESS));
+            queries.add(QueryBuilders.matchQuery(partNumber, IndexerMapping.PART_NUMBER_KEY));
         }
 
         if (partName != null && !partName.isEmpty()) {
@@ -222,7 +219,13 @@ public class IndexerQueryBuilder {
         }
 
         if (queryString != null && !queryString.isEmpty()) {
-            queries.add(QueryBuilders.queryStringQuery(queryString));
+            List<QueryBuilder> queryStringQueries = new ArrayList<>();
+            QueryBuilder queryStringQuery = QueryBuilders.queryStringQuery(queryString);
+            queryStringQueries.add(queryStringQuery);
+            queryStringQueries.add(QueryBuilders.nestedQuery(IndexerMapping.FILES_KEY, queryStringQuery, ScoreMode.None));
+            BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
+            queryStringQueries.forEach(boolQuery::should);
+            queries.add(boolQuery);
         }
 
         return queries;

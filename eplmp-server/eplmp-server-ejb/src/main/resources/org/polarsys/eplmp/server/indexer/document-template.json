@@ -1,12 +1,33 @@
 {
   "index_patterns": ["*-eplmp-*-documents"],
+  "order" : 1,
   "settings": {
+    "analysis": {
+      "analyzer": {
+        "id_analyzer": {
+          "tokenizer": "id_tokenizer",
+          "filter" : ["lowercase"]
+        }
+      },
+      "tokenizer": {
+        "id_tokenizer": {
+          "type": "char_group",
+          "tokenize_on_chars": [
+            "whitespace",
+            "-",
+            "_",
+            "\n"
+          ]
+        }
+      }
+    }
   },
   "mappings": {
     "_doc": {
       "properties": {
         "docMId":{
-          "type":"keyword"
+          "type":"text",
+          "analyzer" : "id_analyzer"
         },
         "folder": {
           "type" : "keyword"
