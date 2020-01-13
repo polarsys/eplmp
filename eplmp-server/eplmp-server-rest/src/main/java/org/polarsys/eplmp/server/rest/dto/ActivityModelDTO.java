@@ -105,4 +105,7 @@ public class ActivityModelDTO implements Serializable {
         this.relaunchStep = relaunchStep;
     }
 
+    public void setTaskModels(List<TaskModelDTO> taskModels) {
+        this.taskModels = taskModels;
+    }
 }
