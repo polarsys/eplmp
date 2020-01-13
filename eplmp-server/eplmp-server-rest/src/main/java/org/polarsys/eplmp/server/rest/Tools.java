@@ -197,7 +197,9 @@ public class Tools {
             List<CADInstanceDTO> cadInstancesDTO = new ArrayList<>();
             for (CADInstance cadInstance : partUsageLink.getCadInstances()) {
                 CADInstanceDTO cadInstanceDTO = mapper.map(cadInstance, CADInstanceDTO.class);
-                cadInstanceDTO.setMatrix(cadInstance.getRotationMatrix().getValues());
+                if(RotationType.MATRIX.equals(cadInstance.getRotationType())) {
+                    cadInstanceDTO.setMatrix(cadInstance.getRotationMatrix().getValues());
+                }
                 cadInstancesDTO.add(cadInstanceDTO);
             }
             List<PartSubstituteLinkDTO> substituteLinkDTOs = new ArrayList<>();
