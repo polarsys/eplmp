@@ -13,21 +13,23 @@ package org.polarsys.eplmp.server.rest.dto;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import org.polarsys.eplmp.core.util.DateUtils;
 
-import javax.xml.bind.annotation.XmlRootElement;
+import javax.json.bind.annotation.JsonbDateFormat;
 import java.io.Serializable;
 import java.util.Date;
 
-@XmlRootElement
 @ApiModel(value = "DateBasedEffectivityDTO",
         description = "This class is the representation of a {@link org.polarsys.eplmp.core.common.DateBasedEffectivity} entity",
         parent = EffectivityDTO.class)
 public class DateBasedEffectivityDTO extends EffectivityDTO implements Serializable {
 
     @ApiModelProperty(value = "Start date of the Effectivity")
+    @JsonbDateFormat(value = DateUtils.GLOBAL_DATE_FORMAT)
     private Date startDate;
 
     @ApiModelProperty(value = "End date of the Effectivity")
+    @JsonbDateFormat(value = DateUtils.GLOBAL_DATE_FORMAT)
     private Date endDate;
 
     public DateBasedEffectivityDTO() {

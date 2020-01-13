@@ -15,10 +15,9 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import org.polarsys.eplmp.core.admin.OperationSecurityStrategy;
 
-import javax.xml.bind.annotation.XmlRootElement;
 import java.io.Serializable;
 
-@XmlRootElement
+
 @ApiModel(value="PlatformOptionsDTO", description="This class is a representation of a {@link org.polarsys.eplmp.core.admin.PlatformOptions} entity")
 public class PlatformOptionsDTO implements Serializable {
 

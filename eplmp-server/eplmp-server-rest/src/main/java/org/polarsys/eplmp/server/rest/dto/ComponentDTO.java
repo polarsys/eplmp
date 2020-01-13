@@ -13,9 +13,9 @@ package org.polarsys.eplmp.server.rest.dto;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import org.polarsys.eplmp.core.util.DateUtils;
 
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
+import javax.json.bind.annotation.JsonbDateFormat;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
@@ -23,7 +23,7 @@ import java.util.List;
 /**
  * @author Julien Maffre
  */
-@XmlRootElement
+
 @ApiModel(value = "ComponentDTO", description = "This class is the representation of a {@link org.polarsys.eplmp.core.product.Component} entity")
 public class ComponentDTO implements Serializable {
 
@@ -79,6 +79,7 @@ public class ComponentDTO implements Serializable {
     private UserDTO checkOutUser;
 
     @ApiModelProperty(value = "Check out date if any")
+    @JsonbDateFormat(value = DateUtils.GLOBAL_DATE_FORMAT)
     private Date checkOutDate;
 
     @ApiModelProperty(value = "Released flag")
@@ -91,15 +92,12 @@ public class ComponentDTO implements Serializable {
     private boolean optional;
 
     @ApiModelProperty(value = "Last part iteration number")
-    @XmlElement(nillable = true)
     private int lastIterationNumber;
 
     @ApiModelProperty(value = "Denied access flag")
-    @XmlElement(nillable = true)
     private boolean accessDeny;
 
     @ApiModelProperty(value = "Available substitutes list")
-    @XmlElement(nillable = true)
     private List<String> substituteIds;
 
     @ApiModelProperty(value = "Hooked modifications notifications")

@@ -14,13 +14,14 @@ package org.polarsys.eplmp.server.rest.dto.baseline;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import org.polarsys.eplmp.core.configuration.ProductBaselineType;
+import org.polarsys.eplmp.core.util.DateUtils;
 
-import javax.xml.bind.annotation.XmlRootElement;
+import javax.json.bind.annotation.JsonbDateFormat;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 
-@XmlRootElement
+
 @ApiModel(value="ProductBaselineCreationDTO", description="DTO creation class for {@link org.polarsys.eplmp.core.configuration.ProductBaseline} entity")
 public class ProductBaselineCreationDTO implements Serializable {
 
@@ -46,6 +47,7 @@ public class ProductBaselineCreationDTO implements Serializable {
     private List<String> optionalUsageLinks;
 
     @ApiModelProperty(value = "Effective date")
+    @JsonbDateFormat(value = DateUtils.GLOBAL_DATE_FORMAT)
     private Date effectiveDate;
 
     @ApiModelProperty(value = "Effective serial number")

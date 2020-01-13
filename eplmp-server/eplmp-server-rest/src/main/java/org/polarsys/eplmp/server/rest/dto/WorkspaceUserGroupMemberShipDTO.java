@@ -15,10 +15,9 @@ package org.polarsys.eplmp.server.rest.dto;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-import javax.xml.bind.annotation.XmlRootElement;
 import java.io.Serializable;
 
-@XmlRootElement
+
 @ApiModel(value="WorkspaceUserGroupMemberShipDTO", description="This class is a representation of a {@link org.polarsys.eplmp.core.security.WorkspaceUserGroupMemberShip} entity")
 public class WorkspaceUserGroupMemberShipDTO implements Serializable {
 

@@ -13,15 +13,16 @@ package org.polarsys.eplmp.server.rest.dto.product;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import org.polarsys.eplmp.core.util.DateUtils;
 import org.polarsys.eplmp.server.rest.dto.*;
 import org.polarsys.eplmp.server.rest.dto.baseline.BaselinedPartDTO;
 import org.polarsys.eplmp.server.rest.dto.baseline.ProductBaselineDTO;
 
-import javax.xml.bind.annotation.XmlRootElement;
+import javax.json.bind.annotation.JsonbDateFormat;
 import java.io.Serializable;
 import java.util.*;
 
-@XmlRootElement
+
 @ApiModel(value="ProductInstanceIterationDTO", description="This class is the representation of {@link org.polarsys.eplmp.core.configuration.ProductInstanceIteration} entity")
 public class ProductInstanceIterationDTO implements Serializable {
 
@@ -44,6 +45,7 @@ public class ProductInstanceIterationDTO implements Serializable {
     private String updateAuthorName;
 
     @ApiModelProperty(value = "Product instance last modification date")
+    @JsonbDateFormat(value = DateUtils.GLOBAL_DATE_FORMAT)
     private Date modificationDate;
 
     @ApiModelProperty(value = "Product instance baselined parts")
@@ -59,6 +61,7 @@ public class ProductInstanceIterationDTO implements Serializable {
     private UserDTO author;
 
     @ApiModelProperty(value = "Product instance creation date")
+    @JsonbDateFormat(value = DateUtils.GLOBAL_DATE_FORMAT)
     private Date creationDate;
 
     @ApiModelProperty(value = "Product instance substitute links retained as parts")

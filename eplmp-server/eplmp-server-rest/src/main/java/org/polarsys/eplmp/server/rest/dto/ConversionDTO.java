@@ -13,19 +13,22 @@ package org.polarsys.eplmp.server.rest.dto;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import org.polarsys.eplmp.core.util.DateUtils;
 
-import javax.xml.bind.annotation.XmlRootElement;
+import javax.json.bind.annotation.JsonbDateFormat;
 import java.io.Serializable;
 import java.util.Date;
 
-@XmlRootElement
+
 @ApiModel(value="ConversionDTO", description="This class is the representation of a {@link org.polarsys.eplmp.core.product.Conversion} entity")
 public class ConversionDTO implements Serializable {
 
     @ApiModelProperty(value = "Conversion end date")
+    @JsonbDateFormat(value = DateUtils.GLOBAL_DATE_FORMAT)
     private Date endDate;
 
     @ApiModelProperty(value = "Conversion start date")
+    @JsonbDateFormat(value = DateUtils.GLOBAL_DATE_FORMAT)
     private Date startDate;
 
     @ApiModelProperty(value = "Success flag")

@@ -13,14 +13,15 @@ package org.polarsys.eplmp.server.rest.dto;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import org.polarsys.eplmp.core.util.DateUtils;
 
-import javax.xml.bind.annotation.XmlRootElement;
+import javax.json.bind.annotation.JsonbDateFormat;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-@XmlRootElement
+
 @ApiModel(value = "WorkflowDTO", description = "This class is a representation of a {@link org.polarsys.eplmp.core.workflow.Workflow} entity")
 public class WorkflowDTO implements Serializable, Comparable<WorkflowDTO> {
 
@@ -34,6 +35,7 @@ public class WorkflowDTO implements Serializable, Comparable<WorkflowDTO> {
     private List<ActivityDTO> activities;
 
     @ApiModelProperty(value = "Workflow aborted date if aborted")
+    @JsonbDateFormat(value = DateUtils.GLOBAL_DATE_FORMAT)
     private Date abortedDate;
 
     public WorkflowDTO() {

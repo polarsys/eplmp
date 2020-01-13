@@ -14,10 +14,9 @@ package org.polarsys.eplmp.server.rest.dto;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-import javax.xml.bind.annotation.XmlRootElement;
 import java.io.Serializable;
 
-@XmlRootElement
+
 @ApiModel(value="CountDTO", description="This class is an helper class for documents and parts counting purposes")
 public class CountDTO implements Serializable {
 

@@ -14,10 +14,9 @@ package org.polarsys.eplmp.server.rest.dto;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-import javax.xml.bind.annotation.XmlRootElement;
 import java.io.Serializable;
 
-@XmlRootElement
+
 @ApiModel(value="InstanceAttributeTemplateDTO", description="This class is the representation of an {@link org.polarsys.eplmp.core.meta.InstanceAttributeTemplate} entity")
 public class InstanceAttributeTemplateDTO implements Serializable {
 

@@ -14,14 +14,15 @@ package org.polarsys.eplmp.server.rest.dto.baseline;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import org.polarsys.eplmp.core.configuration.DocumentBaselineType;
+import org.polarsys.eplmp.core.util.DateUtils;
 import org.polarsys.eplmp.server.rest.dto.UserDTO;
 
-import javax.xml.bind.annotation.XmlRootElement;
+import javax.json.bind.annotation.JsonbDateFormat;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 
-@XmlRootElement
+
 @ApiModel(value="DocumentBaselineDTO", description="This class is the representation of {@link org.polarsys.eplmp.core.configuration.DocumentBaseline} entity")
 public class DocumentBaselineDTO implements Serializable {
 
@@ -35,6 +36,7 @@ public class DocumentBaselineDTO implements Serializable {
     private String description;
 
     @ApiModelProperty(value = "Baseline creation date")
+    @JsonbDateFormat(value = DateUtils.GLOBAL_DATE_FORMAT)
     private Date creationDate;
 
     @ApiModelProperty(value = "Baseline type")

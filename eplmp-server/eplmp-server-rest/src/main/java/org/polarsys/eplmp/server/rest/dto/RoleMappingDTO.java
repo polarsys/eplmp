@@ -13,7 +13,6 @@ package org.polarsys.eplmp.server.rest.dto;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-import javax.xml.bind.annotation.XmlRootElement;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,7 +21,7 @@ import java.util.List;
  * @author Morgan Guimard
  */
 
-@XmlRootElement
+
 @ApiModel(value="RoleMappingDTO", description="Use this class to provide roles mapping for {@link org.polarsys.eplmp.core.workflow.Workflow} entity instantiation")
 public class RoleMappingDTO implements Serializable {
 

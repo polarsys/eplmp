@@ -13,13 +13,14 @@ package org.polarsys.eplmp.server.rest.dto;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import org.polarsys.eplmp.core.util.DateUtils;
 
-import javax.xml.bind.annotation.XmlRootElement;
+import javax.json.bind.annotation.JsonbDateFormat;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 
-@XmlRootElement
+
 @ApiModel(value="PartMasterTemplateDTO", description="This class is a representation of a {@link org.polarsys.eplmp.core.product.PartMasterTemplate} entity")
 public class PartMasterTemplateDTO implements Serializable {
 
@@ -39,9 +40,11 @@ public class PartMasterTemplateDTO implements Serializable {
     private UserDTO author;
 
     @ApiModelProperty(value = "Part template creation date")
+    @JsonbDateFormat(value = DateUtils.GLOBAL_DATE_FORMAT)
     private Date creationDate;
 
     @ApiModelProperty(value = "Part template modification date")
+        @JsonbDateFormat(value = DateUtils.GLOBAL_DATE_FORMAT)
     private Date modificationDate;
 
     @ApiModelProperty(value = "Generate id flag")

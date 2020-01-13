@@ -14,19 +14,19 @@ package org.polarsys.eplmp.server.rest.dto;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import org.polarsys.eplmp.core.meta.RevisionStatus;
+import org.polarsys.eplmp.core.util.DateUtils;
 
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
+import javax.json.bind.annotation.JsonbDateFormat;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 
-@XmlRootElement
+
 @ApiModel(value="PartRevisionDTO", description="This class is a representation of a {@link org.polarsys.eplmp.core.product.PartRevision} entity")
 public class PartRevisionDTO implements Serializable {
 
     @ApiModelProperty(value = "Part last iteration number")
-    @XmlElement(nillable = true)
+
     int lastIterationNumber;
 
     @ApiModelProperty(value = "Part key")
@@ -48,12 +48,15 @@ public class PartRevisionDTO implements Serializable {
     private UserDTO author;
 
     @ApiModelProperty(value = "Part creation date")
+    @JsonbDateFormat(value = DateUtils.GLOBAL_DATE_FORMAT)
     private Date creationDate;
 
     @ApiModelProperty(value = "Part modification date")
+    @JsonbDateFormat(value = DateUtils.GLOBAL_DATE_FORMAT)
     private Date modificationDate;
 
     @ApiModelProperty(value = "Part check in date")
+    @JsonbDateFormat(value = DateUtils.GLOBAL_DATE_FORMAT)
     private Date checkInDate;
 
     @ApiModelProperty(value = "Part description")
@@ -63,15 +66,15 @@ public class PartRevisionDTO implements Serializable {
     private List<PartIterationDTO> partIterations;
 
     @ApiModelProperty(value = "Part check out user if any")
-    @XmlElement(nillable = true)
+
     private UserDTO checkOutUser;
 
     @ApiModelProperty(value = "Part check out date if any")
-    @XmlElement(nillable = true)
+    @JsonbDateFormat(value = DateUtils.GLOBAL_DATE_FORMAT)
     private Date checkOutDate;
 
     @ApiModelProperty(value = "Instantiated workflow if any")
-    @XmlElement(nillable = true)
+
     private WorkflowDTO workflow;
 
     @ApiModelProperty(value = "Current lifecycle state")
@@ -87,14 +90,14 @@ public class PartRevisionDTO implements Serializable {
     private boolean publicShared;
 
     @ApiModelProperty(value = "Part ACL")
-    @XmlElement(nillable = true)
+
     private ACLDTO acl;
 
     @ApiModelProperty(value = "Attributes locked flag")
     private boolean attributesLocked;
 
     @ApiModelProperty(value = "Part status")
-    @XmlElement(nillable = true)
+
     private RevisionStatus status;
 
     @ApiModelProperty(value = "Part tag list")
@@ -104,17 +107,19 @@ public class PartRevisionDTO implements Serializable {
     private List<ModificationNotificationDTO> notifications;
 
     @ApiModelProperty(value = "Obsolete date")
+        @JsonbDateFormat(value = DateUtils.GLOBAL_DATE_FORMAT)
     private Date obsoleteDate;
 
     @ApiModelProperty(value = "Obsolete author")
-    @XmlElement(nillable = true)
+
     private UserDTO obsoleteAuthor;
 
     @ApiModelProperty(value = "Released date")
+        @JsonbDateFormat(value = DateUtils.GLOBAL_DATE_FORMAT)
     private Date releaseDate;
 
     @ApiModelProperty(value = "Released author")
-    @XmlElement(nillable = true)
+
     private UserDTO releaseAuthor;
 
     public PartRevisionDTO() {

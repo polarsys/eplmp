@@ -12,7 +12,6 @@ package org.polarsys.eplmp.server.rest.dto;
 
 import io.swagger.annotations.ApiModel;
 
-import javax.xml.bind.annotation.XmlRootElement;
 import java.io.Serializable;
 import java.util.ArrayList;
 
@@ -21,7 +20,7 @@ import java.util.ArrayList;
  *
  * @author Morgan Guimard
  */
-@XmlRootElement
+
 @ApiModel(value = "StringListDTO",
         description = "This class is the representation of a list of strings")
 public class StringListDTO

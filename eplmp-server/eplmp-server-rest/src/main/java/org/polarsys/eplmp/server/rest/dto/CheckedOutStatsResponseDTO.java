@@ -12,7 +12,6 @@ package org.polarsys.eplmp.server.rest.dto;
 
 import io.swagger.annotations.ApiModel;
 
-import javax.xml.bind.annotation.XmlRootElement;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.List;
@@ -23,7 +22,7 @@ import java.util.Map;
  *
  * @author Morgan Guimard
  */
-@XmlRootElement
+
 @ApiModel(value = "CheckedOutStatsResponseDTO",
         description = "This class is the representation of checked out entities stats, grouped by user and date")
 public class CheckedOutStatsResponseDTO

@@ -13,15 +13,16 @@ package org.polarsys.eplmp.server.rest.dto;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import org.polarsys.eplmp.core.util.DateUtils;
 
-import javax.xml.bind.annotation.XmlRootElement;
+import javax.json.bind.annotation.JsonbDateFormat;
 import java.io.Serializable;
 import java.util.Date;
 
 /**
  * @author Morgan Guimard
  */
-@XmlRootElement
+
 @ApiModel(value = "SharedPartDTO", description = "This class is a representation of a {@link org.polarsys.eplmp.core.sharing.SharedPart} entity")
 public class SharedPartDTO implements Serializable {
 
@@ -35,6 +36,7 @@ public class SharedPartDTO implements Serializable {
     private String password;
 
     @ApiModelProperty(value = "Shared part expire date")
+    @JsonbDateFormat(value = DateUtils.GLOBAL_DATE_FORMAT)
     private Date expireDate;
 
     @ApiModelProperty(value = "Shared part login creator")

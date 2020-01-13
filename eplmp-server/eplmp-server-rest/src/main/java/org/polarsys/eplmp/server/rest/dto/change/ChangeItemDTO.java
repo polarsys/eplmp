@@ -14,11 +14,12 @@ package org.polarsys.eplmp.server.rest.dto.change;
 import io.swagger.annotations.ApiModelProperty;
 import org.polarsys.eplmp.core.change.ChangeItemCategory;
 import org.polarsys.eplmp.core.change.ChangeItemPriority;
+import org.polarsys.eplmp.core.util.DateUtils;
 import org.polarsys.eplmp.server.rest.dto.ACLDTO;
 import org.polarsys.eplmp.server.rest.dto.DocumentIterationDTO;
 import org.polarsys.eplmp.server.rest.dto.PartIterationDTO;
 
-import javax.xml.bind.annotation.XmlElement;
+import javax.json.bind.annotation.JsonbDateFormat;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
@@ -41,14 +42,15 @@ public abstract class ChangeItemDTO implements Serializable {
     private String authorName;
 
     @ApiModelProperty(value = "Change item assignee user login")
-    @XmlElement(nillable = true)
+
     private String assignee;
 
     @ApiModelProperty(value = "Change item assignee user name")
-    @XmlElement(nillable = true)
+
     private String assigneeName;
 
     @ApiModelProperty(value = "Change item creation date")
+    @JsonbDateFormat(value = DateUtils.GLOBAL_DATE_FORMAT)
     private Date creationDate;
 
     @ApiModelProperty(value = "Change item description")
@@ -70,7 +72,7 @@ public abstract class ChangeItemDTO implements Serializable {
     private String[] tags;
 
     @ApiModelProperty(value = "Change item ACL")
-    @XmlElement(nillable = true)
+
     private ACLDTO acl;
 
     @ApiModelProperty(value = "Change item writable flag")

@@ -14,12 +14,10 @@ package org.polarsys.eplmp.server.rest.dto.change;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
 import java.io.Serializable;
 import java.util.List;
 
-@XmlRootElement
+
 @ApiModel(value="ChangeOrderDTO", description="This class is the representation of a {@link org.polarsys.eplmp.core.change.ChangeOrder} entity")
 public class ChangeOrderDTO extends ChangeItemDTO implements Serializable {
 
@@ -27,7 +25,7 @@ public class ChangeOrderDTO extends ChangeItemDTO implements Serializable {
     private List<ChangeRequestDTO> addressedChangeRequests;
 
     @ApiModelProperty(value = "Change order due milestone id")
-    @XmlElement(nillable = true)
+
     private int milestoneId;
 
     public ChangeOrderDTO() {

@@ -14,11 +14,10 @@ package org.polarsys.eplmp.server.rest.dto;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-import javax.xml.bind.annotation.XmlRootElement;
 import java.io.Serializable;
 import java.util.List;
 
-@XmlRootElement
+
 @ApiModel(value = "ImportPreviewDTO", description = "This class is a representation of an {@link org.polarsys.eplmp.core.product.ImportPreview} entity")
 public class ImportPreviewDTO implements Serializable {
 

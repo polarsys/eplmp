@@ -14,13 +14,12 @@ package org.polarsys.eplmp.server.rest.dto;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-import javax.xml.bind.annotation.XmlRootElement;
 import java.io.Serializable;
 
 /**
  * @author Morgan Guimard
  */
-@XmlRootElement
+
 @ApiModel(value = "DiskUsageSpaceDTO", description = "This class provides storage information for a given workspace or for the entire platform")
 public class DiskUsageSpaceDTO implements Serializable {
 

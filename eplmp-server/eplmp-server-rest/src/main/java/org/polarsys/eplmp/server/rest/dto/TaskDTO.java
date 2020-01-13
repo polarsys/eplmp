@@ -13,14 +13,15 @@ package org.polarsys.eplmp.server.rest.dto;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import org.polarsys.eplmp.core.util.DateUtils;
 
-import javax.xml.bind.annotation.XmlRootElement;
+import javax.json.bind.annotation.JsonbDateFormat;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-@XmlRootElement
+
 @ApiModel(value="TaskDTO", description="This class is a representation of a {@link org.polarsys.eplmp.core.workflow.Task} entity")
 public class TaskDTO implements Serializable {
 
@@ -37,6 +38,7 @@ public class TaskDTO implements Serializable {
     private int targetIteration;
 
     @ApiModelProperty(value = "Task closure date")
+    @JsonbDateFormat(value = DateUtils.GLOBAL_DATE_FORMAT)
     private Date closureDate;
 
     @ApiModelProperty(value = "Task signature")

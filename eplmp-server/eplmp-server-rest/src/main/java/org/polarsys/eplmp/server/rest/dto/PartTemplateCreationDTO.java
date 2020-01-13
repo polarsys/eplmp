@@ -14,11 +14,10 @@ package org.polarsys.eplmp.server.rest.dto;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-import javax.xml.bind.annotation.XmlRootElement;
 import java.io.Serializable;
 import java.util.List;
 
-@XmlRootElement
+
 @ApiModel(value="PartTemplateCreationDTO", description="Use this class to create a new {@link org.polarsys.eplmp.core.product.PartTemplateMaster} entity")
 public class PartTemplateCreationDTO implements Serializable {
 

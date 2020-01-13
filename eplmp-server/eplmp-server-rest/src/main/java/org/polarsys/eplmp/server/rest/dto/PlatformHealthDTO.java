@@ -14,10 +14,9 @@ package org.polarsys.eplmp.server.rest.dto;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-import javax.xml.bind.annotation.XmlRootElement;
 import java.io.Serializable;
 
-@XmlRootElement
+
 @ApiModel(value = "PlatformHealthDTO",
         description = "This class represents the server's health-check result")
 public class PlatformHealthDTO implements Serializable {

@@ -14,11 +14,10 @@ package org.polarsys.eplmp.server.rest.dto.baseline;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-import javax.xml.bind.annotation.XmlRootElement;
 import java.io.Serializable;
 import java.util.List;
 
-@XmlRootElement
+
 @ApiModel(value="BaselinedDocumentDTO", description="This class is the representation of a {@link org.polarsys.eplmp.core.configuration.BaselinedDocument} entity")
 public class BaselinedDocumentDTO implements Serializable {
 

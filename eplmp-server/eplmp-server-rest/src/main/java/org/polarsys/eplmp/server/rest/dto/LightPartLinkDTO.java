@@ -14,10 +14,9 @@ package org.polarsys.eplmp.server.rest.dto;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-import javax.xml.bind.annotation.XmlRootElement;
 import java.io.Serializable;
 
-@XmlRootElement
+
 @ApiModel(value="LightPartLinkDTO", description="This class is a light representation of a {@link org.polarsys.eplmp.core.product.PartLink} entity")
 public class LightPartLinkDTO implements Serializable {
 

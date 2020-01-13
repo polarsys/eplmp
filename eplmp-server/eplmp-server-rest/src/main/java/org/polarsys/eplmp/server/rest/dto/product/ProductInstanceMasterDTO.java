@@ -15,11 +15,10 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import org.polarsys.eplmp.server.rest.dto.ACLDTO;
 
-import javax.xml.bind.annotation.XmlRootElement;
 import java.io.Serializable;
 import java.util.List;
 
-@XmlRootElement
+
 @ApiModel(value="ProductInstanceMasterDTO", description="This class is the representation of {@link org.polarsys.eplmp.core.configuration.ProductInstanceMaster} entity")
 public class ProductInstanceMasterDTO implements Serializable {
 

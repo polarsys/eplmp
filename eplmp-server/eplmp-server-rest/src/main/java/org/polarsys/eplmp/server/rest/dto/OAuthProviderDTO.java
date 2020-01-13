@@ -14,10 +14,9 @@ package org.polarsys.eplmp.server.rest.dto;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-import javax.xml.bind.annotation.XmlRootElement;
 import java.io.Serializable;
 
-@XmlRootElement
+
 @ApiModel(value = "OAuthProviderPublicDTO", description = "This class is the representation of an {@link org.polarsys.eplmp.core.common.OAuthProvider} entity")
 public class OAuthProviderDTO extends OAuthProviderPublicDTO implements Serializable {
 

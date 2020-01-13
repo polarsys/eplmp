@@ -15,12 +15,11 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import org.polarsys.eplmp.server.rest.dto.PartUsageLinkDTO;
 
-import javax.xml.bind.annotation.XmlRootElement;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-@XmlRootElement
+
 @ApiModel(value="PathChoiceDTO", description="This class is the representation of {@link org.polarsys.eplmp.core.configuration.PathChoice} entity")
 public class PathChoiceDTO implements Serializable {
 

@@ -14,12 +14,11 @@ package org.polarsys.eplmp.server.rest.dto;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-import javax.xml.bind.annotation.XmlRootElement;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-@XmlRootElement
+
 @ApiModel(value="PathDataMasterDTO", description="This class is a representation of a {@link org.polarsys.eplmp.core.product.PathDataMaster} entity")
 public class PathDataMasterDTO implements Serializable {
 

@@ -14,10 +14,10 @@ package org.polarsys.eplmp.server.rest.dto;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import org.polarsys.eplmp.core.meta.RevisionStatus;
+import org.polarsys.eplmp.core.util.DateUtils;
 
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlTransient;
+import javax.json.bind.annotation.JsonbDateFormat;
+import javax.json.bind.annotation.JsonbTransient;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
@@ -25,7 +25,7 @@ import java.util.List;
 /**
  * @author Florent Garin
  */
-@XmlRootElement
+
 @ApiModel(value="DocumentRevisionDTO", description="This class is the representation of a {@link org.polarsys.eplmp.core.document.DocumentRevision} entity")
 public class DocumentRevisionDTO implements Serializable, Comparable<DocumentRevisionDTO> {
 
@@ -48,21 +48,21 @@ public class DocumentRevisionDTO implements Serializable, Comparable<DocumentRev
     private UserDTO author;
 
     @ApiModelProperty(value = "Document creation date")
+    @JsonbDateFormat(value = DateUtils.GLOBAL_DATE_FORMAT)
     private Date creationDate;
 
     @ApiModelProperty(value = "Document comment link")
-    @XmlElement(nillable = true)
+
     private String commentLink;
 
     @ApiModelProperty(value = "Document title")
     private String title;
 
     @ApiModelProperty(value = "Document check out user")
-    @XmlElement(nillable = true)
     private UserDTO checkOutUser;
 
     @ApiModelProperty(value = "Document check out date")
-    @XmlElement(nillable = true)
+    @JsonbDateFormat(value = DateUtils.GLOBAL_DATE_FORMAT)
     private Date checkOutDate;
 
     @ApiModelProperty(value = "Document tag list")
@@ -101,26 +101,28 @@ public class DocumentRevisionDTO implements Serializable, Comparable<DocumentRev
     @ApiModelProperty(value = "Attributes locked flag")
     private boolean attributesLocked;
 
-    @XmlElement(nillable = true)
+
     @ApiModelProperty(value = "Document status")
     private RevisionStatus status;
 
     @ApiModelProperty(value = "Obsolete date")
+        @JsonbDateFormat(value = DateUtils.GLOBAL_DATE_FORMAT)
     private Date obsoleteDate;
 
     @ApiModelProperty(value = "Obsolete author")
-    @XmlElement(nillable = true)
+
     private UserDTO obsoleteAuthor;
 
     @ApiModelProperty(value = "Released date")
+        @JsonbDateFormat(value = DateUtils.GLOBAL_DATE_FORMAT)
     private Date releaseDate;
 
     @ApiModelProperty(value = "Released author")
-    @XmlElement(nillable = true)
+
     private UserDTO releaseAuthor;
 
     @ApiModelProperty(value = "Document ACL")
-    @XmlElement(nillable = true)
+
     private ACLDTO acl;
 
     public DocumentRevisionDTO() {
@@ -268,7 +270,7 @@ public class DocumentRevisionDTO implements Serializable, Comparable<DocumentRev
         this.routePath = routePath;
     }
 
-    @XmlTransient
+    @JsonbTransient
     public DocumentIterationDTO getLastIteration() {
         if (documentIterations != null) {
             int index = documentIterations.size() - 1;

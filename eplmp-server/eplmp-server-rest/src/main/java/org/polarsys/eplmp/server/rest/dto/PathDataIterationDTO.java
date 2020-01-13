@@ -14,7 +14,6 @@ package org.polarsys.eplmp.server.rest.dto;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-import javax.xml.bind.annotation.XmlRootElement;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Set;
@@ -22,7 +21,7 @@ import java.util.Set;
 /**
  * @author Chadid Asmae
  */
-@XmlRootElement
+
 @ApiModel(value = "PathDataIterationDTO", description = "This class is a representation of a {@link org.polarsys.eplmp.core.product.PathDataIteration} entity")
 public class PathDataIterationDTO implements Serializable {
 

@@ -13,13 +13,13 @@ package org.polarsys.eplmp.server.rest.dto;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import org.polarsys.eplmp.core.util.DateUtils;
 
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
+import javax.json.bind.annotation.JsonbDateFormat;
 import java.io.Serializable;
 import java.util.Date;
 
-@XmlRootElement
+
 @ApiModel(value="ModificationNotificationDTO", description="This class is a representation of a {@link org.polarsys.eplmp.core.change.ModificationNotification} entity")
 public class ModificationNotificationDTO implements Serializable {
 
@@ -45,6 +45,7 @@ public class ModificationNotificationDTO implements Serializable {
     private int modifiedPartIteration;
 
     @ApiModelProperty(value = "Modified part check in date")
+    @JsonbDateFormat(value = DateUtils.GLOBAL_DATE_FORMAT)
     private Date checkInDate;
 
     @ApiModelProperty(value = "Modified part iteration note")
@@ -54,7 +55,7 @@ public class ModificationNotificationDTO implements Serializable {
     private UserDTO author;
 
     @ApiModelProperty(value = "Acknowledged flag")
-    @XmlElement(nillable = true)
+
     private boolean acknowledged;
 
     @ApiModelProperty(value = "Acknowledged comment")
@@ -64,6 +65,7 @@ public class ModificationNotificationDTO implements Serializable {
     private UserDTO ackAuthor;
 
     @ApiModelProperty(value = "Acknowledged date")
+        @JsonbDateFormat(value = DateUtils.GLOBAL_DATE_FORMAT)
     private Date ackDate;
 
     public ModificationNotificationDTO() {

@@ -14,13 +14,12 @@ package org.polarsys.eplmp.server.rest.dto;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-import javax.xml.bind.annotation.XmlRootElement;
 import java.io.Serializable;
 
 /**
  * @author Florent Garin
  */
-@XmlRootElement
+
 @ApiModel(value="TagSubscriptionDTO", description="This is a representation of a {@link org.polarsys.eplmp.core.meta.TagUserSubscription} or {@link org.polarsys.eplmp.core.meta.TagUserGroupSubscription} entity")
 public class TagSubscriptionDTO implements Serializable {
 

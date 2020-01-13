@@ -13,9 +13,9 @@ package org.polarsys.eplmp.server.rest.dto;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import org.polarsys.eplmp.core.util.DateUtils;
 
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
+import javax.json.bind.annotation.JsonbDateFormat;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
@@ -24,7 +24,7 @@ import java.util.List;
  * @author morgan on 09/04/15.
  */
 
-@XmlRootElement
+
 @ApiModel(value="QueryDTO", description="This class is a representation of a {@link org.polarsys.eplmp.core.query.Query} entity")
 public class QueryDTO implements Serializable {
 
@@ -35,14 +35,14 @@ public class QueryDTO implements Serializable {
     private String name;
 
     @ApiModelProperty(value = "Query creation date")
+    @JsonbDateFormat(value = DateUtils.GLOBAL_DATE_FORMAT)
     private Date creationDate;
 
     @ApiModelProperty(value = "Part iteration query rule")
-    @XmlElement(nillable = false)
     private QueryRuleDTO queryRule;
 
     @ApiModelProperty(value = "Path data query rule")
-    @XmlElement(nillable = true)
+
     private QueryRuleDTO pathDataQueryRule;
 
     @ApiModelProperty(value = "List of select statements")

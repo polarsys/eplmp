@@ -14,10 +14,9 @@ package org.polarsys.eplmp.server.rest.dto.baseline;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-import javax.xml.bind.annotation.XmlRootElement;
 import java.io.Serializable;
 
-@XmlRootElement
+
 @ApiModel(value="BaselinedDocumentOptionDTO", description="This class holds status and iteration information of a {@link org.polarsys.eplmp.core.configuration.BaselinedDocument} entity")
 public class BaselinedDocumentOptionDTO implements Serializable {
 

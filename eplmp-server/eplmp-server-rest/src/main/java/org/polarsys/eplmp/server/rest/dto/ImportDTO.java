@@ -13,13 +13,14 @@ package org.polarsys.eplmp.server.rest.dto;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import org.polarsys.eplmp.core.util.DateUtils;
 
-import javax.xml.bind.annotation.XmlRootElement;
+import javax.json.bind.annotation.JsonbDateFormat;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 
-@XmlRootElement
+
 @ApiModel(value="ImportDTO", description="This class is a representation of an {@link org.polarsys.eplmp.core.product.Import} entity")
 public class ImportDTO implements Serializable {
 
@@ -30,9 +31,11 @@ public class ImportDTO implements Serializable {
     private String fileName;
 
     @ApiModelProperty(value = "Import end date")
+    @JsonbDateFormat(value = DateUtils.GLOBAL_DATE_FORMAT)
     private Date endDate;
 
     @ApiModelProperty(value = "Import start date")
+    @JsonbDateFormat(value = DateUtils.GLOBAL_DATE_FORMAT)
     private Date startDate;
 
     @ApiModelProperty(value = "Success flag")

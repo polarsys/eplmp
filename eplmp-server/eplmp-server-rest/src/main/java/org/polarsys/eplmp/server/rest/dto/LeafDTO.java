@@ -14,14 +14,12 @@ package org.polarsys.eplmp.server.rest.dto;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-import javax.xml.bind.annotation.XmlRootElement;
 import java.io.Serializable;
 import java.util.List;
 
 /**
  * @author Morgan Guimard
  */
-@XmlRootElement
 @ApiModel(value = "LeafDTO", description = "This class is the representation of a leaf in InstanceCollection")
 public class LeafDTO implements Serializable {
 

@@ -12,9 +12,9 @@ package org.polarsys.eplmp.server.rest.dto;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import org.polarsys.eplmp.core.util.DateUtils;
 
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
+import javax.json.bind.annotation.JsonbDateFormat;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
@@ -22,7 +22,7 @@ import java.util.List;
 /**
  * @author Florent Garin
  */
-@XmlRootElement
+
 @ApiModel(value="DocumentIterationDTO", description="This class is the representation of a {@link org.polarsys.eplmp.core.document.DocumentIteration} entity")
 public class DocumentIterationDTO implements Serializable {
 
@@ -42,12 +42,15 @@ public class DocumentIterationDTO implements Serializable {
     private int iteration;
 
     @ApiModelProperty(value = "Document creation date")
+    @JsonbDateFormat(value = DateUtils.GLOBAL_DATE_FORMAT)
     private Date creationDate;
 
     @ApiModelProperty(value = "Document modification date")
+    @JsonbDateFormat(value = DateUtils.GLOBAL_DATE_FORMAT)
     private Date modificationDate;
 
     @ApiModelProperty(value = "Document check in date")
+    @JsonbDateFormat(value = DateUtils.GLOBAL_DATE_FORMAT)
     private Date checkInDate;
 
     @ApiModelProperty(value = "Document title")
@@ -56,7 +59,7 @@ public class DocumentIterationDTO implements Serializable {
     @ApiModelProperty(value = "Document author")
     private UserDTO author;
 
-    @XmlElement(nillable = true)
+
     @ApiModelProperty(value = "Revision note")
     private String revisionNote;
 

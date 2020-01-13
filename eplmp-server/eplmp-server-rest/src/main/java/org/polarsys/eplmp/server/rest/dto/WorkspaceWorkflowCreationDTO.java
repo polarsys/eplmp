@@ -14,13 +14,12 @@ package org.polarsys.eplmp.server.rest.dto;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-import javax.xml.bind.annotation.XmlRootElement;
 import java.io.Serializable;
 
 /**
  * @author Morgan Guimard
  */
-@XmlRootElement
+
 @ApiModel(value="WorkspaceWorkflowCreationDTO", description="Use this class to create a new {@link org.polarsys.eplmp.core.workflow.WorkspaceWorkflow} entity")
 public class WorkspaceWorkflowCreationDTO implements Serializable {
 

@@ -13,15 +13,15 @@ package org.polarsys.eplmp.server.rest.dto;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import org.polarsys.eplmp.core.util.DateUtils;
 
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
+import javax.json.bind.annotation.JsonbDateFormat;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-@XmlRootElement
+
 @ApiModel(value="WorkflowModelDTO", description="This class is a representation of a {@link org.polarsys.eplmp.core.workflow.WorkflowModel} entity")
 public class WorkflowModelDTO implements Serializable {
 
@@ -38,13 +38,13 @@ public class WorkflowModelDTO implements Serializable {
     private UserDTO author;
 
     @ApiModelProperty(value = "Workflow model creation date")
+    @JsonbDateFormat(value = DateUtils.GLOBAL_DATE_FORMAT)
     private Date creationDate;
 
     @ApiModelProperty(value = "Workflow model ACL")
     private ACLDTO acl;
 
     @ApiModelProperty(value = "Workflow model activity model list")
-    @XmlElement(nillable = false, required = true)
     private List<ActivityModelDTO> activityModels;
 
     public WorkflowModelDTO() {

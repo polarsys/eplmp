@@ -24,9 +24,9 @@ public class DateUtils {
     private DateUtils() {
     }
 
-    private static final String GLOBAL_DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX";
-    private static final String SHORT_DATE_FORMAT = "yyyy-MM-dd";
-    private static final String TIMEZONE = "UTC";
+    public static final String GLOBAL_DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX";
+    public static final String SHORT_DATE_FORMAT = "yyyy-MM-dd";
+    public static final String TIMEZONE = "UTC";
 
     public static Date parse(String s) throws ParseException {
         return parse(s, TIMEZONE);

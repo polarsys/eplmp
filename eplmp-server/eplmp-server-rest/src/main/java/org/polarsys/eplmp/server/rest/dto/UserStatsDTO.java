@@ -14,13 +14,12 @@ package org.polarsys.eplmp.server.rest.dto;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-import javax.xml.bind.annotation.XmlRootElement;
 import java.io.Serializable;
 
 /**
  * @author Morgan Guimard
  */
-@XmlRootElement
+
 @ApiModel(value="UserStatsDTO",
         description="This class is a representation of user stats in workspace")
 public class UserStatsDTO implements Serializable {

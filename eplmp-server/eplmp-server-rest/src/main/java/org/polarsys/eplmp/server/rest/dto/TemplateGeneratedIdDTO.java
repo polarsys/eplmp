@@ -14,10 +14,9 @@ package org.polarsys.eplmp.server.rest.dto;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-import javax.xml.bind.annotation.XmlRootElement;
 import java.io.Serializable;
 
-@XmlRootElement
+
 @ApiModel(value="TemplateGeneratedIdDTO", description="This class provides information on next {@link org.polarsys.eplmp.core.product.PartMasterTemplate} or {@link org.polarsys.eplmp.core.document.DocumentMasterTemplate} generated id")
 public class TemplateGeneratedIdDTO implements Serializable {
 

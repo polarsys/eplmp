@@ -13,14 +13,13 @@ package org.polarsys.eplmp.server.rest.dto;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-import javax.xml.bind.annotation.XmlRootElement;
 import java.io.Serializable;
 import java.util.List;
 
 /**
  * @author lebeaujulien on 03/03/15.
  */
-@XmlRootElement
+
 @ApiModel(value="ListOfValuesDTO", description="This class is a representation of a {@link org.polarsys.eplmp.core.meta.ListOfValues} entity")
 public class ListOfValuesDTO implements Serializable {
 

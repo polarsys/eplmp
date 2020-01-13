@@ -14,16 +14,17 @@ package org.polarsys.eplmp.server.rest.dto.product;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import org.polarsys.eplmp.core.configuration.ProductBaselineType;
+import org.polarsys.eplmp.core.util.DateUtils;
 import org.polarsys.eplmp.server.rest.dto.ACLDTO;
 import org.polarsys.eplmp.server.rest.dto.BinaryResourceDTO;
 import org.polarsys.eplmp.server.rest.dto.DocumentRevisionDTO;
 import org.polarsys.eplmp.server.rest.dto.InstanceAttributeDTO;
 
-import javax.xml.bind.annotation.XmlRootElement;
+import javax.json.bind.annotation.JsonbDateFormat;
 import java.io.Serializable;
 import java.util.*;
 
-@XmlRootElement
+
 @ApiModel(value = "ProductInstanceCreationDTO", description = "Use this class to create a new {@link org.polarsys.eplmp.core.configuration.ProductInstanceMaster} entity")
 public class ProductInstanceCreationDTO implements Serializable {
 
@@ -52,6 +53,7 @@ public class ProductInstanceCreationDTO implements Serializable {
     private ProductBaselineType type;
 
     @ApiModelProperty(value = "Date for date effectivity filter")
+    @JsonbDateFormat(value = DateUtils.GLOBAL_DATE_FORMAT)
     private Date effectiveDate;
 
     @ApiModelProperty(value = "Serial number for serial number effectivity filter")

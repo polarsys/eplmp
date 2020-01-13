@@ -14,10 +14,9 @@ package org.polarsys.eplmp.server.rest.dto;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-import javax.xml.bind.annotation.XmlRootElement;
 import java.io.Serializable;
 
-@XmlRootElement
+
 @ApiModel(value = "OAuthLoginRequestDTO", description = "Use this class to provide login information when signing in with an oauth access token")
 public class OAuthLoginRequestDTO implements Serializable {
 

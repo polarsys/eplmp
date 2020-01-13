@@ -15,12 +15,13 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import org.polarsys.eplmp.core.product.ConfigurationItemKey;
 import org.polarsys.eplmp.core.product.TypeEffectivity;
+import org.polarsys.eplmp.core.util.DateUtils;
 
-import javax.xml.bind.annotation.XmlRootElement;
+import javax.json.bind.annotation.JsonbDateFormat;
 import java.io.Serializable;
 import java.util.Date;
 
-@XmlRootElement
+
 @ApiModel(value = "EffectivityDTO",
         description = "This class is the representation of an {@link org.polarsys.eplmp.core.common.Effectivity} entity",
         subTypes = {SerialNumberBasedEffectivityDTO.class, DateBasedEffectivityDTO.class, LotBasedEffectivityDTO.class})
@@ -48,9 +49,11 @@ public class EffectivityDTO implements Serializable {
     private String endNumber;
 
     @ApiModelProperty(value = "Start date of the Effectivity")
+    @JsonbDateFormat(value = DateUtils.GLOBAL_DATE_FORMAT)
     private Date startDate;
 
     @ApiModelProperty(value = "End date of the Effectivity")
+    @JsonbDateFormat(value = DateUtils.GLOBAL_DATE_FORMAT)
     private Date endDate;
 
     @ApiModelProperty(value = "Start number of the Lot")

@@ -14,13 +14,12 @@ package org.polarsys.eplmp.server.rest.dto;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-import javax.xml.bind.annotation.XmlRootElement;
 import java.io.Serializable;
 
 /**
  * @author Yassine Belouad
  */
-@XmlRootElement
+
 @ApiModel(value="DocumentCreationDTO", description="Use this class to create a new {@link org.polarsys.eplmp.core.document.DocumentMaster} entity  and its {@link org.polarsys.eplmp.core.document.DocumentRevision} ")
 public class DocumentCreationDTO implements Serializable, Comparable<DocumentCreationDTO> {
 

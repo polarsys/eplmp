@@ -14,7 +14,6 @@ package org.polarsys.eplmp.server.rest.dto;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-import javax.xml.bind.annotation.XmlRootElement;
 import java.io.Serializable;
 import java.util.List;
 
@@ -22,7 +21,7 @@ import java.util.List;
  * @author morgan on 09/04/15.
  */
 
-@XmlRootElement
+
 @ApiModel(value="QueryRuleDTO", description="This class is a representation of a {@link org.polarsys.eplmp.core.query.QueryRule} entity")
 public class QueryRuleDTO implements Serializable {
 

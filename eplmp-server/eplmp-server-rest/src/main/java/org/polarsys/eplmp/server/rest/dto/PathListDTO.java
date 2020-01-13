@@ -15,10 +15,9 @@ package org.polarsys.eplmp.server.rest.dto;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-import javax.xml.bind.annotation.XmlRootElement;
 import java.io.Serializable;
 
-@XmlRootElement
+
 @ApiModel(value="PathListDTO", description="This class holds a list of strings representing multiple sequences of {@link org.polarsys.eplmp.core.product.PartLink} entities")
 public class PathListDTO implements Serializable {
 

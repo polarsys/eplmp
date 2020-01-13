@@ -14,13 +14,12 @@ package org.polarsys.eplmp.server.rest.dto;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-import javax.xml.bind.annotation.XmlRootElement;
 import java.io.Serializable;
 
 /**
  * @author lebeaujulien on 23/04/15.
  */
-@XmlRootElement
+
 @ApiModel(value="QueryContextDTO", description="This class is a representation of a {@link org.polarsys.eplmp.core.query.QueryContext} entity")
 public class QueryContextDTO implements Serializable {
 

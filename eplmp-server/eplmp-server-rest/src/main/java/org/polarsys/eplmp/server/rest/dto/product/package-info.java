@@ -13,9 +13,4 @@
  * @author Charles Fallourd
  * @version 2.5, 01/06/15
  */
-@XmlJavaTypeAdapter(value = DateAdapter.class, type = Date.class) package org.polarsys.eplmp.server.rest.dto.product;
-
-import org.polarsys.eplmp.server.rest.converters.DateAdapter;
-
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
-import java.util.Date;
+package org.polarsys.eplmp.server.rest.dto.product;
