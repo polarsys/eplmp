@@ -131,7 +131,7 @@ public class IndexerQueryBuilder {
         String folder = documentSearchQuery.getFolder();
 
         if (docMId != null && !docMId.isEmpty()) {
-            queries.add(QueryBuilders.matchQuery(docMId, IndexerMapping.DOCUMENT_ID_KEY));
+            queries.add(QueryBuilders.multiMatchQuery(docMId, IndexerMapping.DOCUMENT_ID_KEY));
         }
 
         if (title != null && !title.isEmpty()) {
@@ -154,7 +154,7 @@ public class IndexerQueryBuilder {
         String partName = partSearchQuery.getName();
 
         if (partNumber != null && !partNumber.isEmpty()) {
-            queries.add(QueryBuilders.matchQuery(partNumber, IndexerMapping.PART_NUMBER_KEY));
+            queries.add(QueryBuilders.multiMatchQuery(partNumber, IndexerMapping.PART_NUMBER_KEY));
         }
 
         if (partName != null && !partName.isEmpty()) {
