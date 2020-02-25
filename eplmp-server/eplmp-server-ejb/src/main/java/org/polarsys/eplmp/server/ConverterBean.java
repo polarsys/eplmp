@@ -21,7 +21,6 @@ import org.polarsys.eplmp.core.services.*;
 import org.polarsys.eplmp.server.config.AuthConfig;
 import org.polarsys.eplmp.server.config.ServerConfig;
 import org.polarsys.eplmp.server.converters.ConversionOrder;
-import org.polarsys.eplmp.server.converters.ConverterUtils;
 import org.polarsys.eplmp.server.converters.serialization.JsonbSerializer;
 import org.polarsys.eplmp.server.dao.PartRevisionDAO;
 
@@ -33,8 +32,8 @@ import javax.ejb.Local;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -72,21 +71,9 @@ public class ConverterBean implements IConverterManagerLocal {
     @Inject
     private ServerConfig serverConfig;
 
-
     private static final Logger LOGGER = Logger.getLogger(ConverterBean.class.getName());
     private static final String PRODUCER_TOPIC = "CONVERT";
-    private static final String CONF_PROPERTIES = "/org/polarsys/eplmp/server/converters/utils/conf.properties";
     private KafkaProducer<String, ConversionOrder> producer;
-    private static final float[] RATIO = new float[]{1f, 0.6f, 0.2f};
-    private static final Properties CONF = new Properties();
-
-    static {
-        try (InputStream inputStream = ConverterBean.class.getResourceAsStream(CONF_PROPERTIES)) {
-            CONF.load(inputStream);
-        } catch (IOException e) {
-            LOGGER.log(Level.SEVERE, null, e);
-        }
-    }
 
     @PostConstruct
     public void init (){
@@ -156,6 +143,7 @@ public class ConverterBean implements IConverterManagerLocal {
         userService.checkWorkspaceWriteAccess(partRevisionKey.getWorkspaceId());
 
         PartRevision partRevision = partRevisionDAO.loadPartR(partRevisionKey);
+        Path tempDir = Paths.get(serverConfig.getConversionsPath() +  "/" + conversionResult.getTempDir());
 
         if(null == partRevision) {
             LOGGER.severe("Cannot find part revision");
@@ -172,10 +160,10 @@ public class ConverterBean implements IConverterManagerLocal {
         }
 
         Map<String, List<ConversionResult.Position>> componentPositionMap = conversionResult.getComponentPositionMap();
-        Path convertedFile = conversionResult.getConvertedFile();
+        Map<Integer, Path> convertedFileLODs = conversionResult.getConvertedFileLODs();
 
         // No CAD file and no position map
-        if(convertedFile == null && componentPositionMap == null) {
+        if((convertedFileLODs == null || convertedFileLODs.isEmpty()) && componentPositionMap == null) {
             LOGGER.severe("Converted file and component position map are null, conversion failed \nError output: " + conversionResult.getErrorOutput());
             productService.endConversion(partIterationKey, false);
             return;
@@ -188,47 +176,35 @@ public class ConverterBean implements IConverterManagerLocal {
             return;
         }
 
-        // Handle converted file
-        if(convertedFile != null) {
-            // Temp dir : conversionPath/UUID
-            String uuid = convertedFile.getParent().getFileName().toString();
-            String fileName = convertedFile.getFileName().toString();
-            Path tempDir = Paths.get(serverConfig.getConversionsPath() + "/" + uuid);
-
-            Path convertedFileAbsolute = Paths.get(tempDir.toAbsolutePath() + "/" + fileName);
-
-            if (!handleConvertedFile(tempDir, convertedFileAbsolute, conversionResult, partIterationKey)) {
-                LOGGER.severe("Failed to hand converted fileconversion failed");
-                productService.endConversion(partIterationKey, false);
-                return;
-            }
-
-
-            double[] box = conversionResult.getBox();
-
-            if (decimate(convertedFileAbsolute, tempDir, RATIO)) {
-                for (int i = 0; i < RATIO.length; i++) {
-                    Path geometryFile = tempDir
-                            .resolve(convertedFileAbsolute.getFileName().toString().replaceAll("\\.obj$", Math.round((RATIO[i] * 100)) + ".obj"));
-                    saveGeometryFile(partIterationKey, i, geometryFile, box);
-                }
-            } else {
-                // Copy the converted file if decimation failed,
-                saveGeometryFile(partIterationKey, 0, convertedFileAbsolute, box);
-            }
-
-            // Save materials files as attached files
-            for (Path material : conversionResult.getMaterials()) {
-                Path absolutePath = Paths.get(tempDir + "/" + material.getFileName());
+        List<Path> materials = conversionResult.getMaterials();
+        // Save materials files as attached files
+        if(materials != null && !materials.isEmpty()){
+            LOGGER.info("Saving materials: " + materials.size());
+            for (Path material : materials) {
+                Path absolutePath = Paths.get(tempDir.toAbsolutePath() + "/" + material.getFileName());
                 saveAttachedFile(partIterationKey, absolutePath);
             }
+        }
 
-            try {
-                LOGGER.log(Level.FINE, "Conversion ended with success");
-                productService.endConversion(partIterationKey, true);
-            } catch (ApplicationException e) {
-                LOGGER.log(Level.SEVERE, null, e);
+        double[] box = conversionResult.getBox();
+
+        if(convertedFileLODs != null && !convertedFileLODs.isEmpty()) {
+            // Handle converted file LODs
+            LOGGER.info("LODS discovered: " + convertedFileLODs.size());
+            Set<Map.Entry<Integer, Path>> entries = convertedFileLODs.entrySet();
+            for (Map.Entry<Integer, Path> entry : entries) {
+                Integer quality = entry.getKey();
+                Path convertedFile = entry.getValue();
+                Path convertedFileAbsolute = Paths.get(tempDir.toAbsolutePath() + "/" + convertedFile.getFileName());
+                saveGeometryFile(partIterationKey, quality, convertedFileAbsolute, box);
             }
+        }
+
+        try {
+            LOGGER.log(Level.FINE, "Conversion ended with success");
+            productService.endConversion(partIterationKey, true);
+        } catch (ApplicationException e) {
+            LOGGER.log(Level.SEVERE, null, e);
         }
     }
 
@@ -237,31 +213,6 @@ public class ConverterBean implements IConverterManagerLocal {
         Key key = authConfig.getJWTKey();
         UserGroupMapping mapping = new UserGroupMapping(login, UserGroupMapping.REGULAR_USER_ROLE_ID);
         return tokenManager.createAuthToken(key, mapping);
-    }
-
-    private boolean handleConvertedFile(Path tempDir, Path convertedFile, ConversionResult conversionResult, PartIterationKey pPartIPK) {
-
-        double[] box = conversionResult.getBox();
-
-        if (decimate(convertedFile, tempDir, RATIO)) {
-            String fileName = convertedFile.getFileName().toString();
-            for (int i = 0; i < RATIO.length; i++) {
-                Path geometryFile = tempDir
-                        .resolve(fileName.replaceAll("\\.obj$", Math.round((RATIO[i] * 100)) + ".obj"));
-                saveGeometryFile(pPartIPK, i, geometryFile, box);
-            }
-        } else {
-            // Copy the converted file if decimation failed,
-            saveGeometryFile(pPartIPK, 0, convertedFile, box);
-        }
-
-        // manage materials
-        for (Path material : conversionResult.getMaterials()) {
-            saveAttachedFile(pPartIPK, material);
-        }
-
-        return true;
-
     }
 
     private boolean syncAssembly(Map<String, List<ConversionResult.Position>> componentPositionMap, PartIteration partToConvert)
@@ -317,63 +268,13 @@ public class ConverterBean implements IConverterManagerLocal {
         return instances;
     }
 
-
-    private boolean decimate(Path file, Path tempDir, float[] ratio) {
-
-        LOGGER.log(Level.INFO, "Decimate file in progress : {0}", ratio);
-
-        // sanity checks
-        String decimater = CONF.getProperty("decimater");
-        Path executable = Paths.get(decimater);
-        if (!executable.toFile().exists()) {
-            LOGGER.log(Level.WARNING, "Cannot decimate file \"{0}\", decimater \"{1}\" is not available",
-                    new Object[]{file.getFileName(), decimater});
-            return false;
-        }
-        if (!Files.isExecutable(executable)) {
-            LOGGER.log(Level.WARNING, "Cannot decimate file \"{0}\", decimater \"{1}\" has no execution rights",
-                    new Object[]{file.getFileName(), decimater});
-            return false;
-        }
-
-        boolean decimateSucceed = false;
-
-        try {
-            String[] args = {decimater, "-i", file.toAbsolutePath().toString(), "-o",
-                    tempDir.toAbsolutePath().toString(), String.valueOf(ratio[0]), String.valueOf(ratio[1]),
-                    String.valueOf(ratio[2])};
-
-            LOGGER.log(Level.INFO, "Decimate command\n{0}", args);
-
-            // Add redirectErrorStream, fix process hang up
-            ProcessBuilder pb = new ProcessBuilder(args).redirectErrorStream(true);
-
-            Process proc = pb.start();
-
-            String stdOutput = ConverterUtils.inputStreamToString(proc.getInputStream());
-
-            proc.waitFor();
-
-            if (proc.exitValue() == 0) {
-                LOGGER.log(Level.INFO, "Decimation done");
-                decimateSucceed = true;
-            } else {
-                LOGGER.log(Level.SEVERE, "Decimation failed with code = {0} {1}", new Object[]{proc.exitValue(), stdOutput});
-            }
-
-        } catch (IOException | InterruptedException e) {
-            LOGGER.log(Level.SEVERE, "Decimation failed for " + file.toAbsolutePath(), e);
-        }
-        return decimateSucceed;
-    }
-
     private void saveGeometryFile(PartIterationKey partIPK, int quality, Path file, double[] box) {
         try {
             Geometry lod = (Geometry) productService.saveGeometryInPartIteration(partIPK, file.getFileName().toString(),
                     quality, Files.size(file), box);
             try (OutputStream os = storageManager.getBinaryResourceOutputStream(lod)) {
                 Files.copy(file, os);
-                LOGGER.log(Level.INFO, "geometry saved");
+                LOGGER.log(Level.INFO, "geometry saved : " + file.toAbsolutePath());
             } catch (IOException e) {
                 LOGGER.log(Level.SEVERE, e.getMessage(), e);
             }

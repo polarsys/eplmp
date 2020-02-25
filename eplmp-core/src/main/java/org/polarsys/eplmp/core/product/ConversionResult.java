@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 /**
  * This ConversionResult class represents the conversion status done by a
@@ -32,6 +31,7 @@ import java.util.stream.Collectors;
  * It holds the converted file and its materials.
  */
 public class ConversionResult implements Closeable, Serializable {
+
 
     public static class Position implements Serializable {
 
@@ -70,9 +70,10 @@ public class ConversionResult implements Closeable, Serializable {
     private static final long serialVersionUID = 1L;
 
     /**
-     * The converted file for succeed conversions
+     * The converted file LODs for succeed conversions
+     * Map: QualityAsInteger, URI
      */
-    private URI convertedFile;
+    private Map<Integer,Path> convertedFileLODs;
     /**
      * Bounding box
      */
@@ -80,7 +81,7 @@ public class ConversionResult implements Closeable, Serializable {
     /**
      * The list of materials files if any
      */
-    private List<URI> materials = new ArrayList<>();
+    private List<Path> materials = new ArrayList<>();
     /**
      * The output of conversion program
      */
@@ -92,32 +93,11 @@ public class ConversionResult implements Closeable, Serializable {
 
     private Map<String, List<Position>> componentPositionMap;
 
+    private Path tempDir;
     /**
      * Default constructor
      */
     public ConversionResult() {
-    }
-
-    /**
-     * Constructor with converted file
-     *
-     * @param convertedFile
-     *            the converted file
-     */
-    public ConversionResult(Path convertedFile) {
-        this.convertedFile = convertedFile.toUri();
-    }
-
-    /**
-     * Constructor with converted file and materials
-     *
-     * @param convertedFile
-     *            the converted file
-     */
-    public ConversionResult(Path convertedFile, List<Path> materials) {
-        this.convertedFile = convertedFile.toUri();
-        this.materials = new ArrayList<>();
-        materials.forEach((path) -> this.materials.add(path.toUri()));
     }
 
     /**
@@ -130,25 +110,13 @@ public class ConversionResult implements Closeable, Serializable {
         this.componentPositionMap = componentPositionMap;
     }
 
-    public Path getConvertedFile() {
-        return convertedFile != null ? Paths.get(convertedFile) : null;
-    }
-
-    public void setConvertedFile(Path convertedFile) {
-        if (null != convertedFile) {
-            this.convertedFile = convertedFile.toUri();
-        }
-    }
-
     public List<Path> getMaterials() {
-        return materials.stream()
-                .map(Paths::get)
-                .collect(Collectors.toList());
+        return materials;
     }
 
     public void setMaterials(List<Path> materials) {
         this.materials = new ArrayList<>();
-        materials.forEach(path -> this.materials.add(path.toUri()));
+        materials.forEach(path -> this.materials.add(path));
     }
 
     public String getStdOutput() {
@@ -183,18 +151,41 @@ public class ConversionResult implements Closeable, Serializable {
         this.box = box;
     }
 
-    public void close() {
-        try {
-            if (convertedFile != null) {
-                Files.deleteIfExists(Paths.get(convertedFile));
-            }
-            if (materials != null) {
-                for (URI m : materials) {
-                    Files.deleteIfExists(Paths.get(m));
+    public Map<Integer, Path> getConvertedFileLODs() {
+        return convertedFileLODs;
+    }
+
+    public void setConvertedFileLODs(Map<Integer, Path> convertedFileLODs) {
+        this.convertedFileLODs = convertedFileLODs;
+    }
+
+    public Path getTempDir() {
+        return tempDir;
+    }
+
+    public void setTempDir(Path tempDir) {
+        this.tempDir = tempDir;
+    }
+
+    @Override
+    public void close() throws IOException {
+        if (convertedFileLODs != null) {
+            convertedFileLODs.values().forEach(convertedFile -> {
+                try {
+                    Files.deleteIfExists(convertedFile);
+                } catch (IOException e) {
+                    LOGGER.log(Level.SEVERE, null, e);
+                }
+            });
+        }
+        if (materials != null) {
+            for (Path m : materials) {
+                try {
+                    Files.deleteIfExists(m);
+                } catch (IOException e) {
+                    LOGGER.log(Level.SEVERE, null, e);
                 }
             }
-        } catch (IOException e) {
-            LOGGER.log(Level.SEVERE, null, e);
         }
     }
 }

@@ -60,6 +60,9 @@ public class ConversionResultDTO implements Serializable {
     @ApiModelProperty(value = "Converted file")
     private String convertedFile;
 
+    @ApiModelProperty(value = "Converted file LODs")
+    private Map<String,String> convertedFileLODs;
+
     @ApiModelProperty(value = "Materials")
     private List<String> materials = new ArrayList<>();
 
@@ -71,6 +74,9 @@ public class ConversionResultDTO implements Serializable {
 
     @ApiModelProperty(value = "Component position map")
     private Map<String, List<PositionDTO>> componentPositionMap;
+
+    @ApiModelProperty(value = "Bounding box")
+    private Double[] box;
 
     public PartIterationKey getPartIterationKey() {
         return partIterationKey;
@@ -126,5 +132,21 @@ public class ConversionResultDTO implements Serializable {
 
     public void setComponentPositionMap(Map<String, List<PositionDTO>> componentPositionMap) {
         this.componentPositionMap = componentPositionMap;
+    }
+
+    public Map<String, String> getConvertedFileLODs() {
+        return convertedFileLODs;
+    }
+
+    public void setConvertedFileLODs(Map<String, String> convertedFileLODs) {
+        this.convertedFileLODs = convertedFileLODs;
+    }
+
+    public Double[] getBox() {
+        return box;
+    }
+
+    public void setBox(Double[] box) {
+        this.box = box;
     }
 }

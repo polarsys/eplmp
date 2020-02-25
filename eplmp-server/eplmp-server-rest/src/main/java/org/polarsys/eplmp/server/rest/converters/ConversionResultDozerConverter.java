@@ -12,10 +12,10 @@
 package org.polarsys.eplmp.server.rest.converters;
 
 import org.dozer.DozerConverter;
-import org.polarsys.eplmp.core.common.BinaryResource;
 import org.polarsys.eplmp.core.product.ConversionResult;
 import org.polarsys.eplmp.server.rest.dto.ConversionResultDTO;
 
+import java.net.URI;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
@@ -41,10 +41,12 @@ public class ConversionResultDozerConverter extends DozerConverter<ConversionRes
     public ConversionResult convertFrom(ConversionResultDTO conversionResultDTO, ConversionResult pConversionResult) {
         ConversionResult conversionResult = new ConversionResult();
 
-        if( null != conversionResultDTO.getConvertedFile()) {
-            Path convertedFile = Paths.get(conversionResultDTO.getConvertedFile());
-            conversionResult.setConvertedFile(convertedFile);
-        }
+        if( null != conversionResultDTO.getConvertedFileLODs()) {
+            Map<Integer, Path> lods = new HashMap<>();
+            conversionResultDTO.getConvertedFileLODs()
+                    .forEach((key, value) -> lods.put(Integer.valueOf(key), Paths.get(value)));
+            conversionResult.setConvertedFileLODs(lods);
+         }
 
         conversionResult.setErrorOutput(conversionResultDTO.getErrorOutput());
         conversionResult.setStdOutput(conversionResultDTO.getStdOutput());
@@ -67,6 +69,7 @@ public class ConversionResultDozerConverter extends DozerConverter<ConversionRes
             conversionResult.setComponentPositionMap(positionMap);
         }
 
+        conversionResult.setTempDir(Paths.get(conversionResultDTO.getTempDir()));
         return conversionResult;
     }
 }
