@@ -69,7 +69,9 @@ public class ConversionResultDozerConverter extends DozerConverter<ConversionRes
             conversionResult.setComponentPositionMap(positionMap);
         }
 
-        conversionResult.setTempDir(Paths.get(conversionResultDTO.getTempDir()));
+        if(conversionResultDTO.getTempDir() != null) {
+            conversionResult.setTempDir(Paths.get(conversionResultDTO.getTempDir()));
+        }
         return conversionResult;
     }
 }
