@@ -22,10 +22,6 @@ import java.util.Properties;
 @Singleton
 public class IndexerConfig {
 
-    public static final String NUMBER_OF_SHARDS = "number_of_shards";
-    public static final String NUMBER_OF_REPLICAS = "number_of_replicas";
-    public static final String AUTO_EXPAND_REPLICAS = "auto_expand_replicas";
-
     @Resource(lookup = "elasticsearch.config")
     private Properties properties;
 
@@ -46,7 +42,6 @@ public class IndexerConfig {
     public String getAWSSecretKey() { return properties.getProperty("awsSecretKey"); }
 
     public String getPrefixIndex(){
-
         String property = properties.getProperty("indexPrefix");
         return ( property != null ) ? property : "localhost" ;
     }
