@@ -15,6 +15,7 @@ import org.polarsys.eplmp.core.product.ConversionResult;
 
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Map;
 
 public class ConversionResultProxy extends ConversionResult {
 
@@ -31,8 +32,13 @@ public class ConversionResultProxy extends ConversionResult {
 
     public ConversionResultProxy(Path convertedFile, List<Path> materials) {
         super();
-        this.convertedFile  = convertedFile;
+        this.setConvertedFile(convertedFile);
         this.setMaterials(materials);
+    }
+
+    public ConversionResultProxy(Map<String, List<Position>> componentPositionMap) {
+        super();
+        this.setComponentPositionMap(componentPositionMap);
     }
 
     public Path getConvertedFile() {
