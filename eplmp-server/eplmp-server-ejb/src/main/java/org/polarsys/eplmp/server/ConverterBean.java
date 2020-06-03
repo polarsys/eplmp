@@ -153,6 +153,14 @@ public class ConverterBean implements IConverterManagerLocal {
         PartIteration partIteration = partRevision.getLastIteration();
         PartIterationKey partIterationKey = partIteration.getKey();
 
+        String errorOutput = conversionResult.getErrorOutput();
+
+        if(null != errorOutput && !errorOutput.isEmpty()){
+            LOGGER.severe("Conversion ended with errors: \n"+errorOutput);
+            productService.endConversion(partIterationKey, false);
+            return;
+        }
+
         if(!partRevision.isCheckedOut()) {
             LOGGER.severe("Cannot proceed as the part is not checked out");
             productService.endConversion(partIterationKey, false);
@@ -164,7 +172,7 @@ public class ConverterBean implements IConverterManagerLocal {
 
         // No CAD file and no position map
         if((convertedFileLODs == null || convertedFileLODs.isEmpty()) && componentPositionMap == null) {
-            LOGGER.severe("Converted file and component position map are null, conversion failed \nError output: " + conversionResult.getErrorOutput());
+            LOGGER.severe("Converted file and component position map are null, conversion failed \nError output: " + errorOutput);
             productService.endConversion(partIterationKey, false);
             return;
         }

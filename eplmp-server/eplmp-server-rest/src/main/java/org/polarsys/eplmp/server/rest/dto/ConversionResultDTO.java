@@ -15,6 +15,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import org.polarsys.eplmp.core.product.PartIterationKey;
 
+import javax.json.bind.annotation.JsonbProperty;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,16 +25,24 @@ import java.util.Map;
 @ApiModel(value = "ConversionResultDTO", description = "")
 public class ConversionResultDTO implements Serializable {
 
+    public ConversionResultDTO(){
+
+    }
+
     @ApiModelProperty(value = "PartIterationKey")
+    @JsonbProperty(nillable = true)
     private PartIterationKey partIterationKey;
 
     @ApiModelProperty(value = "Temp dir")
+    @JsonbProperty(nillable = true)
     private String tempDir;
 
     public static class PositionDTO implements Serializable {
 
         private double[] translation;
         private double[][] rotationmatrix;
+
+        public PositionDTO(){}
 
         public PositionDTO(double[][] rm, double[] o) {
             this.translation = o;
@@ -58,24 +67,31 @@ public class ConversionResultDTO implements Serializable {
     }
 
     @ApiModelProperty(value = "Converted file")
+    @JsonbProperty(nillable = true)
     private String convertedFile;
 
     @ApiModelProperty(value = "Converted file LODs")
+    @JsonbProperty(nillable = true)
     private Map<String,String> convertedFileLODs;
 
     @ApiModelProperty(value = "Materials")
+    @JsonbProperty(nillable = true)
     private List<String> materials = new ArrayList<>();
 
     @ApiModelProperty(value = "Std output")
+    @JsonbProperty(nillable = true)
     private String stdOutput;
 
     @ApiModelProperty(value = "Error output")
+    @JsonbProperty(nillable = true)
     private String errorOutput;
 
     @ApiModelProperty(value = "Component position map")
+    @JsonbProperty(nillable = true)
     private Map<String, List<PositionDTO>> componentPositionMap;
 
     @ApiModelProperty(value = "Bounding box")
+    @JsonbProperty(nillable = true)
     private Double[] box;
 
     public PartIterationKey getPartIterationKey() {
