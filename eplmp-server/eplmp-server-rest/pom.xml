@@ -95,7 +95,7 @@
         <dependency>
             <groupId>org.polarsys.eplmp</groupId>
             <artifactId>eplmp-server-config</artifactId>
-            <version>${parent.version}</version>
+            <version>${project.parent.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
