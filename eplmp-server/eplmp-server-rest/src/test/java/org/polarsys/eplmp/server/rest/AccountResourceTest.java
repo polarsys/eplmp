@@ -19,6 +19,7 @@ import org.mockito.InjectMocks;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.internal.matchers.Any;
 import org.polarsys.eplmp.core.common.Account;
 import org.polarsys.eplmp.core.common.Workspace;
 import org.polarsys.eplmp.core.exceptions.ApplicationException;
@@ -122,6 +123,7 @@ public class AccountResourceTest {
         res = accountResource.updateAccount("WithoutBearer " + authToken, accountDTO);
         Assert.assertEquals(Response.Status.FORBIDDEN.getStatusCode(), res.getStatus());
 
+        Mockito.when(tokenManager.isJWTValidBefore(ArgumentMatchers.any(), ArgumentMatchers.anyInt() , ArgumentMatchers.anyString())).thenReturn(true);
         res = accountResource.updateAccount("Bearer " + authToken, accountDTO);
         Assert.assertEquals(Response.Status.OK.getStatusCode(), res.getStatus());
 
@@ -150,7 +152,10 @@ public class AccountResourceTest {
     @Test
     public void createAccountTest() throws ApplicationException, IOException, ServletException {
         Key key = new HmacKey("verySecretPhrase".getBytes("UTF-8"));
+
         Mockito.when(authConfig.getJWTKey()).thenReturn(key);
+        Mockito.when(tokenManager.createAuthToken(ArgumentMatchers.any(),ArgumentMatchers.any())).thenReturn("whatever");
+
 
         HttpServletRequest mockedRequest = Mockito.mock(HttpServletRequest.class);
         HttpServletResponse mockedResponse = Mockito.mock(HttpServletResponse.class);
@@ -163,6 +168,7 @@ public class AccountResourceTest {
         Mockito.when(accountManager.createAccount(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any(),
                 ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
                 .thenReturn(account);
+
 
         Response res = accountResource.createAccount(mockedRequest, mockedResponse, accountDTO);
         Assert.assertEquals(Response.Status.ACCEPTED.getStatusCode(), res.getStatus());

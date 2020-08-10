@@ -62,6 +62,8 @@ public class SharedResourceTest {
     private IContextManagerLocal contextManager;
     @Mock
     private AuthConfig authConfig;
+    @Mock
+    private ITokenManagerLocal tokenManager;
 
     private String workspaceId = "wks";
     private String partNumber = "partM";
