@@ -35,7 +35,7 @@
                         <ejbModule>
                             <groupId>org.polarsys.eplmp</groupId>
                             <artifactId>eplmp-server-attributes-importer</artifactId>
-                            <bundleFileName>eplmp-server-config.jar</bundleFileName>
+                            <bundleFileName>eplmp-server-attributes-importer.jar</bundleFileName>
                         </ejbModule>
                         <ejbModule>
                             <groupId>org.polarsys.eplmp</groupId>
