@@ -17,5 +17,6 @@
         <module>eplmp-server-ejb</module>
         <module>eplmp-server-rest</module>
         <module>eplmp-server-ear</module>
+        <module>eplmp-server-attributes-importer</module>
     </modules>
 </project>
