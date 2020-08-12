@@ -71,9 +71,9 @@ public class EffectivityConfigSpecTest {
 
         //------------- TEST : No effectivities on parts revision -------------
         //## BEGIN CONFIGURATION
-        when(pM1_pR1.getEffectivities()).thenReturn(Collections.EMPTY_SET);
-        when(pM1_pR2.getEffectivities()).thenReturn(Collections.EMPTY_SET);
-        when(pM1_pR3.getEffectivities()).thenReturn(Collections.EMPTY_SET);
+        when(pM1_pR1.getEffectivities()).thenReturn(new HashSet<>());
+        when(pM1_pR2.getEffectivities()).thenReturn(new HashSet<>());
+        when(pM1_pR3.getEffectivities()).thenReturn(new HashSet<>());
         //## END CONFIGURATION
         PartIteration result = effectivityConfigSpec.filterPartIteration(pM1);
 
