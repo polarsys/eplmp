@@ -41,7 +41,7 @@ public class PathDataAttributesImporterImpl implements PathDataImporter {
     private static final String[] EXTENSIONS = {"xls"};
     private static final Logger LOGGER = Logger.getLogger(PathDataAttributesImporterImpl.class.getName());
 
-    private static final String I18N_CONF = "/com/docdoku/server/importers/attributes/ExcelImport";
+    private static final String I18N_CONF = "/org/polarsys/server/importers/attributes/ExcelImport";
 
     private Properties properties;
 

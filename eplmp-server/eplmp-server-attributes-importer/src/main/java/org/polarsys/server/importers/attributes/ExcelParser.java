@@ -42,7 +42,7 @@ public class ExcelParser {
     public static final Pattern PATTERN_NEW_ATT = Pattern.compile("(.*) <(.*)>"); //pattern for a new attribute
     public static final String SPLITTER = "\\|";
     private static final Logger LOGGER = Logger.getLogger(ExcelParser.class.getName());
-    private static final String I18N_CONF = "/com/docdoku/server/importers/attributes/ExcelImport";
+    private static final String I18N_CONF = "/org/polarsys/server/importers/attributes/ExcelImport";
     private static final Pattern FLOAT_PATTERN;
     private static final String INVALID_TEXT_VALUE = "InvalidTextValue";
     private static final String INVALID_BOOLEAN_VALUE = "InvalidBooleanValue";
