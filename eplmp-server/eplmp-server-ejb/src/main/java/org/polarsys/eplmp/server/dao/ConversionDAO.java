@@ -22,6 +22,9 @@ import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceException;
 import javax.persistence.TypedQuery;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
 
 
 @RequestScoped
@@ -71,5 +74,27 @@ public class ConversionDAO {
         em.createQuery("DELETE FROM Conversion c WHERE c.partIteration = :partIteration", Conversion.class)
                 .setParameter("partIteration", pPartI)
                 .executeUpdate();
+    }
+
+    public Integer setPendingConversionsAsFailedIfOver(Integer retentionTimeMs) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.MILLISECOND, -retentionTimeMs);
+
+        TypedQuery<Conversion> query =
+                em.createQuery("SELECT DISTINCT c FROM Conversion c WHERE c.pending = true AND c.startDate <= :date", Conversion.class)
+                        .setParameter("date", calendar.getTime());
+
+        List<Conversion> conversions = query.getResultList();
+        if(!conversions.isEmpty()){
+            for(Conversion conversion: conversions){
+                conversion.setPending(false);
+                conversion.setEndDate(new Date());
+                conversion.setSucceed(false);
+            }
+            em.flush();
+        }
+
+        return conversions.size();
+
     }
 }
