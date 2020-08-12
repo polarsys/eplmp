@@ -50,19 +50,19 @@ public class AuthConfig {
     }
 
     public Boolean isJwtEnabled() {
-        return Boolean.parseBoolean(properties.getProperty("jwt.enabled"));
+        return Boolean.parseBoolean(properties.getProperty("jwtEnabled"));
     }
 
     public Boolean isBasicHeaderEnabled() {
-        return Boolean.parseBoolean(properties.getProperty("basic.header.enabled"));
+        return Boolean.parseBoolean(properties.getProperty("basicHeaderEnabled"));
     }
 
     public Boolean isSessionEnabled() {
-        return Boolean.parseBoolean(properties.getProperty("session.enabled"));
+        return Boolean.parseBoolean(properties.getProperty("sessionEnabled"));
     }
 
     public Key getJWTKey() {
-        String secret = properties.getProperty("jwt.key");
+        String secret = properties.getProperty("jwtKey");
 
         if (null != secret && !secret.isEmpty()) {
             try {
