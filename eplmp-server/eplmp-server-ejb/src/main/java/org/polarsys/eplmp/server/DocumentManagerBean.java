@@ -1950,7 +1950,7 @@ public class DocumentManagerBean implements IDocumentManagerLocal {
     }
 
     private boolean isAnotherUserHomeFolder(User user, Folder folder) {
-        return folder.isPrivate() && !folder.getOwner().equals(user.getLogin());
+        return folder.isPrivate() && !user.getLogin().equals(folder.getOwner());
     }
 
     private boolean isInAnotherUserHomeFolder(User user, DocumentRevision documentRevision) {
